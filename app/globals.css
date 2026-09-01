@@ -1,0 +1,172 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens Cloison — source de vérité unique.                    */
+/*  Toute couleur / ombre / animation de l'UI vient d'ici.              */
+/* ------------------------------------------------------------------ */
+@theme {
+  /* Palette */
+  --color-cream: #fff6e8; /* fond général */
+  --color-paper: #ffffff; /* cartes, surfaces */
+  --color-ink: #141414; /* texte, contours, ombres */
+  --color-cobalt: #2b3ef0; /* primaire */
+  --color-sun: #ffd23f; /* accent logo */
+  --color-flame: #ff5c1f; /* CTA, alerte douce */
+  --color-mint: #7de08a; /* espace locataire */
+  --color-sky: #9db8ff; /* espace agence */
+  --color-muted: #888888;
+  --color-live: #1db954; /* pastille "en vie" */
+
+  /* Typographie */
+  --font-display: var(--font-archivo-black), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+
+  /* Ombres portées « néo-brutalistes » : décalage plein, zéro flou. */
+  --shadow-brut-xs: 3px 3px 0 var(--color-ink);
+  --shadow-brut-sm: 4px 4px 0 var(--color-ink);
+  --shadow-brut: 6px 6px 0 var(--color-ink);
+  --shadow-brut-lg: 8px 8px 0 var(--color-ink);
+  --shadow-brut-pressed: 2px 2px 0 var(--color-ink);
+  --shadow-brut-raised: 9px 9px 0 var(--color-ink);
+
+  /* Rayons */
+  --radius-brut: 14px;
+  --radius-brut-lg: 18px;
+  --radius-brut-xl: 24px;
+
+  /* Animations */
+  --animate-marquee: marquee 20s linear infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.7s both;
+  --animate-wiggle: wiggle 8s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -12px;
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+  50% {
+    opacity: 0.45;
+    scale: 0.82;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 24px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    rotate: -0.4deg;
+  }
+  50% {
+    rotate: 0.4deg;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Utilitaires maison                                                  */
+/* ------------------------------------------------------------------ */
+
+/* Le contour noir plein, présent sur presque toutes les surfaces. */
+@utility outlined {
+  border: 2px solid var(--color-ink);
+}
+
+/* Bouton / carte cliquable : l'ombre se rétracte, l'élément « s'enfonce ». */
+@utility press {
+  transition:
+    box-shadow 0.15s ease,
+    translate 0.15s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-brut-pressed);
+    translate: 4px 4px;
+  }
+}
+
+/* Carte non cliquable : l'ombre se creuse au survol. */
+@utility lift {
+  transition:
+    box-shadow 0.15s ease,
+    translate 0.15s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-brut-raised);
+    translate: -3px -3px;
+  }
+}
+
+/* Titre en lettrage plein, la signature typographique de la marque. */
+@utility display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                                */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-sun);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-cobalt);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* Personne ne doit subir les animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
