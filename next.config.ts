@@ -6,8 +6,16 @@ import type { NextConfig } from 'next'
  * Volontairement absent : une Content-Security-Policy. Une CSP stricte sous
  * App Router impose des nonces, donc un middleware et un rendu dynamique — on
  * echangerait aujourd'hui des pages entierement statiques contre une protection
- * qui n'a rien a proteger, le site ne recevant encore aucune donnee. A trancher
- * avec le socle produit (phase 2), pas avant.
+ * sans objet.
+ *
+ * Le site recoit des donnees depuis le formulaire agence, mais ce n'est pas la
+ * question : ce qu'une CSP attenue avant tout, c'est l'execution de script
+ * injecte dans une page, et rien de ce qui est saisi n'est jamais reaffiche.
+ * La surface apparait quand une page montre du contenu fourni par un tiers,
+ * c'est-a-dire l'espace agence et les pieces deposees, en phase 4. Le rendu y
+ * sera dynamique de toute facon : le cout du nonce disparait.
+ *
+ * Voir docs/dettes.md, ou ce signal est trace.
  */
 const securityHeaders = [
   {
