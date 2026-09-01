@@ -1,5 +1,6 @@
 import { Hero } from '@/components/sections/Hero'
 import { Marquee } from '@/components/sections/Marquee'
+import { Parcours } from '@/components/sections/Parcours'
 import { Positioning } from '@/components/sections/Positioning'
 import { Pricing } from '@/components/sections/Pricing'
 import { Problem } from '@/components/sections/Problem'
@@ -13,6 +14,7 @@ export default function HomePage() {
       <Hero />
       <Marquee />
       <Problem />
+      <Parcours />
       <Product />
       <Positioning />
       <Pricing />

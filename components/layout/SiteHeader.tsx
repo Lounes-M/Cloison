@@ -19,7 +19,7 @@ export function SiteHeader() {
               </a>
             ))}
           </div>
-          <Button href="/agences" tone="flame" size="sm">
+          <Button href="/#parcours" tone="flame" size="sm">
             Démarrer
           </Button>
         </div>

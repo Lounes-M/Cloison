@@ -153,6 +153,38 @@
   }
 }
 
+/* Bascule de parcours — deux boutons radio, et aucun JavaScript.
+   Meme parti pris que `reveal` : l'etat vit en CSS, le composant reste
+   declaratif. La bascule fonctionne donc avant l'hydratation, et sans elle —
+   ce qui compte sur une page ou tout le reste est statique. */
+@utility bascule {
+  /* Panneaux masques par defaut : seul celui dont le radio est coche
+     s'affiche. `display: none` les retire aussi de l'arbre d'accessibilite,
+     donc un lecteur d'ecran n'annonce jamais le parcours inactif. */
+  & [data-panneau] {
+    display: none;
+  }
+
+  &:has([data-piste='locataire']:checked) [data-panneau='locataire'],
+  &:has([data-piste='agence']:checked) [data-panneau='agence'] {
+    display: block;
+  }
+
+  /* Onglet actif : plein, comme un bouton deja enfonce. */
+  &:has([data-piste='locataire']:checked) [data-onglet='locataire'],
+  &:has([data-piste='agence']:checked) [data-onglet='agence'] {
+    background-color: var(--color-ink);
+    color: var(--color-cream);
+  }
+
+  /* Le radio etant visuellement masque, c'est l'etiquette qui doit porter le
+     focus — sans cela, la navigation au clavier serait invisible. */
+  & [data-piste]:focus-visible + [data-onglet] {
+    outline: 3px solid var(--color-cobalt);
+    outline-offset: 3px;
+  }
+}
+
 /* Titre en lettrage plein, la signature typographique de la marque. */
 @utility display {
   font-family: var(--font-display);
@@ -173,6 +205,12 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* L'en-tete est colle en haut : sans cette marge, un saut d'ancre depose
+     le titre de la section dessous, invisible. */
+  section[id] {
+    scroll-margin-top: 6rem;
   }
 
   ::selection {

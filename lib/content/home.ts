@@ -4,6 +4,8 @@
  * Pour changer une accroche, on n'ouvre pas un composant.
  */
 
+import { commentCaMarche } from './agences'
+
 export const hero = {
   eyebrow: 'La caution de A à Z',
   badges: [
@@ -25,7 +27,7 @@ export const hero = {
   ],
   liveBadge: { label: 'garant éligible', position: 'top-[240px] right-[8%]', tilt: -5, delay: 1.2 },
   subtitle:
-    "Le garant dépose ses pièces chez lui. Le locataire voit un feu vert. L'agence signe. Personne ne voit ce qu'il ne doit pas voir.",
+    "Tu crées ton dossier, ton garant dépose ses pièces de son côté, l'agence reçoit un dossier complet. Personne ne voit ce qu'il ne doit pas voir.",
   primaryCta: 'Créer mon dossier',
   secondaryCta: 'Je suis une agence',
 } as const
@@ -49,23 +51,28 @@ export const problem = {
     'Trois personnes gênées. Zéro processus. Et des documents sensibles qui traînent partout.',
 } as const
 
-/** Les trois espaces cloisonnés — le cœur du produit. */
+/**
+ * Les trois espaces cloisonnés — le cœur du produit.
+ *
+ * L'ordre suit le parcours réel : le locataire ouvre le dossier, le garant
+ * dépose, l'agence décide. Changer cet ordre, c'est changer le produit.
+ */
 export const spaces = [
   {
-    id: 'garant',
-    step: 1,
-    title: 'Le garant',
-    tone: 'sun',
-    body: 'Il dépose ses pièces seul, chez lui, dans son espace. Il voit ce qu\u2019il couvre, combien, jusqu\u2019à quand.',
-    footnote: { left: 'Couvre : loyer + charges', right: '🔒' },
-  },
-  {
     id: 'locataire',
-    step: 2,
+    step: 1,
     title: 'Le locataire',
     tone: 'mint',
-    body: "Il voit un feu vert : dossier complet, garant éligible. Rien d'autre, pas les montants.",
+    body: "Il crée le dossier et invite son garant. Il suit l'avancement : dossier complet, garant éligible. Ni les pièces, ni les montants.",
     footnote: { left: 'Dossier complet · Garant éligible', live: true },
+  },
+  {
+    id: 'garant',
+    step: 2,
+    title: 'Le garant',
+    tone: 'sun',
+    body: 'Il reçoit un lien et dépose ses pièces seul, chez lui. Il voit ce qu\u2019il couvre, combien, jusqu\u2019à quand.',
+    footnote: { left: 'Couvre : loyer + charges', right: '🔒' },
   },
   {
     id: 'agence',
@@ -76,6 +83,57 @@ export const spaces = [
     footnote: { left: 'Acte signé ✍️', right: 'Ratio : ✓' },
   },
 ] as const
+
+/**
+ * Les deux portes d'entrée du produit.
+ *
+ * Le locataire d'abord, et l'ordre n'est pas cosmétique : c'est lui qui a le
+ * problème, c'est lui qui relancera son garant, et c'est le seul dont la
+ * motivation ne retombe pas. La porte agence existe en parallèle — elle sert
+ * l'agence qui préfère lancer le dossier elle-même.
+ *
+ * Les étapes agence sont reprises de `agences.ts` plutôt que recopiées : deux
+ * descriptions du même parcours finiraient par diverger, et c'est la page
+ * agences qui fait foi.
+ */
+export const parcours = {
+  eyebrow: 'Comment ça marche',
+  headline: ['Trois étapes,', 'aucune relance.'],
+  /** Lu par les lecteurs d'écran à la place du groupe d'onglets. */
+  legende: 'Par où commences-tu ?',
+  pistes: [
+    {
+      id: 'locataire',
+      onglet: 'Je cherche un logement',
+      etapes: [
+        {
+          numero: 1,
+          titre: 'Tu crées ton dossier',
+          texte:
+            'Deux minutes, et tu désignes qui se porte caution pour toi. Rien à scanner, rien à imprimer.',
+        },
+        {
+          numero: 2,
+          titre: 'Ton garant reçoit un lien',
+          texte:
+            "Il dépose ses pièces de son côté, chez lui. Tu vois où il en est — jamais ce qu'il envoie.",
+        },
+        {
+          numero: 3,
+          titre: "Tu transmets à l'agence",
+          texte: "Dossier complet, garant vérifié, acte prêt à signer. Elle n'a plus qu'à décider.",
+        },
+      ],
+      note: 'Bientôt ouvert aux locataires, en commençant par les trois villes du pilote.',
+    },
+    {
+      id: 'agence',
+      onglet: 'Je suis une agence',
+      etapes: commentCaMarche.etapes,
+      cta: { label: 'Ce que ça change pour vous', href: '/agences' },
+    },
+  ],
+} as const
 
 export const product = {
   headline: ['Chacun sa vue.', "Rien d'autre."],
