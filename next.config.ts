@@ -72,6 +72,13 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
 
+  // ATTENTION : tout ce qui est declare ici est substitue par sa valeur au
+  // build, y compris dans le bundle envoye au navigateur des qu'un composant
+  // client le reference. Ce bloc n'accueille que des valeurs publiques —
+  // l'URL du site en est une, le visiteur est deja dessus. Une cle d'API, un
+  // jeton ou un secret de signature n'ont rien a y faire : ils se lisent
+  // uniquement cote serveur, via `process.env`, sans prefixe `NEXT_PUBLIC_`
+  // et sans passer par ici.
   env: {
     NEXT_PUBLIC_SITE_URL: siteUrl,
   },
