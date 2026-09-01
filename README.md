@@ -18,7 +18,8 @@ npm run dev
 
 Le site tourne sur http://localhost:3000.
 
-Node ≥ 20.9 est requis (voir `.nvmrc`).
+Node 24 est requis (voir `.nvmrc`). C'est la version par defaut de Vercel et celle de la CI ;
+`engines.node` est fige sur `24.x` pour qu'aucune des trois ne derive toute seule.
 
 ## Scripts
 

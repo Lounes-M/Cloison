@@ -51,7 +51,7 @@ const securityHeaders = [
  *
  * Ordre de priorite :
  *
- * 1. `NEXT_PUBLIC_SITE_URL` si tu la definis toi-meme — elle gagne toujours.
+ * 1. `NEXT_PUBLIC_SITE_URL` si tu la renseignes toi-meme — elle gagne toujours.
  * 2. `VERCEL_PROJECT_PRODUCTION_URL`, posee par Vercel : le domaine de
  *    production le plus court. C'est le `.vercel.app` tant qu'aucun domaine
  *    personnalise n'est rattache, puis le domaine personnalise des qu'il l'est.
@@ -61,11 +61,47 @@ const securityHeaders = [
  * Consequence : rien a saisir pour la premiere mise en ligne, et rien a
  * modifier le jour du domaine definitif — un redeploiement suffit.
  */
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
+
+/**
+ * Premiere valeur reellement renseignee.
+ *
+ * `??` ne suffit pas : il ne se declenche que sur `null` et `undefined`. Une
+ * variable creee dans le tableau de bord Vercel puis laissee vide vaut `''`,
+ * ce qui l'emporterait sur toutes les sources suivantes et produirait une URL
+ * invalide. Une variable vide vaut absente.
+ */
+function premiereRenseignee(...valeurs: (string | undefined)[]): string | undefined {
+  for (const valeur of valeurs) {
+    const propre = valeur?.trim()
+    if (propre) return propre
+  }
+  return undefined
+}
+
+/** Accepte `cloison.fr` comme `https://cloison.fr`, et retire la barre finale. */
+function normaliseUrl(valeur: string): string {
+  const avecProtocole = /^https?:\/\//i.test(valeur) ? valeur : `https://${valeur}`
+  return avecProtocole.replace(/\/+$/, '')
+}
+
+const domaineVercel = premiereRenseignee(process.env.VERCEL_PROJECT_PRODUCTION_URL)
+
+const siteUrl = normaliseUrl(
+  premiereRenseignee(process.env.NEXT_PUBLIC_SITE_URL, domaineVercel) ?? 'http://localhost:3000',
+)
+
+// Echoue ici, avec un message qui dit quoi faire, plutot que quinze lignes plus
+// loin sur le `new URL()` des metadonnees.
+try {
+  new URL(siteUrl)
+} catch {
+  throw new Error(
+    `URL du site invalide : ${JSON.stringify(siteUrl)}. ` +
+      `Verifie NEXT_PUBLIC_SITE_URL dans les variables d'environnement : soit une URL ` +
+      `complete (https://cloison.fr), soit supprime-la entierement pour laisser Vercel ` +
+      `fournir le domaine de production.`,
+  )
+}
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
