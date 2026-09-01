@@ -72,16 +72,33 @@ pour la suite prévue.
 
 ## Déploiement
 
-Hébergement cible : Vercel. Le dépôt est prêt, il reste trois étapes qui demandent ton compte.
+Hébergement cible : Vercel. Le dépôt est prêt, et **il n'y a aucune variable d'environnement à
+saisir**.
 
-1. **Importer le dépôt** sur [vercel.com/new](https://vercel.com/new). Next.js est détecté seul :
-   ne touche ni à la commande de build ni au répertoire de sortie.
-2. **Définir `NEXT_PUBLIC_SITE_URL`** sur l'URL de production, sans barre oblique finale
-   (`https://cloison.fr`). Sans elle, `sitemap.xml`, `robots.txt` et l'image Open Graph pointent
-   vers `localhost`. À définir pour les trois environnements — en préproduction, mets l'URL de
-   préproduction, pas celle de production.
-3. **Brancher le domaine**, puis relancer un déploiement pour que les métadonnées reprennent la
-   bonne URL.
+1. **Importer le dépôt** sur [vercel.com/new](https://vercel.com/new). Le dépôt étant privé, pense à
+   autoriser explicitement `Lounes-M/Cloison` quand Vercel demande l'accès à GitHub. Next.js est
+   ensuite détecté seul : ne touche ni à la commande de build ni au répertoire de sortie.
+2. **Déployer.**
+3. **Brancher le domaine** dans Settings → Domains quand tu l'auras, puis **redéployer**.
+
+### D'où vient l'URL du site
+
+`site.url` est résolue au build dans [`next.config.ts`](next.config.ts), dans cet ordre :
+
+| Priorité | Source                          | Quand                               |
+| -------- | ------------------------------- | ----------------------------------- |
+| 1        | `NEXT_PUBLIC_SITE_URL`          | seulement si tu la définis toi-même |
+| 2        | `VERCEL_PROJECT_PRODUCTION_URL` | sur Vercel, automatiquement         |
+| 3        | `http://localhost:3000`         | en développement                    |
+
+`VERCEL_PROJECT_PRODUCTION_URL` est le domaine de production le plus court du projet : le
+`.vercel.app` tant qu'aucun domaine personnalisé n'est rattaché, **puis le domaine personnalisé dès
+qu'il l'est**. C'est pour cela qu'il n'y a rien à saisir, ni au premier déploiement ni le jour du
+domaine — il suffit de redéployer pour que les métadonnées suivent.
+
+Cela suppose que **« Enable access to System Environment Variables »** reste coché dans
+Settings → Environment Variables (c'est le réglage par défaut). Si tu le décoches, l'URL retombe sur
+`localhost` et le sitemap devient faux.
 
 Après la mise en ligne, vérifie que `https://<domaine>/sitemap.xml` et `/robots.txt` citent bien le
 domaine de production, et passe l'URL dans un validateur d'aperçu social pour contrôler l'image

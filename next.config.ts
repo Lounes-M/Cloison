@@ -45,10 +45,36 @@ const securityHeaders = [
   },
 ]
 
+/**
+ * URL publique du site, resolue une seule fois au build et exposee a tout le
+ * code via `NEXT_PUBLIC_SITE_URL` (cote serveur comme cote client).
+ *
+ * Ordre de priorite :
+ *
+ * 1. `NEXT_PUBLIC_SITE_URL` si tu la definis toi-meme — elle gagne toujours.
+ * 2. `VERCEL_PROJECT_PRODUCTION_URL`, posee par Vercel : le domaine de
+ *    production le plus court. C'est le `.vercel.app` tant qu'aucun domaine
+ *    personnalise n'est rattache, puis le domaine personnalise des qu'il l'est.
+ *    Elle ne contient pas le protocole, d'ou le `https://` ajoute ici.
+ * 3. `localhost` en developpement.
+ *
+ * Consequence : rien a saisir pour la premiere mise en ligne, et rien a
+ * modifier le jour du domaine definitif — un redeploiement suffit.
+ */
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'http://localhost:3000')
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   typedRoutes: true,
+
+  env: {
+    NEXT_PUBLIC_SITE_URL: siteUrl,
+  },
 
   async headers() {
     return [
