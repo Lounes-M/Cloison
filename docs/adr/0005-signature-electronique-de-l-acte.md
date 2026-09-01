@@ -129,6 +129,10 @@ Restent trois points à confirmer avant de signer, qui ne se lisent pas sur une 
 qu'une « transaction » recouvre exactement quand l'agence contresigne (une ou deux ?), si
 l'archivage à valeur probante est inclus ou en supplément, et le mode de vérification d'identité
 retenu pour l'avancé. Cet ADR fixe le choix et son raisonnement, pas le contrat.
+Sur ces critères, **Yousign** (français, QTSP, API-first) est le candidat principal, et
+**Docaposte** l'alternative — plus lourde, mais le nom de La Poste vaut un argument commercial
+auprès d'une agence prudente. Le choix final demande une conversation commerciale et une lecture des
+conditions : cet ADR fixe les critères, pas le contrat.
 
 ### L'acte signé échappe à la règle des trois mois
 
@@ -174,6 +178,7 @@ question de parcours, à trancher avec le premier vrai dossier.
   ou la moitié du prix de l'acte. Le signal de sortie vers le qualifié ne se déclenchera donc pas
   seul : il s'accompagnera nécessairement d'un nouveau prix de l'acte, et il faut le savoir avant
   de le tirer.
+  dépendance, mais il pose un plancher au prix de l'acte. À connaître avant d'annoncer un tarif.
 - Le schéma des dossiers porte désormais une **classe de rétention** par objet, pas une échéance
   unique par dossier. À écrire en phase 3, en même temps que la table `dossiers`.
 - Le parcours du garant gagne un écran incompressible — la saisie de la mention — qu'il ne faut pas
