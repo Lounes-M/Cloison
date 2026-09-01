@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Declenchement manuel. Necessaire, et pas seulement pratique : les commits
+  # pousses par une application GitHub ne declenchent pas de workflow, donc une
+  # PR ouverte par un agent n'a aucune verification tant qu'on ne la lance pas.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
