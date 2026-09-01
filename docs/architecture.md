@@ -40,13 +40,20 @@ filtrage côté client, jamais par une route devinable. La structure `app/` en g
 
 Points à trancher avant d'écrire la première ligne du produit :
 
-- **Stockage des pièces** — chiffrement au repos, durée de rétention (le dossier est valable trois
-  mois), suppression effective à l'expiration.
 - **Signature électronique** — prestataire eIDAS pour l'acte de cautionnement (loi ELAN).
 - **Filigranage** — appliqué à la génération du lien agence, pas au dépôt : le garant ne doit jamais
-  voir ses propres pièces dégradées.
+  voir ses propres pièces dégradées. Le point de passage est acquis (voir ci-dessous), reste ce que
+  le filigrane inscrit.
 
-L'**identité** ne fait plus partie de cette liste : elle est tranchée par
+Le **stockage des pièces** n'en fait plus partie : il est tranché par
+l'[ADR 0003](adr/0003-stockage-et-chiffrement-des-pieces.md). Les pièces sont chiffrées par notre
+serveur avant de partir chez Supabase, avec une clé maîtresse qui vit chez Vercel — le chiffré et la
+clé chez deux hébergeurs différents. Conséquence structurante : les URLs signées deviennent
+inutilisables, toute lecture traverse une route serveur, et c'est là que le filigranage
+s'appliquera. La rétention est de trois mois, et l'expiration détruit la clé du dossier plutôt que
+d'espérer que la suppression atteigne les sauvegardes.
+
+L'**identité** ne fait plus partie de cette liste non plus : elle est tranchée par
 l'[ADR 0002](adr/0002-modele-d-acces-et-creation-de-compte.md). Le garant et le locataire arrivent
 par lien signé et n'ont jamais de compte ; l'agence a de vrais comptes nominatifs, via Supabase
 Auth. Trois populations, trois rôles Postgres — `anon`, `authenticated`, `porteur_lien` — pour que
