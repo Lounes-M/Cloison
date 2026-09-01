@@ -60,8 +60,14 @@ sienne : la limite ne borne donc pas un attaquant réparti sur plusieurs instanc
 contre le bruit ordinaire (double-clic, script naïf, envois répétés) et ce qu'elle protège est une
 table sans lecture publique ni donnée sensible.
 
-**Signal de sortie** : la première limite qui protège quelque chose de sérieux, c'est-à-dire les
-liens d'accès en phase 3. Elle se fera alors avec un magasin partagé.
+**Signal déclenché le 1er septembre 2026**, par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md).
+Le point d'envoi d'un lien magique est exactement ce qu'il ne faut pas laisser sans limite : il
+envoie un e-mail à une adresse choisie par l'appelant, ce qui en fait à la fois un amplificateur de
+spam et un moyen de savoir si une adresse a un dossier.
+
+**Ce que ça demande** : un magasin partagé, et une réponse identique que l'adresse existe ou non.
+Ce n'est plus une amélioration ultérieure mais un prérequis de mise en service, à livrer avec le
+parcours locataire.
 
 ### Pas de Content-Security-Policy
 
