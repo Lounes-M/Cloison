@@ -72,5 +72,30 @@ pour la suite prévue.
 
 ## Déploiement
 
-Le projet est prêt pour Vercel : importer le dépôt, définir `NEXT_PUBLIC_SITE_URL` sur le domaine de
-production (voir `.env.example`), déployer. Aucune autre variable n'est nécessaire pour l'instant.
+Hébergement cible : Vercel. Le dépôt est prêt, il reste trois étapes qui demandent ton compte.
+
+1. **Importer le dépôt** sur [vercel.com/new](https://vercel.com/new). Next.js est détecté seul :
+   ne touche ni à la commande de build ni au répertoire de sortie.
+2. **Définir `NEXT_PUBLIC_SITE_URL`** sur l'URL de production, sans barre oblique finale
+   (`https://cloison.fr`). Sans elle, `sitemap.xml`, `robots.txt` et l'image Open Graph pointent
+   vers `localhost`. À définir pour les trois environnements — en préproduction, mets l'URL de
+   préproduction, pas celle de production.
+3. **Brancher le domaine**, puis relancer un déploiement pour que les métadonnées reprennent la
+   bonne URL.
+
+Après la mise en ligne, vérifie que `https://<domaine>/sitemap.xml` et `/robots.txt` citent bien le
+domaine de production, et passe l'URL dans un validateur d'aperçu social pour contrôler l'image
+Open Graph.
+
+### En-têtes de sécurité
+
+Ils sont déclarés dans [`next.config.ts`](next.config.ts) et s'appliquent à toutes les réponses.
+
+`Strict-Transport-Security` est envoyé avec `preload` : **n'ajoute le domaine à la liste de
+préchargement HSTS qu'une fois certain de rester en HTTPS**, l'opération étant longue à défaire.
+L'en-tête seul est sans risque.
+
+Il n'y a volontairement **pas de Content-Security-Policy** pour l'instant : sous App Router, une CSP
+stricte impose des nonces, donc un middleware et un rendu dynamique. On échangerait aujourd'hui des
+pages entièrement statiques contre une protection sans objet, le site ne recevant aucune donnée.
+À trancher avec le socle produit, quand les premiers formulaires arriveront.

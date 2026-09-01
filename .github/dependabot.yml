@@ -1,0 +1,63 @@
+version: 2
+
+updates:
+  # Dependances applicatives. Un produit qui manipulera des bulletins de paie
+  # ne peut pas dependre de la vigilance humaine pour ses correctifs.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/Paris
+    open-pull-requests-limit: 8
+    commit-message:
+      prefix: deps
+      prefix-development: deps-dev
+    groups:
+      # Le trio Next/React se met a jour ensemble ou pas du tout : les versions
+      # sont couplees, une PR par paquet produirait des builds incoherents.
+      next-react:
+        patterns:
+          - next
+          - react
+          - react-dom
+          - '@types/react'
+          - '@types/react-dom'
+          - eslint-config-next
+      tailwind:
+        patterns:
+          - tailwindcss
+          - '@tailwindcss/*'
+          - prettier-plugin-tailwindcss
+      # Le reste de l'outillage : regroupe pour ne pas noyer le depot sous les
+      # PR de patch.
+      outillage:
+        dependency-type: development
+        patterns:
+          - '*'
+        exclude-patterns:
+          - next
+          - react
+          - react-dom
+          - '@types/react'
+          - '@types/react-dom'
+          - eslint-config-next
+          - tailwindcss
+          - '@tailwindcss/*'
+          - prettier-plugin-tailwindcss
+        update-types:
+          - minor
+          - patch
+
+  # Les actions GitHub sont du code executable avec acces au depot : elles se
+  # tiennent a jour comme le reste.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: Europe/Paris
+    commit-message:
+      prefix: ci

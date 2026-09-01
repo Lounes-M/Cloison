@@ -1,20 +1,7 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Archivo_Black } from 'next/font/google'
 import { site } from '@/lib/site'
+import { fontVariables } from './fonts'
 import './globals.css'
-
-const archivo = Archivo({
-  subsets: ['latin'],
-  variable: '--font-archivo',
-  display: 'swap',
-})
-
-const archivoBlack = Archivo_Black({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-archivo-black',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -59,7 +46,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${archivo.variable} ${archivoBlack.variable}`}>
+    <html lang="fr" className={fontVariables}>
       <body>{children}</body>
     </html>
   )

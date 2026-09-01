@@ -13,39 +13,68 @@ const sizes = {
   md: 'px-8 py-4 text-[17px] rounded-brut shadow-brut',
 } as const
 
-type ButtonProps = {
-  /** Ancre de la meme page (`#tarifs`) ou route interne (`/agences`). */
-  href: Route | `#${string}`
+type CommonProps = {
   children: React.ReactNode
   tone?: keyof typeof tones
   size?: keyof typeof sizes
   className?: string
 }
 
+/** Destination : ancre de la meme page (`#tarifs`) ou route interne (`/agences`). */
+type LinkProps = CommonProps & {
+  href: Route | `#${string}`
+  onClick?: never
+  type?: never
+}
+
+/** Action : le bouton declenche du code au lieu de naviguer. */
+type ActionProps = CommonProps & {
+  onClick: () => void
+  href?: never
+  type?: 'button' | 'submit'
+}
+
+type ButtonProps = LinkProps | ActionProps
+
 /**
  * CTA « neo-brutaliste » : contour plein, ombre decalee qui se retracte au survol
  * pendant que le bouton glisse de 4 px — il s'enfonce litteralement dans la page.
+ *
+ * Rend l'element juste : `<button>` pour une action, `<a>` pour une ancre de la
+ * meme page (rien a prefetcher), `<Link>` pour une vraie navigation.
  */
-export function Button({ href, children, tone = 'cobalt', size = 'md', className }: ButtonProps) {
+export function Button({
+  children,
+  tone = 'cobalt',
+  size = 'md',
+  className,
+  ...rest
+}: ButtonProps) {
   const classes = cn(
-    'press inline-flex items-center justify-center font-bold outlined',
+    'press inline-flex cursor-pointer items-center justify-center font-bold outlined',
     tones[tone],
     sizes[size],
     className,
   )
 
-  // Une ancre de la meme page n'a rien a prefetcher : `<a>` suffit et evite
-  // que le routeur tente une navigation.
-  if (href.startsWith('#')) {
+  if (rest.onClick) {
     return (
-      <a href={href} className={classes}>
+      <button type={rest.type ?? 'button'} onClick={rest.onClick} className={classes}>
+        {children}
+      </button>
+    )
+  }
+
+  if (rest.href.startsWith('#')) {
+    return (
+      <a href={rest.href} className={classes}>
         {children}
       </a>
     )
   }
 
   return (
-    <Link href={href as Route} className={classes}>
+    <Link href={rest.href as Route} className={classes}>
       {children}
     </Link>
   )
