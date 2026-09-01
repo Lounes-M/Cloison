@@ -48,6 +48,22 @@ fonctionne parfaitement et ne protège rien, ce que l'agence découvrirait le jo
 > montrer explicitement que la mention, elle, se saisit à la main — c'est un argument de sérieux
 > autant qu'une obligation.
 
+**La formule, elle, est libre.** La réforme de 2021 a supprimé la phrase type qu'il fallait recopier
+mot pour mot, et dont la moindre erreur de vocabulaire annulait l'acte. C'est un assouplissement
+réel : on ne peut plus se tromper de formulation. Mais le **contenu** reste contraint, à peine de
+nullité — la mention doit exprimer :
+
+1. la volonté de s'engager **en qualité de caution** ;
+2. l'obligation de **payer le créancier en cas de défaillance du débiteur** ;
+3. le **montant maximal garanti, en chiffres et en toutes lettres** (en cas de divergence, les
+   lettres l'emportent) ;
+4. si l'engagement est **solidaire**, la renonciation aux bénéfices de discussion et de division.
+
+Ces deux faits ensemble dessinent exactement ce que doit faire le parcours : **guider sans
+pré-remplir**. On affiche les quatre éléments exigés, le garant compose et saisit, et le serveur
+vérifie ce qu'il a écrit — cohérence entre le montant en chiffres et celui en lettres, présence de
+la clause de solidarité quand le bail l'exige. On contrôle le résultat, on ne le fournit pas.
+
 ### Signature avancée, chez un prestataire qui sait faire du qualifié
 
 Le règlement eIDAS distingue trois niveaux : simple, avancée, qualifiée. Les trois sont recevables
@@ -89,6 +105,30 @@ Dans cet ordre :
    l'acte » de `tarifAgence`.
 5. **Archivage à valeur probante** inclus.
 
+Sur ces critères, et après relevé des tarifs publics : **Universign** (Cryptolog International,
+groupe Signaturit).
+
+|                     | Universign / Signaturit                                 | Youtrust (ex-Yousign)               |
+| ------------------- | ------------------------------------------------------- | ----------------------------------- |
+| Engagement          | Aucun, résiliable à tout moment                         | **Annuel**, à partir de 1 248 €     |
+| Abonnement          | 23 €/mois (10 transactions) à 38 €/mois (illimité)      | 104 à 129 €/mois, facturé à l'année |
+| Signature avancée   | **2,50 €** par signature                                | Module additionnel, prix non public |
+| Signature qualifiée | **à partir de 10 €** par signature                      | Module additionnel, prix non public |
+| QTSP, hébergement   | Trust List UE depuis 2016, centres de données en France | QTSP Trust List UE                  |
+
+Ce qui décide, ce n'est pas le prix unitaire — c'est **l'engagement**. Youtrust demande
+1 248 € à l'année avant la première signature, sur un pilote dont on ignore le volume : à cent
+actes, ça fait plus de 12 € l'acte en frais fixes. Universign se résilie à tout moment et facture à
+la transaction. Quand on ne connaît pas son volume, on n'achète pas un volume.
+
+Le second critère décisif : les deux niveaux sont **publiés, sur la même API**. Le « le niveau reste
+un paramètre » de cet ADR devient chiffrable à l'avance — passer à l'avancé au qualifié, c'est
+2,50 € qui deviennent 10 €. Chez Youtrust, il faut appeler un commercial pour le savoir.
+
+Restent trois points à confirmer avant de signer, qui ne se lisent pas sur une page de tarifs : ce
+qu'une « transaction » recouvre exactement quand l'agence contresigne (une ou deux ?), si
+l'archivage à valeur probante est inclus ou en supplément, et le mode de vérification d'identité
+retenu pour l'avancé. Cet ADR fixe le choix et son raisonnement, pas le contrat.
 Sur ces critères, **Yousign** (français, QTSP, API-first) est le candidat principal, et
 **Docaposte** l'alternative — plus lourde, mais le nom de La Poste vaut un argument commercial
 auprès d'une agence prudente. Le choix final demande une conversation commerciale et une lecture des
@@ -130,6 +170,14 @@ question de parcours, à trancher avec le premier vrai dossier.
 
 - Un troisième sous-traitant, après Supabase et Resend. À inscrire au registre, DPA à signer.
 - Un coût variable par acte, adossé au revenu plutôt qu'aux charges fixes : c'est le bon sens de la
+  dépendance, mais il pose un plancher au prix de l'acte. Aux tarifs relevés, un acte revient à
+  **environ 3 à 5 €** tout compris en avancé — abonnement amorti et signature — soit une part
+  supportable d'un acte facturé quelques dizaines d'euros.
+- **Le choix de l'avancé n'est pas qu'une question de parcours, c'est aussi l'économie unitaire.** À
+  partir de 10 € la signature qualifiée contre 2,50 € l'avancée, le qualifié consommerait le tiers
+  ou la moitié du prix de l'acte. Le signal de sortie vers le qualifié ne se déclenchera donc pas
+  seul : il s'accompagnera nécessairement d'un nouveau prix de l'acte, et il faut le savoir avant
+  de le tirer.
   dépendance, mais il pose un plancher au prix de l'acte. À connaître avant d'annoncer un tarif.
 - Le schéma des dossiers porte désormais une **classe de rétention** par objet, pas une échéance
   unique par dossier. À écrire en phase 3, en même temps que la table `dossiers`.
@@ -139,8 +187,13 @@ question de parcours, à trancher avec le premier vrai dossier.
 ## Alternatives écartées
 
 **Le qualifié dès maintenant** — juridiquement le plus solide, et la présomption de fiabilité est un
-vrai argument commercial. Écarté pour l'instant sur le parcours du garant, pas sur le principe : le
-choix de prestataire est fait pour que ce soit réversible en un paramètre.
+vrai argument commercial. Écarté sur le parcours du garant **et** sur l'économie unitaire, pas sur le
+principe : le choix de prestataire est fait pour que ce soit réversible en un paramètre.
+
+**Attendre un qualifié gratuit via France Identité** — l'identité numérique de l'État abaisse le
+coût de la vérification, pas celui du service de confiance : un prestataire qualifié doit financer
+son infrastructure et sa conformité ANSSI, et ne peut pas délivrer à 0 €. Ce n'est pas une option
+qui arrive, c'est un prix qui baissera peut-être.
 
 **Une signature maison** — horodatage, journal, case à cocher. Ce serait une signature simple
 habillée en solennité, sur un acte sanctionné par la nullité. Le pire des trois niveaux, avec

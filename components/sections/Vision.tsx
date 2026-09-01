@@ -13,7 +13,7 @@ const useCaseTones = {
 
 export function Vision() {
   return (
-    <Section id="demarrer" className="pb-24 text-center">
+    <Section className="pb-24 text-center">
       <Reveal>
         <div className="bg-cobalt shadow-brut-lg outlined relative overflow-hidden rounded-[24px] px-8 py-16 text-white md:px-12">
           <span
@@ -56,7 +56,7 @@ export function Vision() {
             </ul>
 
             <div className="mt-9">
-              <Button href="#demarrer" tone="flame">
+              <Button href="#parcours" tone="flame">
                 {vision.cta} →
               </Button>
             </div>
