@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck · Lint · Format · Build · Secrets
+    name: Typecheck · Lint · Format · Typo · Build · Secrets
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +32,11 @@ jobs:
 
       - name: Format check
         run: npm run format:check
+
+      # Ni emoji ni tiret cadratin, nulle part. Ne demande pas de build : c'est
+      # une lecture de fichiers, elle passe donc avant l'etape la plus lente.
+      - name: Typographie
+        run: npm run check:typo
 
       - name: Build
         run: npm run build
