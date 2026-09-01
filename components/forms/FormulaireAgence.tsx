@@ -26,7 +26,7 @@ export function FormulaireAgence() {
   const resume = useRef<HTMLDivElement>(null)
 
   // Horodatage d'affichage : sert a reperer un envoi trop rapide pour etre
-  // humain. Ecrit directement dans le champ apres le rendu — pas d'etat React,
+  // humain. Ecrit directement dans le champ apres le rendu : pas d'etat React,
   // donc pas de rendu en cascade, et rien dans le HTML du serveur. Sans
   // JavaScript le champ reste vide et le controle de delai est simplement
   // ignore cote serveur.
@@ -49,7 +49,7 @@ export function FormulaireAgence() {
       >
         <p className="font-display text-2xl uppercase">C&apos;est noté.</p>
         <p className="mx-auto mt-3 max-w-[420px] text-[15px] leading-relaxed font-medium">
-          On revient vers toi sous 48 heures ouvrées, avec une démonstration sur un dossier réel —
+          On revient vers toi sous 48 heures ouvrées, avec une démonstration sur un dossier réel :
           pas une plaquette.
         </p>
       </div>
@@ -202,7 +202,7 @@ export function FormulaireAgence() {
 
       {/*
         Information au moment de la collecte. Ce n'est pas la page de mentions
-        legales — celle-ci demande une structure immatriculee — mais l'agence
+    legales (celle-ci demande une structure immatriculee), mais l'agence
         doit savoir a quoi elle consent quand elle laisse son adresse.
       */}
       <p className="text-muted text-[12.5px] leading-relaxed">

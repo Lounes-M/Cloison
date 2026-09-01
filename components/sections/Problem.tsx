@@ -1,3 +1,4 @@
+import { Icone } from '@/components/ui/Icone'
 import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
 import { problem } from '@/lib/content/home'
@@ -12,10 +13,17 @@ export function Problem() {
             <div className="flex flex-col gap-2">
               {problem.conversation.messages.map((message) => (
                 <p
-                  key={message}
-                  className="border-ink rounded-[12px_12px_12px_3px] border-[1.5px] bg-[#e8f5e0] px-4 py-3 text-sm font-medium"
+                  key={'fichier' in message ? message.fichier : message.texte}
+                  className="border-ink flex items-center gap-2 rounded-[12px_12px_12px_3px] border-[1.5px] bg-[#e8f5e0] px-4 py-3 text-sm font-medium"
                 >
-                  {message}
+                  {'fichier' in message ? (
+                    <>
+                      <Icone nom="fichier" titre="Pièce jointe" />
+                      {message.fichier}
+                    </>
+                  ) : (
+                    message.texte
+                  )}
                 </p>
               ))}
             </div>

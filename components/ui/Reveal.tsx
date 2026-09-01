@@ -17,7 +17,7 @@ type RevealProps = {
  *
  * L'état masqué et tous les filets de sécurité vivent dans la classe CSS
  * `reveal` (voir `app/globals.css`) : JavaScript ne fait qu'une chose, poser
- * `data-shown` au bon moment. Consequence — pas de `setState` dans un effet,
+ * `data-shown` au bon moment. Consequence : pas de `setState` dans un effet,
  * pas de rendu en cascade, et surtout aucun flash : le contenu n'est jamais
  * affiché puis rétracté à l'hydratation.
  *
@@ -26,7 +26,7 @@ type RevealProps = {
  *
  * 1. Un scroll rapide ou un saut d'ancre peut faire passer l'élément de
  *    « sous le viewport » à « au-dessus » entre deux échantillonnages de
- *    l'observer, sans jamais le voir intersecté — on révèle donc aussi tout
+ *    l'observer, sans jamais le voir intersecté, on révèle donc aussi tout
  *    ce qui est déjà passé.
  * 2. Si JavaScript ne s'exécute pas du tout, une animation CSS retardée
  *    révèle l'élément toute seule.

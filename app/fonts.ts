@@ -2,7 +2,7 @@ import { Archivo, Archivo_Black } from 'next/font/google'
 
 /**
  * Les deux faces de la marque, partagees par le layout racine et par
- * `global-error.tsx` — qui remplace ce layout et doit donc les redeclarer.
+ * `global-error.tsx`, qui remplace ce layout et doit donc les redeclarer.
  */
 
 export const archivo = Archivo({

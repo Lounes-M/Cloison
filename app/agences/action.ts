@@ -25,7 +25,7 @@ const MAX_PAR_FENETRE = 5
  *
  * Honnete sur sa portee : chaque instance serverless a la sienne, donc elle ne
  * borne pas un attaquant reparti sur plusieurs instances. Elle suffit contre le
- * bruit ordinaire — double-clic, script naif, remplissage repete — et c'est ce
+ * bruit ordinaire (double-clic, script naif, remplissage repete), et c'est ce
  * qu'on protege ici : une table sans lecture publique et sans donnee sensible.
  * Le jour ou une vraie limite s'impose (phase 3, sur les liens d'acces), elle
  * se fera avec un magasin partage.
@@ -121,7 +121,7 @@ export async function envoyerDemandeAgence(
   // Tout ce qui suit touche des services externes. Une action serveur qui leve
   // renvoie un 500 et fait disparaitre le formulaire : l'agence perd sa saisie
   // et ne comprend pas pourquoi. Variable manquante, Supabase indisponible,
-  // reseau coupe — tout doit ressortir en message lisible.
+  // reseau coupe : tout doit ressortir en message lisible.
   try {
     const resultat = await enregistrerDemande(demande, 'formulaire-agences')
 

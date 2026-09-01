@@ -9,7 +9,7 @@ import 'server-only'
  * a l'execution du garde-fou statique de `scripts/verifie-variables-publiques.mjs`.
  *
  * On lit paresseusement plutot qu'au chargement du module : le build doit
- * pouvoir se faire sans ces variables — la page /agences est statique, seule
+ * pouvoir se faire sans ces variables : la page /agences est statique, seule
  * la soumission du formulaire en a besoin.
  */
 
@@ -42,7 +42,7 @@ export const env = {
    * Volontairement la seule du projet : la table n'autorise que l'insertion,
    * jamais la lecture. La cle secrete, qui contourne RLS, n'existe pas ici.
    *
-   * Cote base, une requete portant cette cle prend le role Postgres `anon` —
+   * Cote base, une requete portant cette cle prend le role Postgres `anon`,
    * exactement comme l'ancienne cle du meme nom. Les politiques ecrites
    * `to anon` s'appliquent donc sans changement. L'ancienne cle fonctionne
    * encore si elle est collee ici, mais Supabase la deprecie fin 2026.

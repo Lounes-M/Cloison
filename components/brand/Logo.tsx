@@ -46,7 +46,7 @@ export function Logo({ variant = 'default', asLink = true, className }: LogoProp
   }
 
   return (
-    <Link href="/" className={classes} aria-label="Cloison — accueil">
+    <Link href="/" className={classes} aria-label="Cloison, accueil">
       {content}
     </Link>
   )

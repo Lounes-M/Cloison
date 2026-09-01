@@ -35,27 +35,47 @@ presse, documents. Dans le site, on utilise toujours le composant.
 | `live`   | `#1db954` | Pastille d'état vérifié               |
 | `muted`  | `#888888` | Texte secondaire                      |
 
-Les trois espaces ont chacun leur couleur — `sun`, `mint`, `sky` — et cette association ne bouge pas.
+Les trois espaces ont chacun leur couleur (`sun`, `mint`, `sky`) et cette association ne bouge pas.
 Un lecteur doit pouvoir identifier de quel côté de la cloison il se trouve à la couleur seule.
 
 ## Typographie
 
 - **Archivo Black** (`font-display`) : titres, chiffres, logo. Toujours en capitales.
-- **Archivo** (`font-sans`) : tout le reste. Corps de texte en `font-medium` ou `font-semibold` —
+- **Archivo** (`font-sans`) : tout le reste. Corps de texte en `font-medium` ou `font-semibold`,
   le light n'existe pas dans cette identité.
 
 ## Le style « néo-brutaliste »
 
 Trois règles suffisent à reproduire n'importe quel élément du site :
 
-1. **Contour plein** de 2 px en `ink` — utilitaire `outlined`.
-2. **Ombre portée décalée, sans flou** — `shadow-brut-sm`, `shadow-brut`, `shadow-brut-lg`.
+1. **Contour plein** de 2 px en `ink` : utilitaire `outlined`.
+2. **Ombre portée décalée, sans flou** : `shadow-brut-sm`, `shadow-brut`, `shadow-brut-lg`.
 3. **Réaction au survol** :
-   - `press` sur ce qui est cliquable — l'ombre se rétracte, l'élément glisse de 4 px : il s'enfonce.
-   - `lift` sur ce qui ne l'est pas — l'ombre se creuse, l'élément se soulève.
+   - `press` sur ce qui est cliquable : l'ombre se rétracte, l'élément glisse de 4 px, il s'enfonce.
+   - `lift` sur ce qui ne l'est pas : l'ombre se creuse, l'élément se soulève.
 
 Les rotations légères (`rotate-1`, `-rotate-2`) sont volontaires et doivent rester rares : elles
 signalent ce qui compte (la règle d'or des tarifs, le tampon « Rescanné. Refait. »).
+
+## Icônes et ponctuation
+
+Deux règles tenues partout, y compris dans le code et la documentation. Elles sont vérifiées par
+`npm run check:typo`, donc elles ne dépendent pas de la vigilance du relecteur.
+
+**Aucun emoji.** Un emoji est dessiné par le système d'exploitation : il change de forme et de
+couleur d'un appareil à l'autre, ignore la charte, et refuse de suivre la couleur du texte qui
+l'entoure. Une marque qui se reconnaît à ses contours pleins ne peut pas sous-traiter ses
+pictogrammes à Apple et à Google.
+
+Les icônes vivent donc dans [`components/ui/Icone.tsx`](../components/ui/Icone.tsx), dessinées sur
+la même grammaire que le reste : traits de 2 px, extrémités carrées, angles francs, aucune courbe
+molle. Elles héritent de `currentColor`, donc une icône posée sur un fond sombre suit le texte sans
+qu'on la redéclare.
+
+**Aucun tiret cadratin.** Ce que le cadratin exprime se dit en français avec des deux-points, une
+virgule ou des parenthèses, et le texte y gagne : le cadratin laisse au lecteur le soin de deviner
+quel lien logique on avait en tête, alors que les trois autres le nomment. Pour séparer deux
+éléments d'un titre, le point médian (`·`).
 
 ## Mouvement
 

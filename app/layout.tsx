@@ -9,8 +9,8 @@ import './globals.css'
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — ${site.tagline}`,
-    template: `%s — ${site.name}`,
+    default: `${site.name} · ${site.tagline}`,
+    template: `%s · ${site.name}`,
   },
   description: site.description,
   applicationName: site.name,
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     locale: site.locale,
     url: site.url,
     siteName: site.name,
-    title: `${site.name} — ${site.tagline}`,
+    title: `${site.name} · ${site.tagline}`,
     description: site.description,
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${site.name} — ${site.tagline}`,
+    title: `${site.name} · ${site.tagline}`,
     description: site.description,
   },
   robots: {
@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Mesure d'audience sans cookie : rien n'est ecrit sur l'appareil du
           visiteur, aucun identifiant ne le suit d'un site a l'autre. C'est ce
           qui permet a la landing de ne pas s'ouvrir sur un bandeau de
-          consentement — une page qui vend la confidentialite et commence par
+          consentement : une page qui vend la confidentialite et commence par
           demander l'autorisation de pister se contredit toute seule.
 
           Le caractere exempte de consentement reste a faire confirmer par un

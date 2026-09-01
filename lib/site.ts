@@ -1,4 +1,4 @@
-/** Configuration globale du site — importée par les métadonnées et la navigation. */
+/** Configuration globale du site : importée par les métadonnées et la navigation. */
 export const site = {
   name: 'Cloison',
   tagline: 'Le coffre à trois clés',

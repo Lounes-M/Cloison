@@ -4,7 +4,7 @@ import type { NextConfig } from 'next'
  * En-tetes de securite appliques a toutes les reponses.
  *
  * Volontairement absent : une Content-Security-Policy. Une CSP stricte sous
- * App Router impose des nonces, donc un middleware et un rendu dynamique — on
+ * App Router impose des nonces, donc un middleware et un rendu dynamique : on
  * echangerait aujourd'hui des pages entierement statiques contre une protection
  * sans objet.
  *
@@ -25,7 +25,7 @@ const securityHeaders = [
     value: 'max-age=63072000; includeSubDomains; preload',
   },
   {
-    // Empeche le navigateur de deviner un type MIME — vecteur classique quand
+    // Empeche le navigateur de deviner un type MIME : vecteur classique quand
     // le site servira des pieces televersees.
     key: 'X-Content-Type-Options',
     value: 'nosniff',
@@ -59,7 +59,7 @@ const securityHeaders = [
  *
  * Ordre de priorite :
  *
- * 1. `NEXT_PUBLIC_SITE_URL` si tu la renseignes toi-meme — elle gagne toujours.
+ * 1. `NEXT_PUBLIC_SITE_URL` si tu la renseignes toi-meme : elle gagne toujours.
  * 2. `VERCEL_PROJECT_PRODUCTION_URL`, posee par Vercel : le domaine de
  *    production le plus court. C'est le `.vercel.app` tant qu'aucun domaine
  *    personnalise n'est rattache, puis le domaine personnalise des qu'il l'est.
@@ -67,7 +67,7 @@ const securityHeaders = [
  * 3. `localhost` en developpement.
  *
  * Consequence : rien a saisir pour la premiere mise en ligne, et rien a
- * modifier le jour du domaine definitif — un redeploiement suffit.
+ * modifier le jour du domaine definitif : un redeploiement suffit.
  */
 
 /**
@@ -118,7 +118,7 @@ const nextConfig: NextConfig = {
 
   // ATTENTION : tout ce qui est declare ici est substitue par sa valeur au
   // build, y compris dans le bundle envoye au navigateur des qu'un composant
-  // client le reference. Ce bloc n'accueille que des valeurs publiques —
+  // client le reference. Ce bloc n'accueille que des valeurs publiques :
   // l'URL du site en est une, le visiteur est deja dessus. Une cle d'API, un
   // jeton ou un secret de signature n'ont rien a y faire : ils se lisent
   // uniquement cote serveur, via `process.env`, sans prefixe `NEXT_PUBLIC_`

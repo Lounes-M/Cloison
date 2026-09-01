@@ -51,7 +51,7 @@ type ButtonProps = LinkProps | ActionProps | InerteProps
 
 /**
  * CTA « neo-brutaliste » : contour plein, ombre decalee qui se retracte au survol
- * pendant que le bouton glisse de 4 px — il s'enfonce litteralement dans la page.
+ * pendant que le bouton glisse de 4 px : il s'enfonce litteralement dans la page.
  *
  * Rend l'element juste : `<button>` pour une action, `<a>` pour une ancre de la
  * meme page (rien a prefetcher), `<Link>` pour une vraie navigation.

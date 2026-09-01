@@ -5,7 +5,7 @@
 --
 -- Il n'imite que ce dont les migrations dependent reellement : les quatre
 -- roles, le schema `auth`, la table `auth.users` reduite a trois colonnes, et
--- `auth.uid()`. Rien de plus — un faux qui en fait trop finit par tester le
+-- `auth.uid()`. Rien de plus : un faux qui en fait trop finit par tester le
 -- faux plutot que le vrai.
 
 create extension if not exists pgcrypto;

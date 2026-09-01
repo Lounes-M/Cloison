@@ -6,7 +6,7 @@ Un seul livrable : le site public, rendu entièrement en statique. Toutes les ro
 prérendues au build (`○ Static`), il n'y a ni base de données, ni authentification, ni API.
 
 Les composants sont des **Server Components** par défaut. Un seul est client :
-`components/ui/Reveal.tsx`, qui a besoin d'un `IntersectionObserver`. C'est la règle à tenir —
+`components/ui/Reveal.tsx`, qui a besoin d'un `IntersectionObserver`. C'est la règle à tenir :
 `'use client'` se justifie, il ne se subit pas.
 
 ## Conventions
@@ -34,19 +34,19 @@ Cloison est un produit à **trois acteurs qui ne voient pas la même chose du m�
 | L'agence     | Les pièces filigranées, le ratio calculé, l'acte pré-rempli          |
 
 Le cloisonnement est la fonctionnalité, pas une option de confidentialité. Il devra donc être
-appliqué **côté serveur**, sur chaque lecture, à partir du rôle porté par la session — jamais par un
+appliqué **côté serveur**, sur chaque lecture, à partir du rôle porté par la session : jamais par un
 filtrage côté client, jamais par une route devinable. La structure `app/` en groupes de routes
 (`(marketing)`, `(app)`) accueillera cette séparation quand les espaces seront implémentés.
 
 Les quatre points à trancher avant d'écrire la première ligne du produit **le sont tous**. Ils
 forment la phase 2, et chacun a son ADR.
 
-| Décision                   | Ce qui a été tranché                                                                                                                                                                                                                                                                                                                   | ADR                                                      |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| **Identité**               | Le garant et le locataire n'ont jamais de compte et arrivent par lien signé ; l'agence a de vrais comptes nominatifs, via Supabase Auth. Trois populations, trois rôles Postgres — `anon`, `authenticated`, `porteur_lien` — pour que la frontière soit portée par le rôle et non par une condition qu'une politique pourrait oublier. | [0002](adr/0002-modele-d-acces-et-creation-de-compte.md) |
-| **Stockage des pièces**    | Chiffrement applicatif avant l'envoi, clé maîtresse chez Vercel et chiffré chez Supabase — deux hébergeurs, deux rayons d'explosion. Rétention de trois mois, et l'expiration détruit la clé plutôt que d'espérer que la suppression atteigne les sauvegardes.                                                                         | [0003](adr/0003-stockage-et-chiffrement-des-pieces.md)   |
-| **Filigranage**            | Marquage nominatif par consultation, sur des pages rasterisées pour que la marque ne s'enlève pas. Trace de consultation en écriture seule.                                                                                                                                                                                            | [0004](adr/0004-filigranage-et-trace-de-consultation.md) |
-| **Signature électronique** | Signature avancée eIDAS chez un prestataire UE capable de qualifié, pour que le niveau reste un paramètre. La mention de l'article 2297 du Code civil n'est jamais pré-remplie.                                                                                                                                                        | [0005](adr/0005-signature-electronique-de-l-acte.md)     |
+| Décision                   | Ce qui a été tranché                                                                                                                                                                                                                                                                                                                 | ADR                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| **Identité**               | Le garant et le locataire n'ont jamais de compte et arrivent par lien signé ; l'agence a de vrais comptes nominatifs, via Supabase Auth. Trois populations, trois rôles Postgres (`anon`, `authenticated`, `porteur_lien`) pour que la frontière soit portée par le rôle et non par une condition qu'une politique pourrait oublier. | [0002](adr/0002-modele-d-acces-et-creation-de-compte.md) |
+| **Stockage des pièces**    | Chiffrement applicatif avant l'envoi, clé maîtresse chez Vercel et chiffré chez Supabase : deux hébergeurs, deux rayons d'explosion. Rétention de trois mois, et l'expiration détruit la clé plutôt que d'espérer que la suppression atteigne les sauvegardes.                                                                       | [0003](adr/0003-stockage-et-chiffrement-des-pieces.md)   |
+| **Filigranage**            | Marquage nominatif par consultation, sur des pages rasterisées pour que la marque ne s'enlève pas. Trace de consultation en écriture seule.                                                                                                                                                                                          | [0004](adr/0004-filigranage-et-trace-de-consultation.md) |
+| **Signature électronique** | Signature avancée eIDAS chez un prestataire UE capable de qualifié, pour que le niveau reste un paramètre. La mention de l'article 2297 du Code civil n'est jamais pré-remplie.                                                                                                                                                      | [0005](adr/0005-signature-electronique-de-l-acte.md)     |
 
 Trois choses valent d'être retenues de l'ensemble, parce qu'elles ne se lisent pas dans un ADR pris
 isolément.
@@ -62,11 +62,11 @@ l'ADR 0004 ne marquerait qu'un nom d'entreprise, c'est-à-dire personne.
 
 **La rétention n'est pas uniforme.** Les pièces servent à décider et se détruisent à la décision ;
 l'acte est un contrat et doit survivre au bail. La clé de chiffrement est donc attachée à la classe
-de rétention, pas au dossier — c'est l'ADR 0005 qui précise l'ADR 0003 sur ce point.
+de rétention, pas au dossier : c'est l'ADR 0005 qui précise l'ADR 0003 sur ce point.
 
 ## Qualité
 
 `npm run check` enchaîne typecheck, lint et vérification de formatage. La CI GitHub Actions
 (`.github/workflows/ci.yml`) lance la même chose plus le build sur chaque push et chaque pull
-request. Aucun test automatisé pour l'instant — à ajouter dès que la première logique métier apparaît
+request. Aucun test automatisé pour l'instant : à ajouter dès que la première logique métier apparaît
 (le calcul du ratio de solvabilité est le premier candidat évident).

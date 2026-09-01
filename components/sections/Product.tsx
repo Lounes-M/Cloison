@@ -1,3 +1,4 @@
+import { Icone } from '@/components/ui/Icone'
 import { LiveDot } from '@/components/ui/LiveDot'
 import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
@@ -53,7 +54,12 @@ export function Product() {
                       {'live' in space.footnote && space.footnote.live ? <LiveDot /> : null}
                       {space.footnote.left}
                     </span>
-                    {'right' in space.footnote ? <span>{space.footnote.right}</span> : null}
+                    <span className="flex items-center gap-1.5">
+                      {'right' in space.footnote ? space.footnote.right : null}
+                      {'iconeDroite' in space.footnote ? (
+                        <Icone nom={space.footnote.iconeDroite} />
+                      ) : null}
+                    </span>
                   </div>
                 </article>
               </Reveal>

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button'
+import { Icone } from '@/components/ui/Icone'
 import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
 import { vision } from '@/lib/content/home'
@@ -16,18 +17,14 @@ export function Vision() {
     <Section className="pb-24 text-center">
       <Reveal>
         <div className="bg-cobalt shadow-brut-lg outlined relative overflow-hidden rounded-[24px] px-8 py-16 text-white md:px-12">
-          <span
-            aria-hidden
-            className="animate-spin-slow absolute -top-8 -left-5 text-[120px] opacity-15"
-          >
-            ✳
-          </span>
-          <span
-            aria-hidden
-            className="animate-spin-slow absolute -right-2.5 -bottom-10 text-[140px] opacity-15 [animation-direction:reverse]"
-          >
-            ✳
-          </span>
+          <Icone
+            nom="asterisque"
+            className="animate-spin-slow absolute -top-8 -left-5 size-30 opacity-15"
+          />
+          <Icone
+            nom="asterisque"
+            className="animate-spin-slow absolute -right-2.5 -bottom-10 size-35 opacity-15 [animation-direction:reverse]"
+          />
 
           <div className="relative">
             <h2 className="font-display mx-auto max-w-[820px] text-[clamp(1.75rem,4.5vw,38px)] leading-tight">
