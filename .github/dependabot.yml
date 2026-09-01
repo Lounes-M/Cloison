@@ -14,6 +14,21 @@ updates:
     commit-message:
       prefix: deps
       prefix-development: deps-dev
+    ignore:
+      # Majeures mises en pause : `eslint-config-next` ne les supporte pas
+      # encore, et il n'existe aucune version de repli intermediaire.
+      #
+      #   eslint 10    -> eslint-plugin-react appelle context.getFilename(),
+      #                   supprimee dans ESLint 10
+      #   typescript 7 -> typescript-eslint refuse explicitement TS 7.0
+      #
+      # A lever des que `eslint-config-next` les prend en charge. Sans cette
+      # pause, Dependabot rouvre les memes PR chaque lundi. Voir docs/dettes.md.
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+
     groups:
       # Le trio Next/React se met a jour ensemble ou pas du tout : les versions
       # sont couplees, une PR par paquet produirait des builds incoherents.

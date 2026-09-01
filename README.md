@@ -69,8 +69,8 @@ Deux règles qui font gagner du temps :
 2. **Les couleurs, ombres et animations vivent dans `app/globals.css`**, sous `@theme`. Aucune valeur
    hexadécimale en dur dans un composant.
 
-Voir [`docs/brand.md`](docs/brand.md) pour la charte et [`docs/architecture.md`](docs/architecture.md)
-pour la suite prévue.
+Voir [`docs/brand.md`](docs/brand.md) pour la charte, [`docs/architecture.md`](docs/architecture.md)
+pour la suite prévue, et [`docs/dettes.md`](docs/dettes.md) pour ce qu'on sait devoir régler plus tard.
 
 ## Déploiement
 
