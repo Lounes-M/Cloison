@@ -34,7 +34,20 @@ type ActionProps = CommonProps & {
   type?: 'button' | 'submit'
 }
 
-type ButtonProps = LinkProps | ActionProps
+/**
+ * Bouton sans destination : celle qu'il ouvrira n'existe pas encore.
+ *
+ * Explicite, et pas devine : un `href` oublie doit rester une erreur de
+ * typage, jamais un bouton mort qui passe inapercu.
+ */
+type InerteProps = CommonProps & {
+  inerte: true
+  href?: never
+  onClick?: never
+  type?: never
+}
+
+type ButtonProps = LinkProps | ActionProps | InerteProps
 
 /**
  * CTA « neo-brutaliste » : contour plein, ombre decalee qui se retracte au survol
@@ -56,6 +69,14 @@ export function Button({
     sizes[size],
     className,
   )
+
+  if ('inerte' in rest) {
+    return (
+      <button type="button" className={classes}>
+        {children}
+      </button>
+    )
+  }
 
   if (rest.onClick) {
     return (

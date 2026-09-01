@@ -124,6 +124,7 @@ export const parcours = {
           texte: "Dossier complet, garant vérifié, acte prêt à signer. Elle n'a plus qu'à décider.",
         },
       ],
+      cta: { label: 'Créer mon dossier' },
       note: 'Bientôt ouvert aux locataires, en commençant par les trois villes du pilote.',
     },
     {

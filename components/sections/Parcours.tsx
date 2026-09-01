@@ -77,13 +77,17 @@ export function Parcours() {
             </ol>
 
             <div className="mt-9 text-center">
-              {'cta' in piste ? (
+              {'href' in piste.cta ? (
                 <Button href={piste.cta.href as Route} tone="paper">
                   {piste.cta.label} →
                 </Button>
               ) : (
-                <p className="text-muted text-[14.5px] font-semibold">{piste.note}</p>
+                <Button inerte>{piste.cta.label} →</Button>
               )}
+
+              {'note' in piste ? (
+                <p className="text-muted mt-4 text-[14.5px] font-semibold">{piste.note}</p>
+              ) : null}
             </div>
           </div>
         ))}
