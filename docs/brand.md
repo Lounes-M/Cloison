@@ -22,18 +22,18 @@ presse, documents. Dans le site, on utilise toujours le composant.
 
 ## Palette
 
-| Token     | Hex       | Usage                                        |
-| --------- | --------- | -------------------------------------------- |
-| `cream`   | `#fff6e8` | Fond général                                  |
-| `paper`   | `#ffffff` | Cartes et surfaces posées sur le fond         |
-| `ink`     | `#141414` | Texte, contours, ombres portées               |
-| `cobalt`  | `#2b3ef0` | Couleur primaire, CTA principal               |
-| `sun`     | `#ffd23f` | Accent du logo, espace **garant**             |
-| `flame`   | `#ff5c1f` | CTA secondaire, mise en tension               |
-| `mint`    | `#7de08a` | Espace **locataire**                          |
-| `sky`     | `#9db8ff` | Espace **agence**                             |
-| `live`    | `#1db954` | Pastille d'état vérifié                       |
-| `muted`   | `#888888` | Texte secondaire                              |
+| Token    | Hex       | Usage                                 |
+| -------- | --------- | ------------------------------------- |
+| `cream`  | `#fff6e8` | Fond général                          |
+| `paper`  | `#ffffff` | Cartes et surfaces posées sur le fond |
+| `ink`    | `#141414` | Texte, contours, ombres portées       |
+| `cobalt` | `#2b3ef0` | Couleur primaire, CTA principal       |
+| `sun`    | `#ffd23f` | Accent du logo, espace **garant**     |
+| `flame`  | `#ff5c1f` | CTA secondaire, mise en tension       |
+| `mint`   | `#7de08a` | Espace **locataire**                  |
+| `sky`    | `#9db8ff` | Espace **agence**                     |
+| `live`   | `#1db954` | Pastille d'état vérifié               |
+| `muted`  | `#888888` | Texte secondaire                      |
 
 Les trois espaces ont chacun leur couleur — `sun`, `mint`, `sky` — et cette association ne bouge pas.
 Un lecteur doit pouvoir identifier de quel côté de la cloison il se trouve à la couleur seule.
@@ -67,4 +67,4 @@ contenu visible si JavaScript ne s'exécute pas.
 ## Ton
 
 Tutoiement, phrases courtes, aucun jargon juridique dans le marketing. Le produit parle de gêne, pas
-de conformité. La promesse tient en une phrase : *personne ne voit ce qu'il ne doit pas voir*.
+de conformité. La promesse tient en une phrase : _personne ne voit ce qu'il ne doit pas voir_.

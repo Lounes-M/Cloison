@@ -92,6 +92,13 @@
   }
 }
 
+@keyframes reveal-fallback {
+  to {
+    opacity: 1;
+    transform: rotate(var(--reveal-tilt, 0deg));
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Utilitaires maison                                                  */
 /* ------------------------------------------------------------------ */
@@ -122,6 +129,27 @@
   &:hover {
     box-shadow: var(--shadow-brut-raised);
     translate: -3px -3px;
+  }
+}
+
+/* Apparition au scroll — pilotee par `components/ui/Reveal.tsx`, qui se
+   contente de poser `data-shown`. Tout le reste (etat masque, transition,
+   filet sans JS) est ici. */
+@utility reveal {
+  opacity: 0;
+  transform: rotate(var(--reveal-tilt, 0deg)) translateY(30px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+  transition-delay: var(--reveal-delay, 0s);
+
+  /* Si JavaScript ne s'execute jamais, l'element apparait quand meme. */
+  animation: reveal-fallback 0.4s ease 4s forwards;
+
+  &[data-shown='true'] {
+    opacity: 1;
+    transform: rotate(var(--reveal-tilt, 0deg));
+    animation: none;
   }
 }
 
@@ -161,6 +189,13 @@
 
 /* Personne ne doit subir les animations. */
 @media (prefers-reduced-motion: reduce) {
+  /* Aucune apparition progressive : le contenu est la, point. */
+  .reveal {
+    opacity: 1;
+    transform: rotate(var(--reveal-tilt, 0deg));
+    animation: none;
+  }
+
   *,
   *::before,
   *::after {

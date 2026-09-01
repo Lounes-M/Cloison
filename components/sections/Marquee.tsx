@@ -16,7 +16,7 @@ export function Marquee() {
 
   return (
     <div aria-hidden className="overflow-hidden">
-      <div className="border-ink bg-cobalt -rotate-1 scale-[1.02] overflow-hidden border-y-[3px] py-3.5 whitespace-nowrap">
+      <div className="border-ink bg-cobalt scale-[1.02] -rotate-1 overflow-hidden border-y-[3px] py-3.5 whitespace-nowrap">
         <div className="animate-marquee font-display flex w-max text-base text-white uppercase">
           {items.map((item, index) => (
             <span key={`${item}-${index}`} className="flex items-center gap-10 pr-10">

@@ -27,11 +27,11 @@ coup d'œil dans `app/page.tsx`.
 
 Cloison est un produit à **trois acteurs qui ne voient pas la même chose du même dossier** :
 
-| Acteur        | Voit                                                              |
-| ------------- | ----------------------------------------------------------------- |
-| Le garant     | Ses propres pièces, ce qu'il couvre, le montant, l'échéance        |
-| Le locataire  | Un statut : dossier complet, garant éligible. Ni pièces, ni montants |
-| L'agence      | Les pièces filigranées, le ratio calculé, l'acte pré-rempli        |
+| Acteur       | Voit                                                                 |
+| ------------ | -------------------------------------------------------------------- |
+| Le garant    | Ses propres pièces, ce qu'il couvre, le montant, l'échéance          |
+| Le locataire | Un statut : dossier complet, garant éligible. Ni pièces, ni montants |
+| L'agence     | Les pièces filigranées, le ratio calculé, l'acte pré-rempli          |
 
 Le cloisonnement est la fonctionnalité, pas une option de confidentialité. Il devra donc être
 appliqué **côté serveur**, sur chaque lecture, à partir du rôle porté par la session — jamais par un
