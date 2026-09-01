@@ -45,8 +45,12 @@ Points à trancher avant d'écrire la première ligne du produit :
 - **Signature électronique** — prestataire eIDAS pour l'acte de cautionnement (loi ELAN).
 - **Filigranage** — appliqué à la génération du lien agence, pas au dépôt : le garant ne doit jamais
   voir ses propres pièces dégradées.
-- **Identité** — les trois acteurs arrivent par lien, sans compte. Le modèle de session doit tenir
-  cette promesse (« pas de compte ») sans ouvrir un accès devinable.
+
+L'**identité** ne fait plus partie de cette liste : elle est tranchée par
+l'[ADR 0002](adr/0002-modele-d-acces-et-creation-de-compte.md). Le garant et le locataire arrivent
+par lien signé et n'ont jamais de compte ; l'agence a de vrais comptes nominatifs, via Supabase
+Auth. Trois populations, trois rôles Postgres — `anon`, `authenticated`, `porteur_lien` — pour que
+la frontière soit portée par le rôle et non par une condition qu'une politique pourrait oublier.
 
 ## Qualité
 
