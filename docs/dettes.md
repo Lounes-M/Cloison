@@ -83,8 +83,16 @@ apparaît réellement, et le rendu y sera dynamique de toute façon : le coût d
 Assumé : il n'y a pas encore de logique métier à tester, et des tests d'interface sur une landing
 statique coûteraient plus qu'ils ne rapporteraient.
 
-**Signal de sortie** — la première logique métier, c'est-à-dire le calcul du ratio de solvabilité, en
-phase 4. Les règles d'accès viennent avant, en phase 3, et se testent en premier.
+Nuance depuis l'[ADR 0002](adr/0002-modele-d-acces-et-creation-de-compte.md) : les règles d'accès
+sont écrites, et elles se vérifient — mais **à la main**, avec `supabase/essais/`, sur un Postgres
+local. Ce n'est pas rien : ce scénario a trouvé une variable homonyme d'une colonne qui rendait
+`rejoindre_ou_creer_agence` inutilisable, là où la migration s'appliquait sans broncher. Ce qui
+manque, c'est que la CI le rejoue, donc que personne ne puisse l'oublier.
+
+**Signal de sortie** — la phase 3, quand les liens d'accès rejoindront les comptes d'agence. Le
+scénario existe déjà ; il ne restera qu'à lui donner un Postgres dans `ci.yml` et à faire échouer le
+build quand un refus attendu n'en est plus un. Le calcul du ratio de solvabilité, en phase 4, sera
+le premier test de logique métier au sens habituel.
 
 ---
 

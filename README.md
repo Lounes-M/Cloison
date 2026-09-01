@@ -59,6 +59,7 @@ lib/
   site.ts             Config globale (nom, URL, navigation)
   utils.ts            `cn()` — fusion de classes Tailwind
 supabase/migrations/  Schéma SQL versionné, appliqué dans l'ordre
+supabase/essais/      Scénario d'accès rejouable sur un Postgres local (à la main)
 scripts/              Garde-fous exécutables (fuite de secrets…)
 assets/fonts/         Archivo Black en TTF, lu au build pour l'image Open Graph
 public/brand/         Déclinaisons PNG du logo (réseaux sociaux, presse, emails)
