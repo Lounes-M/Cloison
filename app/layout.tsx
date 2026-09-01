@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 import { site } from '@/lib/site'
 import { fontVariables } from './fonts'
 import './globals.css'
@@ -47,7 +48,20 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={fontVariables}>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/*
+          Mesure d'audience sans cookie : rien n'est ecrit sur l'appareil du
+          visiteur, aucun identifiant ne le suit d'un site a l'autre. C'est ce
+          qui permet a la landing de ne pas s'ouvrir sur un bandeau de
+          consentement — une page qui vend la confidentialite et commence par
+          demander l'autorisation de pister se contredit toute seule.
+
+          Le caractere exempte de consentement reste a faire confirmer par un
+          conseil avant la campagne aupres des agences.
+        */}
+        <Analytics />
+      </body>
     </html>
   )
 }
