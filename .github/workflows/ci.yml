@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck · Lint · Format · Build
+    name: Typecheck · Lint · Format · Build · Secrets
     runs-on: ubuntu-latest
 
     steps:
@@ -35,3 +35,8 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Rejoue apres le build : c'est la seule etape ou les fichiers servis au
+      # navigateur existent, donc la seule ou une fuite reelle peut etre vue.
+      - name: Fuites dans le bundle client
+        run: npm run check:env

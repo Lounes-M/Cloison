@@ -30,7 +30,8 @@ Node ≥ 20.9 est requis (voir `.nvmrc`).
 | `npm run typecheck` | TypeScript en mode strict, sans émission               |
 | `npm run lint`      | ESLint (`--fix` avec `npm run lint:fix`)               |
 | `npm run format`    | Prettier en écriture (`format:check` en lecture seule) |
-| `npm run check`     | Les trois vérifications de la CI d'un coup             |
+| `npm run check:env` | Vérifie qu'aucun secret ne peut partir vers le client  |
+| `npm run check`     | Toutes les vérifications de la CI d'un coup            |
 
 Avant de pousser : `npm run check`.
 
@@ -103,6 +104,28 @@ Settings → Environment Variables (c'est le réglage par défaut). Si tu le dé
 Après la mise en ligne, vérifie que `https://<domaine>/sitemap.xml` et `/robots.txt` citent bien le
 domaine de production, et passe l'URL dans un validateur d'aperçu social pour contrôler l'image
 Open Graph.
+
+### Variables d'environnement et secrets
+
+Deux mécanismes exposent une variable au navigateur sous Next : le préfixe `NEXT_PUBLIC_`, et le
+bloc `env` de [`next.config.ts`](next.config.ts). Les deux **substituent la valeur au build** — elle
+devient lisible par n'importe qui dans le code source de la page. Rien ne signale l'erreur, le site
+fonctionne parfaitement.
+
+`npm run check:env` rend la règle opposable plutôt que déclarative. Il vérifie que :
+
+1. le bloc `env` ne contient que des clés explicitement autorisées ;
+2. aucune variable `NEXT_PUBLIC_*` du code ne porte un nom de secret ;
+3. aucune valeur de variable sensible de l'environnement ne se retrouve dans les fichiers servis au
+   navigateur.
+
+La troisième est la seule qui constate une fuite réelle : elle a besoin d'un build, et la CI la
+rejoue donc après l'étape de build.
+
+**Un secret ne porte jamais le préfixe `NEXT_PUBLIC_` et ne passe jamais par le bloc `env`.** Il se
+lit côté serveur via `process.env`. Rendre une nouvelle valeur publique est une décision explicite :
+il faut l'ajouter à `CLES_PUBLIQUES_AUTORISEES` dans
+[`scripts/verifie-variables-publiques.mjs`](scripts/verifie-variables-publiques.mjs).
 
 ### En-têtes de sécurité
 
