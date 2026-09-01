@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
+import { SiteFooter } from '@/components/layout/SiteFooter'
+import { SiteHeader } from '@/components/layout/SiteHeader'
 import { site } from '@/lib/site'
 import { fontVariables } from './fonts'
 import './globals.css'
@@ -49,7 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={fontVariables}>
       <body>
+        <SiteHeader />
         {children}
+        <SiteFooter />
         {/*
           Mesure d'audience sans cookie : rien n'est ecrit sur l'appareil du
           visiteur, aucun identifiant ne le suit d'un site a l'autre. C'est ce

@@ -11,15 +11,13 @@ export const site = {
 } as const
 
 export const navLinks = [
-  { label: 'Produit', href: '#produit' },
-  { label: 'Tarifs', href: '#tarifs' },
-  { label: 'Agences', href: '#agences' },
+  { label: 'Produit', href: '/#produit' },
+  { label: 'Tarifs', href: '/#tarifs' },
+  { label: 'Agences', href: '/agences' },
 ] as const
 
 export const footerLinks = [
-  { label: 'Produit', href: '#produit' },
-  { label: 'Tarifs', href: '#tarifs' },
-  { label: 'Agences', href: '#agences' },
-  { label: 'Contact', href: '#contact' },
-  { label: 'Mentions légales', href: '#mentions-legales' },
+  { label: 'Produit', href: '/#produit' },
+  { label: 'Tarifs', href: '/#tarifs' },
+  { label: 'Agences', href: '/agences' },
 ] as const

@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/Button'
 
 /**
  * Frontiere d'erreur des pages : elle remplace le contenu de la route, le
- * layout racine restant monte. L'en-tete et le pied de page vivant aujourd'hui
- * dans `page.tsx` et non dans le layout, ils disparaissent avec la page — a
- * revoir le jour ou une deuxieme route arrive et ou ce chrome remontera dans
- * le layout.
+ * layout racine restant monte. L'en-tete et le pied de page vivant desormais
+ * dans ce layout, ils restent en place — le visiteur peut donc naviguer
+ * ailleurs sans repasser par l'accueil.
  *
  * `digest` est l'identifiant que Next attribue a l'erreur cote serveur ; c'est
  * la seule chose exploitable pour retrouver la trace dans les logs, et la seule

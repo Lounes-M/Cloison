@@ -89,7 +89,7 @@ export function Hero() {
           style={{ animationFillMode: 'both' }}
         >
           <Button href="#demarrer">{hero.primaryCta} →</Button>
-          <Button href="#agences" tone="paper">
+          <Button href="/agences" tone="paper">
             {hero.secondaryCta}
           </Button>
         </div>

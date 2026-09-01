@@ -53,21 +53,30 @@ Sans conséquence immédiate — TypeScript 6 est parfaitement fonctionnel — m
 
 ## Décidées, à revoir plus tard
 
+### Limitation de débit en mémoire sur le formulaire agence
+
+`app/agences/action.ts` limite les envois avec une table en mémoire. Chaque instance serverless a la
+sienne : la limite ne borne donc pas un attaquant réparti sur plusieurs instances. Elle suffit
+contre le bruit ordinaire — double-clic, script naïf, envois répétés — et ce qu'elle protège est une
+table sans lecture publique ni donnée sensible.
+
+**Signal de sortie** — la première limite qui protège quelque chose de sérieux, c'est-à-dire les
+liens d'accès en phase 3. Elle se fera alors avec un magasin partagé.
+
 ### Pas de Content-Security-Policy
 
-Une CSP stricte sous App Router impose des nonces, donc un middleware et un rendu dynamique. On
-échangerait aujourd'hui des pages entièrement statiques contre une protection sans objet : le site
-ne reçoit aucune donnée.
+Une CSP stricte sous App Router impose des nonces, donc un middleware et un rendu dynamique — on
+échangerait des pages entièrement statiques contre cette protection.
 
-**Signal de sortie** — le premier formulaire qui part en production, c'est-à-dire la phase 1. À
-trancher avec le reste du socle produit.
+**Signal déclenché puis redéfini le 1er septembre 2026.** Le signal initial était « le premier
+formulaire en production », et le formulaire agence l'a déclenché. Réexaminé, il était mal choisi :
+ce que la CSP atténue avant tout, c'est l'exécution de script injecté dans une page, et le
+formulaire n'ouvre aucune surface de ce type — les données saisies partent vers Supabase et un
+e-mail, elles ne sont jamais réaffichées sur le site.
 
-### L'en-tête et le pied de page vivent dans `page.tsx`
-
-Conséquence visible : lors d'une erreur, `app/error.tsx` remplace toute la page, chrome compris.
-Acceptable tant qu'il n'y a qu'une seule route.
-
-**Signal de sortie** — la deuxième route, en phase 1. Les remonter alors dans le layout racine.
+**Nouveau signal de sortie** — la première page qui **affiche du contenu fourni par un tiers**,
+c'est-à-dire l'espace agence montrant les pièces déposées, en phase 4. C'est là que la surface
+apparaît réellement, et le rendu y sera dynamique de toute façon : le coût du nonce disparaît.
 
 ### Aucun test automatisé
 
@@ -76,3 +85,11 @@ statique coûteraient plus qu'ils ne rapporteraient.
 
 **Signal de sortie** — la première logique métier, c'est-à-dire le calcul du ratio de solvabilité, en
 phase 4. Les règles d'accès viennent avant, en phase 3, et se testent en premier.
+
+---
+
+## Réglées
+
+- **L'en-tête et le pied de page vivaient dans `page.tsx`** — remontés dans le layout racine le
+  1er septembre 2026, à l'arrivée de la deuxième route (`/agences`), comme prévu. `app/error.tsx`
+  et `app/not-found.tsx` conservent désormais la navigation du site.
