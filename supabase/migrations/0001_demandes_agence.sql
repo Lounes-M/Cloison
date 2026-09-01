@@ -47,9 +47,13 @@ create unique index demandes_agence_email_idx on public.demandes_agence (lower(t
 --
 -- Ici, une seule ouverture : le role `anon` peut INSERER, rien d'autre. Pas de
 -- SELECT, pas d'UPDATE, pas de DELETE. Consequence directe : meme si la cle
--- anonyme fuitait, elle ne permettrait pas de LIRE la liste des agences
+-- publiable fuitait, elle ne permettrait pas de LIRE la liste des agences
 -- prospectees — seulement d'y ajouter du bruit, que l'anti-robot du formulaire
 -- et la contrainte d'unicite limitent deja.
+--
+-- `anon` est bien le role vise : une requete portant une cle publiable
+-- (`sb_publishable_...`) sans utilisateur connecte prend ce role, tout comme
+-- l'ancienne cle `anon`.
 --
 -- La lecture se fait depuis le tableau de bord Supabase, avec ton compte.
 -- Aucune cle de service n'existe dans l'application : le secret le plus

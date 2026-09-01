@@ -42,8 +42,9 @@ d'autorisation exposerait tout, sans filet. Prendre Supabase pour ensuite désac
 garantie reviendrait à en payer la complexité sans en acheter le bénéfice.
 
 Conséquence immédiate, appliquée dès la première table : **aucune clé `service_role` n'existe dans
-ce dépôt.** Le formulaire agence écrit avec la clé anonyme, sur une table dont la politique
-n'autorise que l'insertion.
+ce dépôt.** Le formulaire agence écrit avec la clé publiable, sur une table dont la politique
+n'autorise que l'insertion. Une requête portant cette clé prend le rôle Postgres `anon`, celui que
+visent les politiques.
 
 ## Ce que cette décision ne tranche pas
 

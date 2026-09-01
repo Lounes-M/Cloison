@@ -20,7 +20,7 @@ export type ResultatEnregistrement =
   { statut: 'enregistree' } | { statut: 'deja-connue' } | { statut: 'echec'; raison: string }
 
 function clientSupabase() {
-  return createClient(env.supabaseUrl, env.supabaseAnonKey, {
+  return createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 }

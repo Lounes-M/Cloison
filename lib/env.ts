@@ -37,12 +37,18 @@ export const env = {
   },
 
   /**
-   * Cle anonyme Supabase. Volontairement la seule : la table n'autorise que
-   * l'insertion, jamais la lecture. La cle de service, qui contourne RLS,
-   * n'existe pas dans ce projet.
+   * Cle publiable Supabase (`sb_publishable_...`).
+   *
+   * Volontairement la seule du projet : la table n'autorise que l'insertion,
+   * jamais la lecture. La cle secrete, qui contourne RLS, n'existe pas ici.
+   *
+   * Cote base, une requete portant cette cle prend le role Postgres `anon` —
+   * exactement comme l'ancienne cle du meme nom. Les politiques ecrites
+   * `to anon` s'appliquent donc sans changement. L'ancienne cle fonctionne
+   * encore si elle est collee ici, mais Supabase la deprecie fin 2026.
    */
-  get supabaseAnonKey() {
-    return requise('SUPABASE_ANON_KEY')
+  get supabasePublishableKey() {
+    return requise('SUPABASE_PUBLISHABLE_KEY')
   },
 
   /** Cle Resend, pour la notification d'une nouvelle demande. */
