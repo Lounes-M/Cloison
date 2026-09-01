@@ -38,26 +38,31 @@ appliqué **côté serveur**, sur chaque lecture, à partir du rôle porté par 
 filtrage côté client, jamais par une route devinable. La structure `app/` en groupes de routes
 (`(marketing)`, `(app)`) accueillera cette séparation quand les espaces seront implémentés.
 
-Points à trancher avant d'écrire la première ligne du produit :
+Les quatre points à trancher avant d'écrire la première ligne du produit **le sont tous**. Ils
+forment la phase 2, et chacun a son ADR.
 
-- **Signature électronique** — prestataire eIDAS pour l'acte de cautionnement (loi ELAN).
-- **Filigranage** — appliqué à la génération du lien agence, pas au dépôt : le garant ne doit jamais
-  voir ses propres pièces dégradées. Le point de passage est acquis (voir ci-dessous), reste ce que
-  le filigrane inscrit.
+| Décision                   | Ce qui a été tranché                                                                                                                                                                                                                                                                                                                   | ADR                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Identité**               | Le garant et le locataire n'ont jamais de compte et arrivent par lien signé ; l'agence a de vrais comptes nominatifs, via Supabase Auth. Trois populations, trois rôles Postgres — `anon`, `authenticated`, `porteur_lien` — pour que la frontière soit portée par le rôle et non par une condition qu'une politique pourrait oublier. | [0002](adr/0002-modele-d-acces-et-creation-de-compte.md) |
+| **Stockage des pièces**    | Chiffrement applicatif avant l'envoi, clé maîtresse chez Vercel et chiffré chez Supabase — deux hébergeurs, deux rayons d'explosion. Rétention de trois mois, et l'expiration détruit la clé plutôt que d'espérer que la suppression atteigne les sauvegardes.                                                                         | [0003](adr/0003-stockage-et-chiffrement-des-pieces.md)   |
+| **Filigranage**            | Marquage nominatif par consultation, sur des pages rasterisées pour que la marque ne s'enlève pas. Trace de consultation en écriture seule.                                                                                                                                                                                            | [0004](adr/0004-filigranage-et-trace-de-consultation.md) |
+| **Signature électronique** | Signature avancée eIDAS chez un prestataire UE capable de qualifié, pour que le niveau reste un paramètre. La mention de l'article 2297 du Code civil n'est jamais pré-remplie.                                                                                                                                                        | [0005](adr/0005-signature-electronique-de-l-acte.md)     |
 
-Le **stockage des pièces** n'en fait plus partie : il est tranché par
-l'[ADR 0003](adr/0003-stockage-et-chiffrement-des-pieces.md). Les pièces sont chiffrées par notre
-serveur avant de partir chez Supabase, avec une clé maîtresse qui vit chez Vercel — le chiffré et la
-clé chez deux hébergeurs différents. Conséquence structurante : les URLs signées deviennent
-inutilisables, toute lecture traverse une route serveur, et c'est là que le filigranage
-s'appliquera. La rétention est de trois mois, et l'expiration détruit la clé du dossier plutôt que
-d'espérer que la suppression atteigne les sauvegardes.
+Trois choses valent d'être retenues de l'ensemble, parce qu'elles ne se lisent pas dans un ADR pris
+isolément.
 
-L'**identité** ne fait plus partie de cette liste non plus : elle est tranchée par
-l'[ADR 0002](adr/0002-modele-d-acces-et-creation-de-compte.md). Le garant et le locataire arrivent
-par lien signé et n'ont jamais de compte ; l'agence a de vrais comptes nominatifs, via Supabase
-Auth. Trois populations, trois rôles Postgres — `anon`, `authenticated`, `porteur_lien` — pour que
-la frontière soit portée par le rôle et non par une condition qu'une politique pourrait oublier.
+**Un seul point de passage porte trois fonctions.** Le chiffrement interdit les URLs signées, donc
+toute lecture d'une pièce traverse une route serveur ; c'est exactement là que le filigranage doit
+s'appliquer, et là que la trace s'écrit. Déchiffrer, marquer, tracer : un seul endroit. Les
+contraintes ont convergé au lieu de s'ajouter.
+
+**Le nominatif tient à une décision prise trois ADR plus tôt.** Un filigrane qui désigne une
+personne ne vaut que parce qu'un compte est une personne et non une agence. Sans l'ADR 0002,
+l'ADR 0004 ne marquerait qu'un nom d'entreprise, c'est-à-dire personne.
+
+**La rétention n'est pas uniforme.** Les pièces servent à décider et se détruisent à la décision ;
+l'acte est un contrat et doit survivre au bail. La clé de chiffrement est donc attachée à la classe
+de rétention, pas au dossier — c'est l'ADR 0005 qui précise l'ADR 0003 sur ce point.
 
 ## Qualité
 
