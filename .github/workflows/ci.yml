@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Declenchement manuel. Necessaire, et pas seulement pratique : les commits
+  # pousses par une application GitHub ne declenchent pas de workflow, donc une
+  # PR ouverte par un agent n'a aucune verification tant qu'on ne la lance pas.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -11,7 +15,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck · Lint · Format · Build · Secrets
+    name: Typecheck · Lint · Format · Typo · Build · Secrets
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +36,11 @@ jobs:
 
       - name: Format check
         run: npm run format:check
+
+      # Ni emoji ni tiret cadratin, nulle part. Ne demande pas de build : c'est
+      # une lecture de fichiers, elle passe donc avant l'etape la plus lente.
+      - name: Typographie
+        run: npm run check:typo
 
       - name: Build
         run: npm run build

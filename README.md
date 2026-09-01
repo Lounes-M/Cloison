@@ -23,16 +23,17 @@ Node 24 est requis (voir `.nvmrc`). C'est la version par defaut de Vercel et cel
 
 ## Scripts
 
-| Commande            | Effet                                                  |
-| ------------------- | ------------------------------------------------------ |
-| `npm run dev`       | Serveur de développement (Turbopack)                   |
-| `npm run build`     | Build de production                                    |
-| `npm run start`     | Sert le build de production                            |
-| `npm run typecheck` | TypeScript en mode strict, sans émission               |
-| `npm run lint`      | ESLint (`--fix` avec `npm run lint:fix`)               |
-| `npm run format`    | Prettier en écriture (`format:check` en lecture seule) |
-| `npm run check:env` | Vérifie qu'aucun secret ne peut partir vers le client  |
-| `npm run check`     | Toutes les vérifications de la CI d'un coup            |
+| Commande             | Effet                                                  |
+| -------------------- | ------------------------------------------------------ |
+| `npm run dev`        | Serveur de développement (Turbopack)                   |
+| `npm run build`      | Build de production                                    |
+| `npm run start`      | Sert le build de production                            |
+| `npm run typecheck`  | TypeScript en mode strict, sans émission               |
+| `npm run lint`       | ESLint (`--fix` avec `npm run lint:fix`)               |
+| `npm run format`     | Prettier en écriture (`format:check` en lecture seule) |
+| `npm run check:env`  | Vérifie qu'aucun secret ne peut partir vers le client  |
+| `npm run check:typo` | Vérifie qu'aucun emoji ni tiret cadratin ne subsiste   |
+| `npm run check`      | Toutes les vérifications de la CI d'un coup            |
 
 Avant de pousser : `npm run check`.
 
@@ -40,7 +41,7 @@ Avant de pousser : `npm run check`.
 
 - **Next.js 16** (App Router, React Server Components, Turbopack)
 - **React 19** · **TypeScript** en `strict` + `noUncheckedIndexedAccess`
-- **Tailwind CSS 4** — tokens déclarés en CSS dans `app/globals.css`
+- **Tailwind CSS 4** : tokens déclarés en CSS dans `app/globals.css`
 - **ESLint** (`next/core-web-vitals` + `next/typescript`) et **Prettier**
 
 ## Organisation
@@ -57,7 +58,7 @@ lib/
   content/            Tout le texte des pages, séparé de la mise en forme
   env.ts              Variables serveur, jamais exposées au navigateur
   site.ts             Config globale (nom, URL, navigation)
-  utils.ts            `cn()` — fusion de classes Tailwind
+  utils.ts            `cn()` : fusion de classes Tailwind
 supabase/migrations/  Schéma SQL versionné, appliqué dans l'ordre
 supabase/essais/      Scénario d'accès rejouable sur un Postgres local (à la main)
 scripts/              Garde-fous exécutables (fuite de secrets…)
@@ -102,7 +103,7 @@ saisir**.
 `VERCEL_PROJECT_PRODUCTION_URL` est le domaine de production le plus court du projet : le
 `.vercel.app` tant qu'aucun domaine personnalisé n'est rattaché, **puis le domaine personnalisé dès
 qu'il l'est**. C'est pour cela qu'il n'y a rien à saisir, ni au premier déploiement ni le jour du
-domaine — il suffit de redéployer pour que les métadonnées suivent.
+domaine : il suffit de redéployer pour que les métadonnées suivent.
 
 Cela suppose que **« Enable access to System Environment Variables »** reste coché dans
 Settings → Environment Variables (c'est le réglage par défaut). Si tu le décoches, l'URL retombe sur
@@ -115,7 +116,7 @@ Open Graph.
 ### Variables d'environnement et secrets
 
 Deux mécanismes exposent une variable au navigateur sous Next : le préfixe `NEXT_PUBLIC_`, et le
-bloc `env` de [`next.config.ts`](next.config.ts). Les deux **substituent la valeur au build** — elle
+bloc `env` de [`next.config.ts`](next.config.ts). Les deux **substituent la valeur au build** : elle
 devient lisible par n'importe qui dans le code source de la page. Rien ne signale l'erreur, le site
 fonctionne parfaitement.
 

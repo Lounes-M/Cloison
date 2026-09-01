@@ -3,7 +3,7 @@
 -- Cette migration applique l'ADR 0002. Elle pose trois choses :
 --
 --   1. le role Postgres `porteur_lien`, troisieme frontiere d'acces, cree ici
---      alors qu'il ne donne encore acces a rien — comme la RLS de la table
+--      alors qu'il ne donne encore acces a rien : comme la RLS de la table
 --      `demandes_agence`, le geste s'installe avant que les tables sensibles
 --      arrivent ;
 --   2. les agences et leurs membres, avec le rattachement par domaine e-mail ;
@@ -57,7 +57,7 @@ comment on role porteur_lien is
 --
 -- Le rattachement par domaine est le moteur de croissance : le deuxieme
 -- collaborateur d'une agence rejoint l'espace du premier au lieu d'en creer un
--- double. C'est aussi son unique mode de defaillance grave — si `gmail.com`
+-- double. C'est aussi son unique mode de defaillance grave : si `gmail.com`
 -- passait, tous les comptes Gmail du monde se retrouveraient dans une meme
 -- agence, a se lire les uns les autres.
 --
@@ -159,8 +159,8 @@ create trigger agence_reinitialise_verification
 -- ---------------------------------------------------------------------------
 --
 -- Un compte est une PERSONNE, jamais une agence. Un compte partage par huit
--- negociateurs rendrait creuse la promesse faite sur /agences — « chaque
--- consultation laisse une trace » — puisque la trace ne nommerait personne.
+-- negociateurs rendrait creuse la promesse faite sur /agences : « chaque
+-- consultation laisse une trace » : puisque la trace ne nommerait personne.
 --
 -- Deux roles, pas davantage. Une matrice de permissions se construit quand on
 -- sait ce qu'elle doit exprimer, pas avant.
@@ -231,7 +231,7 @@ $$;
 -- d'invitations : le domaine EST l'invitation. Un collegue s'inscrit avec son
 -- adresse professionnelle et rejoint l'agence, sans que personne ait a lui
 -- preparer un jeton. Une invitation explicite ne deviendra necessaire que pour
--- quelqu'un dont l'adresse porte un autre domaine — l'administrateur d'un
+-- quelqu'un dont l'adresse porte un autre domaine : l'administrateur d'un
 -- reseau, en phase 4.
 --
 -- Les collaborateurs sont illimites et gratuits : le prix est a l'acte, chaque
@@ -307,7 +307,7 @@ $$;
 -- 7. Droits et politiques
 -- ---------------------------------------------------------------------------
 --
--- On retire d'abord tout, on rouvre ensuite le strict necessaire — les droits
+-- On retire d'abord tout, on rouvre ensuite le strict necessaire : les droits
 -- par defaut de Supabase sur le schema `public` sont larges, et une table
 -- sensible ne doit rien devoir a un defaut.
 

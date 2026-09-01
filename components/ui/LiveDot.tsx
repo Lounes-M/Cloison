@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-/** Pastille verte qui bat — signale un état vérifié en temps réel. */
+/** Pastille verte qui bat : signale un état vérifié en temps réel. */
 export function LiveDot({ className }: { className?: string }) {
   return (
     <span

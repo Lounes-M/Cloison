@@ -1,4 +1,4 @@
-# ADR 0003 — Stockage et chiffrement des pièces
+# ADR 0003 · Stockage et chiffrement des pièces
 
 **Date** : 1er septembre 2026
 **Statut** : acceptée
@@ -13,7 +13,7 @@ laissé une question sans réponse :
 > _Une compromission côté Supabase donne-t-elle des documents lisibles ?_
 
 Elle est vérifiée, et la réponse est **oui**. Supabase chiffre au repos en AES-256, avec des clés
-protégées par des HSM — mais ce sont **leurs** clés. Il n'existe pas de clé gérée par le client pour
+protégées par des HSM, mais ce sont **leurs** clés. Il n'existe pas de clé gérée par le client pour
 Storage. Ce chiffrement protège contre un disque volé dans un centre de données ; il ne protège ni
 contre une compromission de la plateforme, ni contre la fuite de nos propres identifiants de projet.
 
@@ -30,7 +30,7 @@ Chaque dossier reçoit une **clé de données** (DEK) tirée au hasard, en AES-2
 chiffrées par notre serveur **avant** de partir vers Storage : Supabase ne reçoit jamais un octet
 lisible. La DEK est stockée dans Postgres, elle-même chiffrée par une **clé maîtresse** (KEK).
 
-AES-256-GCM via le module `crypto` de Node — aucune dépendance nouvelle, et un mode authentifié qui
+AES-256-GCM via le module `crypto` de Node : aucune dépendance nouvelle, et un mode authentifié qui
 détecte une altération du fichier plutôt que de renvoyer de la bouillie. Les routes qui chiffrent ou
 déchiffrent tournent donc en runtime Node, pas Edge.
 
@@ -48,7 +48,7 @@ Ce choix est cohérent avec `scripts/verifie-variables-publiques.mjs` : la KEK e
 dangereux du produit, elle ne porte évidemment jamais le préfixe `NEXT_PUBLIC_` et ne passe jamais
 par le bloc `env` de `next.config.ts`.
 
-### Les URLs signées deviennent inutilisables — et ce n'est pas une perte
+### Les URLs signées deviennent inutilisables, et ce n'est pas une perte
 
 Une URL signée Storage renverrait le chiffré, donc rien d'exploitable. Toute lecture d'une pièce
 passe désormais par une route de notre serveur, qui déchiffre à la volée.
@@ -70,7 +70,7 @@ coïncident : il n'y a pas d'arbitrage à faire.
 
 Elle rappelle aussi que les pièces doivent être détruites **dès qu'elles ne servent plus à la
 décision**. Trois mois est donc un plafond, pas un délai à consommer : le compte à rebours réel
-démarre à la décision de l'agence — signature ou refus — et l'immense majorité des dossiers meurent
+démarre à la décision de l'agence (signature ou refus) et l'immense majorité des dossiers meurent
 là, bien avant l'échéance.
 
 ### L'effacement est cryptographique
@@ -81,7 +81,7 @@ suppression.
 
 **À l'expiration, on détruit la DEK du dossier.** Les pièces deviennent immédiatement illisibles,
 partout où elles se trouvent, sauvegardes comprises, sans rien avoir à effacer. Les objets sont
-ensuite supprimés pour de bon, par un travail planifié `pg_cron` — mais en second rideau, pas comme
+ensuite supprimés pour de bon, par un travail planifié `pg_cron`, mais en second rideau, pas comme
 garantie.
 
 C'est la deuxième raison d'être du chiffrement, et elle vaut la première : elle rend la promesse
@@ -89,7 +89,7 @@ d'effacement **vérifiable** au lieu de déclarative.
 
 ## Ce que cette décision ne tranche pas
 
-**Le format du filigrane.** Le point de passage est décidé, ce qu'il inscrit ne l'est pas — ADR
+**Le format du filigrane.** Le point de passage est décidé, ce qu'il inscrit ne l'est pas : ADR
 suivant.
 
 **La rotation de la KEK.** Rechiffrer les DEK sous une nouvelle clé maîtresse est un travail
@@ -98,7 +98,7 @@ ne pas avoir à migrer plus tard ; la procédure elle-même attendra d'en avoir 
 
 **Un vrai KMS.** Une variable d'environnement Vercel est un endroit correct pour une clé maîtresse à
 ce stade, pas un endroit idéal. Le signal de sortie est le premier salarié qui a accès au tableau de
-bord Vercel sans avoir à connaître la KEK — c'est-à-dire le moment où la séparation des rôles
+bord Vercel sans avoir à connaître la KEK : c'est-à-dire le moment où la séparation des rôles
 devient un vrai sujet, et non plus une affaire de deux fondateurs.
 
 **La signature électronique.** Le prestataire eIDAS recevra des pièces qui sortent de ce stockage,
@@ -111,7 +111,7 @@ donc il en dépend, mais c'est une décision distincte.
   réelle. Ce n'est pas une précaution d'exploitation, c'est une condition de mise en service.
 - Supabase reste un sous-traitant, mais ne détient plus que du chiffré. Cela ne le sort pas du
   registre RGPD (tâche 17) et n'annule pas le DPA, mais cela change ce qu'une violation chez lui
-  signifierait — et c'est un argument opposable dans la conversation avec une agence.
+  signifierait, et c'est un argument opposable dans la conversation avec une agence.
 - Pas de CDN sur les pièces. Une consultation d'agence coûte de la bande passante de fonction. À
   surveiller au moment où le pilote passe à l'échelle.
 - Le schéma des dossiers portera la DEK chiffrée et sa version de clé. Détruire cette colonne est
@@ -121,20 +121,20 @@ donc il en dépend, mais c'est une décision distincte.
 
 ## Alternatives écartées
 
-**S'en remettre au chiffrement au repos de Supabase** — c'est l'option par défaut, et c'est
+**S'en remettre au chiffrement au repos de Supabase** : c'est l'option par défaut, et c'est
 exactement celle à laquelle l'ADR 0001 a refusé de se rabattre sans l'avoir regardée. La
 vérification donne la réponse : leurs clés, donc leur rayon d'explosion.
 
-**Supabase Vault ou `pgsodium` pour la clé** — met la clé à côté du chiffré. Aucune garantie
+**Supabase Vault ou `pgsodium` pour la clé** : met la clé à côté du chiffré. Aucune garantie
 achetée, et `pgsodium` est en cours de dépréciation.
 
-**CipherStash / ZeroKMS** — une vraie réponse, avec une clé par valeur et une gestion externe. Mais
+**CipherStash / ZeroKMS** : une vraie réponse, avec une clé par valeur et une gestion externe. Mais
 c'est un sous-traitant de plus, un coût récurrent avant le premier euro de revenu, et une
 dépendance structurante prise trop tôt. À revoir si le volume ou un client grand compte le justifie.
 
-**Chiffrer dans le navigateur du garant** — séduisant, et incompatible avec le produit : l'agence
+**Chiffrer dans le navigateur du garant** : séduisant, et incompatible avec le produit : l'agence
 doit lire les pièces, donc la clé doit lui parvenir. Sans compte de garant, il n'existe aucun
 endroit sûr où la déposer entre les deux. On aurait un coffre dont la clé voyage dans les liens.
 
-**Ne pas stocker du tout, tout faire transiter** — l'agence consulte le dossier quand elle le
+**Ne pas stocker du tout, tout faire transiter** : l'agence consulte le dossier quand elle le
 décide, pas au moment du dépôt. Il faut bien que les pièces attendent quelque part.

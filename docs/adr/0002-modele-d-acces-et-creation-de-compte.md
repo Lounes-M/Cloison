@@ -1,4 +1,4 @@
-# ADR 0002 — Modèle d'accès : qui peut créer un compte
+# ADR 0002 · Modèle d'accès : qui peut créer un compte
 
 **Date** : 1er septembre 2026
 **Statut** : acceptée
@@ -8,11 +8,11 @@ Tranche l'authentification des agences, que l'ADR 0001 renvoyait à la phase 4.
 ## Contexte
 
 Trois acteurs, et une promesse affichée sur la page d'accueil : **pas de compte**. Elle est reprise
-mot pour mot sur `/agences` — « Aucun compte à créer, ni pour lui, ni pour son garant ».
+mot pour mot sur `/agences` : « Aucun compte à créer, ni pour lui, ni pour son garant ».
 
 Elle ne dit rien de l'agence. Et l'agence est un cas différent des deux autres : elle revient, sur
 des dizaines de dossiers, avec plusieurs collaborateurs, et c'est elle qui paie. L'ADR 0001 l'avait
-vu — « elle voudra probablement un vrai compte » — et renvoyait la décision en phase 4.
+vu (« elle voudra probablement un vrai compte ») et renvoyait la décision en phase 4.
 
 **Ce report était une erreur de séquencement.** Le modèle de session se conçoit en phase 2, et il ne
 peut pas se concevoir sans savoir s'il porte un émetteur de jetons ou deux. On tranche donc
@@ -31,7 +31,7 @@ collecte les bulletins de paie d'un tiers. La barrière tombe là, et nulle part
 
 Un compte non vérifié est un compte complet : produit entier sur un **dossier de démonstration**,
 invitation de collègues, tout sauf l'envoi d'un lien réel. C'est ce qui rend l'inscription ouverte
-autre chose qu'un décor — et ce qui transforme une demande d'activation en prospect qualifié, dont
+autre chose qu'un décor, et ce qui transforme une demande d'activation en prospect qualifié, dont
 on sait ce qu'il a essayé, plutôt qu'en formulaire de contact.
 
 ### Un compte est une personne
@@ -42,7 +42,7 @@ trace », et une trace qui ne nomme personne ne vaut rien.
 
 Deux rôles internes, `admin` et `membre`. Les membres voient **tous** les dossiers de leur agence :
 la gestion locative se fait à plusieurs, il y a des congés et du turnover. Le cloisonnement se joue
-entre garant, locataire et agence — pas entre deux collègues. Accès large, traçabilité nominale.
+entre garant, locataire et agence : pas entre deux collègues. Accès large, traçabilité nominale.
 
 ### Trois rôles Postgres
 
@@ -57,7 +57,7 @@ politique écrite `to authenticated` est inatteignable par un porteur de lien qu
 l'erreur commise dans sa clause `using`. C'est la même défense en profondeur que celle qui a motivé
 l'ADR 0001, appliquée à la séparation des populations.
 
-**On prend donc Supabase Auth — pour l'agence seulement.** L'ADR 0001 l'avait pressenti. Il apporte
+**On prend donc Supabase Auth : pour l'agence seulement.** L'ADR 0001 l'avait pressenti. Il apporte
 le lien magique, OAuth Google et Microsoft (les agences tournent sur Workspace ou M365), le MFA, et
 SAML le jour où un réseau l'exigera. Le réécrire serait des mois sans un gramme de différenciation.
 
@@ -66,8 +66,8 @@ auront pas.
 
 ### Pas de mot de passe
 
-Lien magique et OAuth. Cohérent avec la marque, zéro ticket de réinitialisation — ce qui compte à
-deux — et surtout l'adresse est vérifiée par construction, ce dont le rattachement par domaine a
+Lien magique et OAuth. Cohérent avec la marque, zéro ticket de réinitialisation : ce qui compte à
+deux, et surtout l'adresse est vérifiée par construction, ce dont le rattachement par domaine a
 besoin pour être sûr.
 
 ### Le rattachement par domaine
@@ -77,7 +77,7 @@ rejoint au lieu d'en créer un double. L'adoption démarre par un négociateur c
 directeur : sans ce mécanisme, une agence de huit personnes produit huit espaces isolés.
 
 Conséquence directe : **il n'y a pas de table d'invitations.** Le domaine _est_ l'invitation. Une
-invitation explicite ne deviendra nécessaire que pour une adresse d'un autre domaine — un
+invitation explicite ne deviendra nécessaire que pour une adresse d'un autre domaine : un
 administrateur de réseau, en phase 4.
 
 Et corollaire tarifaire, qui n'est pas négociable : **les collaborateurs sont illimités et
@@ -94,7 +94,7 @@ Trois bénéfices d'un seul geste : un argument commercial (« toutes les agence
 adressé au garant, qui est celui qui doit céder ses documents), un alignement réglementaire
 défendable puisqu'on manipule des pièces financières de tiers, et un filtre qui coûte peu.
 
-Pendant le pilote — vingt agences, trois villes, six mois — la vérification est **manuelle**, faite
+Pendant le pilote (vingt agences, trois villes, six mois) la vérification est **manuelle**, faite
 depuis le tableau de bord Supabase. À la sortie du pilote, on automatise SIREN et carte pro sans
 toucher à l'architecture : même chemin de code, défaut inversé. On ne construit pas
 « l'invitation seule » pour la remplacer ensuite.
@@ -103,7 +103,7 @@ toucher à l'architecture : même chemin de code, défaut inversé. On ne constr
 
 **Le format exact du jeton de capacité.** La vérification faite pour cet ADR confirme le chemin :
 Supabase accepte des JWT signés par une **clé de signature importée**, et le claim `role` peut
-désigner un rôle Postgres qu'on a créé soi-même — `porteur_lien` en l'occurrence. Restent la durée
+désigner un rôle Postgres qu'on a créé soi-même : `porteur_lien` en l'occurrence. Restent la durée
 de vie, la révocation (`jti`), et ce que le lien porte réellement. Phase 3.
 
 **Le chiffrement des pièces**, toujours ouvert depuis l'ADR 0001. Tâche 13.
@@ -135,18 +135,18 @@ B2B. On garde la porte ouverte en ne la murant pas.
 
 ## Alternatives écartées
 
-**Tout en jetons maison, y compris l'agence** — cohérent, un seul émetteur, mais il faudrait écrire
+**Tout en jetons maison, y compris l'agence** : cohérent, un seul émetteur, mais il faudrait écrire
 la connexion, la vérification d'adresse, la révocation, le MFA, puis SAML. Des mois de travail sur
 un problème résolu, et un système d'authentification maison à maintenir sur un produit qui vend la
 confidentialité.
 
-**Supabase Auth pour les trois acteurs** — trahit la promesse affichée sur la page d'accueil. Le
+**Supabase Auth pour les trois acteurs** : trahit la promesse affichée sur la page d'accueil. Le
 « pas de compte » n'est pas une commodité, c'est ce qui fait que le garant va au bout du dépôt.
 
-**Inscription sur invitation seule** — confortable pour le pilote, mais met ta boîte mail au milieu
+**Inscription sur invitation seule** : confortable pour le pilote, mais met ta boîte mail au milieu
 du tunnel d'acquisition, et se remplace par de l'auto-inscription au pire moment : celui où ça
 décolle. Le drapeau d'activation donne le même contrôle sans la dette.
 
-**Vérification par pièce justificative (Kbis déposé)** — plus lourd pour l'agence, sans rien
+**Vérification par pièce justificative (Kbis déposé)** : plus lourd pour l'agence, sans rien
 apporter de plus que SIREN et carte pro, qui sont exactement les deux registres que la profession
 tient déjà.

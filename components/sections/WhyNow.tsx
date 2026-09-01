@@ -1,3 +1,4 @@
+import { Icone } from '@/components/ui/Icone'
 import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
 import { goToMarket, whyNow } from '@/lib/content/home'
@@ -8,7 +9,8 @@ export function WhyNow() {
       <div className="grid gap-5 md:grid-cols-[1.2fr_1fr]">
         <Reveal>
           <div className="border-ink animate-wiggle h-full rounded-[18px] border-2 border-dashed p-8">
-            <p className="font-display text-cobalt mb-3.5 text-[15px] uppercase">
+            <p className="font-display text-cobalt mb-3.5 flex items-center gap-2 text-[15px] uppercase">
+              <Icone nom="eclair" />
               {whyNow.eyebrow}
             </p>
             <p className="text-lg leading-relaxed font-medium">

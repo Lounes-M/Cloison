@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button'
+import { Icone } from '@/components/ui/Icone'
 import { LiveDot } from '@/components/ui/LiveDot'
 import { Section } from '@/components/ui/Section'
 import { hero } from '@/lib/content/home'
@@ -16,7 +17,7 @@ export function Hero() {
       contained={false}
       className="relative overflow-hidden pt-14 pb-18 text-center md:pb-20"
     >
-      {/* Étiquettes flottantes — décoratives, masquées sous lg pour laisser
+      {/* Étiquettes flottantes : décoratives, masquées sous lg pour laisser
           respirer le titre sur mobile. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
         {hero.badges.map((badge) => (
@@ -30,6 +31,7 @@ export function Hero() {
             style={{ rotate: `${badge.tilt}deg`, animationDelay: `${badge.delay}s` }}
           >
             {badge.label}
+            <Icone nom="coche" className="ml-1.5" />
           </div>
         ))}
 
@@ -47,12 +49,14 @@ export function Hero() {
           {hero.liveBadge.label}
         </div>
 
-        <div className="animate-spin-slow absolute bottom-10 left-[10%] text-[52px] leading-none">
-          ✳
-        </div>
-        <div className="text-flame animate-spin-slow absolute top-15 right-[26%] text-[32px] leading-none [animation-direction:reverse]">
-          ★
-        </div>
+        <Icone
+          nom="asterisque"
+          className="animate-spin-slow absolute bottom-10 left-[10%] size-13"
+        />
+        <Icone
+          nom="etoile"
+          className="text-flame animate-spin-slow absolute top-15 right-[26%] size-8 [animation-direction:reverse]"
+        />
       </div>
 
       <div className="relative mx-auto max-w-[1200px]">

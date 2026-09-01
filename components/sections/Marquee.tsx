@@ -1,3 +1,4 @@
+import { Icone } from '@/components/ui/Icone'
 import { marqueeItems } from '@/lib/content/home'
 
 /**
@@ -21,7 +22,7 @@ export function Marquee() {
           {items.map((item, index) => (
             <span key={`${item}-${index}`} className="flex items-center gap-10 pr-10">
               {item}
-              <span className="text-sun">★</span>
+              <Icone nom="etoile" className="text-sun size-4" />
             </span>
           ))}
         </div>

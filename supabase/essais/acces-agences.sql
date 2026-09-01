@@ -1,6 +1,6 @@
 -- Essais du modele d'acces de l'ADR 0002, a lancer a la main.
 --
--- Ce ne sont pas des tests automatises — il n'y en a pas encore dans le projet
+-- Ce ne sont pas des tests automatises : il n'y en a pas encore dans le projet
 -- (voir docs/dettes.md). C'est un scenario rejouable qui verifie que les
 -- regles d'acces font ce que l'ADR promet, sur un Postgres local.
 --

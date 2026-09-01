@@ -27,7 +27,7 @@ export function SiteFooter() {
       </div>
 
       <p className="mx-auto mt-6 max-w-[1200px] text-xs opacity-50">
-        © {new Date().getFullYear()} {site.name} — {site.tagline}.
+        © {new Date().getFullYear()} {site.name} · {site.tagline}.
       </p>
     </footer>
   )

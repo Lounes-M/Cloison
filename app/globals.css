@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ */
-/*  Design tokens Cloison — source de vérité unique.                    */
+/*  Design tokens Cloison : source de vérité unique.                    */
 /*  Toute couleur / ombre / animation de l'UI vient d'ici.              */
 /* ------------------------------------------------------------------ */
 @theme {
@@ -132,7 +132,7 @@
   }
 }
 
-/* Apparition au scroll — pilotee par `components/ui/Reveal.tsx`, qui se
+/* Apparition au scroll : pilotee par `components/ui/Reveal.tsx`, qui se
    contente de poser `data-shown`. Tout le reste (etat masque, transition,
    filet sans JS) est ici. */
 @utility reveal {
@@ -153,9 +153,9 @@
   }
 }
 
-/* Bascule de parcours — deux boutons radio, et aucun JavaScript.
+/* Bascule de parcours : deux boutons radio, et aucun JavaScript.
    Meme parti pris que `reveal` : l'etat vit en CSS, le composant reste
-   declaratif. La bascule fonctionne donc avant l'hydratation, et sans elle —
+   declaratif. La bascule fonctionne donc avant l'hydratation, et sans elle,
    ce qui compte sur une page ou tout le reste est statique. */
 @utility bascule {
   /* Panneaux masques par defaut : seul celui dont le radio est coche
@@ -178,7 +178,7 @@
   }
 
   /* Le radio etant visuellement masque, c'est l'etiquette qui doit porter le
-     focus — sans cela, la navigation au clavier serait invisible. */
+     focus : sans cela, la navigation au clavier serait invisible. */
   & [data-piste]:focus-visible + [data-onglet] {
     outline: 3px solid var(--color-cobalt);
     outline-offset: 3px;

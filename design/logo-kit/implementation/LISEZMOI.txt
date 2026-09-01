@@ -1,4 +1,4 @@
-LOGO CLOISON — INTÉGRATION SITE
+LOGO CLOISON : INTÉGRATION SITE
 ================================
 
 Le meilleur format pour le web n'est PAS une image : le logo est du texte
@@ -11,7 +11,7 @@ taille, léger (0 Ko d'image) et sa couleur s'adapte au fond.
    La taille se règle uniquement avec font-size.
 
 2. cloison-favicon.svg
-   Favicon vectoriel (barre jaune sur carré cobalt — 100 % formes, aucune
+   Favicon vectoriel (barre jaune sur carré cobalt : 100 % formes, aucune
    police requise). À déclarer :
    <link rel="icon" type="image/svg+xml" href="/cloison-favicon.svg">
 

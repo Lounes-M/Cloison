@@ -9,16 +9,16 @@ import { commentCaMarche } from './agences'
 export const hero = {
   eyebrow: 'La caution de A à Z',
   badges: [
-    { label: 'pas de compte ✓', tone: 'sun', position: 'top-[70px] left-[6%]', tilt: -8, delay: 0 },
+    { label: 'pas de compte', tone: 'sun', position: 'top-[70px] left-[6%]', tilt: -8, delay: 0 },
     {
-      label: 'pas de papier ✓',
+      label: 'pas de papier',
       tone: 'mint',
       position: 'top-[200px] left-[3%]',
       tilt: 5,
       delay: 0.8,
     },
     {
-      label: 'pas de relance ✓',
+      label: 'pas de relance',
       tone: 'sky',
       position: 'top-[100px] right-[5%]',
       tilt: 6,
@@ -42,8 +42,12 @@ export const marqueeItems = [
 export const problem = {
   eyebrow: 'Le problème',
   conversation: {
-    from: 'WhatsApp — Tonton Marc',
-    messages: ['📎 bulletin_paie_mars.pdf', '📎 avis_imposition_2025.pdf', "c'est bon là ?? 😅"],
+    from: 'WhatsApp · Tonton Marc',
+    messages: [
+      { fichier: 'bulletin_paie_mars.pdf' },
+      { fichier: 'avis_imposition_2025.pdf' },
+      { texte: "c'est bon là ??" },
+    ],
     stamp: 'Rescanné. Refait.',
   },
   body: "Louer à Paris, Lyon ou Bordeaux quand tu as 25 ans, c'est presque toujours un proche qui se porte caution. Un oncle, un ami, la belle-famille. Et aujourd'hui, ça donne : ses bulletins de paie sur ton WhatsApp, son avis d'imposition dans ton Drive, un acte de caution imprimé, mal rempli, rescanné, refait.",
@@ -52,7 +56,7 @@ export const problem = {
 } as const
 
 /**
- * Les trois espaces cloisonnés — le cœur du produit.
+ * Les trois espaces cloisonnés : le cœur du produit.
  *
  * L'ordre suit le parcours réel : le locataire ouvre le dossier, le garant
  * dépose, l'agence décide. Changer cet ordre, c'est changer le produit.
@@ -72,7 +76,7 @@ export const spaces = [
     title: 'Le garant',
     tone: 'sun',
     body: 'Il reçoit un lien et dépose ses pièces seul, chez lui. Il voit ce qu\u2019il couvre, combien, jusqu\u2019à quand.',
-    footnote: { left: 'Couvre : loyer + charges', right: '🔒' },
+    footnote: { left: 'Couvre : loyer + charges', iconeDroite: 'cadenas' },
   },
   {
     id: 'agence',
@@ -80,7 +84,7 @@ export const spaces = [
     title: "L'agence",
     tone: 'sky',
     body: 'Elle ouvre un lien : pièces filigranées, ratio de solvabilité calculé, acte de cautionnement pré-rempli, signé électroniquement.',
-    footnote: { left: 'Acte signé ✍️', right: 'Ratio : ✓' },
+    footnote: { left: 'Acte signé', right: 'Ratio vérifié', iconeDroite: 'coche' },
   },
 ] as const
 
@@ -89,7 +93,7 @@ export const spaces = [
  *
  * Le locataire d'abord, et l'ordre n'est pas cosmétique : c'est lui qui a le
  * problème, c'est lui qui relancera son garant, et c'est le seul dont la
- * motivation ne retombe pas. La porte agence existe en parallèle — elle sert
+ * motivation ne retombe pas. La porte agence existe en parallèle : elle sert
  * l'agence qui préfère lancer le dossier elle-même.
  *
  * Les étapes agence sont reprises de `agences.ts` plutôt que recopiées : deux
@@ -116,7 +120,7 @@ export const parcours = {
           numero: 2,
           titre: 'Ton garant reçoit un lien',
           texte:
-            "Il dépose ses pièces de son côté, chez lui. Tu vois où il en est — jamais ce qu'il envoie.",
+            "Il dépose ses pièces de son côté, chez lui. Tu vois où il en est, jamais ce qu'il envoie.",
         },
         {
           numero: 3,
@@ -189,7 +193,7 @@ export const pricing = {
 } as const
 
 export const whyNow = {
-  eyebrow: '⚡ Pourquoi maintenant',
+  eyebrow: 'Pourquoi maintenant',
   body: 'La caution se signe électroniquement depuis la loi ELAN, les agences ont déjà leur outil de signature, et',
   emphasis: 'personne n\u2019a encore branché le garant dessus.',
 } as const

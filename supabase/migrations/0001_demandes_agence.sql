@@ -2,7 +2,7 @@
 --
 -- C'est la premiere table du projet, et volontairement celle a plus faible
 -- enjeu : elle sert a installer les gestes qui protegeront les tables
--- sensibles — migration versionnee, RLS des la creation, refus par defaut.
+-- sensibles : migration versionnee, RLS des la creation, refus par defaut.
 -- On apprend le geste sur ce qui ne fait pas mal.
 
 create table public.demandes_agence (
@@ -48,7 +48,7 @@ create unique index demandes_agence_email_idx on public.demandes_agence (lower(t
 -- Ici, une seule ouverture : le role `anon` peut INSERER, rien d'autre. Pas de
 -- SELECT, pas d'UPDATE, pas de DELETE. Consequence directe : meme si la cle
 -- publiable fuitait, elle ne permettrait pas de LIRE la liste des agences
--- prospectees — seulement d'y ajouter du bruit, que l'anti-robot du formulaire
+-- prospectees : seulement d'y ajouter du bruit, que l'anti-robot du formulaire
 -- et la contrainte d'unicite limitent deja.
 --
 -- `anon` est bien le role vise : une requete portant une cle publiable

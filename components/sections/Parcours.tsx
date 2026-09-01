@@ -15,7 +15,7 @@ import { parcours } from '@/lib/content/home'
  * l'être.
  *
  * Un groupe de boutons radio plutôt qu'un jeu d'onglets ARIA : c'est
- * exactement ce que fait l'utilisateur — choisir entre deux options — et la
+ * exactement ce que fait l'utilisateur (choisir entre deux options), et la
  * navigation au clavier vient alors du navigateur, pas d'un script.
  */
 export function Parcours() {

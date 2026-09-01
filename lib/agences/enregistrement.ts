@@ -9,7 +9,7 @@ import { VOLUMES, type DemandeAgence } from './schema'
  * Enregistrement d'une demande d'agence, puis notification.
  *
  * L'ordre n'est pas anodin : on ecrit d'abord, on notifie ensuite. Si l'e-mail
- * echoue, la demande est deja en base et rien n'est perdu — l'inverse aurait
+ * echoue, la demande est deja en base et rien n'est perdu : l'inverse aurait
  * fait dependre la conservation du lead de la disponibilite d'un service tiers.
  */
 
@@ -64,7 +64,7 @@ export async function enregistrerDemande(
  */
 export async function notifierDemande(demande: DemandeAgence): Promise<void> {
   const volume = VOLUMES.find((v) => v.valeur === demande.dossiersParAn)?.libelle
-  const sujet = `Nouvelle agence — ${demande.nomAgence} (${demande.ville})`
+  const sujet = `Nouvelle agence : ${demande.nomAgence} (${demande.ville})`
 
   const corps = [
     `Agence   : ${demande.nomAgence}`,

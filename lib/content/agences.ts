@@ -100,5 +100,5 @@ export const formulaire = {
   eyebrow: 'Pilote',
   titre: ['On démarre avec', 'vingt agences.'],
   sousTitre:
-    "Trois villes tendues, six mois, un accompagnement direct. En échange, on veut vos retours sans filtre — c'est ce qui construit le produit.",
+    "Trois villes tendues, six mois, un accompagnement direct. En échange, on veut vos retours sans filtre : c'est ce qui construit le produit.",
 } as const

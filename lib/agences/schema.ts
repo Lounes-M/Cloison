@@ -5,7 +5,7 @@ import { z } from 'zod'
  *
  * Le navigateur s'en sert pour afficher les erreurs tout de suite ; le serveur
  * le revalide integralement, parce qu'une validation cote client n'est qu'un
- * confort d'interface — n'importe qui peut poster directement sur l'action.
+ * confort d'interface : n'importe qui peut poster directement sur l'action.
  */
 
 export const VOLUMES = [

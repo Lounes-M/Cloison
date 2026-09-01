@@ -2,7 +2,7 @@
 /**
  * Garde-fou : empeche un secret de partir dans le bundle navigateur.
  *
- * Sous Next, deux mecanismes exposent une variable au client — le prefixe
+ * Sous Next, deux mecanismes exposent une variable au client : le prefixe
  * `NEXT_PUBLIC_`, et le bloc `env` de `next.config.ts`. Les deux substituent la
  * valeur au build : elle devient lisible par n'importe qui via « afficher le
  * code source ». Rien ne signale l'erreur, le site fonctionne parfaitement.
@@ -50,7 +50,7 @@ const config = readFileSync(cheminConfig, 'utf8')
 
 const debut = config.indexOf('env: {')
 if (debut === -1) {
-  avertissements.push('next.config.ts ne declare plus de bloc `env` — verification 1 sans objet.')
+  avertissements.push('next.config.ts ne declare plus de bloc `env` : verification 1 sans objet.')
 } else {
   const fin = config.indexOf('}', debut)
   const corps = config.slice(debut + 'env: {'.length, fin)
@@ -59,7 +59,7 @@ if (debut === -1) {
   for (const cle of cles) {
     if (!CLES_PUBLIQUES_AUTORISEES.has(cle)) {
       erreurs.push(
-        `next.config.ts — la cle \`${cle}\` est declaree dans \`env\` sans figurer dans la liste ` +
+        `next.config.ts : la cle \`${cle}\` est declaree dans \`env\` sans figurer dans la liste ` +
           `des cles publiques autorisees.\n` +
           `    Tout ce qui passe par ce bloc est substitue au build et peut finir dans le bundle ` +
           `navigateur.\n` +
@@ -96,7 +96,7 @@ for (const fichier of fichiersSource(racine)) {
     const nom = trouve[0]
     if (MOTS_SENSIBLES.test(nom)) {
       erreurs.push(
-        `${relative(racine, fichier)} — \`${nom}\` porte un nom de secret ET le prefixe ` +
+        `${relative(racine, fichier)} : \`${nom}\` porte un nom de secret ET le prefixe ` +
           `\`NEXT_PUBLIC_\`.\n` +
           `    Ce prefixe rend la valeur publique. Retire-le et lis la variable cote serveur.`,
       )
@@ -112,7 +112,7 @@ const dossierStatic = join(racine, '.next', 'static')
 
 if (!existsSync(dossierStatic)) {
   avertissements.push(
-    'Pas de build trouve — verification 3 (fuite reelle dans le bundle) non executee.\n' +
+    'Pas de build trouve : verification 3 (fuite reelle dans le bundle) non executee.\n' +
       '    Lance `npm run build` puis relance ce script pour l’inclure.',
   )
 } else {
@@ -152,7 +152,7 @@ if (!existsSync(dossierStatic)) {
       for (const [nom, valeur] of candidats) {
         if (contenu.includes(valeur)) {
           erreurs.push(
-            `FUITE — la valeur de \`${nom}\` apparait dans ${relative(racine, chemin)}.\n` +
+            `FUITE : la valeur de \`${nom}\` apparait dans ${relative(racine, chemin)}.\n` +
               `    Ce fichier est servi au navigateur : ce secret est compromis.\n` +
               `    Fais-le tourner, puis retire la variable du code client.`,
           )
