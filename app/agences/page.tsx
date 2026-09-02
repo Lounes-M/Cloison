@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { FormulaireAgence } from '@/components/forms/FormulaireAgence'
+import { ApercuDossier } from '@/components/sections/ApercuDossier'
+import { Icone } from '@/components/ui/Icone'
+import { LiveDot } from '@/components/ui/LiveDot'
 import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
 import {
@@ -18,54 +21,67 @@ export const metadata: Metadata = {
   alternates: { canonical: '/agences' },
 }
 
-const tonesApport = {
-  sun: 'bg-sun',
-  mint: 'bg-mint',
-  sky: 'bg-sky',
-} as const
-
 export default function AgencesPage() {
   return (
     <main>
-      {/* HERO */}
-      <Section contained={false} className="pt-14 pb-16 text-center">
-        <div className="mx-auto max-w-[1200px]">
-          <p className="bg-ink text-sun inline-block rounded-full px-5 py-2 text-[13px] font-bold tracking-[0.06em] uppercase">
+      {/* HERO : le texte a gauche, ce qu'il decrit a droite */}
+      <Section
+        className="pt-16 pb-20"
+        innerClassName="grid items-center gap-14 md:grid-cols-[1.1fr_1fr]"
+      >
+        <div>
+          <p className="bg-ink text-sun animate-fade-up inline-block rounded-full px-5 py-2 text-[13px] font-bold tracking-[0.08em] uppercase">
             {heroAgences.eyebrow}
           </p>
-          <h1 className="font-display mx-auto mt-7 max-w-[900px] text-[clamp(2rem,6vw,60px)] leading-[1.05] uppercase">
-            {heroAgences.titre[0]}
+          <h1 className="font-display animate-fade-up mt-6 text-[clamp(2rem,5.5vw,56px)] leading-[1.04] uppercase [animation-delay:0.15s]">
+            {heroAgences.titre[0]} <span className="text-cobalt">{heroAgences.titre[1]}</span>
             <br />
-            <span className="text-cobalt">{heroAgences.titre[1]}</span>
+            <span className="border-ink shadow-brut-sm bg-flame mt-2 inline-block -rotate-[1.5deg] rounded-xl border-[3px] px-4 text-white">
+              {heroAgences.titre[2]}
+            </span>
           </h1>
-          <p className="mx-auto mt-7 max-w-[620px] text-lg leading-relaxed font-semibold">
+          <p className="animate-fade-up mt-7 max-w-[460px] text-[17px] leading-relaxed font-medium [animation-delay:0.3s]">
             {heroAgences.sousTitre}
           </p>
-          <div className="mt-9">
+          <div className="animate-fade-up mt-8 [animation-delay:0.45s]">
             <a
               href="#demander"
-              className="press bg-flame outlined rounded-brut shadow-brut inline-flex items-center justify-center px-8 py-4 text-[17px] font-bold text-white"
+              className="press bg-flame outlined rounded-brut shadow-brut inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white"
             >
               {heroAgences.ancreFormulaire} →
             </a>
           </div>
         </div>
+
+        <ApercuDossier />
       </Section>
 
-      {/* CE QUE ÇA COÛTE AUJOURD'HUI */}
+      {/* CE QUE ÇA COÛTE AUJOURD'HUI : une liste qui se lit, pas trois cartes */}
       <Section className="border-ink bg-paper border-y-[3px] py-20">
         <Reveal>
-          <p className="font-display text-flame mb-9 text-[15px] tracking-[0.06em] uppercase">
+          <h2 className="font-display text-flame mb-10 text-[15px] tracking-[0.06em] uppercase">
             {douleurs.eyebrow}
-          </p>
+          </h2>
         </Reveal>
-        <ul className="grid gap-5 md:grid-cols-3">
+        <ul className="flex flex-col gap-6">
           {douleurs.items.map((item, index) => (
             <li key={item.titre}>
-              <Reveal delay={index * 0.08} className="h-full">
-                <article className="border-ink h-full rounded-[18px] border-2 border-dashed p-7">
-                  <h2 className="font-display mb-3 text-lg uppercase">{item.titre}</h2>
-                  <p className="text-[15px] leading-relaxed font-medium">{item.texte}</p>
+              <Reveal delay={index * 0.08}>
+                <article className="border-ink flex flex-wrap items-start gap-x-6 gap-y-3 border-t-2 pt-6">
+                  <span className="font-display text-muted text-2xl tabular-nums">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div className="min-w-[16rem] flex-1">
+                    <h3 className="font-display mb-2 text-lg">{item.titre}</h3>
+                    <p className="max-w-[62ch] text-[15px] leading-relaxed font-medium">
+                      {item.texte}
+                    </p>
+                  </div>
+                  {/* Le tampon nomme le coût en trois mots, pour qui parcourt
+                      la page sans lire les paragraphes. */}
+                  <span className="border-flame text-flame shrink-0 -rotate-2 rounded-lg border-2 px-3 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase">
+                    {item.tampon}
+                  </span>
                 </article>
               </Reveal>
             </li>
@@ -73,100 +89,223 @@ export default function AgencesPage() {
         </ul>
       </Section>
 
-      {/* CE QU'ON APPORTE */}
-      <Section className="py-20">
+      {/* UN LIEN : bloc sombre, une seule colonne, contraste maximal */}
+      <Section className="bg-ink text-cream py-20">
         <Reveal>
           <h2 className="font-display mb-10 text-[clamp(2rem,5vw,46px)]">
-            {cequonapporte.titre[0]} <span className="text-cobalt">{cequonapporte.titre[1]}</span>
+            {cequonapporte.titre[0]} <span className="text-sun">{cequonapporte.titre[1]}</span>
           </h2>
         </Reveal>
-        <ul className="grid gap-5 md:grid-cols-3">
+        <ul className="flex max-w-[70ch] flex-col gap-7">
           {cequonapporte.items.map((item, index) => (
             <li key={item.titre}>
-              <Reveal delay={index * 0.08} className="h-full">
-                <article
-                  className={cn(
-                    'lift outlined shadow-brut h-full rounded-[18px] p-7',
-                    tonesApport[item.tone],
-                  )}
-                >
-                  <h3 className="font-display mb-3 text-xl uppercase">{item.titre}</h3>
-                  <p className="text-[15px] leading-relaxed font-medium">{item.texte}</p>
-                </article>
+              <Reveal delay={index * 0.08}>
+                <div className="flex gap-4">
+                  <span className="bg-sun text-ink mt-0.5 grid size-7 shrink-0 place-items-center rounded-full">
+                    <Icone nom="coche" className="size-4" />
+                  </span>
+                  <div>
+                    <h3 className="font-display mb-1.5 text-lg">{item.titre}</h3>
+                    <p className="text-[15px] leading-relaxed font-medium opacity-90">
+                      {item.texte}
+                    </p>
+                  </div>
+                </div>
               </Reveal>
             </li>
           ))}
         </ul>
         <Reveal>
-          <div className="bg-ink text-cream mt-5 rounded-[18px] p-7">
-            <h3 className="font-display text-sun mb-2 text-lg uppercase">
-              {cequonapporte.garantie.titre}
-            </h3>
-            <p className="max-w-[70ch] text-[15px] leading-relaxed font-medium opacity-90">
+          <div className="border-sun mt-10 max-w-[70ch] rounded-[18px] border-2 p-7">
+            <h3 className="font-display text-sun mb-2 text-lg">{cequonapporte.garantie.titre}</h3>
+            <p className="text-[15px] leading-relaxed font-medium opacity-90">
               {cequonapporte.garantie.texte}
             </p>
           </div>
         </Reveal>
       </Section>
 
-      {/* COMMENT ÇA MARCHE */}
-      <Section className="border-ink bg-paper border-y-[3px] py-20">
+      {/* TROIS ÉTAPES : une descente, pas trois colonnes côte à côte */}
+      <Section className="py-20">
         <Reveal>
-          <h2 className="font-display mb-10 text-[clamp(2rem,5vw,46px)]">
-            {commentCaMarche.titre}
+          <h2 className="font-display mb-12 text-center text-[clamp(2rem,5vw,46px)]">
+            {commentCaMarche.titre[0]}{' '}
+            <span className="text-cobalt">{commentCaMarche.titre[1]}</span>
           </h2>
         </Reveal>
-        <ol className="grid gap-5 md:grid-cols-3">
-          {commentCaMarche.etapes.map((etape, index) => (
-            <li key={etape.numero}>
-              <Reveal delay={index * 0.08} className="h-full">
-                <div className="border-ink shadow-brut-sm h-full rounded-[18px] border-2 p-7">
-                  <span className="bg-cobalt font-display mb-4 grid size-10 place-items-center rounded-full text-lg text-white">
-                    {etape.numero}
-                  </span>
-                  <h3 className="font-display mb-2 text-lg uppercase">{etape.titre}</h3>
-                  <p className="text-[15px] leading-relaxed font-medium">{etape.texte}</p>
-                </div>
-              </Reveal>
-            </li>
-          ))}
+
+        <ol className="relative mx-auto max-w-[900px]">
+          {/* Le fil vertical relie les trois pastilles. Masqué quand les étapes
+              s'empilent en une colonne, où il ne relierait plus rien. */}
+          <span
+            aria-hidden
+            data-fil
+            className="absolute top-6 bottom-6 left-1/2 hidden w-[3px] -translate-x-1/2 bg-[repeating-linear-gradient(to_bottom,var(--color-ink)_0_10px,transparent_10px_23px)] md:block"
+          />
+
+          {commentCaMarche.etapes.map((etape, index) => {
+            const aGauche = index % 2 === 0
+            return (
+              <li key={etape.numero} className="relative">
+                <Reveal delay={index * 0.08}>
+                  <div
+                    className={cn(
+                      'flex items-center gap-6 py-5 md:gap-10',
+                      aGauche ? 'md:flex-row' : 'md:flex-row-reverse',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex-1',
+                        aGauche ? 'md:text-right' : 'md:text-left',
+                        'order-2 md:order-none',
+                      )}
+                    >
+                      <h3 className="font-display mb-2 text-[19px] leading-tight">{etape.titre}</h3>
+                      <p className="text-[15px] leading-relaxed font-medium">{etape.texte}</p>
+                      <p
+                        className={cn(
+                          'mt-3 flex items-center gap-2 text-[12.5px] font-bold',
+                          aGauche ? 'md:justify-end' : 'md:justify-start',
+                        )}
+                      >
+                        <LiveDot className="border-ink border-2" />
+                        {etape.puce}
+                      </p>
+                    </div>
+
+                    <span className="bg-paper border-ink shadow-brut-xs font-display z-10 order-1 grid size-11 shrink-0 place-items-center rounded-full border-2 text-lg md:order-none">
+                      {etape.numero}
+                    </span>
+
+                    {/* Colonne vide en vis-à-vis : elle tient l'alternance
+                        gauche/droite sans dupliquer le contenu. */}
+                    <div aria-hidden className="hidden flex-1 md:block" />
+                  </div>
+                </Reveal>
+              </li>
+            )
+          })}
         </ol>
       </Section>
 
-      {/* TARIF */}
-      <Section className="py-20">
-        <Reveal>
-          <h2 className="font-display mb-8 text-[clamp(2rem,5vw,46px)]">{tarifAgence.titre}</h2>
-          <dl className="grid gap-5 md:grid-cols-3">
-            {tarifAgence.points.map((point) => (
-              <div key={point.libelle} className="bg-paper outlined shadow-brut rounded-[18px] p-7">
-                <dt className="text-muted mb-2 text-[13px] font-bold tracking-[0.06em] uppercase">
-                  {point.libelle}
-                </dt>
-                <dd className="font-display text-[26px] leading-tight">{point.valeur}</dd>
+      {/* TARIF : un ticket de caisse, parce que la dernière ligne est un zéro */}
+      <Section className="border-ink bg-paper border-t-[3px] py-20">
+        <div className="mx-auto grid max-w-[1000px] items-center gap-14 md:grid-cols-[1fr_400px]">
+          <Reveal>
+            <h2 className="font-display text-[clamp(2rem,5vw,48px)] leading-[1.05]">
+              {tarifAgence.titre[0]}
+              <br />
+              {tarifAgence.titre[1]} <span className="text-flame">{tarifAgence.titre[2]}</span>
+            </h2>
+            <div className="bg-sun border-ink shadow-brut-sm mt-7 max-w-[420px] -rotate-1 rounded-2xl border-2 px-6 py-5">
+              <p className="text-[14.5px] leading-relaxed font-bold">{tarifAgence.regleOr}</p>
+            </div>
+          </Reveal>
+
+          <Reveal className="relative" tilt={1}>
+            <span className="bg-flame border-ink font-display absolute -top-4 right-5.5 z-10 rotate-4 rounded-full border-2 px-3.5 py-1.5 text-[11px] text-white uppercase">
+              {tarifAgence.tampon}
+            </span>
+            <div className="bg-cream border-ink shadow-brut rounded-t-md rounded-b-[18px] border-[2.5px] p-7">
+              <div className="border-ink mb-4 border-b-2 border-dashed pb-4 text-center">
+                <span className="font-display inline-flex items-center text-base">
+                  CLOI
+                  <span
+                    aria-hidden
+                    className="bg-sun border-ink mx-0.5 inline-block h-[19px] w-[5px] rotate-6 rounded-[3px] border-[1.5px]"
+                  />
+                  SON
+                </span>
+                <p className="text-muted mt-1 text-[11px] font-semibold">{tarifAgence.entete}</p>
               </div>
-            ))}
-          </dl>
-          <p className="bg-sun outlined mt-5 rounded-[18px] p-6 text-[15px] leading-relaxed font-bold">
-            {tarifAgence.note}
-          </p>
-        </Reveal>
+
+              <dl>
+                {tarifAgence.lignes.map((ligne) => (
+                  <div
+                    key={ligne.libelle}
+                    className="flex items-baseline justify-between py-2.5 text-[14.5px] font-semibold"
+                  >
+                    <dt>{ligne.libelle}</dt>
+                    {/* Les pointillés conduisent l'oeil du libellé au montant,
+                        comme sur un vrai ticket. */}
+                    <span
+                      aria-hidden
+                      className="border-ink mx-2.5 flex-1 border-b-2 border-dotted"
+                    />
+                    <dd
+                      className={cn(
+                        'font-display text-base',
+                        'ton' in ligne && ligne.ton === 'vert' && 'text-[#1a9e50]',
+                      )}
+                    >
+                      {ligne.valeur}
+                    </dd>
+                  </div>
+                ))}
+
+                <div className="border-ink mt-3 flex items-baseline justify-between border-t-2 border-dashed pt-3.5 text-[14.5px] font-bold">
+                  <dt>{tarifAgence.total.libelle}</dt>
+                  <span aria-hidden className="border-ink mx-2.5 flex-1 border-b-2 border-dotted" />
+                  <dd className="bg-ink text-sun font-display rounded-md px-2.5 py-0.5 text-base">
+                    {tarifAgence.total.valeur}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </Reveal>
+        </div>
       </Section>
 
-      {/* FORMULAIRE */}
-      <Section id="demander" className="scroll-mt-28 pb-24">
-        <div className="bg-paper outlined shadow-brut-lg rounded-[24px] p-8 md:p-12">
-          <div className="mb-9">
-            <p className="font-display text-flame mb-3 text-[15px] tracking-[0.06em] uppercase">
+      {/* PILOTE : le bandeau qui amène au formulaire */}
+      <Section
+        contained={false}
+        className="bg-cobalt border-ink relative overflow-hidden border-t-[3px] py-18 text-white"
+      >
+        <Icone
+          nom="asterisque"
+          className="animate-spin-slow absolute -top-8 -right-5 size-32 text-white/15"
+        />
+        <div className="relative mx-auto max-w-[1000px] px-6 md:px-10">
+          <Reveal>
+            <p className="bg-sun text-ink border-ink font-display inline-block -rotate-2 rounded-full border-2 px-4.5 py-1.5 text-xs uppercase">
               {formulaire.eyebrow}
             </p>
-            <h2 className="font-display max-w-[16ch] text-[clamp(1.75rem,4.5vw,40px)]">
-              {formulaire.titre[0]} <span className="text-cobalt">{formulaire.titre[1]}</span>
-            </h2>
-            <p className="mt-4 max-w-[60ch] text-[16px] leading-relaxed font-semibold">
-              {formulaire.sousTitre}
-            </p>
-          </div>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <div className="mt-5 grid items-end gap-10 md:grid-cols-[1fr_auto]">
+              <div>
+                <h2 className="font-display text-[clamp(1.75rem,4.5vw,42px)] leading-tight">
+                  {formulaire.titre}
+                </h2>
+                <p className="mt-4 max-w-[560px] text-base leading-relaxed font-medium opacity-95">
+                  {formulaire.sousTitre}
+                </p>
+              </div>
+              <dl className="flex gap-3">
+                {formulaire.metriques.map((metrique) => (
+                  <div
+                    key={metrique.libelle}
+                    className="rounded-xl border-[1.5px] border-white/40 bg-white/12 px-4.5 py-3.5 text-center"
+                  >
+                    <dt className="sr-only">{metrique.libelle}</dt>
+                    <dd>
+                      <span className="font-display block text-[26px]">{metrique.valeur}</span>
+                      <span className="text-[11.5px] font-semibold opacity-85">
+                        {metrique.libelle}
+                      </span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </Reveal>
+        </div>
+      </Section>
+
+      {/* LE FORMULAIRE, inchangé */}
+      <Section id="demander" className="scroll-mt-28 py-20">
+        <div className="bg-paper outlined shadow-brut-lg mx-auto max-w-[860px] rounded-[24px] p-8 md:p-12">
           <FormulaireAgence />
         </div>
       </Section>
