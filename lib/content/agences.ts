@@ -61,16 +61,19 @@ export const cequonapporte = {
   titre: ['Un lien.', 'Tout est dedans.'],
   items: [
     {
+      ton: 'sun',
       titre: 'Des pièces vérifiées',
       texte:
         "Le garant dépose lui-même, chez lui, sur son espace. Vous ne recevez rien tant que le dossier n'est pas complet.",
     },
     {
+      ton: 'mint',
       titre: 'Un ratio déjà calculé',
       texte:
         'La solvabilité du garant est établie sur les pièces déposées, pas sur une estimation faite à la volée.',
     },
     {
+      ton: 'sky',
       titre: 'Un acte prêt à signer',
       texte:
         "Pré-rempli à partir du bail et des pièces, signé électroniquement, archivé. Plus d'impression, plus de rescan.",
