@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useId, useRef } from 'react'
-import { envoyerDemandeAgence, type EtatFormulaire } from '@/app/agences/action'
+import { envoyerDemandeAgence, type EtatFormulaire } from '@/lib/agences/action'
 import { VOLUMES } from '@/lib/agences/schema'
 import { cn } from '@/lib/utils'
 

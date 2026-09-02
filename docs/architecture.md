@@ -35,8 +35,9 @@ Cloison est un produit à **trois acteurs qui ne voient pas la même chose du m�
 
 Le cloisonnement est la fonctionnalité, pas une option de confidentialité. Il devra donc être
 appliqué **côté serveur**, sur chaque lecture, à partir du rôle porté par la session : jamais par un
-filtrage côté client, jamais par une route devinable. La structure `app/` en groupes de routes
-(`(marketing)`, `(app)`) accueillera cette séparation quand les espaces seront implémentés.
+filtrage côté client, jamais par une route devinable. Le groupe de routes `app/(marketing)/` existe
+depuis le 2 septembre 2026 et isole le site public ; `(app)` naîtra avec le premier espace, en
+phase 4, plutôt que d'attendre vide.
 
 Les quatre points à trancher avant d'écrire la première ligne du produit **le sont tous**. Ils
 forment la phase 2, et chacun a son ADR.

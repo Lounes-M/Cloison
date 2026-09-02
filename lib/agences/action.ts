@@ -1,8 +1,8 @@
 'use server'
 
 import { headers } from 'next/headers'
-import { enregistrerDemande, notifierDemande } from '@/lib/agences/enregistrement'
-import { DELAI_MINIMAL_MS, schemaDemandeAgence } from '@/lib/agences/schema'
+import { enregistrerDemande, notifierDemande } from './enregistrement'
+import { DELAI_MINIMAL_MS, schemaDemandeAgence } from './schema'
 
 export type EtatFormulaire = {
   statut: 'inactif' | 'succes' | 'erreur'

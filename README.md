@@ -47,7 +47,8 @@ Avant de pousser : `npm run check`.
 ## Organisation
 
 ```
-app/                  Routes App Router, métadonnées, favicon, image Open Graph
+app/                  Métadonnées, favicon, image Open Graph, layout racine
+  (marketing)/        Le site public, avec son en-tête et son pied de page
 components/
   brand/              Logo et éléments d'identité
   layout/             En-tête et pied de page du site
