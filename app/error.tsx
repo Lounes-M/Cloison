@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Logo } from '@/components/brand/Logo'
+import { SiteFooter } from '@/components/layout/SiteFooter'
+import { SiteHeader } from '@/components/layout/SiteHeader'
 import { Button } from '@/components/ui/Button'
 
 /**
@@ -29,29 +30,31 @@ export default function Error({
   }, [error])
 
   return (
-    <main className="flex min-h-[70vh] flex-col items-center justify-center gap-7 px-6 py-20 text-center">
-      <Logo className="text-2xl" />
+    <>
+      <SiteHeader />
+      <main className="flex min-h-[70vh] flex-col items-center justify-center gap-7 px-6 py-20 text-center">
+        <h1 className="font-display max-w-[620px] text-[clamp(1.75rem,5vw,2.75rem)] leading-tight">
+          Quelque chose s&apos;est mal passé de notre côté.
+        </h1>
 
-      <h1 className="font-display max-w-[620px] text-[clamp(1.75rem,5vw,2.75rem)] leading-tight">
-        Quelque chose s&apos;est mal passé de notre côté.
-      </h1>
-
-      <p className="max-w-[440px] text-lg font-semibold">
-        Aucune donnée n&apos;a été perdue ni exposée. Réessaie, et si ça recommence, écris-nous.
-      </p>
-
-      <div className="flex flex-wrap justify-center gap-4">
-        <Button onClick={reset}>Réessayer</Button>
-        <Button href="/" tone="paper">
-          Retour à l&apos;accueil
-        </Button>
-      </div>
-
-      {error.digest ? (
-        <p className="text-muted text-xs">
-          Référence à nous transmettre : <code className="font-mono">{error.digest}</code>
+        <p className="max-w-[440px] text-lg font-semibold">
+          Aucune donnée n&apos;a été perdue ni exposée. Réessaie, et si ça recommence, écris-nous.
         </p>
-      ) : null}
-    </main>
+
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button onClick={reset}>Réessayer</Button>
+          <Button href="/" tone="paper">
+            Retour à l&apos;accueil
+          </Button>
+        </div>
+
+        {error.digest ? (
+          <p className="text-muted text-xs">
+            Référence à nous transmettre : <code className="font-mono">{error.digest}</code>
+          </p>
+        ) : null}
+      </main>
+      <SiteFooter />
+    </>
   )
 }
