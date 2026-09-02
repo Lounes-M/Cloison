@@ -21,6 +21,13 @@ export const metadata: Metadata = {
   alternates: { canonical: '/agences' },
 }
 
+/** Une couleur par apport, dans l'ordre des trois espaces du produit. */
+const TONS_APPORT = {
+  sun: 'bg-sun',
+  mint: 'bg-mint',
+  sky: 'bg-sky',
+} as const
+
 export default function AgencesPage() {
   return (
     <main>
@@ -89,40 +96,55 @@ export default function AgencesPage() {
         </ul>
       </Section>
 
-      {/* UN LIEN : bloc sombre, une seule colonne, contraste maximal */}
+      {/* UN LIEN : bloc sombre, et la garantie occupe la quatrieme case */}
       <Section className="bg-ink text-cream py-20">
         <Reveal>
-          <h2 className="font-display mb-10 text-[clamp(2rem,5vw,46px)]">
+          <h2 className="font-display mb-12 text-[clamp(2rem,5vw,46px)]">
             {cequonapporte.titre[0]} <span className="text-sun">{cequonapporte.titre[1]}</span>
           </h2>
         </Reveal>
-        <ul className="flex max-w-[70ch] flex-col gap-7">
+
+        {/* Les trois apports et la garantie forment une seule grille : la carte
+            jaune n'est pas une note ajoutee sous la liste, c'est le quatrieme
+            element, et sa couleur pleine dit qu'il ne se lit pas comme les
+            autres. */}
+        <ul className="grid gap-x-12 gap-y-10 md:grid-cols-2">
           {cequonapporte.items.map((item, index) => (
             <li key={item.titre}>
               <Reveal delay={index * 0.08}>
-                <div className="flex gap-4">
-                  <span className="bg-sun text-ink mt-0.5 grid size-7 shrink-0 place-items-center rounded-full">
-                    <Icone nom="coche" className="size-4" />
-                  </span>
-                  <div>
-                    <h3 className="font-display mb-1.5 text-lg">{item.titre}</h3>
-                    <p className="text-[15px] leading-relaxed font-medium opacity-90">
-                      {item.texte}
-                    </p>
+                <div className="border-cream border-t-2 pt-5">
+                  <div className="mb-2.5 flex items-center gap-3">
+                    <span
+                      className={cn(
+                        'text-ink grid size-7 shrink-0 place-items-center rounded-full',
+                        TONS_APPORT[item.ton],
+                      )}
+                    >
+                      <Icone nom="coche" className="size-4" />
+                    </span>
+                    <h3 className="font-display text-lg">{item.titre}</h3>
                   </div>
+                  <p className="max-w-[46ch] text-[14.5px] leading-relaxed font-medium opacity-70">
+                    {item.texte}
+                  </p>
                 </div>
               </Reveal>
             </li>
           ))}
+
+          <li>
+            <Reveal delay={0.24} tilt={-1}>
+              <div className="bg-sun text-ink border-ink shadow-brut h-full rounded-[18px] border-2 px-6 py-5">
+                <h3 className="font-display mb-2 text-[17px] uppercase">
+                  {cequonapporte.garantie.titre}
+                </h3>
+                <p className="text-[14.5px] leading-relaxed font-medium">
+                  {cequonapporte.garantie.texte}
+                </p>
+              </div>
+            </Reveal>
+          </li>
         </ul>
-        <Reveal>
-          <div className="border-sun mt-10 max-w-[70ch] rounded-[18px] border-2 p-7">
-            <h3 className="font-display text-sun mb-2 text-lg">{cequonapporte.garantie.titre}</h3>
-            <p className="text-[15px] leading-relaxed font-medium opacity-90">
-              {cequonapporte.garantie.texte}
-            </p>
-          </div>
-        </Reveal>
       </Section>
 
       {/* TROIS ÉTAPES : une descente, pas trois colonnes côte à côte */}
