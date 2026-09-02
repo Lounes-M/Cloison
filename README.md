@@ -79,6 +79,27 @@ Voir [`docs/brand.md`](docs/brand.md) pour la charte, [`docs/architecture.md`](d
 pour la suite prévue, [`docs/dettes.md`](docs/dettes.md) pour ce qu'on sait devoir régler plus tard,
 et [`docs/adr/`](docs/adr) pour les décisions d'architecture et leurs raisons.
 
+## Tests
+
+```bash
+npm run test
+```
+
+Les politiques RLS s'éprouvent sur un vrai Postgres, fourni par
+[PGlite](https://pglite.dev) : c'est Postgres compilé en WebAssembly, donc **rien à installer, ni
+Docker ni base locale**, et la CI utilise exactement le même. Chaque test construit sa propre base à
+partir de `supabase/essais/harnais-supabase.sql` puis des migrations, dans l'ordre.
+
+Deux principes valent la peine d'être connus avant d'en écrire un.
+
+**On teste les refus, pas seulement les autorisations.** Une politique ne se vérifie pas en
+constatant qu'elle laisse passer, mais qu'elle arrête.
+
+**Postgres refuse de deux façons, et les confondre produit des tests qui ne prouvent rien.** Sans
+`grant`, la requête lève « permission denied » : c'est `refus()`. Avec le droit mais sans politique,
+elle réussit sans toucher une ligne : c'est `lignesTouchees()`. Un test qui se contenterait de
+constater l'absence d'exception passerait alors même que la ligne aurait été supprimée.
+
 ## Contribuer
 
 **Aucun commit direct sur `main`.** Tout passe par une branche et une pull request, y compris les

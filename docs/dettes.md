@@ -84,22 +84,6 @@ e-mail, elles ne sont jamais réaffichées sur le site.
 c'est-à-dire l'espace agence montrant les pièces déposées, en phase 4. C'est là que la surface
 apparaît réellement, et le rendu y sera dynamique de toute façon : le coût du nonce disparaît.
 
-### Aucun test automatisé
-
-Assumé : il n'y a pas encore de logique métier à tester, et des tests d'interface sur une landing
-statique coûteraient plus qu'ils ne rapporteraient.
-
-Nuance depuis l'[ADR 0002](adr/0002-modele-d-acces-et-creation-de-compte.md) : les règles d'accès
-sont écrites, et elles se vérifient, mais **à la main**, avec `supabase/essais/`, sur un Postgres
-local. Ce n'est pas rien : ce scénario a trouvé une variable homonyme d'une colonne qui rendait
-`rejoindre_ou_creer_agence` inutilisable, là où la migration s'appliquait sans broncher. Ce qui
-manque, c'est que la CI le rejoue, donc que personne ne puisse l'oublier.
-
-**Signal de sortie** : la phase 3, quand les liens d'accès rejoindront les comptes d'agence. Le
-scénario existe déjà ; il ne restera qu'à lui donner un Postgres dans `ci.yml` et à faire échouer le
-build quand un refus attendu n'en est plus un. Le calcul du ratio de solvabilité, en phase 4, sera
-le premier test de logique métier au sens habituel.
-
 ---
 
 ## Réglées
@@ -107,3 +91,10 @@ le premier test de logique métier au sens habituel.
 - **L'en-tête et le pied de page vivaient dans `page.tsx`** : remontés dans le layout racine le
   1er septembre 2026, à l'arrivée de la deuxième route (`/agences`), comme prévu. `app/error.tsx`
   et `app/not-found.tsx` conservent désormais la navigation du site.
+- **Aucun test automatisé** : réglé le 2 septembre 2026, en ouverture de la phase 3, et le signal
+  de sortie était bien celui-là. Le scénario manuel de `supabase/essais/acces-agences.sql` est
+  devenu dix-sept tests assertifs qui tournent dans `npm run check` et dans la CI. Un détail du
+  signal s'est révélé faux : il annonçait « donner un Postgres dans `ci.yml` ». PGlite embarque
+  Postgres dans le processus de test, donc il n'y a ni service à déclarer ni Docker à installer,
+  ni en local ni dans la CI. Le harnais a été vu rouge avant d'être livré, en ouvrant volontairement
+  la lecture de `demandes_agence` au rôle `anon`.

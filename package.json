@@ -17,9 +17,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run check:typo && npm run check:env",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run check:typo && npm run check:env && npm run test",
     "check:env": "node scripts/verifie-variables-publiques.mjs",
-    "check:typo": "node scripts/verifie-typographie.mjs"
+    "check:typo": "node scripts/verifie-typographie.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
@@ -34,6 +36,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
@@ -44,6 +47,7 @@
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   }
 }

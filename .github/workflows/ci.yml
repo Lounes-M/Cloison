@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck · Lint · Format · Typo · Build · Secrets
+    name: Typecheck · Lint · Format · Typo · Tests · Build · Secrets
     runs-on: ubuntu-latest
 
     steps:
@@ -41,6 +41,12 @@ jobs:
       # une lecture de fichiers, elle passe donc avant l'etape la plus lente.
       - name: Typographie
         run: npm run check:typo
+
+      # Les tests tournent avant le build : ils portent sur les regles d'acces,
+      # et rien ne sert de construire une application dont le cloisonnement a
+      # cede. PGlite embarque Postgres, aucun service a demarrer ici.
+      - name: Tests
+        run: npm run test
 
       - name: Build
         run: npm run build
