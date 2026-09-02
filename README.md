@@ -79,6 +79,27 @@ Voir [`docs/brand.md`](docs/brand.md) pour la charte, [`docs/architecture.md`](d
 pour la suite prévue, [`docs/dettes.md`](docs/dettes.md) pour ce qu'on sait devoir régler plus tard,
 et [`docs/adr/`](docs/adr) pour les décisions d'architecture et leurs raisons.
 
+## Contribuer
+
+**Aucun commit direct sur `main`.** Tout passe par une branche et une pull request, y compris les
+changements d'une ligne.
+
+```bash
+git checkout -b sujet/ce-que-ca-fait
+npm run check
+gh pr create --fill
+```
+
+La CI tourne sur la pull request, donc avant la fusion et non après : `main` reste déployable à tout
+instant, puisque Vercel la suit.
+
+La raison n'est pas procédurale. À partir de la phase 3, le code touche les règles d'accès, le
+chiffrement des pièces et les jetons de capacité. Sur ces fichiers, le coût d'une erreur n'est pas
+un bug d'affichage : c'est une pièce d'identité qui sort du dossier. Une relecture avant la mise en
+ligne y est moins chère que la corriger après.
+
+Convention adoptée le 2 septembre 2026, après treize commits poussés directement sur `main`.
+
 ## Déploiement
 
 Hébergement cible : Vercel. Le dépôt est prêt, et **il n'y a aucune variable d'environnement à
