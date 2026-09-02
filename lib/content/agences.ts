@@ -69,17 +69,20 @@ export const commentCaMarche = {
   etapes: [
     {
       numero: 1,
+      puce: 'aucun compte',
       titre: 'Vous envoyez un lien au locataire',
       texte: 'Depuis votre outil habituel. Aucun compte à créer, ni pour lui, ni pour son garant.',
     },
     {
       numero: 2,
+      puce: 'cloisonné',
       titre: 'Le garant dépose ses pièces',
       texte:
         "Seul, chez lui. Le locataire suit l'avancement sans jamais voir les documents ni les montants.",
     },
     {
       numero: 3,
+      puce: 'acte pré-rempli',
       titre: 'Vous recevez un dossier complet',
       texte: "Pièces filigranées, ratio calculé, acte pré-rempli. Vous n'avez plus qu'à signer.",
     },

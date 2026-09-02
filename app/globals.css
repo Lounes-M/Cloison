@@ -92,6 +92,36 @@
   }
 }
 
+@keyframes carte-entre {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(var(--inclinaison, 0deg));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--inclinaison, 0deg));
+  }
+}
+
+@keyframes pastille-apparait {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* Le trait pointille avance entre les etapes : il donne le sens de lecture,
+   de la premiere carte vers la derniere. */
+@keyframes connecteur-avance {
+  to {
+    background-position-x: 23px;
+  }
+}
+
 @keyframes reveal-fallback {
   to {
     opacity: 1;
@@ -170,10 +200,32 @@
     display: block;
   }
 
-  /* Onglet actif : plein, comme un bouton deja enfonce. */
+  /* La pilule est un seul element qui glisse d'une moitie a l'autre, plutot
+     qu'un fond allume sur l'onglet actif : le mouvement dit lequel des deux
+     parcours on quitte, ce qu'un simple changement de couleur ne dit pas.
+     Les deux moities sont a 50 % exactement, d'ou le calage par `left` et
+     `right` plutot que par une translation. */
+  & [data-pilule] {
+    position: absolute;
+    top: 0.375rem;
+    bottom: 0.375rem;
+    left: 0.375rem;
+    right: 50%;
+    border-radius: 99px;
+    background-color: var(--color-ink);
+    transition:
+      left 0.3s cubic-bezier(0.6, -0.2, 0.3, 1.3),
+      right 0.3s cubic-bezier(0.6, -0.2, 0.3, 1.3);
+  }
+
+  &:has([data-piste='agence']:checked) [data-pilule] {
+    left: 50%;
+    right: 0.375rem;
+  }
+
+  /* Seul le texte de l'onglet actif s'inverse : le fond, c'est la pilule. */
   &:has([data-piste='locataire']:checked) [data-onglet='locataire'],
   &:has([data-piste='agence']:checked) [data-onglet='agence'] {
-    background-color: var(--color-ink);
     color: var(--color-cream);
   }
 
@@ -182,6 +234,35 @@
   & [data-piste]:focus-visible + [data-onglet] {
     outline: 3px solid var(--color-cobalt);
     outline-offset: 3px;
+  }
+
+  /* Les cartes entrent en cascade. L'animation se rejoue a chaque bascule,
+     puisque le panneau repasse de `display: none` a visible : c'est ce qui
+     fait sentir qu'on a change de parcours, et non juste de texte. */
+  & [data-carte] {
+    transform: rotate(var(--inclinaison, 0deg));
+    animation: carte-entre 0.5s var(--retard, 0s) both;
+  }
+
+  & [data-carte]:hover {
+    box-shadow: var(--shadow-brut-raised);
+    translate: -3px -3px;
+  }
+
+  & [data-pastille] {
+    animation: pastille-apparait 0.45s calc(var(--retard, 0s) + 0.15s) both;
+  }
+
+  /* Le trait passe DERRIERE les cartes, qui sont opaques : il n'est donc
+     visible que dans les deux intervalles. Une seule regle, plutot que deux
+     segments a positionner a la main. */
+  & [data-connecteur] {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--color-ink) 0 10px,
+      transparent 10px 23px
+    );
+    animation: connecteur-avance 1.2s linear infinite;
   }
 }
 

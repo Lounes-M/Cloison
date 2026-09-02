@@ -112,18 +112,21 @@ export const parcours = {
       etapes: [
         {
           numero: 1,
+          puce: 'zéro papier',
           titre: 'Tu crées ton dossier',
           texte:
             'Deux minutes, et tu désignes qui se porte caution pour toi. Rien à scanner, rien à imprimer.',
         },
         {
           numero: 2,
+          puce: 'garant éligible',
           titre: 'Ton garant reçoit un lien',
           texte:
             "Il dépose ses pièces de son côté, chez lui. Tu vois où il en est, jamais ce qu'il envoie.",
         },
         {
           numero: 3,
+          puce: 'prêt à signer',
           titre: "Tu transmets à l'agence",
           texte: "Dossier complet, garant vérifié, acte prêt à signer. Elle n'a plus qu'à décider.",
         },
@@ -147,29 +150,6 @@ export const product = {
   outro: 'Pas de compte, pas de papier, pas de relance.',
   outroHighlight: "C'est tout.",
 } as const
-
-export const positioning = {
-  headline: ['On ne remplace', 'personne.'],
-  subtitle: "C'est hors de leur périmètre, ils l'écrivent eux-mêmes.",
-  players: [
-    {
-      name: 'Visale',
-      role: 'se porte garant',
-      body: 'Visale se porte garant, on ne le fait pas.',
-    },
-    {
-      name: 'Garantme',
-      role: 'remplace ton oncle',
-      body: 'Garantme remplace ton oncle, on le protège.',
-    },
-    {
-      name: 'DossierFacile',
-      role: "s'arrête au dossier",
-      body: 'DossierFacile labellise le dossier du locataire et s\u2019arrête là ; nous, on prend le garant et on va jusqu\u2019à la signature.',
-    },
-  ],
-} as const
-
 export const pricing = {
   headline: ['Qui paie', 'quoi ?'],
   plans: [

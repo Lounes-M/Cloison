@@ -6,6 +6,7 @@ const tones = {
   cobalt: 'bg-cobalt text-white',
   flame: 'bg-flame text-white',
   paper: 'bg-paper text-ink',
+  sun: 'bg-sun text-ink',
 } as const
 
 const sizes = {
