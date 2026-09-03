@@ -53,6 +53,32 @@ Sans conséquence immédiate (TypeScript 6 est parfaitement fonctionnel) mais l'
 
 ## Décidées, à revoir plus tard
 
+### Les migrations s'appliquent à la main, et rien ne le vérifie
+
+**Constaté le** 3 septembre 2026, en fusionnant la limitation de débit.
+
+Il n'y a ni `supabase/config.toml` ni étape de déploiement : les migrations sont copiées à la main
+dans l'éditeur SQL de Supabase. Le dépôt sait donc ce que le schéma **devrait** être, et rien ne
+sait ce qu'il **est**.
+
+Ce n'est pas théorique. La migration 0008 crée `consommer_debit`, que le formulaire agence appelle
+désormais à chaque envoi. Entre la fusion et son application, le formulaire répond « réessaie dans
+quelques minutes » à tout le monde. L'échec est fermé, donc sans fuite, mais un déploiement peut
+casser une page en production sans qu'aucun test ni aucune CI ne s'en aperçoive : ils tournent tous
+contre PGlite, qui rejoue les migrations depuis zéro et ne peut par construction jamais être en
+retard.
+
+**Ce qui ne servirait à rien** : vérifier que les numéros se suivent, ou qu'aucun fichier n'a été
+modifié après coup. Ces contrôles sont faciles et ne répondent pas à la question posée, qui est
+« qu'est-ce qui est appliqué là-bas ». Un garde-fou qui rassure sans mesurer est pire que pas de
+garde-fou.
+
+**Signal de sortie** : le premier déploiement de la phase 4, qui livrera plusieurs migrations d'un
+coup au lieu d'une. Alors : le CLI Supabase branché en CI avec un projet de préproduction, de sorte
+que `supabase db push` fasse partie du déploiement et que la CI échoue si le schéma diverge. Cela
+demande des identifiants Supabase dans les secrets GitHub, ce qui est une décision à prendre et pas
+seulement une ligne à écrire.
+
 ### Une réponse qui dit si une adresse a un dossier
 
 **Constaté le** 1er septembre 2026 par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md),
