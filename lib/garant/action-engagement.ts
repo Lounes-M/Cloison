@@ -28,7 +28,7 @@ export async function declarerMonEngagement(
   donnees: FormData,
 ): Promise<EtatEngagement> {
   const champs: Record<string, string | undefined> = {}
-  for (const nom of ['couvre', 'montant', 'jusquAu', 'solidaire']) {
+  for (const nom of ['couvre', 'montant', 'jusquAu', 'solidaire', 'revenu']) {
     const valeur = donnees.get(nom)
     champs[nom] = typeof valeur === 'string' ? valeur : undefined
   }
@@ -51,6 +51,9 @@ export async function declarerMonEngagement(
     montant_max_cents: analyse.engagement.montantMaxCents,
     jusqu_au: analyse.engagement.jusquAu,
     solidaire: analyse.engagement.solidaire,
+    // Le ratio n'est pas ici, et ne le sera jamais : la base le calcule quand
+    // cette colonne change, et `porteur_lien` n'a pas le droit de l'ecrire.
+    revenu_net_mensuel_cents: analyse.engagement.revenuNetMensuelCents,
   }
 
   try {

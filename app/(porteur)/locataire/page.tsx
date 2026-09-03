@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
+import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { espace, statuts } from '@/lib/content/locataire'
 import { cn } from '@/lib/utils'
@@ -36,7 +37,7 @@ export default async function PageLocataire() {
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { data: dossier } = await supabase
     .from('dossiers')
-    .select('reference, statut, email_garant, expire_le')
+    .select('reference, statut, email_garant, expire_le, loyer_cents')
     .eq('id', porteur.capacite.dossierId)
     .maybeSingle()
 
@@ -46,6 +47,8 @@ export default async function PageLocataire() {
 
   const statut = statuts[String(dossier.statut)] ?? statuts.ouvert!
   const garant = dossier.email_garant ? String(dossier.email_garant) : null
+  const loyer =
+    dossier.loyer_cents == null ? '' : (Number(dossier.loyer_cents) / 100).toLocaleString('fr-FR')
   const expire = new Date(String(dossier.expire_le)).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
@@ -63,6 +66,14 @@ export default async function PageLocataire() {
         <p className="font-display text-xl uppercase">{statut.libelle}</p>
         <p className="mt-2 text-[15px] leading-relaxed font-medium">{statut.explication}</p>
       </div>
+
+      <section className="mt-10">
+        <h2 className="font-display text-xl uppercase">{espace.loyerTitre}</h2>
+        <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
+          {espace.loyerAide}
+        </p>
+        <FormulaireLoyer loyerActuel={loyer} />
+      </section>
 
       <section className="mt-10">
         <h2 className="font-display text-xl uppercase">{espace.garantTitre}</h2>

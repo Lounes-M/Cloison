@@ -35,6 +35,8 @@ export type Engagement = {
   montantMaxCents: number | null
   jusquAu: string | null
   solidaire: boolean
+  /** Ce qu'on divise par le loyer. Nul tant que le garant ne l'a pas declare. */
+  revenuNetMensuelCents: number | null
 }
 
 export type AnalyseEngagement =
@@ -95,12 +97,18 @@ export function analyserEngagement(
     return { ok: false, message: 'La date de fin doit etre a venir, au format AAAA-MM-JJ.' }
   }
 
+  const revenuNetMensuelCents = montantEnCents(champs.revenu ?? '')
+  if (revenuNetMensuelCents === 'invalide') {
+    return { ok: false, message: 'Le revenu ne se lit pas. Exemple : 3 200 ou 3200,50.' }
+  }
+
   return {
     ok: true,
     engagement: {
       couvre,
       montantMaxCents,
       jusquAu,
+      revenuNetMensuelCents,
       // Une case a cocher absente du formulaire vaut « non ». C'est le seul
       // champ ou l'absence a un sens, et il est explicite ici.
       solidaire: champs.solidaire === 'on' || champs.solidaire === 'true',

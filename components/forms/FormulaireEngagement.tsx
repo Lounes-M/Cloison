@@ -17,14 +17,16 @@ export type EngagementAffiche = {
   montant: string
   jusquAu: string
   solidaire: boolean
+  revenu: string
 } | null
 
 /**
- * Ce que le garant couvre.
+ * Ce que le garant couvre, et ce qu'il gagne.
  *
- * Quatre champs, et aucun n'est le ratio : il est calcule, jamais saisi. Le
- * montant est libre parce qu'un plafond est un choix du garant, pas une
- * consequence des pieces.
+ * Cinq champs, et aucun n'est le ratio : il est calcule, jamais saisi. Le
+ * revenu declare est ce qu'on divise par le loyer ; les pieces en sont la
+ * preuve, que l'agence verifie. Le montant maximum, lui, est libre : un
+ * plafond est un choix du garant, pas une consequence des pieces.
  */
 export function FormulaireEngagement({ actuel }: { actuel: EngagementAffiche }) {
   const [etat, envoyer, enCours] = useActionState(declarerMonEngagement, ETAT_INITIAL)
@@ -42,6 +44,25 @@ export function FormulaireEngagement({ actuel }: { actuel: EngagementAffiche }) 
           {etat.message}
         </p>
       ) : null}
+
+      <div>
+        <label htmlFor={`${id}-revenu`} className="mb-2 block text-[14px] font-bold">
+          {texte.revenu}
+        </label>
+        <input
+          id={`${id}-revenu`}
+          name="revenu"
+          type="text"
+          inputMode="decimal"
+          defaultValue={actuel?.revenu ?? ''}
+          placeholder="3 200"
+          aria-describedby={`${id}-revenu-aide`}
+          className={cn(champBase)}
+        />
+        <p id={`${id}-revenu-aide`} className="text-muted mt-2 text-[13px] font-medium">
+          {texte.revenuAide}
+        </p>
+      </div>
 
       <fieldset>
         <legend className="mb-2 block text-[14px] font-bold">{texte.couvre}</legend>

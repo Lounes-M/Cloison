@@ -105,6 +105,7 @@ describe('l engagement', () => {
         montantMaxCents: 120_000,
         jusquAu: '2029-08-31',
         solidaire: true,
+        revenuNetMensuelCents: null,
       },
     })
   })
@@ -113,8 +114,26 @@ describe('l engagement', () => {
     const analyse = analyserEngagement({ couvre: 'loyer' }, AUJOURDHUI)
     expect(analyse).toEqual({
       ok: true,
-      engagement: { couvre: 'loyer', montantMaxCents: null, jusquAu: null, solidaire: false },
+      engagement: {
+        couvre: 'loyer',
+        montantMaxCents: null,
+        jusquAu: null,
+        solidaire: false,
+        revenuNetMensuelCents: null,
+      },
     })
+  })
+
+  test('le revenu se lit comme un montant, et vide vaut « pas encore »', () => {
+    const declare = analyserEngagement({ couvre: 'loyer', revenu: '3 200,50' }, AUJOURDHUI)
+    expect(declare.ok && declare.engagement.revenuNetMensuelCents).toBe(320_050)
+
+    // Vide n'est pas une erreur : le dossier reste en attente, et la base ne
+    // calcule rien tant que ce terme manque.
+    const vide = analyserEngagement({ couvre: 'loyer', revenu: '' }, AUJOURDHUI)
+    expect(vide.ok && vide.engagement.revenuNetMensuelCents).toBeNull()
+
+    expect(analyserEngagement({ couvre: 'loyer', revenu: 'beaucoup' }, AUJOURDHUI).ok).toBe(false)
   })
 
   test('une case non cochee vaut non, jamais autre chose', () => {

@@ -53,7 +53,7 @@ export default async function PageGarant() {
       .maybeSingle(),
     supabase
       .from('engagements')
-      .select('couvre, montant_max_cents, jusqu_au, solidaire')
+      .select('couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents')
       .eq('dossier_id', dossierId)
       .maybeSingle(),
     supabase
@@ -77,6 +77,10 @@ export default async function PageGarant() {
             : (Number(engagement.montant_max_cents) / 100).toLocaleString('fr-FR'),
         jusquAu: engagement.jusqu_au ? String(engagement.jusqu_au) : '',
         solidaire: Boolean(engagement.solidaire),
+        revenu:
+          engagement.revenu_net_mensuel_cents == null
+            ? ''
+            : (Number(engagement.revenu_net_mensuel_cents) / 100).toLocaleString('fr-FR'),
       }
     : null
 
