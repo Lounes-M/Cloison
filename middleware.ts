@@ -46,11 +46,16 @@ export async function middleware(requete: NextRequest) {
 
 export const config = {
   /**
-   * Le middleware ne tourne que sur l'espace agence.
+   * Seulement l'espace agence, et rien d'autre.
    *
    * Le site public est entierement statique : le faire passer par ici lui
    * couterait un rendu dynamique et une requete a Supabase par page vue, pour
    * rafraichir une session que ses visiteurs n'ont pas.
+   *
+   * `/connexion` est exclue pour la meme raison, moins evidente : personne n'y
+   * a encore de session a rafraichir. Et la route de retour du lien n'en a pas
+   * besoin non plus, puisqu'un gestionnaire de route peut poser ses cookies
+   * lui-meme, ce qu'un composant serveur ne peut pas.
    */
-  matcher: ['/espace/:path*', '/connexion/:path*'],
+  matcher: ['/espace/:path*'],
 }
