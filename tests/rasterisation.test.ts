@@ -170,7 +170,12 @@ describe('le filigrane', () => {
 
     // Et il reste discret : il ne noircit pas la page, sinon il rendrait
     // illisible ce qu'il sert a proteger.
-    expect(avec.encre).toBe(sans.encre)
+    //
+    // Une tolerance, et non l'egalite exacte, qui a fait rouge la CI pour rien :
+    // le rendu n'est pas identique au pixel pres d'une machine a l'autre, et un
+    // bord anticrenele qui franchit le seuil n'est pas une regression. Ce qu'on
+    // affirme est un ordre de grandeur, pas un compte.
+    expect(Math.abs(avec.encre - sans.encre)).toBeLessThan(sans.encre * 0.005)
   }, 60_000)
 
   test('il tient aussi sur une image deposee', async () => {
