@@ -87,7 +87,9 @@ faut un service séparé, sa base de signatures et sa mise à jour. C'est de l'i
 
 **Ce qui rend l'attente tenable** : personne ne reçoit jamais le fichier d'origine. La rasterisation
 de l'ADR 0004 transforme la pièce en images avant qu'elle atteigne l'agence, ce qui détruit le
-JavaScript embarqué, les formulaires et les fichiers joints d'un PDF. Le risque résiduel n'est donc
+JavaScript embarqué, les formulaires et les fichiers joints d'un PDF. Ce n'est plus une intention :
+`tests/rasterisation.test.ts` construit un PDF portant réellement du `/JavaScript`, l'affirme présent
+en entrée, et vérifie qu'il a disparu en sortie, y compris selon `getJSActions()` de pdf.js. Le risque résiduel n'est donc
 pas l'agence : c'est notre propre rastériseur, exposé à un fichier hostile. Cela se traite par
 l'isolation du décodage, pas par des signatures.
 
