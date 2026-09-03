@@ -51,6 +51,21 @@ export const env = {
     return requise('SUPABASE_PUBLISHABLE_KEY')
   },
 
+  /**
+   * Le secret JWT du projet Supabase.
+   *
+   * Il signe les jetons de capacite du garant et du locataire. Supabase lit
+   * ensuite le claim `role` et fait prendre a la connexion le role Postgres
+   * correspondant : c'est ce secret qui rend la frontiere de l'ADR 0002
+   * opposable, et pas seulement declarative.
+   *
+   * Comme la cle maitresse, il ne porte jamais le prefixe `NEXT_PUBLIC_` et ne
+   * passe jamais par le bloc `env` de `next.config.ts`.
+   */
+  get supabaseJwtSecret() {
+    return requise('SUPABASE_JWT_SECRET')
+  },
+
   /** Cle Resend, pour la notification d'une nouvelle demande. */
   get resendApiKey() {
     return requise('RESEND_API_KEY')
