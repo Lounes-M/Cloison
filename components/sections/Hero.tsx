@@ -92,7 +92,7 @@ export function Hero() {
           className="animate-fade-up mt-9 flex flex-wrap justify-center gap-4 [animation-delay:0.45s]"
           style={{ animationFillMode: 'both' }}
         >
-          <Button href="#parcours">{hero.primaryCta} →</Button>
+          <Button href="/demarrer">{hero.primaryCta} →</Button>
           <Button href="/agences" tone="paper">
             {hero.secondaryCta}
           </Button>

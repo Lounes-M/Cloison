@@ -79,6 +79,27 @@ que `supabase db push` fasse partie du déploiement et que la CI échoue si le s
 demande des identifiants Supabase dans les secrets GitHub, ce qui est une décision à prendre et pas
 seulement une ligne à écrire.
 
+### La limite de débit ne couvre que nos routes, pas PostgREST
+
+**Constaté le** 3 septembre 2026, en branchant la porte du locataire.
+
+`consommerDebit` est appelée dans nos actions serveur. Mais la clé publiable est, par construction,
+publique : n'importe qui peut appeler directement les fonctions accordées à `anon` sur l'API
+PostgREST du projet, sans passer par nos routes ni par notre compteur. `ouvrir_dossier_avec_lien`,
+`emettre_jeton` et `consommer_debit` elle-même sont dans ce cas.
+
+Ce que ça permet, et ce que ça ne permet pas. Aucune lecture, aucune escalade : la RLS et les
+fonctions restent la barrière, et elles tiennent. En revanche, remplir `dossiers` de lignes vides,
+ou réémettre le jeton d'un dossier dont on connaîtrait l'uuid, donc révoquer celui du vrai
+locataire. L'uuid n'est pas devinable, ce qui borne le second cas à une fuite préalable.
+
+**Ce qui tient en attendant** : les limites propres de Supabase sur son API, et le fait que
+`ouvrir_dossier_avec_lien` ne donne rien d'utilisable sans notre signature.
+
+**Signal de sortie** : la revue de sécurité de la phase 5. La parade probable est de faire
+consommer le débit **par la fonction SQL elle-même**, à partir d'une empreinte que seule notre clé
+sait produire, ce qui rendrait l'appel direct inutile plutôt qu'interdit.
+
 ### Une réponse qui dit si une adresse a un dossier
 
 **Constaté le** 1er septembre 2026 par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md),
