@@ -29,10 +29,12 @@ class BaseDeTest implements DepotBase {
   cles = new Map<string, Buffer>()
   objets = new Map<string, Buffer>()
   lignes: PieceAInscrire[] = []
+  entrees: { dossierId: string; action: string; pieceId: string }[] = []
   appels: string[] = []
 
   echecTeleversement = false
   echecInscription = false
+  echecJournal = false
 
   /** Une cle deja scellee, posee par un autre depot juste avant le notre. */
   concurrente: Buffer | null = null
@@ -71,8 +73,15 @@ class BaseDeTest implements DepotBase {
 
   async inscrirePiece(piece: PieceAInscrire) {
     this.appels.push('inscrirePiece')
-    if (this.echecInscription) return false
+    if (this.echecInscription) return null
     this.lignes.push(piece)
+    return `piece-${this.lignes.length}`
+  }
+
+  async journaliser(dossierId: string, action: 'piece_deposee', pieceId: string) {
+    this.appels.push('journaliser')
+    if (this.echecJournal) return false
+    this.entrees.push({ dossierId, action, pieceId })
     return true
   }
 }
@@ -244,6 +253,7 @@ describe('ce qui reste apres un echec', () => {
       'inscrirePiece',
       'retirerObjet',
     ])
+    expect(base.entrees).toEqual([])
   })
 
   test('les octets partent avant la ligne, jamais l inverse', async () => {
@@ -260,6 +270,48 @@ describe('ce qui reste apres un echec', () => {
 
     if (resultat.depose) throw new Error('aurait du echouer')
     expect(resultat.raison).not.toMatch(/storage|supabase|sql/i)
+  })
+})
+
+describe('le journal', () => {
+  let base: BaseDeTest
+
+  beforeEach(() => {
+    base = new BaseDeTest()
+  })
+
+  test('un depot reussi laisse une entree', async () => {
+    const resultat = await deposer(base, DOSSIER, 'bulletin_paie', pdf())
+    if (!resultat.depose) throw new Error(resultat.raison)
+
+    expect(base.entrees).toEqual([
+      { dossierId: DOSSIER, action: 'piece_deposee', pieceId: resultat.pieceId },
+    ])
+  })
+
+  test('le journal vient apres l inscription, jamais avant', async () => {
+    await deposer(base, DOSSIER, 'bulletin_paie', pdf())
+    // Inscrire un acces a une piece qui n'existe pas encore ferait echouer
+    // `journaliser`, qui verifie que la piece appartient bien au dossier.
+    expect(base.appels.indexOf('inscrirePiece')).toBeLessThan(base.appels.indexOf('journaliser'))
+  })
+
+  test('un journal en panne n annule pas le depot', async () => {
+    base.echecJournal = true
+    const resultat = await deposer(base, DOSSIER, 'bulletin_paie', pdf())
+
+    // La ligne `pieces` est deja la trace du depot. Defaire un depot reussi
+    // parce qu'on n'a pas su l'ecrire deux fois couterait a la personne une
+    // piece qu'elle croyait posee.
+    expect(resultat).toMatchObject({ depose: true })
+    expect(base.lignes).toHaveLength(1)
+    expect(base.objets.size).toBe(1)
+  })
+
+  test('un depot refuse ne journalise rien', async () => {
+    base.echecTeleversement = true
+    await deposer(base, DOSSIER, 'bulletin_paie', pdf())
+    expect(base.entrees).toEqual([])
   })
 })
 
