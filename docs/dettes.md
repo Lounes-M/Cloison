@@ -69,6 +69,32 @@ spam et un moyen de savoir si une adresse a un dossier.
 Ce n'est plus une amélioration ultérieure mais un prérequis de mise en service, à livrer avec le
 parcours locataire.
 
+### Aucun antivirus sur les pièces déposées
+
+**Décidé le** 3 septembre 2026, à l'ouverture du dépôt des pièces.
+
+Le dépôt vérifie le type réel des octets et borne la taille, mais ne fait passer aucun analyseur
+antiviral sur ce qui entre. Trois options ont été pesées, et celle qui paraissait la plus simple est
+celle qu'il fallait écarter en premier.
+
+**Un service d'analyse externe est exclu, pas reporté.** Il faudrait lui envoyer le bulletin de paie
+en clair. Ce serait un sous-traitant de plus au registre, qui verrait précisément ce que l'ADR 0003
+s'emploie à cacher à Supabase. Le chiffrement par enveloppe perdrait son sens par la porte de
+service.
+
+**ClamAV auto-hébergé tiendrait la promesse, mais ne rentre pas dans une fonction Vercel** : il lui
+faut un service séparé, sa base de signatures et sa mise à jour. C'est de l'infrastructure à tenir.
+
+**Ce qui rend l'attente tenable** : personne ne reçoit jamais le fichier d'origine. La rasterisation
+de l'ADR 0004 transforme la pièce en images avant qu'elle atteigne l'agence, ce qui détruit le
+JavaScript embarqué, les formulaires et les fichiers joints d'un PDF. Le risque résiduel n'est donc
+pas l'agence : c'est notre propre rastériseur, exposé à un fichier hostile. Cela se traite par
+l'isolation du décodage, pas par des signatures.
+
+**Signal de sortie** : la revue de sécurité externe de la phase 5. On y arrive avec la question déjà
+posée et le raisonnement écrit, plutôt qu'avec une case à cocher. Si la rasterisation devait être
+abandonnée ou contournée pour un format, la dette redeviendrait immédiatement bloquante.
+
 ### Pas de Content-Security-Policy
 
 Une CSP stricte sous App Router impose des nonces, donc un middleware et un rendu dynamique : on

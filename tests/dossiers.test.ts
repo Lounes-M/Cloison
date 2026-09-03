@@ -61,9 +61,9 @@ describe('cloisonnement du dossier', () => {
       [dossier],
     )
     await db.query(
-      `insert into public.pieces (dossier_id, type, chemin, taille_octets)
-       values ($1, 'bulletin_paie', 'dossiers/abc/bulletin-1.enc', 240000)`,
-      [dossier],
+      `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
+       values ($1, 'bulletin_paie', $2, 240000, 'application/pdf')`,
+      [dossier, `${dossier}/bulletin-1`],
     )
   })
 
@@ -88,11 +88,15 @@ describe('cloisonnement du dossier', () => {
 
     test('ne depose pas de piece a la place du garant', async () => {
       await porteur('locataire')
-      await refus(
-        db,
-        `insert into public.pieces (dossier_id, type, chemin, taille_octets)
-         values ('${dossier}', 'avis_imposition', 'dossiers/abc/faux.enc', 1000)`,
-      )
+      // Le chemin et le type sont valides : ce qui refuse est bien la
+      // politique, pas une contrainte de forme.
+      expect(
+        await refus(
+          db,
+          `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
+           values ('${dossier}', 'avis_imposition', '${dossier}/faux', 1000, 'application/pdf')`,
+        ),
+      ).toContain('row-level security')
     })
 
     test('ne declare ni ne supprime l engagement', async () => {
@@ -160,8 +164,8 @@ describe('cloisonnement du dossier', () => {
     test('depose une piece', async () => {
       await porteur('garant')
       await db.query(
-        `insert into public.pieces (dossier_id, type, chemin, taille_octets)
-         values ('${dossier}', 'avis_imposition', 'dossiers/abc/avis.enc', 90000)`,
+        `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
+         values ('${dossier}', 'avis_imposition', '${dossier}/avis', 90000, 'application/pdf')`,
       )
       expect(await compter(db, 'public.pieces')).toBe(2)
     })
@@ -176,11 +180,16 @@ describe('cloisonnement du dossier', () => {
 
       // Jeton du dossier A, ecriture visee sur le dossier B.
       await porteur('garant')
-      await refus(
-        db,
-        `insert into public.pieces (dossier_id, type, chemin, taille_octets)
-         values ('${autre}', 'bulletin_paie', 'dossiers/xyz/vol.enc', 1000)`,
-      )
+      expect(
+        await refus(
+          db,
+          // Le chemin designe bien le dossier vise : sinon la contrainte
+          // `chemin_dans_le_dossier` refuserait la premiere, et ce test
+          // passerait sans avoir rien prouve de la RLS.
+          `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
+           values ('${autre}', 'bulletin_paie', '${autre}/vol', 1000, 'application/pdf')`,
+        ),
+      ).toContain('row-level security')
     })
 
     test('ne retire plus une piece une fois le dossier transmis', async () => {
@@ -249,8 +258,8 @@ describe('cloisonnement du dossier', () => {
       expect(
         await refus(
           db,
-          `insert into public.pieces (dossier_id, type, chemin, taille_octets)
-           values ('${dossier}', 'bulletin_paie', 'dossiers/abc/ajout.enc', 100)`,
+          `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
+           values ('${dossier}', 'bulletin_paie', '${dossier}/ajout', 100, 'application/pdf')`,
         ),
       ).toContain('permission denied')
       expect(await refus(db, 'delete from public.pieces')).toContain('permission denied')
