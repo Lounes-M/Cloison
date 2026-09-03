@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 import { env } from '@/lib/env'
 import { DUREE_JETON, signerJeton, verifierSignature, type Capacite, type Partie } from './jeton'
 
@@ -96,4 +97,73 @@ export async function resoudreCapacite(jeton: string | undefined): Promise<Capac
   }
 
   return actif === true ? capacite : null
+}
+
+/**
+ * Ouvre un dossier et emet son premier lien, d'un seul geste.
+ *
+ * Une seule fonction en base (migration 0010), donc une seule transaction : un
+ * dossier sans son premier lien serait un dossier que personne ne pourra
+ * jamais ouvrir, et il vaut mieux qu'il n'existe pas. Le jeton est signe ici,
+ * apres coup, comme pour `emettreLien` : la base tire le `jti`, nous signons.
+ */
+export async function ouvrirDossierAvecLien(
+  emailDuLocataire: string,
+): Promise<{ dossierId: string; reference: string; jeton: string; expireLe: Date } | null> {
+  const { data, error } = await clientAnonyme().rpc('ouvrir_dossier_avec_lien', {
+    email_du_locataire: emailDuLocataire,
+    duree: DUREE_JETON,
+  })
+
+  const ouvert = Array.isArray(data) ? data[0] : data
+  if (error || !ouvert?.dossier_id || !ouvert?.reference || !ouvert?.jti || !ouvert?.expire_le) {
+    console.error('[acces] ouverture refusee', error)
+    return null
+  }
+
+  const expireLe = new Date(ouvert.expire_le)
+  return {
+    dossierId: ouvert.dossier_id,
+    reference: ouvert.reference,
+    jeton: await signerJeton(ouvert.dossier_id, 'locataire', ouvert.jti, expireLe),
+    expireLe,
+  }
+}
+
+/**
+ * Le cookie qui porte le jeton une fois le lien clique.
+ *
+ * Le jeton quitte l'URL des la premiere requete (voir `app/(porteur)/lien`),
+ * et vit ensuite ici, `HttpOnly`. Le cookie n'est qu'un vehicule : la seule
+ * autorite reste le jeton, verifie a chaque lecture par `resoudreCapacite`.
+ */
+export const NOM_COOKIE_CAPACITE = 'cloison_capacite'
+
+/**
+ * La capacite portee par la requete, ou rien.
+ *
+ * Verifie a chaque appel, signature et `jti`, plutot que de faire confiance a
+ * la presence du cookie. Un cookie est fourni par le client ; un jeton
+ * revoque par une reemission doit cesser de valoir sans attendre qu'il expire.
+ */
+export async function capaciteDepuisCookies(): Promise<{
+  capacite: Capacite
+  jeton: string
+} | null> {
+  const jeton = (await cookies()).get(NOM_COOKIE_CAPACITE)?.value
+  if (!jeton) return null
+
+  const capacite = await resoudreCapacite(jeton)
+  return capacite ? { capacite, jeton } : null
+}
+
+/**
+ * L'adresse que le courriel porte.
+ *
+ * `NEXT_PUBLIC_SITE_URL` est normalisee par `next.config.ts`, ou deduite du
+ * domaine Vercel quand elle n'est pas posee.
+ */
+export function urlDuLien(jeton: string): string {
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  return `${site}/lien/${jeton}`
 }
