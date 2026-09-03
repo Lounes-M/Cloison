@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest'
-import { deposer, type DepotBase, type PieceAInscrire } from '@/lib/coffre/depot'
+import { deposer, retirerPiece, type DepotBase, type PieceAInscrire } from '@/lib/coffre/depot'
 import { depuisBytea, versBytea } from '@/lib/coffre/depot-supabase'
 import { nouvelleCle, ouvrir, sceller } from '@/lib/coffre/enveloppe'
 
@@ -78,10 +78,29 @@ class BaseDeTest implements DepotBase {
     return `piece-${this.lignes.length}`
   }
 
-  async journaliser(dossierId: string, action: 'piece_deposee', pieceId: string) {
+  async journaliser(dossierId: string, action: 'piece_deposee' | 'piece_retiree', pieceId: string) {
     this.appels.push('journaliser')
     if (this.echecJournal) return false
     this.entrees.push({ dossierId, action, pieceId })
+    return true
+  }
+
+  /** Vrai quand le dossier est parti : la RLS ne supprime plus rien. */
+  dossierTransmis = false
+
+  async pieceDeposee(pieceId: string) {
+    this.appels.push('pieceDeposee')
+    const index = Number(pieceId.replace('piece-', '')) - 1
+    const ligne = this.lignes[index]
+    return ligne ? { dossierId: ligne.dossierId, chemin: ligne.chemin } : null
+  }
+
+  async supprimerPiece(pieceId: string) {
+    this.appels.push('supprimerPiece')
+    if (this.dossierTransmis) return false
+    const index = Number(pieceId.replace('piece-', '')) - 1
+    if (!this.lignes[index]) return false
+    this.lignes.splice(index, 1)
     return true
   }
 }
@@ -312,6 +331,72 @@ describe('le journal', () => {
     base.echecTeleversement = true
     await deposer(base, DOSSIER, 'bulletin_paie', pdf())
     expect(base.entrees).toEqual([])
+  })
+})
+
+describe('retirer une piece', () => {
+  let base: BaseDeTest
+
+  beforeEach(async () => {
+    base = new BaseDeTest()
+    const resultat = await deposer(base, DOSSIER, 'bulletin_paie', pdf())
+    if (!resultat.depose) throw new Error(resultat.raison)
+    base.appels = []
+    base.entrees = []
+  })
+
+  test('elle disparait de la table et du stockage, et le journal le sait', async () => {
+    const resultat = await retirerPiece(base, 'piece-1')
+
+    expect(resultat).toEqual({ retiree: true })
+    expect(base.lignes).toHaveLength(0)
+    expect(base.objets.size).toBe(0)
+    expect(base.entrees).toEqual([
+      { dossierId: DOSSIER, action: 'piece_retiree', pieceId: 'piece-1' },
+    ])
+  })
+
+  test('le journal precede la suppression, sinon il ne pourrait plus rien inscrire', async () => {
+    await retirerPiece(base, 'piece-1')
+
+    // `journaliser` relit la piece dans `pieces` pour verifier qu'elle
+    // appartient au dossier. Apres la suppression, il n'y aurait plus rien a
+    // relire, et le retrait serait la seule action du coffre sans trace.
+    expect(base.appels.indexOf('journaliser')).toBeLessThan(base.appels.indexOf('supprimerPiece'))
+  })
+
+  test('la ligne part avant les octets, jamais l inverse', async () => {
+    await retirerPiece(base, 'piece-1')
+    expect(base.appels.indexOf('supprimerPiece')).toBeLessThan(base.appels.indexOf('retirerObjet'))
+  })
+
+  test('un dossier transmis garde ses pieces, octets compris', async () => {
+    base.dossierTransmis = true
+    const resultat = await retirerPiece(base, 'piece-1')
+
+    // C'est la RLS qui refuse, en ne supprimant rien. Les octets ne doivent
+    // pas etre touches : l'agence decide sur cette piece.
+    expect(resultat).toMatchObject({ retiree: false })
+    expect(base.lignes).toHaveLength(1)
+    expect(base.objets.size).toBe(1)
+    expect(base.appels).not.toContain('retirerObjet')
+  })
+
+  test('une piece hors de portee ne journalise rien', async () => {
+    const resultat = await retirerPiece(base, 'piece-99')
+    expect(resultat).toMatchObject({ retiree: false })
+    expect(base.entrees).toEqual([])
+    expect(base.lignes).toHaveLength(1)
+  })
+
+  test('un journal en panne empeche le retrait', async () => {
+    base.echecJournal = true
+    const resultat = await retirerPiece(base, 'piece-1')
+
+    // Meme regle qu'a l'ouverture : on ne fait pas ce qu'on ne peut pas inscrire.
+    expect(resultat).toMatchObject({ retiree: false })
+    expect(base.lignes).toHaveLength(1)
+    expect(base.objets.size).toBe(1)
   })
 })
 
