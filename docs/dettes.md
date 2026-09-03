@@ -79,6 +79,26 @@ que `supabase db push` fasse partie du déploiement et que la CI échoue si le s
 demande des identifiants Supabase dans les secrets GitHub, ce qui est une décision à prendre et pas
 seulement une ligne à écrire.
 
+### Quatre mégaoctets par pièce, pas vingt
+
+**Constaté le** 3 septembre 2026, en construisant le dépôt du garant.
+
+La table `pieces` accepte vingt mégaoctets par fichier. En pratique, le dépôt en accepte quatre.
+La raison n'est pas chez nous : Vercel refuse tout corps de requête au-delà de 4,5 Mo, avec une
+erreur 413, et c'est vérifié sur sa documentation du 24 août 2026. Or le chiffrement par enveloppe
+impose de passer par notre serveur : la seule parade que Vercel documente, l'envoi direct du
+navigateur vers le stockage, ferait arriver le fichier en clair chez Supabase, ce que l'ADR 0003
+interdit.
+
+**Ce qui rend l'attente tenable** : les photos sont réduites dans le navigateur avant envoi, à deux
+mille pixels de côté, ce qui ramène une photo de téléphone sous un mégaoctet. Un PDF de bulletin de
+paie dépasse rarement un mégaoctet. La borne haute de la base reste à vingt : c'est elle qui aura
+raison le jour où la borne pratique sera levée.
+
+**Signal de sortie** : le premier fichier réel refusé pour sa taille. La parade serait alors le
+découpage en morceaux scellés séparément, chacun sous la borne, réassemblés à l'ouverture. Pas
+l'envoi direct.
+
 ### La limite de débit ne couvre que nos routes, pas PostgREST
 
 **Constaté le** 3 septembre 2026, en branchant la porte du locataire.

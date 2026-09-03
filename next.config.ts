@@ -116,6 +116,17 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
 
+  experimental: {
+    serverActions: {
+      // Le depot d'une piece passe par une action serveur, parce que le
+      // chiffrement impose de passer par nous. Next borne le corps a 1 Mo par
+      // defaut ; on monte a la borne de Vercel, 4,5 Mo, que rien ne depasse de
+      // toute facon. La borne pratique par fichier, 4 Mo, vit dans
+      // `lib/garant/validation.ts`, et la borne haute, 20 Mo, dans la base.
+      bodySizeLimit: '4.5mb',
+    },
+  },
+
   // ATTENTION : tout ce qui est declare ici est substitue par sa valeur au
   // build, y compris dans le bundle envoye au navigateur des qu'un composant
   // client le reference. Ce bloc n'accueille que des valeurs publiques :

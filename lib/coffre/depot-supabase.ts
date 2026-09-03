@@ -71,7 +71,7 @@ async function lireCleScellee(supabase: SupabaseClient, dossierId: string) {
 async function inscrireAuJournal(
   supabase: SupabaseClient,
   dossierId: string,
-  action: 'piece_deposee' | 'piece_ouverte',
+  action: 'piece_deposee' | 'piece_ouverte' | 'piece_retiree',
   pieceId: string,
 ) {
   // `journaliser` ne prend aucun parametre d'identite : elle lit l'acteur dans
@@ -156,6 +156,35 @@ export function baseSupabase(supabase: SupabaseClient): DepotBase {
       }
 
       return data.id as string
+    },
+
+    async pieceDeposee(pieceId) {
+      const { data, error } = await supabase
+        .from('pieces')
+        .select('dossier_id, chemin')
+        .eq('id', pieceId)
+        .maybeSingle()
+
+      if (error || !data) {
+        if (error) console.error('[coffre] lecture de la piece impossible', error)
+        return null
+      }
+
+      return { dossierId: data.dossier_id as string, chemin: data.chemin as string }
+    },
+
+    async supprimerPiece(pieceId) {
+      // `select` apres `delete` rend les lignes effectivement supprimees. Sans
+      // lui, un refus de la RLS ressemblerait a un succes : zero ligne, zero
+      // erreur.
+      const { data, error } = await supabase.from('pieces').delete().eq('id', pieceId).select('id')
+
+      if (error) {
+        console.error('[coffre] suppression de la piece refusee', error)
+        return false
+      }
+
+      return Array.isArray(data) && data.length > 0
     },
 
     journaliser: (dossierId, action, pieceId) =>

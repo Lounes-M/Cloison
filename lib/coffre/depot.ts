@@ -50,11 +50,23 @@ export interface DepotBase {
   /** Rend l'identifiant de la piece inscrite, ou rien si l'inscription a echoue. */
   inscrirePiece(piece: PieceAInscrire): Promise<string | null>
 
-  journaliser(dossierId: string, action: 'piece_deposee', pieceId: string): Promise<boolean>
+  /** Une piece que l'appelant a le droit de voir, ou rien : c'est la RLS qui decide. */
+  pieceDeposee(pieceId: string): Promise<{ dossierId: string; chemin: string } | null>
+
+  /** Vrai si une ligne a bien ete supprimee. Zero ligne, c'est un refus, pas un succes. */
+  supprimerPiece(pieceId: string): Promise<boolean>
+
+  journaliser(
+    dossierId: string,
+    action: 'piece_deposee' | 'piece_retiree',
+    pieceId: string,
+  ): Promise<boolean>
 }
 
 export type Resultat =
   { depose: true; chemin: string; pieceId: string } | { depose: false; raison: string }
+
+export type Retrait = { retiree: true } | { retiree: false; raison: string }
 
 /**
  * La cle de donnees du dossier, creee si elle n'existe pas encore.
@@ -141,4 +153,40 @@ export async function deposer(
   }
 
   return { depose: true, chemin, pieceId }
+}
+
+/**
+ * Retire une piece : journal, ligne, octets, dans cet ordre.
+ *
+ * Le journal d'abord, et ce n'est pas un choix de style. `journaliser` verifie
+ * que la piece appartient au dossier en la relisant dans `pieces` : une fois
+ * la ligne supprimee, il n'y a plus rien a relire et l'inscription serait
+ * refusee. Le retrait serait alors la seule action du coffre sans trace.
+ *
+ * La ligne ensuite, et non les octets : c'est la RLS qui dit si le retrait est
+ * encore permis (avant transmission seulement). Si elle ne supprime rien, on
+ * s'arrete la, les octets intacts. Le journal garde alors une tentative qui n'a
+ * pas abouti : c'est le sens dans lequel on prefere se tromper, comme a
+ * l'ouverture.
+ *
+ * Les octets en dernier. Un objet orphelin est invisible et chiffre ; une
+ * ligne sans objet ferait voir a l'agence une piece qui ne s'ouvre pas.
+ */
+export async function retirerPiece(base: DepotBase, pieceId: string): Promise<Retrait> {
+  const piece = await base.pieceDeposee(pieceId)
+  if (!piece) return { retiree: false, raison: "Cette piece n'existe pas, ou tu n'y as pas acces." }
+
+  if (!(await base.journaliser(piece.dossierId, 'piece_retiree', pieceId))) {
+    return { retiree: false, raison: "Le retrait n'a pas abouti. Reessaie dans un instant." }
+  }
+
+  if (!(await base.supprimerPiece(pieceId))) {
+    return {
+      retiree: false,
+      raison: 'Cette piece ne peut plus etre retiree : le dossier est parti a l’agence.',
+    }
+  }
+
+  await base.retirerObjet(piece.chemin)
+  return { retiree: true }
 }

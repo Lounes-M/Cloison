@@ -1,50 +1,179 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
+import { BoutonRetrait } from '@/components/forms/BoutonRetrait'
+import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
+import {
+  FormulaireEngagement,
+  type EngagementAffiche,
+} from '@/components/forms/FormulaireEngagement'
+import { Icone } from '@/components/ui/Icone'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
+import { depot, engagement as texteEngagement, natures } from '@/lib/content/garant'
+import { tailleLisible } from '@/lib/garant/validation'
 
 export const metadata: Metadata = {
   title: 'Ton dépôt',
   robots: { index: false, follow: false },
 }
 
+/** Tant que le dossier est la, le garant depose et corrige. Apres, il regarde. */
+const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'garant_insuffisant'])
+
+type Piece = { id: string; type: string; taille_octets: number; depose_le: string }
+
 /**
- * L'espace du garant, reduit a ce qu'il faut pour prouver que son lien
- * l'amene bien ici et que son jeton lui ouvre son dossier.
+ * L'espace du garant : ce qu'il couvre, et ses pieces.
  *
- * Le depot des pieces est la tache 29 : c'est la que se joue l'essentiel de
- * l'abandon, et il merite sa propre livraison plutot qu'un coin de celle-ci.
+ * C'est la que se joue l'essentiel de l'abandon. Chaque nature dit ce qu'on
+ * attend et combien, un fichier s'ajoute en un geste depuis le telephone, et
+ * ce qui est depose se voit avec sa taille et sa date, retirable tant que le
+ * dossier n'est pas parti.
+ *
+ * Ce que cette page ne montre pas : le ratio, ni le seuil, ni un verdict. Le
+ * garant depose ; l'agence decide. A distinguer de la cloison du locataire :
+ * ici c'est un choix d'ecran, pas une barriere. Le garant lit sa propre ligne
+ * d'`engagements`, ratio compris, et c'est juste, puisque ce ratio est calcule
+ * a partir de ses propres pieces. On ne l'affiche pas parce qu'un chiffre sans
+ * le seuil qui va avec inquiete sans renseigner.
  */
 export default async function PageGarant() {
   const porteur = await capaciteDepuisCookies()
   if (!porteur) redirect('/lien-invalide')
   if (porteur.capacite.partie !== 'garant') redirect('/locataire')
 
-  const { data: dossier } = await clientPorteurDeLien(porteur.jeton)
-    .from('dossiers')
-    .select('reference, email_locataire')
-    .eq('id', porteur.capacite.dossierId)
-    .maybeSingle()
+  const supabase = clientPorteurDeLien(porteur.jeton)
+  const { dossierId } = porteur.capacite
+
+  const [{ data: dossier }, { data: engagement }, { data: pieces }] = await Promise.all([
+    supabase
+      .from('dossiers')
+      .select('reference, email_locataire, statut')
+      .eq('id', dossierId)
+      .maybeSingle(),
+    supabase
+      .from('engagements')
+      .select('couvre, montant_max_cents, jusqu_au, solidaire')
+      .eq('dossier_id', dossierId)
+      .maybeSingle(),
+    supabase
+      .from('pieces')
+      .select('id, type, taille_octets, depose_le')
+      .eq('dossier_id', dossierId)
+      .order('depose_le', { ascending: true }),
+  ])
 
   if (!dossier) redirect('/lien-invalide')
 
+  const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
+  const deposees = (pieces ?? []) as Piece[]
+
+  const engagementAffiche: EngagementAffiche = engagement
+    ? {
+        couvre: engagement.couvre as 'loyer' | 'loyer_charges',
+        montant:
+          engagement.montant_max_cents == null
+            ? ''
+            : (Number(engagement.montant_max_cents) / 100).toLocaleString('fr-FR'),
+        jusquAu: engagement.jusqu_au ? String(engagement.jusqu_au) : '',
+        solidaire: Boolean(engagement.solidaire),
+      }
+    : null
+
   return (
-    <div className="w-full max-w-[560px]">
+    <div className="w-full max-w-[640px]">
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
-        Référence {String(dossier.reference)}
+        {depot.reference} {String(dossier.reference)}
       </p>
-      <h1 className="font-display mt-2 text-3xl uppercase md:text-4xl">Ton dépôt</h1>
-      <p className="mt-4 text-[15px] leading-relaxed font-medium">
-        <strong>{String(dossier.email_locataire)}</strong> t&apos;a désigné comme garant. Tu es au
-        bon endroit, et ton lien fonctionne.
+      <h1 className="font-display mt-2 text-3xl uppercase md:text-4xl">{depot.titre}</h1>
+      <p className="mt-3 text-[15px] leading-relaxed font-medium">
+        {depot.demandePar(String(dossier.email_locataire))}
       </p>
-      <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">
-        <p className="font-display text-xl uppercase">Le dépôt arrive</p>
-        <p className="mt-2 text-[15px] leading-relaxed font-medium">
-          C&apos;est le prochain chantier. Garde ce lien : il te ramènera ici quand le dépôt sera
-          ouvert.
-        </p>
+
+      <div className="bg-sky outlined shadow-brut mt-6 flex items-start gap-3 rounded-[18px] p-5">
+        <Icone nom="cadenas" className="mt-0.5 size-5 shrink-0" />
+        <p className="text-[14px] leading-relaxed font-medium">{depot.discretion}</p>
       </div>
+
+      {!ouvert ? (
+        <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">
+          <p className="font-display text-xl uppercase">{depot.fermeTitre}</p>
+          <p className="mt-2 text-[15px] leading-relaxed font-medium">{depot.fermeTexte}</p>
+        </div>
+      ) : null}
+
+      <section className="mt-12">
+        <h2 className="font-display text-2xl uppercase">{depot.piecesTitre}</h2>
+        <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
+
+        <ol className="flex flex-col gap-8">
+          {natures.map((nature) => {
+            const siennes = deposees.filter((p) => p.type === nature.valeur)
+            const complete = nature.attendu > 0 && siennes.length >= nature.attendu
+
+            return (
+              <li key={nature.valeur} className="border-ink border-t-2 pt-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="flex items-center gap-2 text-[16px] font-bold">
+                      {nature.libelle}
+                      {complete ? <Icone nom="coche" className="text-cobalt size-5" /> : null}
+                    </h3>
+                    <p className="text-muted mt-1 text-[13px] font-medium">{nature.aide}</p>
+                  </div>
+                </div>
+
+                {siennes.length > 0 ? (
+                  <ul className="mt-4 flex flex-col gap-2">
+                    {siennes.map((piece) => (
+                      <li
+                        key={piece.id}
+                        className="bg-paper outlined flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3"
+                      >
+                        <span className="flex items-center gap-2 text-[14px] font-medium">
+                          <Icone nom="fichier" className="size-4" />
+                          {tailleLisible(piece.taille_octets)}
+                          <span className="text-muted">
+                            {depot.deposeLe(
+                              new Date(piece.depose_le).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'long',
+                              }),
+                            )}
+                          </span>
+                        </span>
+                        {ouvert ? <BoutonRetrait pieceId={piece.id} /> : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {ouvert ? (
+                  <div className="mt-4">
+                    <FormulaireDepot nature={nature.valeur} libelle={nature.libelle} />
+                  </div>
+                ) : null}
+              </li>
+            )
+          })}
+        </ol>
+      </section>
+
+      <section className="mt-14">
+        <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>
+        <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
+          {texteEngagement.aide}
+        </p>
+        {ouvert ? (
+          <FormulaireEngagement actuel={engagementAffiche} />
+        ) : (
+          <p className="text-[15px] font-medium">
+            {engagementAffiche
+              ? `${engagementAffiche.couvre === 'loyer' ? 'Le loyer seul' : 'Le loyer et les charges'}${engagementAffiche.montant ? `, jusqu’à ${engagementAffiche.montant} € par mois` : ''}${engagementAffiche.jusquAu ? `, jusqu’au ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? ', caution solidaire' : ''}.`
+              : 'Aucun engagement déclaré.'}
+          </p>
+        )}
+      </section>
     </div>
   )
 }
