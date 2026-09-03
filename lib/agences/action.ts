@@ -1,6 +1,8 @@
 'use server'
 
 import { headers } from 'next/headers'
+import { consommerDebit } from '@/lib/acces/debit'
+import { clientAnonyme } from '@/lib/acces/session'
 import { enregistrerDemande, notifierDemande } from './enregistrement'
 import { DELAI_MINIMAL_MS, schemaDemandeAgence } from './schema'
 
@@ -14,44 +16,6 @@ export type EtatFormulaire = {
    * une panne passagere ne doit pas lui faire retaper quatre champs.
    */
   valeurs?: Record<string, string>
-}
-
-/** Fenetre glissante de limitation de debit. */
-const FENETRE_MS = 10 * 60 * 1000
-const MAX_PAR_FENETRE = 5
-
-/**
- * Limitation de debit en memoire.
- *
- * Honnete sur sa portee : chaque instance serverless a la sienne, donc elle ne
- * borne pas un attaquant reparti sur plusieurs instances. Elle suffit contre le
- * bruit ordinaire (double-clic, script naif, remplissage repete), et c'est ce
- * qu'on protege ici : une table sans lecture publique et sans donnee sensible.
- * Le jour ou une vraie limite s'impose (phase 3, sur les liens d'acces), elle
- * se fera avec un magasin partage.
- */
-const tentatives = new Map<string, number[]>()
-
-function tropDeTentatives(cle: string): boolean {
-  const maintenant = Date.now()
-  const recentes = (tentatives.get(cle) ?? []).filter((t) => maintenant - t < FENETRE_MS)
-
-  if (recentes.length >= MAX_PAR_FENETRE) {
-    tentatives.set(cle, recentes)
-    return true
-  }
-
-  recentes.push(maintenant)
-  tentatives.set(cle, recentes)
-
-  // La table ne doit pas grossir indefiniment sur une instance longue duree.
-  if (tentatives.size > 5000) {
-    for (const [autre, dates] of tentatives) {
-      if (dates.every((t) => maintenant - t >= FENETRE_MS)) tentatives.delete(autre)
-    }
-  }
-
-  return false
 }
 
 async function identifiantAppelant(): Promise<string> {
@@ -110,19 +74,24 @@ export async function envoyerDemandeAgence(
     return { statut: 'succes' }
   }
 
-  if (tropDeTentatives(await identifiantAppelant())) {
-    return {
-      statut: 'erreur',
-      message: 'Trop de tentatives. Réessaie dans quelques minutes.',
-      valeurs: saisie,
-    }
-  }
-
   // Tout ce qui suit touche des services externes. Une action serveur qui leve
   // renvoie un 500 et fait disparaitre le formulaire : l'agence perd sa saisie
   // et ne comprend pas pourquoi. Variable manquante, Supabase indisponible,
   // reseau coupe : tout doit ressortir en message lisible.
   try {
+    // La limite est comptee dans Postgres, partagee par toutes les instances :
+    // celle qui vivait ici en memoire ne bornait qu'une fonction serverless a
+    // la fois. Elle est a l'interieur du `try` a dessein, parce qu'elle depend
+    // desormais de `CLE_MAITRESSE` : une variable absente doit rendre un
+    // message lisible, pas faire disparaitre le formulaire.
+    if (!(await consommerDebit(clientAnonyme(), 'demande_agence', await identifiantAppelant()))) {
+      return {
+        statut: 'erreur',
+        message: 'Trop de tentatives. Réessaie dans quelques minutes.',
+        valeurs: saisie,
+      }
+    }
+
     const resultat = await enregistrerDemande(demande, 'formulaire-agences')
 
     if (resultat.statut === 'echec') {

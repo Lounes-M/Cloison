@@ -14,7 +14,7 @@ import { DUREE_JETON, signerJeton, verifierSignature, type Capacite, type Partie
  */
 
 /** Client anonyme, pour les fonctions ouvertes avant toute session. */
-function clientAnonyme() {
+export function clientAnonyme() {
   return createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
