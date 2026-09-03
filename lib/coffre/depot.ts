@@ -46,10 +46,15 @@ export interface DepotBase {
   poserCleScellee(dossierId: string, scellee: Buffer): Promise<'posee' | 'deja' | 'echec'>
   televerser(chemin: string, scelle: Buffer): Promise<boolean>
   retirerObjet(chemin: string): Promise<void>
-  inscrirePiece(piece: PieceAInscrire): Promise<boolean>
+
+  /** Rend l'identifiant de la piece inscrite, ou rien si l'inscription a echoue. */
+  inscrirePiece(piece: PieceAInscrire): Promise<string | null>
+
+  journaliser(dossierId: string, action: 'piece_deposee', pieceId: string): Promise<boolean>
 }
 
-export type Resultat = { depose: true; chemin: string } | { depose: false; raison: string }
+export type Resultat =
+  { depose: true; chemin: string; pieceId: string } | { depose: false; raison: string }
 
 /**
  * La cle de donnees du dossier, creee si elle n'existe pas encore.
@@ -109,7 +114,7 @@ export async function deposer(
     return { depose: false, raison: "Le depot n'a pas abouti. Reessaie dans un instant." }
   }
 
-  const inscrite = await base.inscrirePiece({
+  const pieceId = await base.inscrirePiece({
     dossierId,
     nature,
     chemin,
@@ -119,10 +124,21 @@ export async function deposer(
     typeReel: verdict.type,
   })
 
-  if (!inscrite) {
+  if (!pieceId) {
     await base.retirerObjet(chemin)
     return { depose: false, raison: "Le depot n'a pas abouti. Reessaie dans un instant." }
   }
 
-  return { depose: true, chemin }
+  // Le journal vient apres, et son echec n'annule rien : la ligne `pieces`
+  // est deja la trace du depot, et defaire un depot reussi parce qu'on n'a
+  // pas su l'ecrire deux fois couterait a la personne une piece qu'elle
+  // croyait posee.
+  //
+  // La regle s'inverse a l'ouverture d'une piece, ou le journal EST la trace :
+  // la, on n'ouvre pas ce qu'on ne peut pas inscrire.
+  if (!(await base.journaliser(dossierId, 'piece_deposee', pieceId))) {
+    console.error('[coffre] depot non journalise', chemin)
+  }
+
+  return { depose: true, chemin, pieceId }
 }

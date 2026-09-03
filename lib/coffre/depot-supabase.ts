@@ -104,16 +104,38 @@ export function baseSupabase(supabase: SupabaseClient): DepotBase {
     },
 
     async inscrirePiece(piece: PieceAInscrire) {
-      const { error } = await supabase.from('pieces').insert({
-        dossier_id: piece.dossierId,
-        type: piece.nature,
-        chemin: piece.chemin,
-        taille_octets: piece.tailleOctets,
-        type_reel: piece.typeReel,
+      const { data, error } = await supabase
+        .from('pieces')
+        .insert({
+          dossier_id: piece.dossierId,
+          type: piece.nature,
+          chemin: piece.chemin,
+          taille_octets: piece.tailleOctets,
+          type_reel: piece.typeReel,
+        })
+        .select('id')
+        .single()
+
+      if (error || !data?.id) {
+        console.error('[coffre] inscription de la piece refusee', error)
+        return null
+      }
+
+      return data.id as string
+    },
+
+    async journaliser(dossierId, action, pieceId) {
+      // `journaliser` ne prend aucun parametre d'identite : elle lit l'acteur
+      // dans le jeton que porte ce client. Il n'y a donc rien a falsifier
+      // ici, meme par erreur.
+      const { error } = await supabase.rpc('journaliser', {
+        le_dossier: dossierId,
+        l_action: action,
+        la_piece: pieceId,
       })
 
       if (error) {
-        console.error('[coffre] inscription de la piece refusee', error)
+        console.error('[coffre] inscription au journal refusee', error)
         return false
       }
 

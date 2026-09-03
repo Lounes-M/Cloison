@@ -27,20 +27,26 @@ coup d'œil dans `app/page.tsx`.
 
 Cloison est un produit à **trois acteurs qui ne voient pas la même chose du même dossier** :
 
-| Acteur       | `dossiers`                    | `engagements`     | `pieces`       | `cles_dossier`    | `storage.objects`       |
-| ------------ | ----------------------------- | ----------------- | -------------- | ----------------- | ----------------------- |
-| Le locataire | lecture, plus `email_garant`  | **rien**          | **rien**       | **rien**          | **rien**                |
-| Le garant    | lecture                       | lecture, écriture | lecture, dépôt | lecture, création | dépôt, lecture, retrait |
-| L'agence     | lecture, plus `statut`        | lecture           | lecture        | lecture           | lecture                 |
-| `anon`       | `ouvrir_dossier()` uniquement | **rien**          | **rien**       | **rien**          | **rien**                |
+| Acteur       | `dossiers`                    | `engagements`     | `pieces`       | `cles_dossier`    | `storage.objects`       | `journal_acces`      |
+| ------------ | ----------------------------- | ----------------- | -------------- | ----------------- | ----------------------- | -------------------- |
+| Le locataire | lecture, plus `email_garant`  | **rien**          | **rien**       | **rien**          | **rien**                | inscrit, ne lit pas  |
+| Le garant    | lecture                       | lecture, écriture | lecture, dépôt | lecture, création | dépôt, lecture, retrait | lecture, inscription |
+| L'agence     | lecture, plus `statut`        | lecture           | lecture        | lecture           | lecture                 | lecture, inscription |
+| `anon`       | `ouvrir_dossier()` uniquement | **rien**          | **rien**       | **rien**          | **rien**                | **rien**             |
 
-La matrice est appliquée par les migrations 0003, 0005 et 0006, et vérifiée test par test dans
-`tests/dossiers.test.ts`, `tests/cles-dossier.test.ts` et `tests/pieces.test.ts`. Quatre points la
-rendent lisible.
+La matrice est appliquée par les migrations 0003, 0005, 0006 et 0007, et vérifiée test par test
+dans `tests/dossiers.test.ts`, `tests/cles-dossier.test.ts`, `tests/pieces.test.ts` et
+`tests/journal-acces.test.ts`. Cinq points la rendent lisible.
 
 **Le montant et le ratio ne sont pas des colonnes de `dossiers`.** Ils vivent dans `engagements`,
 une table que le locataire ne lit pas du tout. Ce n'est pas un filtrage d'affichage : la base ne
 lui rend pas la ligne.
+
+**Le journal est la seule colonne où l'on écrit sans pouvoir lire.** Le locataire y inscrit ses
+propres consultations et n'y lit rien : voir qu'une pièce a été ouverte lui apprendrait qu'elle
+existe. Et personne n'écrit directement dans cette table, quel que soit son rôle. Une fonction
+`security definer` renseigne l'acteur d'après le jeton de l'appelant, ce qui rend une entrée
+mensongère impossible à fabriquer plutôt qu'improbable.
 
 **Ce que l'agence lit du coffre est inerte.** Elle voit la clé scellée et les octets scellés, et
 ni l'une ni les autres ne servent à quoi que ce soit sans la clé maîtresse, qui vit chez Vercel. Lui
