@@ -69,6 +69,9 @@ export const depot = {
 export const engagement = {
   titre: 'Ce que tu couvres',
   aide: 'Ce que tu déclares ici figurera dans l’acte de cautionnement. Tu peux le corriger tant que le dossier n’est pas parti.',
+  revenu: 'Ton revenu net mensuel',
+  revenuAide:
+    'En euros, ce que tu touches par mois après impôt à la source. Tes bulletins en sont la preuve : l’agence les compare. Vide, le dossier reste en attente.',
   couvre: 'Tu couvres',
   couvreOptions: [
     { valeur: 'loyer_charges', libelle: 'Le loyer et les charges' },

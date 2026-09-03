@@ -35,6 +35,13 @@ export const espace = {
   garantEnvoi: 'Envoi…',
   garantSucces: 'Lien envoyé. Ton garant a sept jours pour déposer.',
   expire: (date: string) => `Ce dossier expire le ${date}.`,
+  loyerTitre: 'Le loyer',
+  loyerAide:
+    'Charges comprises, par mois. C’est ce qui sert à établir si ton garant convient : sans lui, le dossier reste en attente.',
+  loyerChamp: 'Loyer mensuel, charges comprises',
+  loyerBouton: 'Enregistrer',
+  loyerEnvoi: 'Enregistrement…',
+  loyerSucces: 'Loyer enregistré.',
 } as const
 
 /**

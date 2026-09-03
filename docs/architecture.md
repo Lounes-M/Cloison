@@ -27,16 +27,22 @@ coup d'œil dans `app/page.tsx`.
 
 Cloison est un produit à **trois acteurs qui ne voient pas la même chose du même dossier** :
 
-| Acteur       | `dossiers`                    | `engagements`     | `pieces`       | `cles_dossier`    | `storage.objects`       | `journal_acces`      |
-| ------------ | ----------------------------- | ----------------- | -------------- | ----------------- | ----------------------- | -------------------- |
-| Le locataire | lecture, plus `email_garant`  | **rien**          | **rien**       | **rien**          | **rien**                | inscrit, ne lit pas  |
-| Le garant    | lecture                       | lecture, écriture | lecture, dépôt | lecture, création | dépôt, lecture, retrait | lecture, inscription |
-| L'agence     | lecture, plus `statut`        | lecture           | lecture        | lecture           | lecture                 | lecture, inscription |
-| `anon`       | `ouvrir_dossier()` uniquement | **rien**          | **rien**       | **rien**          | **rien**                | **rien**             |
+| Acteur       | `dossiers`                                    | `engagements`                   | `pieces`       | `cles_dossier`    | `storage.objects`       | `journal_acces`      |
+| ------------ | --------------------------------------------- | ------------------------------- | -------------- | ----------------- | ----------------------- | -------------------- |
+| Le locataire | lecture, plus `email_garant` et `loyer_cents` | **rien**                        | **rien**       | **rien**          | **rien**                | inscrit, ne lit pas  |
+| Le garant    | lecture                                       | lecture, écriture, sauf `ratio` | lecture, dépôt | lecture, création | dépôt, lecture, retrait | lecture, inscription |
+| L'agence     | lecture, plus `statut`                        | lecture                         | lecture        | lecture           | lecture                 | lecture, inscription |
+| `anon`       | `ouvrir_dossier()` uniquement                 | **rien**                        | **rien**       | **rien**          | **rien**                | **rien**             |
 
 La matrice est appliquée par les migrations 0003, 0005, 0006 et 0007, et vérifiée test par test
 dans `tests/dossiers.test.ts`, `tests/cles-dossier.test.ts`, `tests/pieces.test.ts` et
 `tests/journal-acces.test.ts`. Cinq points la rendent lisible.
+
+**Le ratio est calculé, jamais saisi.** Le locataire écrit le loyer, le garant écrit son revenu, et
+c'est la base qui divise, en `security definer`, à chaque écriture qui change le résultat
+(migration 0011). `porteur_lien` n'a le droit d'écrire ni `ratio` ni `statut` : le passage à
+« complet » ou à « ce garant ne convient pas » ne peut venir que d'un calcul. Le seuil appartient à
+l'agence, trois fois le loyer par défaut, parce que c'est celui qui décide qui règle le curseur.
 
 **Le montant et le ratio ne sont pas des colonnes de `dossiers`.** Ils vivent dans `engagements`,
 une table que le locataire ne lit pas du tout. Ce n'est pas un filtrage d'affichage : la base ne
