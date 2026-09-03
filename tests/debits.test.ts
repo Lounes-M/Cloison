@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeAll, beforeEach, describe, expect, test } from 'vitest'
-import { consommerDebit, empreinteDe } from '@/lib/acces/debit'
+import { SUJETS, consommerDebit, empreinteDe } from '@/lib/acces/debit'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
 
 /**
@@ -67,6 +67,16 @@ describe('consommer_debit', () => {
          from pg_proc where proname = 'consommer_debit'`,
     )
     expect(rows[0]!.arguments).toBe('le_sujet text, l_empreinte text')
+  })
+
+  test('chaque sujet connu du code est connu de la base', async () => {
+    // La liste de `lib/acces/debit.ts` et le `case` de `consommer_debit` sont
+    // deux ecritures de la meme chose. Un sujet ajoute d'un cote et oublie de
+    // l'autre ne se verrait qu'a l'execution, sur une page de production, sous
+    // la forme d'un refus incomprehensible.
+    for (const sujet of SUJETS) {
+      expect(await passe(db, sujet, UNE)).toBe(true)
+    }
   })
 
   test('un sujet inconnu est refuse', async () => {

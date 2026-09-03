@@ -19,8 +19,22 @@ import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
  * obtiendrait la table `debits` n'y lirait pas qui a essaye quoi.
  */
 
-/** Ce qu'on limite. Les plafonds, eux, vivent dans la migration 0008. */
-export type SujetDeDebit = 'demande_agence' | 'lien_locataire' | 'lien_garant' | 'ouverture_dossier'
+/**
+ * Ce qu'on limite. Les plafonds, eux, vivent dans les migrations 0008 et 0009.
+ *
+ * Cette liste doit rester le miroir exact du `case` de `consommer_debit` : un
+ * sujet ecrit ici et absent la-bas fait lever la base a l'execution, jamais a
+ * la compilation. Un test compare les deux.
+ */
+export const SUJETS = [
+  'demande_agence',
+  'connexion_agence',
+  'lien_locataire',
+  'lien_garant',
+  'ouverture_dossier',
+] as const
+
+export type SujetDeDebit = (typeof SUJETS)[number]
 
 /**
  * Une cle derivee de la cle maitresse, et non la cle maitresse elle-meme.
