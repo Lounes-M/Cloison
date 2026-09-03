@@ -53,21 +53,23 @@ Sans conséquence immédiate (TypeScript 6 est parfaitement fonctionnel) mais l'
 
 ## Décidées, à revoir plus tard
 
-### Limitation de débit en mémoire sur le formulaire agence
+### Une réponse qui dit si une adresse a un dossier
 
-`app/agences/action.ts` limite les envois avec une table en mémoire. Chaque instance serverless a la
-sienne : la limite ne borne donc pas un attaquant réparti sur plusieurs instances. Elle suffit
-contre le bruit ordinaire (double-clic, script naïf, envois répétés) et ce qu'elle protège est une
-table sans lecture publique ni donnée sensible.
+**Constaté le** 1er septembre 2026 par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md),
+et **partiellement réglé le** 3 septembre 2026.
 
-**Signal déclenché le 1er septembre 2026**, par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md).
-Le point d'envoi d'un lien magique est exactement ce qu'il ne faut pas laisser sans limite : il
-envoie un e-mail à une adresse choisie par l'appelant, ce qui en fait à la fois un amplificateur de
-spam et un moyen de savoir si une adresse a un dossier.
+Le magasin partagé, qui était la moitié technique du sujet, existe : la migration 0008 compte dans
+Postgres, et `lib/acces/debit.ts` n'y envoie qu'une empreinte. La moitié qui reste est de nature
+différente et ne se règle pas dans un compteur.
 
-**Ce que ça demande** : un magasin partagé, et une réponse identique que l'adresse existe ou non.
-Ce n'est plus une amélioration ultérieure mais un prérequis de mise en service, à livrer avec le
-parcours locataire.
+Un point d'envoi de lien magique doit répondre **exactement la même chose** que l'adresse ait un
+dossier ou non : même message, même délai apparent, même code. Sinon la page devient un oracle qui
+répond « cette personne est locataire chez nous ». Le compteur ne peut rien pour ça, et il aggrave
+même le problème s'il est mal branché : une limite qui ne se déclenche que sur les adresses connues
+renseigne à elle seule.
+
+**Signal de sortie** : le parcours locataire, en phase 4. C'est là que la route existera, et la
+règle est à écrire avec elle plutôt qu'après.
 
 ### Aucun antivirus sur les pièces déposées
 
@@ -119,6 +121,12 @@ apparaît réellement, et le rendu y sera dynamique de toute façon : le coût d
 - **L'en-tête et le pied de page vivaient dans `page.tsx`** : remontés dans le layout racine le
   1er septembre 2026, à l'arrivée de la deuxième route (`/agences`), comme prévu. `app/error.tsx`
   et `app/not-found.tsx` conservent désormais la navigation du site.
+- **La limitation de débit vivait en mémoire** : réglée le 3 septembre 2026, comme le signal de
+  l'ADR 0006 l'exigeait. La table en mémoire de `lib/agences/action.ts` a disparu au profit de la
+  migration 0008, partagée par toutes les instances. Une précision qui n'était pas dans le signal :
+  ce qui part vers Supabase n'est jamais l'adresse, mais une empreinte HMAC calculée avec un secret
+  qui vit chez Vercel. Qui obtiendrait la table `debits` n'y lirait pas qui a essayé quoi. En
+  contrepartie, `CLE_MAITRESSE` devient requise en production, ce qu'elle n'était pas jusque-là.
 - **Aucun test automatisé** : réglé le 2 septembre 2026, en ouverture de la phase 3, et le signal
   de sortie était bien celui-là. Le scénario manuel de `supabase/essais/acces-agences.sql` est
   devenu dix-sept tests assertifs qui tournent dans `npm run check` et dans la CI. Un détail du
