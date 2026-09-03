@@ -3,6 +3,8 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { DepotBase, PieceAInscrire } from './depot'
+import type { OuvertureBase, PieceOuvrable } from './ouverture'
+import type { TypeAccepte } from './type-reel'
 
 /**
  * Le branchement de `DepotBase` sur Supabase.
@@ -44,22 +46,54 @@ export function depuisBytea(valeur: unknown): Buffer | null {
 /** Le code Postgres d'une violation de contrainte d'unicite. */
 const DOUBLON = '23505'
 
+/**
+ * Lit la cle scellee d'un dossier, partagee par le depot et l'ouverture.
+ *
+ * Rend `null` sans distinguer l'absence du refus : c'est la RLS qui a decide,
+ * et lui faire dire pourquoi renseignerait sur ce qui existe.
+ */
+async function lireCleScellee(supabase: SupabaseClient, dossierId: string) {
+  const { data, error } = await supabase
+    .from('cles_dossier')
+    .select('cle_scellee')
+    .eq('dossier_id', dossierId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[coffre] lecture de la cle impossible', error)
+    return null
+  }
+
+  return data ? depuisBytea(data.cle_scellee) : null
+}
+
+/** L'inscription au journal, partagee elle aussi. */
+async function inscrireAuJournal(
+  supabase: SupabaseClient,
+  dossierId: string,
+  action: 'piece_deposee' | 'piece_ouverte',
+  pieceId: string,
+) {
+  // `journaliser` ne prend aucun parametre d'identite : elle lit l'acteur dans
+  // le jeton que porte ce client. Il n'y a donc rien a falsifier ici, meme par
+  // erreur.
+  const { error } = await supabase.rpc('journaliser', {
+    le_dossier: dossierId,
+    l_action: action,
+    la_piece: pieceId,
+  })
+
+  if (error) {
+    console.error('[coffre] inscription au journal refusee', error)
+    return false
+  }
+
+  return true
+}
+
 export function baseSupabase(supabase: SupabaseClient): DepotBase {
   return {
-    async cleScellee(dossierId) {
-      const { data, error } = await supabase
-        .from('cles_dossier')
-        .select('cle_scellee')
-        .eq('dossier_id', dossierId)
-        .maybeSingle()
-
-      if (error) {
-        console.error('[coffre] lecture de la cle impossible', error)
-        return null
-      }
-
-      return data ? depuisBytea(data.cle_scellee) : null
-    },
+    cleScellee: (dossierId) => lireCleScellee(supabase, dossierId),
 
     async poserCleScellee(dossierId, scellee) {
       const { error } = await supabase
@@ -124,22 +158,49 @@ export function baseSupabase(supabase: SupabaseClient): DepotBase {
       return data.id as string
     },
 
-    async journaliser(dossierId, action, pieceId) {
-      // `journaliser` ne prend aucun parametre d'identite : elle lit l'acteur
-      // dans le jeton que porte ce client. Il n'y a donc rien a falsifier
-      // ici, meme par erreur.
-      const { error } = await supabase.rpc('journaliser', {
-        le_dossier: dossierId,
-        l_action: action,
-        la_piece: pieceId,
-      })
+    journaliser: (dossierId, action, pieceId) =>
+      inscrireAuJournal(supabase, dossierId, action, pieceId),
+  }
+}
 
-      if (error) {
-        console.error('[coffre] inscription au journal refusee', error)
-        return false
+/** Le pendant en lecture : ce que l'ouverture d'une piece va chercher. */
+export function baseOuvertureSupabase(supabase: SupabaseClient): OuvertureBase {
+  return {
+    async piece(pieceId): Promise<PieceOuvrable | null> {
+      const { data, error } = await supabase
+        .from('pieces')
+        .select('dossier_id, chemin, type_reel')
+        .eq('id', pieceId)
+        .maybeSingle()
+
+      if (error || !data) {
+        if (error) console.error('[coffre] lecture de la piece impossible', error)
+        return null
       }
 
-      return true
+      return {
+        dossierId: data.dossier_id as string,
+        chemin: data.chemin as string,
+        // La contrainte `type_reel` de la migration 0006 borne cette colonne
+        // aux trois valeurs acceptees : rien d'autre ne peut s'y trouver.
+        typeReel: data.type_reel as TypeAccepte,
+      }
     },
+
+    cleScellee: (dossierId) => lireCleScellee(supabase, dossierId),
+
+    async telecharger(chemin) {
+      const { data, error } = await supabase.storage.from(SEAU).download(chemin)
+
+      if (error || !data) {
+        if (error) console.error('[coffre] telechargement refuse', error)
+        return null
+      }
+
+      return Buffer.from(await data.arrayBuffer())
+    },
+
+    journaliser: (dossierId, action, pieceId) =>
+      inscrireAuJournal(supabase, dossierId, action, pieceId),
   }
 }
