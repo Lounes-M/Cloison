@@ -114,10 +114,17 @@ describe('ouvrir_dossier_avec_lien', () => {
     expect(await compter(db, 'public.dossiers')).toBe(2)
   })
 
-  test('une agence qui ouvre se voit rattacher le dossier', async () => {
+  test('une agence verifiee qui ouvre se voit rattacher le dossier', async () => {
     await devenir(db, 'authenticated', MARIE)
     await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
 
+    // Verifiee, en deux instructions : la 0002 remet en `decouverte` toute
+    // agence dont le SIREN change, et la 0012 refuse aux non verifiees.
+    await redevenirProprietaire(db)
+    await db.query(`update public.agences set siren = '123456789', carte_pro = 'CPI 6901 2026 1'`)
+    await db.query(`update public.agences set statut = 'verifiee', verifiee_le = now()`)
+
+    await devenir(db, 'authenticated', MARIE)
     const ouvert = await ouvrir(db, 'locataire@exemple.fr')
 
     // La regle de `ouvrir_dossier` s'applique sans avoir ete recopiee : c'est
