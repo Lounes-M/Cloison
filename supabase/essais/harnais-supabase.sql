@@ -45,3 +45,43 @@ create table auth.users (
 create or replace function auth.uid() returns uuid
   language sql stable
   as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+
+-- ---------------------------------------------------------------------------
+-- Le schema `storage`, reduit a ce que nos politiques lisent
+-- ---------------------------------------------------------------------------
+--
+-- Ce faux-ci merite d'etre borne a haute voix. Il reproduit deux tables et le
+-- fait que la RLS y est active sans aucune politique, ce qui est bien l'etat
+-- ou Supabase les livre. Il permet donc de prouver qu'une clause `using` ou
+-- `with check` dit ce qu'on croit, puisque c'est le meme Postgres qui
+-- l'evalue.
+--
+-- Ce qu'il ne prouve pas, et qu'aucun faux ne pourra prouver ici : que l'API
+-- Storage de Supabase passe bien par ces politiques sur chacun de ses chemins.
+-- Cette partie-la se verifie contre le vrai projet, pas ici.
+
+create schema if not exists storage;
+grant usage on schema storage to anon, authenticated, service_role;
+
+create table storage.buckets (
+  id         text primary key,
+  name       text not null,
+  public     boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+create table storage.objects (
+  id         uuid primary key default gen_random_uuid(),
+  bucket_id  text not null references storage.buckets (id),
+  name       text not null,
+  owner      uuid,
+  created_at timestamptz not null default now(),
+  metadata   jsonb,
+  unique (bucket_id, name)
+);
+
+-- Supabase ouvre les droits de table et s'en remet entierement a la RLS, qui
+-- est active sans politique : tout est donc refuse tant qu'on n'en ecrit pas.
+alter table storage.objects enable row level security;
+grant all on storage.objects to anon, authenticated, service_role;
+grant select on storage.buckets to anon, authenticated, service_role;

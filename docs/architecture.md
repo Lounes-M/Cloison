@@ -27,19 +27,31 @@ coup d'œil dans `app/page.tsx`.
 
 Cloison est un produit à **trois acteurs qui ne voient pas la même chose du même dossier** :
 
-| Acteur       | `dossiers`                    | `engagements`     | `pieces`       |
-| ------------ | ----------------------------- | ----------------- | -------------- |
-| Le locataire | lecture, plus `email_garant`  | **rien**          | **rien**       |
-| Le garant    | lecture                       | lecture, écriture | lecture, dépôt |
-| L'agence     | lecture, plus `statut`        | lecture           | lecture        |
-| `anon`       | `ouvrir_dossier()` uniquement | **rien**          | **rien**       |
+| Acteur       | `dossiers`                    | `engagements`     | `pieces`       | `cles_dossier`    | `storage.objects`       |
+| ------------ | ----------------------------- | ----------------- | -------------- | ----------------- | ----------------------- |
+| Le locataire | lecture, plus `email_garant`  | **rien**          | **rien**       | **rien**          | **rien**                |
+| Le garant    | lecture                       | lecture, écriture | lecture, dépôt | lecture, création | dépôt, lecture, retrait |
+| L'agence     | lecture, plus `statut`        | lecture           | lecture        | lecture           | lecture                 |
+| `anon`       | `ouvrir_dossier()` uniquement | **rien**          | **rien**       | **rien**          | **rien**                |
 
-La matrice est appliquée par la migration 0003 et vérifiée test par test dans `tests/dossiers.ts`.
-Deux points la rendent lisible.
+La matrice est appliquée par les migrations 0003, 0005 et 0006, et vérifiée test par test dans
+`tests/dossiers.test.ts`, `tests/cles-dossier.test.ts` et `tests/pieces.test.ts`. Quatre points la
+rendent lisible.
 
 **Le montant et le ratio ne sont pas des colonnes de `dossiers`.** Ils vivent dans `engagements`,
 une table que le locataire ne lit pas du tout. Ce n'est pas un filtrage d'affichage : la base ne
 lui rend pas la ligne.
+
+**Ce que l'agence lit du coffre est inerte.** Elle voit la clé scellée et les octets scellés, et
+ni l'une ni les autres ne servent à quoi que ce soit sans la clé maîtresse, qui vit chez Vercel. Lui
+cacher le chiffre n'aurait rien ajouté ; ce qui protège, c'est que les deux moitiés ne sont pas
+hébergées au même endroit.
+
+**Deux tables disent la même chose de la même pièce.** `pieces` porte les métadonnées,
+`storage.objects` porte les octets, et leurs règles sont écrites deux fois volontairement : si elles
+divergeaient, la plus permissive des deux deviendrait la règle réelle. La contrainte
+`chemin_dans_le_dossier` et la clause `name like dossier_courant()` sont la même phrase, une fois
+côté lignes et une fois côté octets.
 
 **`porteur_lien` est un seul rôle Postgres pour le garant et le locataire.** La frontière entre eux
 ne peut donc pas venir des droits de table : elle vient du claim `role_partie` porté par le jeton et
