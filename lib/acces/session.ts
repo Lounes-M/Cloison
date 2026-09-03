@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { env } from '@/lib/env'
 import { DUREE_JETON, signerJeton, verifierSignature, type Capacite, type Partie } from './jeton'
@@ -109,8 +109,12 @@ export async function resoudreCapacite(jeton: string | undefined): Promise<Capac
  */
 export async function ouvrirDossierAvecLien(
   emailDuLocataire: string,
+  // Le client decide de qui ouvre : anonyme pour le locataire, celui de
+  // l'agence quand c'est elle. `ouvrir_dossier` lit `agence_courante()` dans
+  // le jeton porte par ce client, et c'est ce qui rattache, ou non, le dossier.
+  supabase: SupabaseClient = clientAnonyme(),
 ): Promise<{ dossierId: string; reference: string; jeton: string; expireLe: Date } | null> {
-  const { data, error } = await clientAnonyme().rpc('ouvrir_dossier_avec_lien', {
+  const { data, error } = await supabase.rpc('ouvrir_dossier_avec_lien', {
     email_du_locataire: emailDuLocataire,
     duree: DUREE_JETON,
   })

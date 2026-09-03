@@ -116,6 +116,22 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
 
+  // `@napi-rs/canvas` charge un binaire natif (`.node`) que Turbopack ne sait
+  // pas emballer, et `pdfjs-dist` va chercher ses polices sur disque a cote de
+  // lui. Les deux restent des modules externes, charges depuis `node_modules`
+  // a l'execution, comme le fait Node. Sans cette ligne, le build echoue sur la
+  // route qui les importe (« non-ecmascript placeable asset »).
+  serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
+
+  // Les polices standard de pdf.js vivent dans `node_modules` et ne sont
+  // atteintes par aucun `import` : le tracage de fichiers ne les emporterait
+  // pas de lui-meme, et pdf.js rendrait alors les pages SANS leur texte, avec
+  // un simple avertissement. C'est le piege que `lib/coffre/rasterisation.ts`
+  // fait echouer bruyamment ; cette ligne est ce que son message reclame.
+  outputFileTracingIncludes: {
+    '/espace/pieces/[id]': ['./node_modules/pdfjs-dist/standard_fonts/**'],
+  },
+
   experimental: {
     serverActions: {
       // Le depot d'une piece passe par une action serveur, parce que le
