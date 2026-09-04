@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import { ouvrirDossierAvecLien, urlDuLien } from '@/lib/acces/session'
 import { envoyerLienLocataire } from '@/lib/courriels/liens'
+import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 import { contexteAgence } from './contexte'
 
 /**
@@ -135,6 +136,10 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
   })
   if (journal) console.error('[agence] prise non journalisee', journal)
 
+  // Le locataire apprend que l'agence decide ; le garant, que sa mention
+  // l'attend. Ni l'un ni l'autre ne recoit de lien : ils ont le leur.
+  await prevenirSiLeStatutAChange(contexte.supabase, id, 'complet')
+
   revalidatePath(`/espace/dossiers/${id}`)
   revalidatePath('/espace')
   return { statut: 'inactif' }
@@ -158,6 +163,9 @@ export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Pro
     if (error) console.error('[agence] refus refuse', error)
     return { statut: 'erreur', message: 'Ce dossier ne peut pas etre refuse dans son etat actuel.' }
   }
+
+  // Le refus se dit, sans son motif : c'est ce que l'ecran promet.
+  await prevenirSiLeStatutAChange(contexte.supabase, id, null)
 
   revalidatePath(`/espace/dossiers/${id}`)
   revalidatePath('/espace')
