@@ -43,6 +43,12 @@ describe('purger_les_dossiers_expires', () => {
       [id],
     )
     await db.query(`insert into public.engagements (dossier_id) values ($1)`, [id])
+    // Depuis la 0018, le lien du garant attend le reglement d'un dossier de
+    // locataire : on le regle ici, comme le webhook Stripe le ferait.
+    await db.query(
+      `update public.dossiers set paye_le = now(), paiement_ref = 'cs_test_purge_' || $1 where id = $1`,
+      [id],
+    )
     await db.query(`select public.emettre_jeton($1, 'garant', '7 days')`, [id])
     await db.query(
       `insert into public.journal_acces (dossier_id, action, acteur) values ($1, 'dossier_consulte', 'locataire')`,
