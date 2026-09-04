@@ -44,6 +44,21 @@ export const tableau = {
     'Dossier de démonstration. Rien ici n’est réel : les pièces le disent en travers de chaque page.',
 } as const
 
+export const activation = {
+  titre: 'Demander l’activation',
+  texte:
+    'Pour ouvrir des dossiers réels, votre agence doit être vérifiée : son SIREN, contrôlable publiquement, et sa carte professionnelle « Gestion immobilière ». Vous les déclarez, nous vérifions, et vous êtes activés sous 48 heures ouvrées.',
+  siren: 'SIREN',
+  cartePro: 'Numéro de carte professionnelle',
+  aide: 'La carte « Gestion immobilière » délivrée par la CCI, au nom de l’agence.',
+  bouton: 'Demander l’activation',
+  envoi: 'Envoi…',
+  succes: 'Demande envoyée. Nous vérifions et revenons vers vous sous 48 heures ouvrées.',
+  enAttente: (date: string) =>
+    `Demande envoyée le ${date}. Nous vérifions et revenons vers vous sous 48 heures ouvrées.`,
+  membre: 'Seul un administrateur de l’agence peut demander l’activation.',
+} as const
+
 export const dossier = {
   retour: 'Tous les dossiers',
   reference: 'Référence',

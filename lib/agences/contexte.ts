@@ -17,6 +17,9 @@ export type Agence = {
   domaine: string
   statut: 'decouverte' | 'verifiee' | 'suspendue'
   seuilRatio: number
+  siren: string | null
+  cartePro: string | null
+  activationDemandeeLe: string | null
 }
 
 export type ContexteAgence =
@@ -47,7 +50,7 @@ export async function contexteAgence(): Promise<ContexteAgence> {
   const [{ data: agence }, { data: membre }] = await Promise.all([
     supabase
       .from('agences')
-      .select('id, nom, domaine, statut, seuil_ratio')
+      .select('id, nom, domaine, statut, seuil_ratio, siren, carte_pro, activation_demandee_le')
       .eq('id', rattachement.agenceId)
       .maybeSingle(),
     supabase
@@ -70,6 +73,10 @@ export async function contexteAgence(): Promise<ContexteAgence> {
       domaine: String(agence.domaine),
       statut: agence.statut as Agence['statut'],
       seuilRatio: Number(agence.seuil_ratio),
+      siren: agence.siren == null ? null : String(agence.siren),
+      cartePro: agence.carte_pro == null ? null : String(agence.carte_pro),
+      activationDemandeeLe:
+        agence.activation_demandee_le == null ? null : String(agence.activation_demandee_le),
     },
     role: membre?.role === 'admin' ? 'admin' : 'membre',
     supabase,
