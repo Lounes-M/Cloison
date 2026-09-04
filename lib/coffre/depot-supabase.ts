@@ -3,8 +3,6 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { DepotBase, PieceAInscrire } from './depot'
-import type { OuvertureBase, PieceOuvrable } from './ouverture'
-import type { TypeAccepte } from './type-reel'
 
 /**
  * Le branchement de `DepotBase` sur Supabase.
@@ -18,7 +16,7 @@ import type { TypeAccepte } from './type-reel'
  */
 
 /** Le seau des pieces. Prive, cree par la migration 0006. */
-const SEAU = 'pieces'
+export const SEAU = 'pieces'
 
 /**
  * PostgREST rend un `bytea` en hexadecimal prefixe, et l'attend de meme.
@@ -52,7 +50,7 @@ const DOUBLON = '23505'
  * Rend `null` sans distinguer l'absence du refus : c'est la RLS qui a decide,
  * et lui faire dire pourquoi renseignerait sur ce qui existe.
  */
-async function lireCleScellee(supabase: SupabaseClient, dossierId: string) {
+export async function lireCleScellee(supabase: SupabaseClient, dossierId: string) {
   const { data, error } = await supabase
     .from('cles_dossier')
     .select('cle_scellee')
@@ -68,7 +66,7 @@ async function lireCleScellee(supabase: SupabaseClient, dossierId: string) {
 }
 
 /** L'inscription au journal, partagee elle aussi. */
-async function inscrireAuJournal(
+export async function inscrireAuJournal(
   supabase: SupabaseClient,
   dossierId: string,
   action: 'piece_deposee' | 'piece_ouverte' | 'piece_retiree',
@@ -185,48 +183,6 @@ export function baseSupabase(supabase: SupabaseClient): DepotBase {
       }
 
       return Array.isArray(data) && data.length > 0
-    },
-
-    journaliser: (dossierId, action, pieceId) =>
-      inscrireAuJournal(supabase, dossierId, action, pieceId),
-  }
-}
-
-/** Le pendant en lecture : ce que l'ouverture d'une piece va chercher. */
-export function baseOuvertureSupabase(supabase: SupabaseClient): OuvertureBase {
-  return {
-    async piece(pieceId): Promise<PieceOuvrable | null> {
-      const { data, error } = await supabase
-        .from('pieces')
-        .select('dossier_id, chemin, type_reel')
-        .eq('id', pieceId)
-        .maybeSingle()
-
-      if (error || !data) {
-        if (error) console.error('[coffre] lecture de la piece impossible', error)
-        return null
-      }
-
-      return {
-        dossierId: data.dossier_id as string,
-        chemin: data.chemin as string,
-        // La contrainte `type_reel` de la migration 0006 borne cette colonne
-        // aux trois valeurs acceptees : rien d'autre ne peut s'y trouver.
-        typeReel: data.type_reel as TypeAccepte,
-      }
-    },
-
-    cleScellee: (dossierId) => lireCleScellee(supabase, dossierId),
-
-    async telecharger(chemin) {
-      const { data, error } = await supabase.storage.from(SEAU).download(chemin)
-
-      if (error || !data) {
-        if (error) console.error('[coffre] telechargement refuse', error)
-        return null
-      }
-
-      return Buffer.from(await data.arrayBuffer())
     },
 
     journaliser: (dossierId, action, pieceId) =>

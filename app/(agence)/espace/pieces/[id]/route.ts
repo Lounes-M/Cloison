@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { baseOuvertureSupabase } from '@/lib/coffre/depot-supabase'
+import { baseOuvertureSupabase } from '@/lib/coffre/ouverture-supabase'
 import { filigranePour, ouvrirPiecePourLAgence } from '@/lib/coffre/ouverture'
 import { contexteAgence } from '@/lib/agences/contexte'
 
