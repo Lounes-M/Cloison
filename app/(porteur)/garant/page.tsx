@@ -9,7 +9,13 @@ import {
 } from '@/components/forms/FormulaireEngagement'
 import { Icone } from '@/components/ui/Icone'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { depot, engagement as texteEngagement, natures } from '@/lib/content/garant'
+import { FormulaireMention } from '@/components/forms/FormulaireMention'
+import {
+  depot,
+  engagement as texteEngagement,
+  mention as texteMention,
+  natures,
+} from '@/lib/content/garant'
 import { tailleLisible } from '@/lib/garant/validation'
 
 export const metadata: Metadata = {
@@ -53,7 +59,9 @@ export default async function PageGarant() {
       .maybeSingle(),
     supabase
       .from('engagements')
-      .select('couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents')
+      .select(
+        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, nom, prenom, adresse, mention, mention_saisie_le',
+      )
       .eq('dossier_id', dossierId)
       .maybeSingle(),
     supabase
@@ -66,6 +74,11 @@ export default async function PageGarant() {
   if (!dossier) redirect('/lien-invalide')
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
+
+  // La mention se compose quand l'agence a pris le dossier : c'est l'acte qui
+  // vient ensuite, et il n'y a pas d'acte sans decision. Un dossier complet
+  // peut deja la preparer.
+  const mentionAttendue = ['complet', 'transmis'].includes(String(dossier.statut))
   const deposees = (pieces ?? []) as Piece[]
 
   const engagementAffiche: EngagementAffiche = engagement
@@ -162,6 +175,29 @@ export default async function PageGarant() {
           })}
         </ol>
       </section>
+
+      {mentionAttendue ? (
+        <section className="mt-14">
+          <h2 className="font-display text-2xl uppercase">{texteMention.titre}</h2>
+          <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
+          <FormulaireMention
+            actuel={
+              engagement
+                ? {
+                    nom: engagement.nom ? String(engagement.nom) : '',
+                    prenom: engagement.prenom ? String(engagement.prenom) : '',
+                    adresse: engagement.adresse ? String(engagement.adresse) : '',
+                    mention: engagement.mention ? String(engagement.mention) : '',
+                    apposeeLe: engagement.mention_saisie_le
+                      ? String(engagement.mention_saisie_le)
+                      : null,
+                  }
+                : null
+            }
+            solidaire={Boolean(engagement?.solidaire ?? true)}
+          />
+        </section>
+      ) : null}
 
       <section className="mt-14">
         <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>

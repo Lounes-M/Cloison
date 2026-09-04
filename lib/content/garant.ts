@@ -88,3 +88,44 @@ export const engagement = {
   envoi: 'Enregistrement…',
   succes: 'Enregistré.',
 } as const
+
+/**
+ * La mention : guidee, jamais fournie.
+ *
+ * Aucune phrase modele ici, ni dans le formulaire, ni dans une aide, ni dans
+ * un `placeholder`. La loi exige que la caution l'appose elle-meme, et
+ * l'ADR 0005 tient qu'un texte pre-suggere d'un peu trop pres suffirait a
+ * faire tomber l'engagement. On decrit ce qu'elle doit contenir ; on ne
+ * l'ecrit pas.
+ */
+export const mention = {
+  titre: 'Ta mention',
+  intro:
+    'L’agence a pris le dossier. Avant l’acte, la loi te demande d’écrire toi-même, avec tes mots, ce à quoi tu t’engages. Personne ne peut le faire à ta place, et c’est ce qui rend ton engagement valable.',
+  prenom: 'Ton prénom',
+  nom: 'Ton nom',
+  adresse: 'Ton adresse',
+  elementsTitre: 'Ce que ta mention doit contenir',
+  elements: {
+    caution: 'Que tu t’engages en qualité de caution.',
+    paiement: 'Que tu paieras le bailleur si le locataire ne paie pas.',
+    montant:
+      'Le montant maximum que tu garantis, écrit deux fois : en chiffres et en toutes lettres. Les deux doivent dire la même chose.',
+    solidarite:
+      'Comme tu as choisi une caution solidaire : que tu renonces au bénéfice de discussion et au bénéfice de division.',
+  },
+  elementsAide:
+    'La formulation est libre. Ce qui compte, c’est que ces éléments y soient, dans tes mots.',
+  champ: 'Ta mention, écrite par toi',
+  bouton: 'Apposer ma mention',
+  corriger: 'Corriger ma mention',
+  envoi: 'Vérification…',
+  succes: 'Mention apposée. L’acte peut être préparé.',
+  manques: {
+    caution: 'On ne lit pas que tu t’engages en qualité de caution.',
+    paiement: 'On ne lit pas que tu paieras en cas de défaillance du locataire.',
+    montant: 'On ne trouve pas un montant écrit en chiffres et en lettres qui concordent.',
+    solidarite:
+      'On ne lit pas la renonciation aux bénéfices de discussion et de division, exigée pour une caution solidaire.',
+  },
+} as const
