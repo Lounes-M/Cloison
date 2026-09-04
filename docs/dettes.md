@@ -79,6 +79,28 @@ que `supabase db push` fasse partie du déploiement et que la CI échoue si le s
 demande des identifiants Supabase dans les secrets GitHub, ce qui est une décision à prendre et pas
 seulement une ligne à écrire.
 
+### La purge laisse des octets orphelins dans Storage
+
+**Constaté le** 4 septembre 2026, en écrivant la purge à trois mois.
+
+`purger_les_dossiers_expires` supprime les lignes de `storage.objects` et les dossiers, mais pas les
+fichiers physiques : Supabase ne les efface qu'à travers son API, qu'une fonction SQL n'a pas, et
+que le dépôt n'appelle jamais avec une clé de service, par choix. Les octets restent donc dans le
+seau, sans ligne qui les désigne.
+
+**Pourquoi ce n'est pas un trou de confidentialité** : c'est l'effacement cryptographique de l'ADR 0003. La clé du dossier part avec lui, et des octets scellés sans clé sont des octets inertes. Un
+test le vérifie : après purge, la table `cles_dossier` est vide pour ce dossier. Ce qui reste est un
+**coût de stockage**, pas un risque.
+
+**Ce qui n'est pas non plus en place** : l'ordonnancement. La fonction existe ; pg_cron doit être
+activé dans Supabase et le `cron.schedule` posé depuis le tableau de bord, parce que PGlite n'a pas
+pg_cron et qu'une migration qui ne rejoue pas dans les tests n'est pas une migration de ce dépôt.
+Tant que ce n'est pas fait, la purge est prouvée, pas exécutée.
+
+**Signal de sortie** : une alerte de taille sur le seau `pieces`, ou le premier mois où la facture
+Storage devient lisible. Alors : un nettoyage périodique des objets sans ligne, depuis une fonction
+serveur qui aurait, elle, une clé de service dédiée à ce seul usage.
+
 ### Quatre mégaoctets par pièce, pas vingt
 
 **Constaté le** 3 septembre 2026, en construisant le dépôt du garant.
