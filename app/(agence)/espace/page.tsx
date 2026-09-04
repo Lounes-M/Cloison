@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { FormulaireActivation } from '@/components/forms/FormulaireActivation'
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { statuts, tableau } from '@/lib/content/espace'
+import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -112,6 +113,25 @@ export default async function PageEspace() {
         <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">
           <p className="font-display text-xl uppercase">{tableau.nonVerifieeTitre}</p>
           <p className="mt-3 text-[15px] leading-relaxed font-medium">{tableau.nonVerifieeTexte}</p>
+
+          <div className="border-ink mt-6 border-t-2 pt-6">
+            <p className="font-display text-lg uppercase">{activation.titre}</p>
+            <p className="mt-2 mb-5 text-[14px] leading-relaxed font-medium">{activation.texte}</p>
+            {agence.activationDemandeeLe ? (
+              <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+                {activation.enAttente(
+                  new Date(agence.activationDemandeeLe).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                  }),
+                )}
+              </p>
+            ) : role === 'admin' ? (
+              <FormulaireActivation siren={agence.siren ?? ''} cartePro={agence.cartePro ?? ''} />
+            ) : (
+              <p className="text-[14px] font-medium">{activation.membre}</p>
+            )}
+          </div>
         </div>
       ) : null}
 
