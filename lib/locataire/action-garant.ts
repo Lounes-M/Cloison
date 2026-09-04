@@ -90,12 +90,22 @@ export async function designerMonGarant(
     // permet, et c'est aussi ce qui donne son adresse pour le courriel.
     const { data: dossier } = await supabase
       .from('dossiers')
-      .select('reference, email_locataire')
+      .select('reference, email_locataire, paye_le, agence_id, demonstration')
       .eq('id', dossierId)
       .maybeSingle()
 
     if (!dossier) {
       return { statut: 'erreur', message: 'Ton lien a expire. Demande-en un nouveau.' }
+    }
+
+    // La base refuserait de toute facon d'emettre le lien (migration 0018) ;
+    // ici on le dit avant, avec les mots de l'ecran.
+    if (!dossier.paye_le && !dossier.agence_id && !dossier.demonstration) {
+      return {
+        statut: 'erreur',
+        message: 'Regle d abord ton dossier, plus haut : le lien de ton garant partira ensuite.',
+        valeur: saisie,
+      }
     }
 
     if (courriel === String(dossier.email_locataire).toLowerCase()) {

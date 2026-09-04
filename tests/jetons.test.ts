@@ -43,6 +43,14 @@ describe('jetons de capacite', () => {
       [rows[0]!.ouvrir_dossier],
     )
     dossier = d[0]!.id
+
+    // Depuis la 0018, le lien du garant attend le reglement d'un dossier de
+    // locataire. Ces tests portent sur les jetons, pas sur le paiement : on
+    // regle ici, comme le webhook Stripe le ferait.
+    await db.query(
+      `update public.dossiers set paye_le = now(), paiement_ref = 'cs_test_jetons' where id = $1`,
+      [dossier],
+    )
   })
 
   test('un jeton fraichement emis est actif', async () => {

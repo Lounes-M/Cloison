@@ -65,6 +65,17 @@ divergeaient, la plus permissive des deux deviendrait la règle réelle. La cont
 `chemin_dans_le_dossier` et la clause `name like dossier_courant()` sont la même phrase, une fois
 côté lignes et une fois côté octets.
 
+**Un quatrième rôle, `serveur`, pour ce que personne ne fait.** Quand Stripe nous dit qu'un dossier
+est réglé, l'appel qui le marque ne vient d'aucune personne : il vient de notre serveur, sur la foi
+d'une signature vérifiée. Ce rôle n'a aucun droit de table et une seule fonction ouverte,
+`marquer_dossier_paye` (migration 0018). Il n'existe que par un jeton que nous signons, cinq
+minutes, pour un appel. La barrière reste le rôle, pas un secret partagé entre deux tables.
+
+**Le garant ne paie jamais, et un test le tient.** Aucun module de paiement n'est importable depuis
+ce qui s'exécute pour lui, et le lien qu'il reçoit ne dépend d'aucun paiement de sa part : c'est le
+locataire qui règle ses trois mois de coffre, ou l'agence qui règle l'acte. `tests/invariants.test.ts`
+et `tests/paiement.test.ts` le vérifient chacun de leur côté.
+
 **`porteur_lien` est un seul rôle Postgres pour le garant et le locataire.** La frontière entre eux
 ne peut donc pas venir des droits de table : elle vient du claim `role_partie` porté par le jeton et
 lu dans chaque politique. C'est le point le plus facile à oublier en ajoutant une table.

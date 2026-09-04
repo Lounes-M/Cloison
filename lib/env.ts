@@ -66,6 +66,21 @@ export const env = {
     return requise('SUPABASE_JWT_SECRET')
   },
 
+  /**
+   * La cle secrete Stripe, et le secret de signature de son webhook.
+   *
+   * Lues paresseusement, comme le reste : tant que le paiement n'est pas
+   * branche, rien ne les demande, et une page qui ne paie pas ne doit pas
+   * echouer parce qu'elles manquent.
+   */
+  get stripeSecretKey() {
+    return requise('STRIPE_SECRET_KEY')
+  },
+
+  get stripeWebhookSecret() {
+    return requise('STRIPE_WEBHOOK_SECRET')
+  },
+
   /** Cle Resend, pour la notification d'une nouvelle demande. */
   get resendApiKey() {
     return requise('RESEND_API_KEY')
