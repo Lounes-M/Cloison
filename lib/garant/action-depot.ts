@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { deposer, retirerPiece, type NatureDePiece } from '@/lib/coffre/depot'
 import { baseSupabase } from '@/lib/coffre/depot-supabase'
+import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { TAILLE_MAX_DEPOT, natureDepuis } from '@/lib/garant/validation'
 
 /**
@@ -58,15 +59,22 @@ export async function deposerUnePiece(
   if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE, nature }
 
   try {
+    const supabase = clientPorteurDeLien(porteur.jeton)
+    const avant = await statutActuel(supabase, porteur.capacite.dossierId)
+
     const contenu = Buffer.from(await fichier.arrayBuffer())
     const resultat = await deposer(
-      baseSupabase(clientPorteurDeLien(porteur.jeton)),
+      baseSupabase(supabase),
       porteur.capacite.dossierId,
       nature as NatureDePiece,
       contenu,
     )
 
     if (!resultat.depose) return { statut: 'erreur', message: resultat.raison, nature }
+
+    // La derniere piece peut avoir fait passer le dossier a complet : c'est la
+    // base qui l'a decide, et c'est ici qu'on le dit.
+    await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
   } catch (erreur) {
     console.error('[garant] depot impossible', erreur)
     return {

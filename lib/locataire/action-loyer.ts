@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
+import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { montantEnCents } from '@/lib/garant/validation'
 
 /**
@@ -37,7 +38,10 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
   }
 
   try {
-    const { error } = await clientPorteurDeLien(porteur.jeton)
+    const supabase = clientPorteurDeLien(porteur.jeton)
+    const avant = await statutActuel(supabase, porteur.capacite.dossierId)
+
+    const { error } = await supabase
       .from('dossiers')
       .update({ loyer_cents: cents })
       .eq('id', porteur.capacite.dossierId)
@@ -50,6 +54,10 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
         valeur: saisie,
       }
     }
+
+    // Le loyer est l'autre terme du ratio : si le garant avait deja tout
+    // depose, c'est cette saisie qui tranche.
+    await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
   } catch (erreur) {
     console.error('[locataire] loyer impossible', erreur)
     return {

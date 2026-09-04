@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
+import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { analyserEngagement } from '@/lib/garant/validation'
 
 /**
@@ -63,6 +64,8 @@ export async function declarerMonEngagement(
       .eq('dossier_id', dossierId)
       .maybeSingle()
 
+    const avant = await statutActuel(supabase, dossierId)
+
     const { error } = existant
       ? await supabase.from('engagements').update(colonnes).eq('dossier_id', dossierId)
       : await supabase.from('engagements').insert({ dossier_id: dossierId, ...colonnes })
@@ -74,6 +77,10 @@ export async function declarerMonEngagement(
         message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
       }
     }
+
+    // Le revenu declare est un des deux termes du ratio : la base a peut-etre
+    // tranche a l'instant.
+    await prevenirSiLeStatutAChange(supabase, dossierId, avant)
   } catch (erreur) {
     console.error('[garant] engagement impossible', erreur)
     return {
