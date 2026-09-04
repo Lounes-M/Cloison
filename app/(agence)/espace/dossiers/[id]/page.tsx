@@ -5,7 +5,7 @@ import { notFound, redirect } from 'next/navigation'
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { acteurs, actions, dossier as texte, natures, statuts } from '@/lib/content/espace'
+import { acteurs, actions, dossier as texte, natures, statuts, tableau } from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 
@@ -58,7 +58,7 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le',
+        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -127,6 +127,12 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
           {statut.libelle}
         </span>
       </div>
+
+      {d.demonstration ? (
+        <p className="bg-sky outlined mt-6 rounded-xl px-4 py-3 text-[14px] font-semibold">
+          {tableau.demoBanniere}
+        </p>
+      ) : null}
 
       <dl className="mt-8 grid gap-4 text-[14px] md:grid-cols-3">
         <div className="outlined bg-paper rounded-xl p-4">

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
+import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
@@ -28,6 +29,7 @@ type Ligne = {
   email_locataire: string
   statut: string
   cree_le: string
+  demonstration: boolean
   engagements: { ratio: string | null } | { ratio: string | null }[] | null
 }
 
@@ -92,7 +94,7 @@ export default async function PageEspace() {
 
   const { data } = await supabase
     .from('dossiers')
-    .select('id, reference, email_locataire, statut, cree_le, engagements(ratio)')
+    .select('id, reference, email_locataire, statut, cree_le, demonstration, engagements(ratio)')
     .order('cree_le', { ascending: false })
   const lignes = (data ?? []) as Ligne[]
 
@@ -144,7 +146,14 @@ export default async function PageEspace() {
                           {ligne.reference}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 font-medium">{ligne.email_locataire}</td>
+                      <td className="px-4 py-3 font-medium">
+                        {ligne.email_locataire}
+                        {ligne.demonstration ? (
+                          <span className="text-muted ml-2 text-[11px] font-bold tracking-wide uppercase">
+                            {tableau.demonstration}
+                          </span>
+                        ) : null}
+                      </td>
                       <td className="px-4 py-3">
                         <span
                           className={cn(
@@ -176,6 +185,21 @@ export default async function PageEspace() {
           <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>
           <div className="mt-6">
             <FormulaireNouveauDossier verifiee={verifiee} />
+          </div>
+
+          <div className="bg-sky outlined shadow-brut mt-10 rounded-[18px] p-6">
+            <p className="font-display text-lg uppercase">{tableau.demoTitre}</p>
+            <p className="mt-2 text-[14px] leading-relaxed font-medium">{tableau.demoAide}</p>
+            {/* Une action serveur sans etat : elle se termine toujours par une
+                redirection, vers le dossier de demonstration ou vers l'espace. */}
+            <form action={ouvrirMaDemonstration} className="mt-4">
+              <button
+                type="submit"
+                className="press outlined bg-paper shadow-brut-xs cursor-pointer rounded-[10px] px-5 py-3 text-[14px] font-bold"
+              >
+                {tableau.demoBouton}
+              </button>
+            </form>
           </div>
         </div>
 

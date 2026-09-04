@@ -35,6 +35,13 @@ export const tableau = {
   seuilSucces: 'Seuil enregistré. Vos dossiers ouverts ont été rejugés.',
   seuilLecture: (seuil: string) =>
     `Seuil de l’agence : ${seuil} fois le loyer. Seul un administrateur le modifie.`,
+  demonstration: 'démonstration',
+  demoTitre: 'Voir le produit sur un dossier de démonstration',
+  demoAide:
+    'Un garant fictif, ses pièces scellées et filigranées, son ratio, le journal des accès : tout, sauf l’envoi d’un lien réel. Il apparaît dans votre liste, marqué comme tel.',
+  demoBouton: 'Ouvrir la démonstration',
+  demoBanniere:
+    'Dossier de démonstration. Rien ici n’est réel : les pièces le disent en travers de chaque page.',
 } as const
 
 export const dossier = {
