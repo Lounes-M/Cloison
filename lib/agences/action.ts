@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers'
 import { consommerDebit } from '@/lib/acces/debit'
-import { clientAnonyme } from '@/lib/acces/session'
+import { clientServeur } from '@/lib/acces/serveur'
 import { enregistrerDemande, notifierDemande } from './enregistrement'
 import { DELAI_MINIMAL_MS, schemaDemandeAgence } from './schema'
 
@@ -84,7 +84,9 @@ export async function envoyerDemandeAgence(
     // la fois. Elle est a l'interieur du `try` a dessein, parce qu'elle depend
     // desormais de `CLE_MAITRESSE` : une variable absente doit rendre un
     // message lisible, pas faire disparaitre le formulaire.
-    if (!(await consommerDebit(clientAnonyme(), 'demande_agence', await identifiantAppelant()))) {
+    if (
+      !(await consommerDebit(await clientServeur(), 'demande_agence', await identifiantAppelant()))
+    ) {
       return {
         statut: 'erreur',
         message: 'Trop de tentatives. Réessaie dans quelques minutes.',

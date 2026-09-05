@@ -58,7 +58,7 @@ export async function baseDEssai(): Promise<PGlite> {
  */
 export async function devenir(
   db: PGlite,
-  role: 'anon' | 'authenticated' | 'porteur_lien',
+  role: 'anon' | 'authenticated' | 'porteur_lien' | 'serveur',
   sub?: string,
 ) {
   await db.exec(`set role ${role}`)

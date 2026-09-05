@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { env } from '@/lib/env'
 import { DUREE_JETON, signerJeton, verifierSignature, type Capacite, type Partie } from './jeton'
+import { clientServeur } from './serveur'
 
 /**
  * Le seul point d'entree pour resoudre « qui es-tu, sur quel dossier, avec
@@ -13,13 +14,6 @@ import { DUREE_JETON, signerJeton, verifierSignature, type Capacite, type Partie
  * l'appelant passe par ici. Un deuxieme chemin serait un deuxieme endroit ou
  * se tromper.
  */
-
-/** Client anonyme, pour les fonctions ouvertes avant toute session. */
-export function clientAnonyme() {
-  return createClient(env.supabaseUrl, env.supabasePublishableKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-}
 
 /**
  * Client portant le jeton de capacite.
@@ -42,12 +36,15 @@ export function clientPorteurDeLien(jeton: string) {
  * La base tire le `jti` et remplace la ligne, donc revoque, avant qu'on signe.
  * Elle borne aussi l'expiration a celle du dossier : un lien ne survit jamais
  * au dossier qu'il ouvre.
+ *
+ * Avec le client du serveur : depuis la migration 0019, emettre un jeton
+ * exige notre signature, et la cle publiable seule n'y suffit plus.
  */
 export async function emettreLien(
   dossierId: string,
   partie: Partie,
 ): Promise<{ jeton: string; expireLe: Date } | null> {
-  const supabase = clientAnonyme()
+  const supabase = await clientServeur()
 
   const { data, error } = await supabase.rpc('emettre_jeton', {
     le_dossier: dossierId,
@@ -83,7 +80,8 @@ export async function resoudreCapacite(jeton: string | undefined): Promise<Capac
   const capacite = await verifierSignature(jeton)
   if (!capacite) return null
 
-  const { data: actif, error } = await clientAnonyme().rpc('jeton_est_actif', {
+  const supabase = await clientServeur()
+  const { data: actif, error } = await supabase.rpc('jeton_est_actif', {
     le_dossier: capacite.dossierId,
     la_partie: capacite.partie,
     le_jti: capacite.jti,
@@ -109,15 +107,19 @@ export async function resoudreCapacite(jeton: string | undefined): Promise<Capac
  */
 export async function ouvrirDossierAvecLien(
   emailDuLocataire: string,
-  // Le client decide de qui ouvre : anonyme pour le locataire, celui de
-  // l'agence quand c'est elle. `ouvrir_dossier` lit `agence_courante()` dans
-  // le jeton porte par ce client, et c'est ce qui rattache, ou non, le dossier.
-  supabase: SupabaseClient = clientAnonyme(),
+  // Le client decide de qui ouvre : celui du serveur pour le locataire, celui
+  // de l'agence quand c'est elle. `ouvrir_dossier` lit `agence_courante()`
+  // dans le jeton porte par ce client, et c'est ce qui rattache, ou non, le
+  // dossier. Le serveur ne porte aucune agence : le dossier reste libre.
+  supabase?: SupabaseClient,
 ): Promise<{ dossierId: string; reference: string; jeton: string; expireLe: Date } | null> {
-  const { data, error } = await supabase.rpc('ouvrir_dossier_avec_lien', {
-    email_du_locataire: emailDuLocataire,
-    duree: DUREE_JETON,
-  })
+  const { data, error } = await (supabase ?? (await clientServeur())).rpc(
+    'ouvrir_dossier_avec_lien',
+    {
+      email_du_locataire: emailDuLocataire,
+      duree: DUREE_JETON,
+    },
+  )
 
   const ouvert = Array.isArray(data) ? data[0] : data
   if (error || !ouvert?.dossier_id || !ouvert?.reference || !ouvert?.jti || !ouvert?.expire_le) {

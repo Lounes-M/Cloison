@@ -69,7 +69,7 @@ describe('recalcul du dossier', () => {
       insert into auth.users (id, email, email_confirmed_at)
       values ('${MARIE}', 'marie@agence-lyon3.fr', now())
     `)
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('locataire@exemple.fr')`,
     )

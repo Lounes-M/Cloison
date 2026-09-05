@@ -55,8 +55,9 @@ Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les reli
 - **Supabase** Postgres, Storage, Auth pour l'agence seulement, par lien magique et par domaine
   e-mail. Clé publiable uniquement. `getUser()`, jamais `getSession()`.
 - **La barrière est le rôle Postgres** (ADR 0002) : `anon`, `authenticated` pour l'agence,
-  `porteur_lien` pour le locataire et le garant par jeton de capacité, `serveur` pour le webhook
-  de paiement. Une politique `to authenticated` est inatteignable par un porteur de lien.
+  `porteur_lien` pour le locataire et le garant par jeton de capacité, `serveur` pour ce que le
+  serveur fait seul : webhook de paiement, ouverture d'un dossier, jetons, débit. `anon` n'appelle
+  plus aucune fonction. Une politique `to authenticated` est inatteignable par un porteur de lien.
 - **Jetons de capacité** : JWT HS256 signé avec `SUPABASE_JWT_SECRET`, cookie `cloison_capacite`
   HttpOnly, révocation par `jetons_actifs`. Le lien est réémissible, le jeton non.
 - **Chiffrement par enveloppe** (ADR 0003) : une clé par dossier, scellée par `CLE_MAITRESSE`
@@ -98,7 +99,7 @@ npm run build
 
 ## Où sont les choses
 
-- `supabase/migrations/` 0001 à 0018, toutes appliquées en production au 4 septembre 2026.
+- `supabase/migrations/` 0001 à 0019 ; 0001 à 0018 appliquées en production au 4 septembre 2026.
 - `lib/acces/` sessions, jetons, débit, rôle serveur. `lib/coffre/` dépôt, enveloppe,
   rasterisation, ouverture. `lib/agences/`, `lib/locataire/`, `lib/garant/` les actions de
   chaque acteur. `lib/courriels/` Resend. `lib/content/` tous les textes et les montants.

@@ -150,7 +150,7 @@ describe('ce que la base tient', () => {
 
   beforeEach(async () => {
     db = await baseDEssai()
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('locataire@exemple.fr')`,
     )

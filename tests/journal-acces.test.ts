@@ -27,7 +27,7 @@ describe('journal des acces', () => {
   }
 
   async function ouvrirDossier(email: string): Promise<string> {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier($1)`,
       [email],

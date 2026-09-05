@@ -27,12 +27,13 @@ coup d'œil dans `app/page.tsx`.
 
 Cloison est un produit à **trois acteurs qui ne voient pas la même chose du même dossier** :
 
-| Acteur       | `dossiers`                                    | `engagements`                   | `pieces`       | `cles_dossier`    | `storage.objects`       | `journal_acces`      |
-| ------------ | --------------------------------------------- | ------------------------------- | -------------- | ----------------- | ----------------------- | -------------------- |
-| Le locataire | lecture, plus `email_garant` et `loyer_cents` | **rien**                        | **rien**       | **rien**          | **rien**                | inscrit, ne lit pas  |
-| Le garant    | lecture                                       | lecture, écriture, sauf `ratio` | lecture, dépôt | lecture, création | dépôt, lecture, retrait | lecture, inscription |
-| L'agence     | lecture, plus `statut`                        | lecture                         | lecture        | lecture           | lecture                 | lecture, inscription |
-| `anon`       | `ouvrir_dossier()` uniquement                 | **rien**                        | **rien**       | **rien**          | **rien**                | **rien**             |
+| Acteur       | `dossiers`                                     | `engagements`                   | `pieces`       | `cles_dossier`    | `storage.objects`       | `journal_acces`      |
+| ------------ | ---------------------------------------------- | ------------------------------- | -------------- | ----------------- | ----------------------- | -------------------- |
+| Le locataire | lecture, plus `email_garant` et `loyer_cents`  | **rien**                        | **rien**       | **rien**          | **rien**                | inscrit, ne lit pas  |
+| Le garant    | lecture                                        | lecture, écriture, sauf `ratio` | lecture, dépôt | lecture, création | dépôt, lecture, retrait | lecture, inscription |
+| L'agence     | lecture, plus `statut`                         | lecture                         | lecture        | lecture           | lecture                 | lecture, inscription |
+| `anon`       | **rien**                                       | **rien**                        | **rien**       | **rien**          | **rien**                | **rien**             |
+| `serveur`    | `ouvrir_dossier()` et les jetons, sans lecture | **rien**                        | **rien**       | **rien**          | **rien**                | **rien**             |
 
 La matrice est appliquée par les migrations 0003, 0005, 0006 et 0007, et vérifiée test par test
 dans `tests/dossiers.test.ts`, `tests/cles-dossier.test.ts`, `tests/pieces.test.ts` et
@@ -67,9 +68,12 @@ côté lignes et une fois côté octets.
 
 **Un quatrième rôle, `serveur`, pour ce que personne ne fait.** Quand Stripe nous dit qu'un dossier
 est réglé, l'appel qui le marque ne vient d'aucune personne : il vient de notre serveur, sur la foi
-d'une signature vérifiée. Ce rôle n'a aucun droit de table et une seule fonction ouverte,
-`marquer_dossier_paye` (migration 0018). Il n'existe que par un jeton que nous signons, cinq
-minutes, pour un appel. La barrière reste le rôle, pas un secret partagé entre deux tables.
+d'une signature vérifiée (migration 0018). Depuis la 0019, ce même rôle porte tout ce que la clé
+publiable ne doit pas pouvoir faire seule : ouvrir un dossier pour un locataire, émettre et vérifier
+un jeton de capacité, compter le débit. `anon` n'a plus aucune fonction. Le rôle n'a aucun droit de
+table et n'existe que par un jeton que nous signons, cinq minutes, pour un appel : qui n'a que la
+clé publiable ne peut plus rien appeler directement sur l'API. La barrière reste le rôle, pas un
+secret partagé entre deux tables.
 
 **Le garant ne paie jamais, et un test le tient.** Aucun module de paiement n'est importable depuis
 ce qui s'exécute pour lui, et le lien qu'il reçoit ne dépend d'aucun paiement de sa part : c'est le

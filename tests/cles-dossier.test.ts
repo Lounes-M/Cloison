@@ -34,7 +34,7 @@ describe('cles de dossier', () => {
         ('${SAM}',   'sam@autre-agence.fr',   now())
     `)
 
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('locataire@exemple.fr')`,
     )
@@ -144,7 +144,7 @@ describe('cles de dossier', () => {
   })
 
   test('le garant d un autre dossier ne pose rien ici', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('autre@exemple.fr')`,
     )

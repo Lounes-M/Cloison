@@ -121,27 +121,6 @@ raison le jour où la borne pratique sera levée.
 découpage en morceaux scellés séparément, chacun sous la borne, réassemblés à l'ouverture. Pas
 l'envoi direct.
 
-### La limite de débit ne couvre que nos routes, pas PostgREST
-
-**Constaté le** 3 septembre 2026, en branchant la porte du locataire.
-
-`consommerDebit` est appelée dans nos actions serveur. Mais la clé publiable est, par construction,
-publique : n'importe qui peut appeler directement les fonctions accordées à `anon` sur l'API
-PostgREST du projet, sans passer par nos routes ni par notre compteur. `ouvrir_dossier_avec_lien`,
-`emettre_jeton` et `consommer_debit` elle-même sont dans ce cas.
-
-Ce que ça permet, et ce que ça ne permet pas. Aucune lecture, aucune escalade : la RLS et les
-fonctions restent la barrière, et elles tiennent. En revanche, remplir `dossiers` de lignes vides,
-ou réémettre le jeton d'un dossier dont on connaîtrait l'uuid, donc révoquer celui du vrai
-locataire. L'uuid n'est pas devinable, ce qui borne le second cas à une fuite préalable.
-
-**Ce qui tient en attendant** : les limites propres de Supabase sur son API, et le fait que
-`ouvrir_dossier_avec_lien` ne donne rien d'utilisable sans notre signature.
-
-**Signal de sortie** : la revue de sécurité de la phase 5. La parade probable est de faire
-consommer le débit **par la fonction SQL elle-même**, à partir d'une empreinte que seule notre clé
-sait produire, ce qui rendrait l'appel direct inutile plutôt qu'interdit.
-
 ### Une réponse qui dit si une adresse a un dossier
 
 **Constaté le** 1er septembre 2026 par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md),
@@ -207,6 +186,15 @@ apparaît réellement, et le rendu y sera dynamique de toute façon : le coût d
 
 ## Réglées
 
+- **La limite de débit ne couvrait que nos routes, pas PostgREST** : réglée le 5 septembre 2026,
+  avant le signal prévu, qui était la revue de sécurité. La parade n'est pas celle que la dette
+  supposait. Plutôt que de faire compter la fonction SQL elle-même, la migration 0019 retire à
+  `anon` les quatre fonctions qui créaient, émettaient ou comptaient (`ouvrir_dossier`,
+  `ouvrir_dossier_avec_lien`, `emettre_jeton`, `jeton_est_actif`, `consommer_debit`) et les
+  réserve au rôle `serveur`, né avec la 0018. Ce rôle n'existe que par un jeton que nous signons :
+  la clé publiable seule ne porte que `anon`, et `anon` n'a plus rien. L'appel direct devient
+  impossible plutôt que borné, ce qui est la barrière de l'ADR 0002 appliquée une fois de plus.
+  `tests/fonctions-serveur.test.ts` le tient par interdiction, rôle par rôle.
 - **L'en-tête et le pied de page vivaient dans `page.tsx`** : remontés dans le layout racine le
   1er septembre 2026, à l'arrivée de la deuxième route (`/agences`), comme prévu. `app/error.tsx`
   et `app/not-found.tsx` conservent désormais la navigation du site.

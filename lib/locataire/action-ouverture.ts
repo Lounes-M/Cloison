@@ -4,7 +4,8 @@ import { headers } from 'next/headers'
 import { z } from 'zod'
 
 import { consommerDebit } from '@/lib/acces/debit'
-import { clientAnonyme, ouvrirDossierAvecLien, urlDuLien } from '@/lib/acces/session'
+import { clientServeur } from '@/lib/acces/serveur'
+import { ouvrirDossierAvecLien, urlDuLien } from '@/lib/acces/session'
 import { envoyerLienLocataire } from '@/lib/courriels/liens'
 
 /**
@@ -59,7 +60,9 @@ export async function ouvrirMonDossier(
   const { courriel } = analyse.data
 
   try {
-    if (!(await consommerDebit(clientAnonyme(), 'ouverture_dossier', await empreinteAppelant()))) {
+    if (
+      !(await consommerDebit(await clientServeur(), 'ouverture_dossier', await empreinteAppelant()))
+    ) {
       return {
         statut: 'erreur',
         message: 'Trop de dossiers ouverts depuis cette connexion. Reessaie dans une heure.',

@@ -18,7 +18,7 @@ describe('ce que la base tient', () => {
   let db: PGlite
 
   async function ouvrir(email: string): Promise<string> {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier($1)`,
       [email],
@@ -32,7 +32,7 @@ describe('ce que la base tient', () => {
   }
 
   async function lienGarant(id: string) {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     return db.query(`select * from public.emettre_jeton($1, 'garant', '7 days')`, [id])
   }
 
@@ -104,7 +104,7 @@ describe('ce que la base tient', () => {
   test('pas de lien au garant sans reglement, pour un dossier de locataire', async () => {
     const id = await ouvrir('locataire@exemple.fr')
 
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     expect(
       await refus(db, `select * from public.emettre_jeton('${id}', 'garant', '7 days')`),
     ).toContain('pas encore regle')

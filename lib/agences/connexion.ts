@@ -5,7 +5,7 @@ import { z } from 'zod'
 
 import { clientAgence } from '@/lib/acces/agence'
 import { consommerDebit } from '@/lib/acces/debit'
-import { clientAnonyme } from '@/lib/acces/session'
+import { clientServeur } from '@/lib/acces/serveur'
 
 /**
  * L'envoi du lien de connexion a un collaborateur d'agence.
@@ -74,7 +74,9 @@ export async function envoyerLienDeConnexion(
   const { courriel } = analyse.data
 
   try {
-    if (!(await consommerDebit(clientAnonyme(), 'connexion_agence', await empreinteAppelant()))) {
+    if (
+      !(await consommerDebit(await clientServeur(), 'connexion_agence', await empreinteAppelant()))
+    ) {
       return {
         statut: 'erreur',
         message: 'Trop de tentatives. Reessaie dans quelques minutes.',
