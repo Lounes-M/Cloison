@@ -1,3 +1,5 @@
+import { connection } from 'next/server'
+
 import { Logo } from '@/components/brand/Logo'
 
 /**
@@ -11,7 +13,13 @@ import { Logo } from '@/components/brand/Logo'
  * avenir : le jour ou l'un des deux espaces a besoin d'une navigation, l'autre
  * ne doit pas l'heriter par accident.
  */
-export default function LayoutPorteur({ children }: { children: React.ReactNode }) {
+export default async function LayoutPorteur({ children }: { children: React.ReactNode }) {
+  // Rendu a chaque requete, jamais prerendu : la Content-Security-Policy de
+  // l'applicatif porte un nonce que le middleware tire par requete, et une
+  // page prerendue au build ne pourrait pas le porter. Ses scripts seraient
+  // alors refuses par le navigateur, sans bruit.
+  await connection()
+
   return (
     <div className="bg-paper flex min-h-dvh flex-col">
       <header className="border-ink flex items-center border-b-2 px-6 py-5 md:px-10">

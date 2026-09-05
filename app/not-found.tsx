@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { connection } from 'next/server'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { Button } from '@/components/ui/Button'
@@ -7,7 +8,13 @@ export const metadata: Metadata = {
   title: 'Page introuvable',
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  // Rendue a chaque requete, jamais prerendue. Une adresse inconnue sous
+  // l'applicatif (`/espace/nulle-part`) arrive ici sous la politique de
+  // securite du middleware, avec un nonce par requete : une page prerendue au
+  // build ne le porterait pas, et le navigateur refuserait ses scripts.
+  await connection()
+
   return (
     <>
       <SiteHeader />

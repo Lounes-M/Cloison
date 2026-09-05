@@ -66,6 +66,9 @@ Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les reli
   jamais MuPDF, qui est sous AGPL. Le journal `journal_acces` est en écriture seule.
 - **Limitation de débit** dans Postgres, par empreintes HMAC dérivées de la clé maîtresse, en
   échec fermé.
+- **Content-Security-Policy** en deux formes, `lib/securite/csp.ts` : nonce et `'strict-dynamic'`
+  sur l'applicatif par le middleware, statique sur le site public. Un segment applicatif nouveau
+  s'ajoute à `SEGMENTS_APPLICATIFS` et au `matcher` du middleware, un test le rappelle.
 - **Resend** pour les courriels, **Stripe** Checkout hébergée pour le paiement, importé d'un seul
   fichier, `lib/paiement/stripe.ts`. **Universign** prévu pour la signature (ADR 0005), compte
   non ouvert.
