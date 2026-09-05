@@ -48,7 +48,7 @@ describe('cloisonnement du dossier', () => {
 
     // Un dossier ouvert par un locataire, sans agence : c'est la porte
     // principale du produit.
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('locataire@exemple.fr')`,
     )
@@ -139,7 +139,7 @@ describe('cloisonnement du dossier', () => {
     })
 
     test('ne voit pas le dossier de quelqu un d autre', async () => {
-      await devenir(db, 'anon')
+      await devenir(db, 'serveur')
       const { rows } = await db.query<{ ouvrir_dossier: string }>(
         `select public.ouvrir_dossier('autre@exemple.fr')`,
       )
@@ -171,7 +171,7 @@ describe('cloisonnement du dossier', () => {
     })
 
     test('ne depose pas dans le dossier d un autre', async () => {
-      await devenir(db, 'anon')
+      await devenir(db, 'serveur')
       const { rows } = await db.query<{ ouvrir_dossier: string }>(
         `select public.ouvrir_dossier('autre@exemple.fr')`,
       )
@@ -266,13 +266,24 @@ describe('cloisonnement du dossier', () => {
     })
   })
 
-  describe('anon', () => {
-    test('ouvre un dossier mais n en lit aucun', async () => {
+  describe('anon et le serveur', () => {
+    test('anon n ouvre plus de dossier, et n en lit aucun', async () => {
       await devenir(db, 'anon')
+      // Depuis la 0019, la cle publiable seule ne cree plus rien : ouvrir
+      // exige notre signature, portee par le role `serveur`.
+      expect(await refus(db, `select public.ouvrir_dossier('encore@exemple.fr')`)).toContain(
+        'permission denied',
+      )
+      expect(await refus(db, 'select * from public.dossiers')).toContain('permission denied')
+      expect(await refus(db, 'select * from public.engagements')).toContain('permission denied')
+      expect(await refus(db, 'select * from public.pieces')).toContain('permission denied')
+    })
+
+    test('le serveur ouvre un dossier mais n en lit aucun', async () => {
+      await devenir(db, 'serveur')
       await db.query(`select public.ouvrir_dossier('encore@exemple.fr')`)
 
-      // Meme motif que `demandes_agence` : la cle publiable ecrit, elle ne lit
-      // jamais.
+      // Le serveur ecrit par la fonction, il ne lit jamais une table.
       expect(await refus(db, 'select * from public.dossiers')).toContain('permission denied')
       expect(await refus(db, 'select * from public.engagements')).toContain('permission denied')
       expect(await refus(db, 'select * from public.pieces')).toContain('permission denied')

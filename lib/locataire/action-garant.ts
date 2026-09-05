@@ -5,9 +5,9 @@ import { headers } from 'next/headers'
 import { z } from 'zod'
 
 import { consommerDebit } from '@/lib/acces/debit'
+import { clientServeur } from '@/lib/acces/serveur'
 import {
   capaciteDepuisCookies,
-  clientAnonyme,
   clientPorteurDeLien,
   emettreLien,
   urlDuLien,
@@ -75,7 +75,7 @@ export async function designerMonGarant(
   }
 
   try {
-    if (!(await consommerDebit(clientAnonyme(), 'lien_garant', await empreinteAppelant()))) {
+    if (!(await consommerDebit(await clientServeur(), 'lien_garant', await empreinteAppelant()))) {
       return {
         statut: 'erreur',
         message: 'Trop de liens envoyes. Reessaie dans un quart d’heure.',

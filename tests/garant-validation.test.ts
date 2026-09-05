@@ -22,7 +22,7 @@ import { baseDEssai, devenir, redevenirProprietaire, refus } from './base'
 describe('les natures de pieces', () => {
   test('chaque nature du contenu est acceptee par la base, et aucune autre', async () => {
     const db: PGlite = await baseDEssai()
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('locataire@exemple.fr')`,
     )

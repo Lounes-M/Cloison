@@ -33,7 +33,7 @@ describe('jetons de capacite', () => {
 
   beforeEach(async () => {
     db = await baseDEssai()
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier('locataire@exemple.fr')`,
     )
@@ -159,12 +159,12 @@ describe('jetons de capacite', () => {
   })
 
   test('une partie inconnue est refusee', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await refus(db, `select * from public.emettre_jeton('${dossier}', 'agence', '7 days')`)
   })
 
   test('un dossier inconnu est refuse', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await refus(
       db,
       `select * from public.emettre_jeton('00000000-0000-0000-0000-000000000000', 'garant', '7 days')`,

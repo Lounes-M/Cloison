@@ -31,10 +31,10 @@ describe('ouvrir_dossier_avec_lien', () => {
       insert into auth.users (id, email, email_confirmed_at)
       values ('${MARIE}', 'marie@agence-lyon3.fr', now())
     `)
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
   })
 
-  test('anon ouvre et recoit de quoi signer le premier lien', async () => {
+  test('le serveur ouvre et recoit de quoi signer le premier lien', async () => {
     const ouvert = await ouvrir(db, 'locataire@exemple.fr')
 
     expect(ouvert.dossier_id).toMatch(/^[0-9a-f-]{36}$/)
@@ -46,7 +46,7 @@ describe('ouvrir_dossier_avec_lien', () => {
   test('le dossier existe, et le jeton est bien celui qui vaut', async () => {
     const ouvert = await ouvrir(db, 'locataire@exemple.fr')
 
-    // `anon` peut verifier un jeton : c'est ce que fait `resoudreCapacite`.
+    // Le serveur peut verifier un jeton : c'est ce que fait `resoudreCapacite`.
     const { rows } = await db.query<{ jeton_est_actif: boolean }>(
       `select public.jeton_est_actif($1, 'locataire', $2)`,
       [ouvert.dossier_id, ouvert.jti],

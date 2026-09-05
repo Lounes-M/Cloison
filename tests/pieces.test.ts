@@ -35,7 +35,7 @@ describe('depot des pieces', () => {
 
   /** Un dossier neuf, par le seul chemin qui en cree. */
   async function ouvrirDossier(email: string): Promise<string> {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier($1)`,
       [email],

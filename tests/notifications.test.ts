@@ -81,7 +81,7 @@ describe('contacts_agence_du_dossier', () => {
   let autre: string
 
   async function ouvrir(email: string) {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier($1)`,
       [email],

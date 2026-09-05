@@ -77,7 +77,7 @@ describe('ouvrir un dossier selon la verification', () => {
   test('le locataire, lui, ouvre toujours sans agence', async () => {
     // La porte principale ne depend d'aucune verification : personne ne
     // collecte les pieces de qui que ce soit en ouvrant pour soi-meme.
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await db.query(`select public.ouvrir_dossier('locataire@exemple.fr')`)
 
     await redevenirProprietaire(db)

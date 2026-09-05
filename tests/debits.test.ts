@@ -28,7 +28,7 @@ describe('consommer_debit', () => {
 
   beforeEach(async () => {
     db = await baseDEssai()
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
   })
 
   test('les premieres passent, celles d apres non', async () => {
@@ -105,7 +105,7 @@ describe('consommer_debit', () => {
     `)
     expect(await compter(db, 'public.debits')).toBe(2)
 
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     // Le comptage repart, et la ligne ancienne disparait : la table reste a une
     // ligne par cle vivante, sans tache de fond a surveiller.
     expect(await passe(db, 'demande_agence', UNE)).toBe(true)
@@ -115,10 +115,10 @@ describe('consommer_debit', () => {
   })
 
   test('personne ne lit ni n ecrit la table directement', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await passe(db, 'demande_agence', UNE)
 
-    for (const role of ['anon', 'authenticated'] as const) {
+    for (const role of ['anon', 'authenticated', 'serveur'] as const) {
       await devenir(db, role)
       expect(await refus(db, 'select * from public.debits')).toContain('permission denied')
       expect(
@@ -131,7 +131,7 @@ describe('consommer_debit', () => {
   })
 
   test('la table ne garde aucune adresse ni aucun horodatage individuel', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await passe(db, 'demande_agence', UNE)
 
     await redevenirProprietaire(db)

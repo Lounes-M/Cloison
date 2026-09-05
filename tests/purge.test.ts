@@ -16,7 +16,7 @@ describe('purger_les_dossiers_expires', () => {
 
   /** Un dossier complet de tout ce qui en depend, expire ou non. */
   async function dossier(email: string, options: { expire: boolean; statut?: string }) {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ ouvrir_dossier: string }>(
       `select public.ouvrir_dossier($1)`,
       [email],
@@ -102,7 +102,7 @@ describe('purger_les_dossiers_expires', () => {
     // Le jeton ne vaut plus rien, meme parfaitement signe : `jeton_est_actif`
     // ne trouve plus la ligne. C'est ce qui ferme la porte avant que le lien
     // expire de lui-meme.
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     const { rows } = await db.query<{ jeton_est_actif: boolean }>(
       `select public.jeton_est_actif($1, 'garant', gen_random_uuid())`,
       [id],
