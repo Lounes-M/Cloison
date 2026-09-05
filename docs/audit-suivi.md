@@ -108,3 +108,12 @@ Aucun courriel de test n'a ete envoye ; la livraison effective reste a prouver.
 Le controle local complet passe 370 tests dans 37 suites, avec typage, lint,
 format et controles de variables publiques. Le build execute ensuite le moteur
 hors du checkout a partir des traces des routes agence et garant.
+
+## Retard de schema precise par repetition
+
+La repetition du 6 septembre a montre que l'estimation initiale etait incomplete :
+0010 a 0013 et 0017 manquent aussi, alors que des migrations plus recentes sont presentes.
+Le plan de quatorze migrations a passe une repetition transactionnelle sur Supabase,
+terminee par annulation et verification distincte. Aucun changement de schema n'est conserve.
+Le script `scripts/preparer-rattrapage-production.mjs` fournit le SQL unique et ses
+preconditions ; voir `docs/exploitation/rattrapage-production.md` pour l'application.
