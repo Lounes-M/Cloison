@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
       - name: Purge physique et reprise des courriels
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: |
-          test -n "$CRON_SECRET"
-          curl --fail --silent --show-error --max-time 70 \
-            --header "Authorization: Bearer $CRON_SECRET" \
-            https://cloison.immo/api/maintenance
+        run: node scripts/executer-maintenance.mjs

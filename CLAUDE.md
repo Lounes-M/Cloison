@@ -19,9 +19,10 @@ version d'origine vit dans un artefact Claude :
   squash avec suppression de la branche, vérifier la CI sur `main`, et **enchaîner sur la tâche
   suivante sans demander**. Signaler dans le message de PR ce qui mérite un regard, personne ne
   relit avant la fusion.
-- **Les migrations s'appliquent à la main**, par Lounes, dans l'éditeur SQL de Supabase. Une PR
-  qui en ajoute une le dit en tête et fournit le SQL à coller. Une migration appliquée ne se
-  modifie plus : on en écrit une nouvelle.
+- **Le deploiement SQL est explicite**, par Lounes ou par l'agent dans le perimetre autorise.
+  Une PR qui ajoute des migrations le dit en tete et fournit le lot SQL. Repetition
+  transactionnelle, preconditions, CI verte, application puis controle des droits reels.
+  Une migration appliquee ne se modifie plus : on en ecrit une nouvelle.
 - **Ni emoji, ni tiret cadratin**, nulle part : `npm run check:typo` le vérifie.
 - **Aucun secret derrière `NEXT_PUBLIC_`**, aucune clé `service_role` ou `sb_secret_` dans le
   code ni dans la conversation. Refuser si elle est proposée. Le serveur n'a que la clé
@@ -121,6 +122,7 @@ Ne pas presenter les phases 0 a 7 comme terminees. La signature exige encore un
 modele contractuel valide et l'integration du compte Universign.
 
 Supabase, Vercel et Stripe CLI sont accessibles depuis le poste de Lounes.
-Verification en lecture seule : aucun dossier ni piece en production ; migration 0019
-non appliquee et pg_cron absent. Les nouvelles migrations restent locales tant que leur
-application n'a pas ete verifiee. La fusion seule ne met pas le schema a jour.
+La PR 43 est fusionnee et deployee. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0028
+est applique en production. Les controles de droits ont ete rejoues via l'API publique.
+Le domaine canonique est www.cloison.immo ; le domaine sans www redirige en 308.
+Le suivi vivant et les limites avant le premier dossier reel sont dans docs/audit-suivi.md.

@@ -1,10 +1,11 @@
 # Suite de l'audit du 5 septembre 2026
 
-Travail en cours sur une PR unique. Ce document remplace l'affirmation selon laquelle
-les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
+La [PR 43](https://github.com/Lounes-M/Cloison/pull/43) a ete fusionnee le 6 septembre
+a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document remplace
+l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Corrections implementees, en verification
+## Corrections livrees par la PR 43
 
 - Claims JSON PostgREST, validite du jeton et expiration du dossier dans les politiques.
 - Suspension d'agence, exclusion persistante d'un collaborateur, MFA a deux facteurs.
@@ -33,14 +34,14 @@ et le role serveur ne la possede pas. pg_cron n'est pas installe.
 Vercel et Stripe CLI sont connectes. Les secrets Production sensibles de Vercel
 ne peuvent pas etre exportes : ils n'ont pas ete remplaces pour contourner cette protection.
 
-## Points restant ouverts dans cette PR
+## Points restant ouverts avant le premier dossier reel
 
-- Tests complets, build, integration reelle, migrations et verification du deploiement.
+- Parcours authentifies de bout en bout et service Storage reel : depot, lecture et suppression.
 - Modele contractuel valide, generation d'acte, chaine Universign et facturation agence.
 - Integration Universign et tests complets du parcours contractuel dependants du modele valide.
-- Documentation d'exploitation, restauration et validation des nouveaux ecrans.
+- Sauvegarde recuperable avec cle de secours, exercice de restauration et revue externe.
 
-La fusion attend les verifications et la CI. Les elements dependants d'un compte,
+La PR 43 a passe les verifications et la CI avant fusion. Les elements dependants d'un compte,
 d'un texte contractuel ou d'une configuration doivent etre identifies sans etre marques termines.
 
 ## Preuves de verification
@@ -53,12 +54,12 @@ Il a ete execute avec PostgreSQL 17 et PostgREST 16.2 locaux ; une tache CI le r
 Le harnais Storage reste minimal : ce test ne prouve pas le fonctionnement du
 service Storage Supabase complet.
 
-Aucune migration 0019 a 0028 n'a encore ete appliquee en production.
+Le rattrapage 0010 a 0013, 0017 et 0019 a 0028 est applique en production.
 CRON_SECRET est configure dans Vercel Production et GitHub Actions. La route
-reste a deployer. L'expediteur Resend est configure ; la livraison effective,
+est deployee. L'expediteur Resend est configure ; la livraison effective,
 l'exercice de restauration et la validation des ecrans authentifies restent a verifier.
 La connexion Universign est confirmee le 6 septembre dans le workspace Cloison. Aucun acte n'a ete signe,
-aucune facture agence emise, et aucun changement n'a ete fusionne dans main.
+aucune facture agence emise. Les corrections du socle sont fusionnees dans main.
 
 La lecture de l’API Supabase ne liste aucune sauvegarde disponible et indique
 PITR desactive. Aucun exercice de restauration ni controle de la copie de secours
@@ -134,3 +135,27 @@ fonctions Supabase reproduits. Le bucket `pieces` est prive et TOTP est active
 pour l'enrolement et la verification. Avant correction, la lecture des privileges
 confirme notamment `marquer_dossier_paye` executable par anon et authenticated.
 La verification HTTP couvre desormais ces refus en plus des claims et revocations.
+
+## Livraison et controles de production, 6 septembre
+
+Le lot de quinze migrations a ete applique en une transaction apres CI verte.
+Empreinte SHA256 du lot :
+`70e59d59303143feae13c952170c6f45badd621f5348f2b2c5fba28a81570890`.
+Une connexion distincte a confirme les tables nouvelles et les permissions ;
+les fonctions de paiement, recuperation et calcul sont refusees a l'anonyme
+par l'API publique avec HTTP 401 et SQL 42501. Zero dossier et zero piece apres operation.
+Un inventaire du schema avant/apres a ete conserve localement, sans donnees de personnes.
+
+Vercel a deploye le commit fusionne avec succes. Le domaine canonique est
+`www.cloison.immo` : le domaine sans www renvoie une redirection 308.
+La route de maintenance refuse un appel sans secret en HTTP 401 sur ce domaine canonique.
+
+Le premier workflow de maintenance retournait un faux succes sur la redirection 308.
+Le suivi utilise maintenant le domaine canonique, refuse toute redirection, exige HTTP 200
+et verifie les compteurs d'erreurs. Son test local reproduit redirection, HTML, JSON
+incomplet, erreurs metier et authentification incorrecte. La validation effective
+sur production doit etre consignée apres execution du workflow corrige.
+
+Les erreurs JSON du moteur documentaire sont remplacees par un message controle :
+un test a reproduit la presence d'un contenu fictif dans l'erreur brute avant correction.
+L'audit npm des dependances de production ne signale aucune vulnerabilite connue.
