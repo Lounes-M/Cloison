@@ -24,7 +24,7 @@ export const heroAgences = {
  */
 export const apercuDossier = {
   badge: 'dossier complet',
-  url: 'cloison.fr/d/8f2k',
+  url: 'cloison.immo/d/8f2k',
   titre: 'Dossier · Garant M.',
   etat: 'vérifié',
   filigrane: 'Filigrané',
