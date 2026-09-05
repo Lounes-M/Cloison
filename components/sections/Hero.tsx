@@ -76,7 +76,7 @@ export function Hero() {
           </span>
           ,<br />
           ni une signature{' '}
-          <span className="border-ink bg-flame shadow-brut-sm inline-block -rotate-[1.5deg] rounded-[14px] border-[3px] px-4 text-white">
+          <span className="border-ink bg-flame shadow-brut-sm text-ink inline-block -rotate-[1.5deg] rounded-[14px] border-[3px] px-4">
             à l&apos;aveugle.
           </span>
         </h1>

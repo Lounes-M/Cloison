@@ -19,7 +19,7 @@ const tons = {
   sky: 'bg-sky',
   sun: 'bg-sun',
   mint: 'bg-mint',
-  flame: 'bg-flame text-white',
+  flame: 'bg-flame text-ink',
   paper: 'bg-paper',
 } as const
 
@@ -46,7 +46,7 @@ export default async function PageLocataire({
   const { data: dossier } = await supabase
     .from('dossiers')
     .select(
-      'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration, loyer_verrouille',
+      'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration, loyer_verrouille, garant_verrouille',
     )
     .eq('id', porteur.capacite.dossierId)
     .maybeSingle()
@@ -56,6 +56,9 @@ export default async function PageLocataire({
   if (!dossier) redirect('/lien-invalide')
 
   const statut = statuts[String(dossier.statut)] ?? statuts.ouvert!
+  const ouvert = ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
+    String(dossier.statut),
+  )
   const garant = dossier.email_garant ? String(dossier.email_garant) : null
 
   // Ce que le locataire achete, c'est le lien de son garant. Un dossier ouvert
@@ -86,8 +89,15 @@ export default async function PageLocataire({
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {espace.loyerAide}
         </p>
-        <FormulaireLoyer loyerActuel={loyer} />
-        {!dossier.agence_id ? <FormulaireContinuite mode="agence" /> : null}
+        {ouvert && !dossier.loyer_verrouille ? (
+          <FormulaireLoyer loyerActuel={loyer} />
+        ) : (
+          <p className="text-sm">
+            Loyer : {loyer} €. Ce montant est figé pour préserver la confidentialité de la
+            déclaration du garant.
+          </p>
+        )}
+        {ouvert && !dossier.agence_id ? <FormulaireContinuite mode="agence" /> : null}
       </section>
 
       {aRegler || dossier.paye_le ? (
@@ -109,7 +119,7 @@ export default async function PageLocataire({
             </p>
           ) : null}
           {paiement === 'indisponible' ? (
-            <p className="bg-flame outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold text-white">
+            <p className="bg-flame outlined text-ink mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
               {paiementLocataire.indisponible}
             </p>
           ) : null}
@@ -138,7 +148,7 @@ export default async function PageLocataire({
               <form action={payerMonDossier} className="mt-5">
                 <button
                   type="submit"
-                  className="press outlined bg-flame shadow-brut rounded-brut cursor-pointer px-8 py-4 text-[17px] font-bold text-white"
+                  className="press outlined bg-flame shadow-brut rounded-brut text-ink cursor-pointer px-8 py-4 text-[17px] font-bold"
                 >
                   {paiementLocataire.bouton}
                 </button>
@@ -157,8 +167,21 @@ export default async function PageLocataire({
           <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
             {paiementLocataire.attente}
           </p>
+        ) : ouvert ? (
+          <>
+            <FormulaireGarant
+              garantActuel={garant}
+              verrouille={Boolean(dossier.garant_verrouille)}
+            />
+            {dossier.garant_verrouille ? (
+              <p className="mt-3 text-sm">
+                Le garant invité reste associé à ce dossier. Pour désigner une autre personne, ouvre
+                un nouveau dossier.
+              </p>
+            ) : null}
+          </>
         ) : (
-          <FormulaireGarant garantActuel={garant} />
+          <p>Ce dossier ne peut plus être modifié.</p>
         )}
       </section>
 

@@ -21,7 +21,7 @@ export function FormulaireNomAgence({ domaine }: { domaine: string }) {
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined rounded-xl px-4 py-3 text-[14px] font-semibold text-white">
+        <p className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold">
           {etat.message}
         </p>
       ) : null}

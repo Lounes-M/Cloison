@@ -30,7 +30,8 @@ describe('courrielsPour', () => {
   test('transmis : le locataire et le garant, pas l agence', () => {
     const envois = courrielsPour({ ...DOSSIER, statut: 'transmis' }, ['marie@agence-lyon3.fr'])
     expect(envois.map((e) => e.a)).toEqual(['locataire@exemple.fr', 'garant@exemple.fr'])
-    expect(envois[1]!.texte).toContain('mention')
+    expect(envois[1]!.texte).toContain('figées')
+    expect(envois[1]!.texte).toContain('ne constitue pas une signature')
   })
 
   test('garant insuffisant : le locataire et l agence, sans le pourquoi', () => {

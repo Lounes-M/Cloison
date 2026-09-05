@@ -29,7 +29,7 @@ export function Pricing() {
         {/* La regle d'or : le garant ne paie jamais. Volontairement de travers. */}
         <li>
           <Reveal delay={0.16} tilt={1.5} className="h-full">
-            <article className="bg-flame shadow-brut outlined relative h-full rounded-[18px] p-7 text-white">
+            <article className="bg-flame shadow-brut outlined text-ink relative h-full rounded-[18px] p-7">
               <span className="bg-sun font-display text-ink outlined absolute -top-4 right-4.5 rotate-4 rounded-full px-3.5 py-1.5 text-xs uppercase">
                 {pricing.goldenRule.tag}
               </span>

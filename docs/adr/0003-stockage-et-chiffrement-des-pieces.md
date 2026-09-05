@@ -37,7 +37,7 @@ déchiffrent tournent donc en runtime Node, pas Edge.
 ### La clé maîtresse ne vit pas chez Supabase
 
 C'est le point qui porte tout l'ADR. **Le chiffré est chez Supabase, la clé est chez Vercel**, en
-variable d'environnement serveur. Compromettre l'un ne donne rien sans l'autre.
+variable d'environnement serveur. Cette séparation protège contre une fuite isolée du stockage. Une compromission du serveur Vercel peut donner accès à la KEK et aux moyens d'accéder à Supabase : elle permet donc de déchiffrer les documents. Ce système ne constitue pas un chiffrement de bout en bout.
 
 Mettre la KEK dans Supabase Vault serait le contresens exact de cette décision : la clé et le
 chiffré partageraient le même rayon d'explosion, et on aurait payé la complexité du chiffrement pour
@@ -79,9 +79,8 @@ Supprimer un fichier d'un stockage objet ne le supprime pas des sauvegardes, et 
 garantit l'inverse à la seconde près. On ne fait donc pas reposer la promesse de suppression sur une
 suppression.
 
-**À l'expiration, on détruit la DEK du dossier.** Les pièces deviennent immédiatement illisibles,
-partout où elles se trouvent, sauvegardes comprises, sans rien avoir à effacer. Les objets sont
-ensuite supprimés pour de bon, par un travail planifié `pg_cron`, mais en second rideau, pas comme
+**À l'expiration, on détruit la DEK du dossier.** Les pièces deviennent illisibles dans la base active. Une ancienne sauvegarde contenant la DEK scellée reste déchiffrable avec la KEK : sa rétention doit être limitée et toute restauration doit rejouer les purges avant ouverture des accès. Les objets sont
+ensuite supprimés pour de bon, par la route authentifiée `/api/maintenance`, mais en second rideau, pas comme
 garantie.
 
 C'est la deuxième raison d'être du chiffrement, et elle vaut la première : elle rend la promesse
@@ -93,16 +92,14 @@ d'effacement **vérifiable** au lieu de déclarative.
 suivant.
 
 **La rotation de la KEK.** Rechiffrer les DEK sous une nouvelle clé maîtresse est un travail
-mécanique, mais il demande un identifiant de version sur chaque DEK. On le pose dès le schéma pour
-ne pas avoir à migrer plus tard ; la procédure elle-même attendra d'en avoir besoin.
+mécanique, mais il demande un identifiant de version sur chaque DEK. Le schéma actuel ne porte pas encore cette version. Ne jamais remplacer la KEK sans une migration de rechiffrement vérifiée.
 
 **Un vrai KMS.** Une variable d'environnement Vercel est un endroit correct pour une clé maîtresse à
 ce stade, pas un endroit idéal. Le signal de sortie est le premier salarié qui a accès au tableau de
 bord Vercel sans avoir à connaître la KEK : c'est-à-dire le moment où la séparation des rôles
 devient un vrai sujet, et non plus une affaire de deux fondateurs.
 
-**La signature électronique.** Le prestataire eIDAS recevra des pièces qui sortent de ce stockage,
-donc il en dépend, mais c'est une décision distincte.
+**La signature électronique.** Le prestataire doit recevoir l’acte à signer, sans les justificatifs de revenus. La chaîne attend un modèle contractuel validé.
 
 ## Conséquences
 
@@ -116,7 +113,7 @@ donc il en dépend, mais c'est une décision distincte.
   surveiller au moment où le pilote passe à l'échelle.
 - Le schéma des dossiers portera la DEK chiffrée et sa version de clé. Détruire cette colonne est
   l'acte d'expiration.
-- Un travail `pg_cron` de suppression différée, à écrire en phase 3 avec la table `dossiers`.
+- Une file de suppression Storage reprise par la maintenance (migration 0021).
 - La dette « chiffrement des pièces » de l'ADR 0001 est réglée ; celle du registre RGPD ne l'est pas.
 
 ## Alternatives écartées

@@ -55,3 +55,41 @@ jobs:
       # navigateur existent, donc la seule ou une fuite reelle peut etre vue.
       - name: Fuites dans le bundle client
         run: npm run check:env
+
+  postgrest:
+    name: PostgreSQL et PostgREST HTTP
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_PASSWORD: cloison-test-only
+          POSTGRES_DB: cloison_audit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      postgrest:
+        image: postgrest/postgrest:v16.2
+        env:
+          PGRST_DB_URI: postgres://authenticator:cloison-test-only@postgres:5432/cloison_audit_test
+          PGRST_DB_SCHEMAS: public
+          PGRST_DB_ANON_ROLE: anon
+          PGRST_JWT_SECRET: local-isolated-postgrest-tests-32-characters-only
+        ports:
+          - 3001:3000
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Revocation et droits via HTTP
+        env:
+          PGTEST_URL: postgres://postgres:cloison-test-only@127.0.0.1:5432/cloison_audit_test
+          POSTGREST_TEST_URL: http://127.0.0.1:3001
+          POSTGREST_TEST_SECRET: local-isolated-postgrest-tests-32-characters-only
+        run: node scripts/test-postgrest.mjs

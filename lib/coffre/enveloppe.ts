@@ -8,8 +8,8 @@ import { createCipheriv, createDecipheriv, randomBytes, timingSafeEqual } from '
  * un octet lisible. La DEK elle-meme est chiffree par la cle maitresse (KEK),
  * qui vit chez Vercel.
  *
- * C'est le point qui porte l'ADR 0003 : le chiffre est chez Supabase, la cle
- * est ailleurs. Compromettre l'un ne donne rien sans l'autre.
+ * La separation protege d'une fuite isolee du stockage. Le serveur Vercel
+ * peut dechiffrer : sa compromission n'est pas couverte par cette separation.
  *
  * AES-256-GCM par le module `crypto` de Node, sans dependance nouvelle. Le
  * mode authentifie n'est pas un detail : sans lui, un octet modifie rendrait

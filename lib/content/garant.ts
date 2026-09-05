@@ -102,7 +102,7 @@ export const engagement = {
 export const mention = {
   titre: 'Ta mention',
   intro:
-    'L’agence a pris le dossier. Avant l’acte, la loi te demande d’écrire toi-même, avec tes mots, ce à quoi tu t’engages. Personne ne peut le faire à ta place, et c’est ce qui rend ton engagement valable.',
+    'Tu peux préparer ta mention avant la transmission du dossier. Cette étape n’est pas une signature et le contrôle automatique ne certifie pas la validité juridique du texte.',
   prenom: 'Ton prénom',
   nom: 'Ton nom',
   adresse: 'Ton adresse',

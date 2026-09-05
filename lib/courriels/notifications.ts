@@ -1,4 +1,6 @@
 import 'server-only'
+import { createHash } from 'node:crypto'
+import { clientServeur } from '@/lib/acces/serveur'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -80,35 +82,41 @@ export async function prevenirSiLeStatutAChange(
   dossierId: string,
   statutAvant: string | null,
 ): Promise<void> {
-  const { data } = await supabase
-    .from('dossiers')
-    .select('id, reference, statut, email_locataire, email_garant, demonstration')
-    .eq('id', dossierId)
-    .maybeSingle()
-
-  if (!data || data.statut === statutAvant || data.demonstration) return
-
-  const dossier: Dossier = {
-    id: String(data.id),
-    reference: String(data.reference),
-    statut: String(data.statut),
-    email_locataire: String(data.email_locataire),
-    email_garant: data.email_garant ? String(data.email_garant) : null,
-    demonstration: Boolean(data.demonstration),
+  // Les arguments historiques restent pour les appelants. La transaction SQL
+  // determine les changements, meme si le processus tombe apres l'ecriture.
+  void supabase
+  void statutAvant
+  try {
+    await livrerNotifications(await clientServeur(), dossierId)
+  } catch {
+    console.error('[courriel] notifications en attente de reprise')
   }
+}
 
-  let contacts: string[] = []
-  if (textesAgence[dossier.statut]) {
-    const { data: adresses, error } = await supabase.rpc('contacts_agence_du_dossier', {
-      le_dossier: dossierId,
-    })
-    if (error) console.error('[courriel] contacts de l agence illisibles', error)
-    contacts = Array.isArray(adresses) ? adresses.map(String) : []
+export async function livrerNotifications(db: SupabaseClient, dossierId?: string) {
+  const { data, error } = await db.rpc('notifications_a_livrer', {
+    le_dossier: dossierId ?? null,
+  })
+  if (error) throw new Error('Notifications indisponibles')
+  let echecs = 0
+  for (const evenement of data ?? []) {
+    let accepte = true
+    for (const envoi of courrielsPour(evenement.dossier as Dossier, evenement.contacts ?? [])) {
+      for (const adresse of Array.isArray(envoi.a) ? envoi.a : [envoi.a]) {
+        const hex = createHash('sha256')
+          .update(`${evenement.id}:${adresse}`)
+          .digest('hex')
+          .slice(0, 32)
+        const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+        if (!(await envoyer(adresse, envoi.sujet, envoi.texte, id))) accepte = false
+      }
+    }
+    if (accepte) {
+      const { error } = await db.rpc('acquitter_notification', { identifiant: evenement.id })
+      if (error) echecs++
+    } else echecs++
   }
-
-  for (const envoi of courrielsPour(dossier, contacts)) {
-    await envoyer(envoi.a, envoi.sujet, envoi.texte)
-  }
+  return { echecs }
 }
 
 /** Le statut d'un dossier tel qu'il est maintenant, pour le comparer apres. */

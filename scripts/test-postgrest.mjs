@@ -1,0 +1,91 @@
+import assert from 'node:assert/strict'
+import { readFileSync, readdirSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { Client } from 'pg'
+import { SignJWT } from 'jose'
+
+export async function verifierPostgrest(db, adresse, secret) {
+  await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
+  for (const fichier of readdirSync('supabase/migrations')
+    .filter((f) => f.endsWith('.sql'))
+    .sort()) {
+    await db.query(readFileSync(`supabase/migrations/${fichier}`, 'utf8'))
+  }
+  await db.query("alter role authenticator login password 'cloison-test-only'")
+  await db.query("notify pgrst, 'reload schema'")
+  let disponible = false
+  for (let i = 0; i < 80; i++) {
+    try {
+      const r = await fetch(`${adresse}/`, { signal: AbortSignal.timeout(1000) })
+      if (r.ok) {
+        disponible = true
+        break
+      }
+    } catch {
+      /* Demarrage du service isole. */
+    }
+    await new Promise((r) => setTimeout(r, 500))
+  }
+  assert(disponible, 'PostgREST de test indisponible')
+  const {
+    rows: [dossier],
+  } = await db.query(
+    "insert into dossiers(email_locataire,reference) values ('http@audit.invalid','HTTP12345678') returning id",
+  )
+  const {
+    rows: [lien],
+  } = await db.query(
+    "insert into jetons_actifs(dossier_id,partie,jti,expire_le) values ($1,'locataire',gen_random_uuid(),now()+interval '7 days') returning jti",
+    [dossier.id],
+  )
+  const signer = (claims) =>
+    new SignJWT(claims)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setExpirationTime('5m')
+      .sign(new TextEncoder().encode(secret))
+  const jeton = await signer({
+    role: 'porteur_lien',
+    role_partie: 'locataire',
+    dossier_id: dossier.id,
+    jti: lien.jti,
+  })
+  const lire = async (jwt) => {
+    const r = await fetch(`${adresse}/dossiers?select=id`, {
+      headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+      signal: AbortSignal.timeout(5000),
+    })
+    return { status: r.status, body: await r.json() }
+  }
+  assert.deepEqual((await lire(jeton)).body, [{ id: dossier.id }])
+  console.log('OK : lien valide et claims JSON')
+  await db.query('update jetons_actifs set jti=gen_random_uuid() where dossier_id=$1', [dossier.id])
+  assert.deepEqual((await lire(jeton)).body, [])
+  console.log('OK : lien revoque sans acces')
+  assert.equal((await lire(jeton.slice(0, -8) + 'invalide')).status, 401)
+  console.log('OK : signature falsifiee refusee')
+  const anonyme = await lire()
+  assert(anonyme.status === 401 || JSON.stringify(anonyme.body) === '[]')
+  console.log('OK : aucun acces anonyme')
+}
+
+if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  const connexion = process.env.PGTEST_URL
+  const adresse = process.env.POSTGREST_TEST_URL
+  const secret = process.env.POSTGREST_TEST_SECRET
+  assert(connexion && adresse && secret, 'Configuration de test manquante')
+  const pg = new URL(connexion)
+  const http = new URL(adresse)
+  assert(
+    ['localhost', '127.0.0.1'].includes(pg.hostname) && pg.pathname === '/cloison_audit_test',
+    'Base locale jetable cloison_audit_test obligatoire',
+  )
+  assert(['localhost', '127.0.0.1'].includes(http.hostname), 'API de test locale obligatoire')
+  const db = new Client({ connectionString: connexion })
+  await db.connect()
+  try {
+    await verifierPostgrest(db, adresse, secret)
+  } finally {
+    await db.end()
+  }
+}

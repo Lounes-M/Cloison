@@ -15,6 +15,12 @@ export async function verifierSecondFacteur(
     if (liste) return { erreur: securite.erreur }
     const existant = facteurs.totp.find((f) => f.status === 'verified')
     if (existant) return { facteur: existant.id }
+    for (const ancien of facteurs.all.filter(
+      (f) => f.factor_type === 'totp' && f.status === 'unverified',
+    )) {
+      const { error } = await db.auth.mfa.unenroll({ factorId: ancien.id })
+      if (error) return { erreur: securite.erreur }
+    }
     const { data, error } = await db.auth.mfa.enroll({
       factorType: 'totp',
       friendlyName: 'Cloison',

@@ -1,6 +1,8 @@
 import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { clientServeur } from '@/lib/acces/serveur'
+import { livrerNotifications } from '@/lib/courriels/notifications'
+import { distribuerCourriels } from '@/lib/courriels/file'
 import { purgerCoffres } from '@/lib/exploitation/purge'
 
 export const runtime = 'nodejs'
@@ -13,8 +15,14 @@ export async function GET(request: Request) {
     return new NextResponse(null, { status: 401 })
   }
   try {
-    const resultat = await purgerCoffres(await clientServeur())
-    return NextResponse.json(resultat, { status: resultat.echecs ? 503 : 200 })
+    const db = await clientServeur()
+    const notifications = await livrerNotifications(db)
+    const courriels = await distribuerCourriels(db)
+    const purge = await purgerCoffres(db)
+    return NextResponse.json(
+      { notifications, courriels, purge },
+      { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200 },
+    )
   } catch {
     console.error('[maintenance] purge impossible')
     return NextResponse.json({ erreur: true }, { status: 503 })

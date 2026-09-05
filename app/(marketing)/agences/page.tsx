@@ -43,7 +43,7 @@ export default function AgencesPage() {
           <h1 className="font-display animate-fade-up mt-6 text-[clamp(2rem,5.5vw,56px)] leading-[1.04] uppercase [animation-delay:0.15s]">
             {heroAgences.titre[0]} <span className="text-cobalt">{heroAgences.titre[1]}</span>
             <br />
-            <span className="border-ink shadow-brut-sm bg-flame mt-2 inline-block -rotate-[1.5deg] rounded-xl border-[3px] px-4 text-white">
+            <span className="border-ink shadow-brut-sm bg-flame text-ink mt-2 inline-block -rotate-[1.5deg] rounded-xl border-[3px] px-4">
               {heroAgences.titre[2]}
             </span>
           </h1>
@@ -53,7 +53,7 @@ export default function AgencesPage() {
           <div className="animate-fade-up mt-8 [animation-delay:0.45s]">
             <a
               href="#demander"
-              className="press bg-flame outlined rounded-brut shadow-brut inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white"
+              className="press bg-flame outlined rounded-brut shadow-brut text-ink inline-flex items-center justify-center px-8 py-4 text-base font-bold"
             >
               {heroAgences.ancreFormulaire} →
             </a>
@@ -226,7 +226,7 @@ export default function AgencesPage() {
           </Reveal>
 
           <Reveal className="relative" tilt={1}>
-            <span className="bg-flame border-ink font-display absolute -top-4 right-5.5 z-10 rotate-4 rounded-full border-2 px-3.5 py-1.5 text-[11px] text-white uppercase">
+            <span className="bg-flame border-ink font-display text-ink absolute -top-4 right-5.5 z-10 rotate-4 rounded-full border-2 px-3.5 py-1.5 text-[11px] uppercase">
               {tarifAgence.tampon}
             </span>
             <div className="bg-cream border-ink shadow-brut rounded-t-md rounded-b-[18px] border-[2.5px] p-7">

@@ -1,46 +1,45 @@
 import 'server-only'
 
-import { Resend } from 'resend'
+import { randomUUID } from 'node:crypto'
+import { clientServeur } from '@/lib/acces/serveur'
+import { sceller } from '@/lib/coffre/enveloppe'
+import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
+import { distribuerCourriels } from './file'
 
 import { env } from '@/lib/env'
 
-/**
- * L'envoi d'un courriel, et rien d'autre.
- *
- * Du texte, jamais de HTML : un courriel qui porte un lien ou une nouvelle a
- * beaucoup a perdre a une mise en page, et rien a y gagner.
- *
- * Ne leve jamais. Un envoi rate se voit dans les journaux et dans la valeur de
- * retour ; il ne doit pas transformer une ecriture reussie en erreur affichee.
- */
+/** Retourne vrai des que le courriel est durablement accepte en file. */
 export async function envoyer(
   a: string | string[],
   sujet: string,
   texte: string,
+  identifiant?: string,
 ): Promise<boolean> {
   const destinataires = Array.isArray(a) ? a.filter(Boolean) : [a]
   if (destinataires.length === 0) return false
-
   try {
-    const { error } = await new Resend(env.resendApiKey).emails.send({
+    const id = identifiant ?? randomUUID()
+    const db = await clientServeur()
+    const contenu = {
       from: env.emailExpediteur,
-      // Le garant et le locataire n'ont pas d'adresse de support propre : leur
-      // courriel repond a la meme adresse que celle de l'agence, quand elle
-      // est posee. Sans elle, une reponse part vers l'expediteur, comme avant.
       ...(env.emailSupport ? { replyTo: env.emailSupport } : {}),
       to: destinataires,
       subject: sujet,
       text: texte,
-    })
-
-    if (error) {
-      console.error('[courriel] envoi refuse', sujet, error)
-      return false
     }
-
+    const { error } = await db.rpc('mettre_courriel_en_file', {
+      identifiant: id,
+      chiffre: sceller(Buffer.from(JSON.stringify(contenu)), cleMaitresse()).toString('base64'),
+    })
+    if (error) return false
+    try {
+      await distribuerCourriels(db, id)
+    } catch {
+      console.error('[courriel] reprise necessaire')
+    }
     return true
-  } catch (erreur) {
-    console.error('[courriel] envoi impossible', sujet, erreur)
+  } catch {
+    console.error('[courriel] mise en file impossible')
     return false
   }
 }
