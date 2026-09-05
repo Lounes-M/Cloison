@@ -2,7 +2,8 @@
 
 Le coffre à trois clés pour la garantie locative. Le garant dépose ses pièces dans un coffre que
 le locataire ne voit jamais ; l'agence les consulte filigranées à son nom, avec le ratio de
-solvabilité, et fait signer l'acte. Site en production sur `https://cloison.vercel.app`.
+solvabilité, et fait signer l'acte. Site en production sur `https://cloison.immo`, domaine acheté le
+5 septembre 2026 ; `cloison.fr` et `cloison.com` sont à acquérir plus tard, `cloison.fr` étant pris.
 
 Ce fichier est ce qu'une nouvelle session doit savoir pour continuer sans relire l'historique.
 La feuille de route complète, cinquante tâches en neuf phases, est dans
@@ -128,19 +129,27 @@ Ce qui reste ne se code pas, et se fait de son côté :
 
 0. **Appliquer la migration 0019** dans l'éditeur SQL de Supabase, avant tout : sans elle, la
    porte du locataire, les liens et le compteur de débit répondent « réessaie » à tout le monde.
-1. Stripe : clés dans Vercel, webhook `/api/paiement/webhook` sur `checkout.session.completed`,
+1. **Rattacher `cloison.immo`** : Vercel, Settings puis Domains, avec `www` redirigé vers l'apex,
+   les deux enregistrements DNS chez le registrar, puis redéployer. Ensuite, dans l'ordre : Supabase,
+   Authentication puis URL Configuration, ajouter `https://cloison.immo/connexion/verifie` et
+   passer le Site URL dessus ; Resend, vérifier `cloison.immo` comme domaine d'envoi et passer
+   `EMAIL_EXPEDITEUR` sur `Cloison <bonjour@cloison.immo>` ; Stripe, déclarer le webhook sur
+   `https://cloison.immo/api/paiement/webhook` ; une redirection de `support@cloison.immo` vers
+   ta boîte, puis `EMAIL_SUPPORT`. Rien à changer dans le code : l'URL du site se déduit du domaine
+   de production Vercel.
+2. Stripe : clés dans Vercel, webhook `/api/paiement/webhook` sur `checkout.session.completed`,
    redéploiement, puis un tour avec la carte de test. Vérifier ensuite les journaux du webhook.
-2. pg_cron : activer l'extension et planifier la purge, SQL dans
+3. pg_cron : activer l'extension et planifier la purge, SQL dans
    `docs/exploitation/sauvegardes-et-restauration.md`.
-3. Région Vercel des fonctions en Europe, `fra1`.
-4. Une restauration réellement effectuée, datée dans le document.
-5. Un conseil pour ce qui est marqué Juridique : conditions générales, registre, accord de
+4. Région Vercel des fonctions en Europe, `fra1`.
+5. Une restauration réellement effectuée, datée dans le document.
+6. Un conseil pour ce qui est marqué Juridique : conditions générales, registre, accord de
    traitement, mentions légales, modèle d'acte.
-6. La revue de sécurité externe, périmètre dans `docs/exploitation/revue-de-securite.md`.
-7. Le compte Universign, qui débloque la signature (tâche 34) puis l'encaissement à l'acte (43).
-8. L'adresse de support à fixer, puis à poser dans Vercel sous `EMAIL_SUPPORT` : l'espace agence
+7. La revue de sécurité externe, périmètre dans `docs/exploitation/revue-de-securite.md`.
+8. Le compte Universign, qui débloque la signature (tâche 34) puis l'encaissement à l'acte (43).
+9. L'adresse de support à fixer, puis à poser dans Vercel sous `EMAIL_SUPPORT` : l'espace agence
    l'affiche et les courriels y répondent dès qu'elle existe.
-9. Le jour du point hebdomadaire et l'endroit du compte rendu.
+10. Le jour du point hebdomadaire et l'endroit du compte rendu.
 
 Ce qui reste à coder, quand ces comptes existeront : la signature électronique de l'acte, la
 facturation effective des actes, et la phase 8, un deuxième

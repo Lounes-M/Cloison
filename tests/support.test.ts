@@ -30,13 +30,13 @@ describe('l adresse de support', () => {
   })
 
   test('posee, elle est rendue sans ses espaces', () => {
-    process.env.EMAIL_SUPPORT = '  support@cloison.fr '
-    expect(env.emailSupport).toBe('support@cloison.fr')
+    process.env.EMAIL_SUPPORT = '  support@cloison.immo '
+    expect(env.emailSupport).toBe('support@cloison.immo')
   })
 
   test('le texte de l espace agence la porte, avec le delai promis', () => {
-    const texte = support.texte('support@cloison.fr')
-    expect(texte).toContain('support@cloison.fr')
+    const texte = support.texte('support@cloison.immo')
+    expect(texte).toContain('support@cloison.immo')
     expect(texte).toContain('quatre heures ouvrées')
     expect(texte).toContain('un jour ouvré')
   })

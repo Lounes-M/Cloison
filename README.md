@@ -131,7 +131,11 @@ saisir**.
    autoriser explicitement `Lounes-M/Cloison` quand Vercel demande l'accès à GitHub. Next.js est
    ensuite détecté seul : ne touche ni à la commande de build ni au répertoire de sortie.
 2. **Déployer.**
-3. **Brancher le domaine** dans Settings → Domains quand tu l'auras, puis **redéployer**.
+3. **Brancher le domaine**, `cloison.immo`, dans Settings → Domains, avec `www` redirigé vers
+   l'apex, puis **redéployer**. Le domaine change aussi trois réglages hors du dépôt : l'URL de
+   retour du lien magique dans Supabase (`https://cloison.immo/connexion/verifie`), le domaine
+   d'envoi vérifié chez Resend pour `EMAIL_EXPEDITEUR`, et l'adresse du webhook Stripe
+   (`https://cloison.immo/api/paiement/webhook`).
 
 ### D'où vient l'URL du site
 

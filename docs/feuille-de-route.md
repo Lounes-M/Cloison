@@ -6,7 +6,7 @@ Légende : `[x]` fait ; `[ ]` à faire ; **À toi** attend un compte, un conseil
 
 ## Phase 0. Finir le socle (Terminee)
 
-Les trois scories du setup, plus la mise en ligne. Le site est en production sur cloison.vercel.app, vérifié après coup : les six en-têtes de sécurité sont servis, sitemap et robots citent le bon domaine, l'image de partage se génère avec la vraie typographie, et rien ne déborde en 390 px. Ajoutés au passage, hors liste : les en-têtes de sécurité et un garde-fou qui empêche un secret de partir vers le navigateur.
+Les trois scories du setup, plus la mise en ligne. Le site est en production sur cloison.vercel.app, puis sur cloison.immo depuis le 5 septembre 2026, vérifié après coup : les six en-têtes de sécurité sont servis, sitemap et robots citent le bon domaine, l'image de partage se génère avec la vraie typographie, et rien ne déborde en 390 px. Ajoutés au passage, hors liste : les en-têtes de sécurité et un garde-fou qui empêche un secret de partir vers le navigateur.
 
 - [x] **01** Supprimer components/ui/Badge.tsx
       Composant mort, jamais importé. Le code non utilisé se met à mentir très vite.

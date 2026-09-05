@@ -79,7 +79,7 @@ function premiereRenseignee(...valeurs: (string | undefined)[]): string | undefi
   return undefined
 }
 
-/** Accepte `cloison.fr` comme `https://cloison.fr`, et retire la barre finale. */
+/** Accepte `cloison.immo` comme `https://cloison.immo`, et retire la barre finale. */
 function normaliseUrl(valeur: string): string {
   const avecProtocole = /^https?:\/\//i.test(valeur) ? valeur : `https://${valeur}`
   return avecProtocole.replace(/\/+$/, '')
@@ -99,7 +99,7 @@ try {
   throw new Error(
     `URL du site invalide : ${JSON.stringify(siteUrl)}. ` +
       `Verifie NEXT_PUBLIC_SITE_URL dans les variables d'environnement : soit une URL ` +
-      `complete (https://cloison.fr), soit supprime-la entierement pour laisser Vercel ` +
+      `complete (https://cloison.immo), soit supprime-la entierement pour laisser Vercel ` +
       `fournir le domaine de production.`,
   )
 }
