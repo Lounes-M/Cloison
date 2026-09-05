@@ -186,7 +186,9 @@ Ils sont déclarés dans [`next.config.ts`](next.config.ts) et s'appliquent à t
 préchargement HSTS qu'une fois certain de rester en HTTPS**, l'opération étant longue à défaire.
 L'en-tête seul est sans risque.
 
-Il n'y a volontairement **pas de Content-Security-Policy** pour l'instant : sous App Router, une CSP
-stricte impose des nonces, donc un middleware et un rendu dynamique. On échangerait aujourd'hui des
-pages entièrement statiques contre une protection sans objet, le site ne recevant aucune donnée.
-À trancher avec le socle produit, quand les premiers formulaires arriveront.
+La **Content-Security-Policy** a deux formes, écrites dans [`lib/securite/csp.ts`](lib/securite/csp.ts).
+Le site public, prérendu, en reçoit une statique depuis `next.config.ts`, qui admet les scripts en
+ligne que Next y pose. L'applicatif, agence et porteurs de lien, en reçoit une du middleware avec un
+nonce par requête et `'strict-dynamic'` : un script injecté dans une page ne porte pas le nonce, il
+ne s'exécute pas. `tests/csp.test.ts` vérifie qu'aucun segment de l'applicatif ne tombe sous la
+politique du site public.

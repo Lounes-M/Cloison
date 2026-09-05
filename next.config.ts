@@ -1,21 +1,14 @@
 import type { NextConfig } from 'next'
 
+import { SEGMENTS_APPLICATIFS, politiqueStatique } from './lib/securite/csp'
+
 /**
  * En-tetes de securite appliques a toutes les reponses.
  *
- * Volontairement absent : une Content-Security-Policy. Une CSP stricte sous
- * App Router impose des nonces, donc un middleware et un rendu dynamique : on
- * echangerait aujourd'hui des pages entierement statiques contre une protection
- * sans objet.
- *
- * Le site recoit des donnees depuis le formulaire agence, mais ce n'est pas la
- * question : ce qu'une CSP attenue avant tout, c'est l'execution de script
- * injecte dans une page, et rien de ce qui est saisi n'est jamais reaffiche.
- * La surface apparait quand une page montre du contenu fourni par un tiers,
- * c'est-a-dire l'espace agence et les pieces deposees, en phase 4. Le rendu y
- * sera dynamique de toute facon : le cout du nonce disparait.
- *
- * Voir docs/dettes.md, ou ce signal est trace.
+ * La Content-Security-Policy n'est pas ici mais juste en dessous, parce
+ * qu'elle a deux formes : celle du site public, statique, declaree dans ce
+ * fichier, et celle de l'applicatif, avec un nonce par requete, posee par le
+ * middleware. Le raisonnement est dans `lib/securite/csp.ts`.
  */
 const securityHeaders = [
   {
@@ -159,6 +152,14 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+      {
+        // Le site public seulement : l'applicatif recoit sa politique, avec
+        // nonce, du middleware. Deux en-tetes CSP sur la meme reponse
+        // s'appliqueraient tous les deux, et le site public n'a pas de nonce a
+        // offrir ; on exclut donc ici exactement ce que le middleware couvre.
+        source: `/((?!(?:${SEGMENTS_APPLICATIFS.join('|')})(?:/|$)).*)`,
+        headers: [{ key: 'Content-Security-Policy', value: politiqueStatique() }],
       },
     ]
   },

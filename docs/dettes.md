@@ -121,24 +121,6 @@ raison le jour où la borne pratique sera levée.
 découpage en morceaux scellés séparément, chacun sous la borne, réassemblés à l'ouverture. Pas
 l'envoi direct.
 
-### Une réponse qui dit si une adresse a un dossier
-
-**Constaté le** 1er septembre 2026 par l'[ADR 0006](adr/0006-lien-magique-pour-le-locataire-et-le-garant.md),
-et **partiellement réglé le** 3 septembre 2026.
-
-Le magasin partagé, qui était la moitié technique du sujet, existe : la migration 0008 compte dans
-Postgres, et `lib/acces/debit.ts` n'y envoie qu'une empreinte. La moitié qui reste est de nature
-différente et ne se règle pas dans un compteur.
-
-Un point d'envoi de lien magique doit répondre **exactement la même chose** que l'adresse ait un
-dossier ou non : même message, même délai apparent, même code. Sinon la page devient un oracle qui
-répond « cette personne est locataire chez nous ». Le compteur ne peut rien pour ça, et il aggrave
-même le problème s'il est mal branché : une limite qui ne se déclenche que sur les adresses connues
-renseigne à elle seule.
-
-**Signal de sortie** : le parcours locataire, en phase 4. C'est là que la route existera, et la
-règle est à écrire avec elle plutôt qu'après.
-
 ### Aucun antivirus sur les pièces déposées
 
 **Décidé le** 3 septembre 2026, à l'ouverture du dépôt des pièces.
@@ -167,25 +149,28 @@ l'isolation du décodage, pas par des signatures.
 posée et le raisonnement écrit, plutôt qu'avec une case à cocher. Si la rasterisation devait être
 abandonnée ou contournée pour un format, la dette redeviendrait immédiatement bloquante.
 
-### Pas de Content-Security-Policy
-
-Une CSP stricte sous App Router impose des nonces, donc un middleware et un rendu dynamique : on
-échangerait des pages entièrement statiques contre cette protection.
-
-**Signal déclenché puis redéfini le 1er septembre 2026.** Le signal initial était « le premier
-formulaire en production », et le formulaire agence l'a déclenché. Réexaminé, il était mal choisi :
-ce que la CSP atténue avant tout, c'est l'exécution de script injecté dans une page, et le
-formulaire n'ouvre aucune surface de ce type : les données saisies partent vers Supabase et un
-e-mail, elles ne sont jamais réaffichées sur le site.
-
-**Nouveau signal de sortie** : la première page qui **affiche du contenu fourni par un tiers**,
-c'est-à-dire l'espace agence montrant les pièces déposées, en phase 4. C'est là que la surface
-apparaît réellement, et le rendu y sera dynamique de toute façon : le coût du nonce disparaît.
-
 ---
 
 ## Réglées
 
+- **Pas de Content-Security-Policy** : réglée le 5 septembre 2026, sur le signal redéfini le
+  1er septembre, l'espace agence affichant désormais ce que d'autres ont saisi. Deux politiques,
+  écrites dans `lib/securite/csp.ts`. Le site public, prérendu, garde `'unsafe-inline'` pour les
+  scripts que Next y pose : protection partielle, assumée là où aucun tiers ne saisit rien.
+  L'applicatif reçoit du middleware un nonce par requête et `'strict-dynamic'` : un script injecté
+  ne porte pas le nonce, il ne s'exécute pas. Le coût prévu s'est confirmé nul, ces pages étant
+  déjà rendues à la requête ; seules `/connexion`, `/lien-invalide` et la page 404 sont passées
+  en dynamique. Deux surprises en chemin : Next refuse les groupes capturants dans un `source`
+  d'en-tête, et zod sonde `new Function` au premier objet validé, ce qu'un `jitless` supprime.
+  `tests/csp.test.ts` tient les directives et le fait qu'aucun segment de l'applicatif ne puisse
+  tomber, par oubli, sous la politique du site public.
+- **Une réponse qui dit si une adresse a un dossier** : réglée le 5 septembre 2026, en
+  constatant que le parcours locataire livré en phase 4 avait tenu la règle sans qu'on l'ait
+  fermée. La porte `/demarrer` crée un dossier neuf à chaque envoi valide, donc sa réponse ne
+  renseigne sur personne, et `tests/porte-locataire.test.ts` le fixe. La connexion agence répond
+  « Regarde tes e-mails » que l'adresse ait un compte ou non, erreur Supabase comprise. Il n'existe
+  pas de parcours « retrouver mon dossier » ; le jour où il existera, la règle est celle-ci :
+  même message, même délai apparent, même code, que l'adresse ait un dossier ou non.
 - **La limite de débit ne couvrait que nos routes, pas PostgREST** : réglée le 5 septembre 2026,
   avant le signal prévu, qui était la revue de sécurité. La parade n'est pas celle que la dette
   supposait. Plutôt que de faire compter la fonction SQL elle-même, la migration 0019 retire à
