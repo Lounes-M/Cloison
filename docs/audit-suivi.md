@@ -153,8 +153,20 @@ La route de maintenance refuse un appel sans secret en HTTP 401 sur ce domaine c
 Le premier workflow de maintenance retournait un faux succes sur la redirection 308.
 Le suivi utilise maintenant le domaine canonique, refuse toute redirection, exige HTTP 200
 et verifie les compteurs d'erreurs. Son test local reproduit redirection, HTML, JSON
-incomplet, erreurs metier et authentification incorrecte. La validation effective
-sur production doit etre consignée apres execution du workflow corrige.
+incomplet, erreurs metier et authentification incorrecte.
+
+Ce controle a ensuite detecte HTTP 503 : le secret de signature configure sur Vercel
+ne permettait pas d'authentifier le role serveur aupres de Supabase. Le secret courant
+a ete verifie contre la signature du jeton public du projet, puis configure dans
+Vercel comme secret, sans impression ni fichier contenant sa valeur. Le redeploiement
+du meme commit main a retabli la connexion. Le workflow corrige
+[33999095368](https://github.com/Lounes-M/Cloison/actions/runs/33999095368)
+passe contre la production : HTTP 200 et zero erreur dans les trois files, alors vides.
+Cela prouve la connexion et l'execution, pas encore un envoi de courriel ni la
+suppression d'un objet Storage reel.
+
+La suite locale de suivi passe 374 tests dans 40 suites ; le build et l'execution
+des dependances documentaires tracees passent egalement.
 
 Les erreurs JSON du moteur documentaire sont remplacees par un message controle :
 un test a reproduit la presence d'un contenu fictif dans l'erreur brute avant correction.

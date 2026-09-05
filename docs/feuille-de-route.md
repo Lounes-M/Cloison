@@ -168,3 +168,8 @@ Le detail des corrections et preuves vit dans `docs/audit-suivi.md`. Le traiteme
 documentaire est deplace dans un processus interrompable avec limites de ressources.
 Les phases contractuelles ne sont pas terminees : Lounes prend en charge l'activation
 Universign et le modele d'acte ; l'integration et sa validation dependent de ces elements.
+
+La PR 43 est fusionnee, deployee et ses migrations sont appliquees. Les controles
+HTTP refusent les fonctions sensibles au role anonyme. Le suivi de livraison
+corrige la verification de maintenance et les erreurs documentaires journalisables.
+Les cases historiques ne prouvent toujours ni restauration reelle ni signature.
