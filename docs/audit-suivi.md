@@ -56,9 +56,24 @@ Aucune migration 0019 a 0027 n'a encore ete appliquee en production.
 CRON_SECRET est configure dans Vercel Production et GitHub Actions. La route
 reste a deployer. La livraison Resend sur domaine verifie,
 l'exercice de restauration et la validation des ecrans authentifies restent a verifier.
-Universign affiche toujours un ecran de connexion. Aucun acte n'a ete signe,
+La connexion Universign est confirmee le 6 septembre dans le workspace Cloison. Aucun acte n'a ete signe,
 aucune facture agence emise, et aucun changement n'a ete fusionne dans main.
 
 La lecture de l’API Supabase ne liste aucune sauvegarde disponible et indique
 PITR desactive. Aucun exercice de restauration ni controle de la copie de secours
 de CLE_MAITRESSE n’a ete realise.
+
+## Acces Universign verifie le 6 septembre
+
+Le compte utilise l'essai gratuit du 5 au 19 septembre 2026, avec zero transaction
+sur dix et aucun modele enregistre. Le menu Developpeur n'est pas present.
+Le tableau des offres du compte reserve la boite a outils developpeur a Enterprise ;
+la signature avancee n'est pas incluse dans l'essai affiche.
+
+L'acces au portail ne prouve donc pas l'activation de l'API necessaire a CLOISON.
+Faire confirmer par Universign l'acces API et un environnement de preproduction,
+le niveau de signature avancee, l'archivage et les conditions commerciales.
+Aucun abonnement n'a ete modifie et aucune transaction n'a ete envoyee.
+Le modele d'acte valide reste a fournir, meme apres activation de l'API.
+
+Reference technique : [creation des cles API](https://apps.universign.com/docs/fr/developer_tools/API_keys/).
