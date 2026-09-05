@@ -5,7 +5,9 @@ le locataire ne voit jamais ; l'agence les consulte filigranées à son nom, ave
 solvabilité, et fait signer l'acte. Site en production sur `https://cloison.vercel.app`.
 
 Ce fichier est ce qu'une nouvelle session doit savoir pour continuer sans relire l'historique.
-La feuille de route complète, cinquante tâches en neuf phases, vit dans un artefact Claude :
+La feuille de route complète, cinquante tâches en neuf phases, est dans
+`docs/feuille-de-route.md` : c'est elle qu'on lit et qu'on met à jour à chaque tâche livrée. Sa
+version d'origine vit dans un artefact Claude :
 `https://claude.ai/code/artifact/64a581c3-18ff-4255-86ac-735d5523dc7e`.
 
 ## Comment travailler avec Lounes
