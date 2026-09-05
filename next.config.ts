@@ -147,6 +147,32 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SITE_URL: siteUrl,
   },
 
+  /**
+   * L'ancien domaine de production, `cloison.vercel.app`, renvoie vers le vrai.
+   *
+   * Vercel ne redirige pas de lui-meme le domaine qu'il attribue au projet :
+   * sans cette regle, deux hotes serviraient le meme site, et les moteurs
+   * comme les liens deja partages se disperseraient. Seul cet hote exact est
+   * redirige : les previews vivent sur d'autres sous-domaines et doivent
+   * rester consultables telles quelles.
+   *
+   * Rien tant qu'aucun domaine personnalise n'est rattache : rediriger l'hote
+   * de production vers lui-meme serait une boucle.
+   */
+  async redirects() {
+    const hoteDeProduction = new URL(siteUrl).host
+    const ancienHote = 'cloison.vercel.app'
+    if (hoteDeProduction === ancienHote || hoteDeProduction.startsWith('localhost')) return []
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host' as const, value: ancienHote }],
+        destination: `${siteUrl}/:path*`,
+        permanent: true,
+      },
+    ]
+  },
+
   async headers() {
     return [
       {

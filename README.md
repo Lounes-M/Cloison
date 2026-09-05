@@ -137,6 +137,13 @@ saisir**.
    d'envoi vérifié chez Resend pour `EMAIL_EXPEDITEUR`, et l'adresse du webhook Stripe
    (`https://cloison.immo/api/paiement/webhook`).
 
+### Où tournent les fonctions
+
+[`vercel.json`](vercel.json) fixe la région des fonctions à `fra1`, Francfort. La clé maîtresse
+déchiffre les pièces là où la fonction s'exécute : le registre des traitements dit l'Union
+européenne, et un test refuse toute région qui n'y serait pas. L'ancien hôte `cloison.vercel.app`
+redirige vers le domaine de production, règle déclarée dans `next.config.ts`.
+
 ### D'où vient l'URL du site
 
 `site.url` est résolue au build dans [`next.config.ts`](next.config.ts), dans cet ordre :
