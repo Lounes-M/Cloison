@@ -136,7 +136,7 @@ Trois villes tendues, vingt agences, six mois : c'est ton propre objectif, affic
 - [ ] **46** Embarquer les premières agences à la main **À toi**
       Sept étapes dans docs/exploitation/embarquement-agence.md, de la demande sur la page d'accueil à l'activation en un seul ordre SQL, avec ce qu'on vérifie et ce qu'on note.
 - [ ] **47** Un canal de support direct, avec un vrai délai de réponse **À toi**
-      Une adresse et un délai tenu : quatre heures ouvrées pour un dossier bloqué, un jour ouvré pour le reste. L'adresse est à fixer, puis à afficher dans l'espace agence.
+      Une adresse et un délai tenu : quatre heures ouvrées pour un dossier bloqué, un jour ouvré pour le reste. L'affichage est prêt depuis le 5 septembre 2026 : dès que `EMAIL_SUPPORT` est posée dans Vercel, l'espace agence la montre en bas de page et les courriels du locataire et du garant y répondent. Reste à fixer l'adresse.
 - [ ] **48** Suivre : dossiers créés, taux de complétion du garant, délai dépôt vers signature **À toi**
       Les trois requêtes sont écrites dans docs/exploitation/suivi-du-pilote.md, sur le schéma réel. À passer chaque semaine, et à noter : la purge à trois mois efface le journal.
 - [ ] **49** Un point hebdomadaire retours vers backlog **À toi**

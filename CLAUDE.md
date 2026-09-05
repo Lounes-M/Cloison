@@ -98,11 +98,13 @@ npm run build
 
 `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_JWT_SECRET`, `CLE_MAITRESSE`,
 `RESEND_API_KEY`, `EMAIL_DESTINATAIRE`, `EMAIL_EXPEDITEUR` sur le domaine vérifié,
-`NEXT_PUBLIC_SITE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Détail dans `.env.example`.
+`EMAIL_SUPPORT` optionnelle, `NEXT_PUBLIC_SITE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
+Détail dans `.env.example`.
 
 ## Où sont les choses
 
-- `supabase/migrations/` 0001 à 0019 ; 0001 à 0018 appliquées en production au 4 septembre 2026.
+- `supabase/migrations/` 0001 à 0019 ; 0001 à 0018 appliquées en production au 4 septembre 2026,
+  la 0019 attend son application.
 - `lib/acces/` sessions, jetons, débit, rôle serveur. `lib/coffre/` dépôt, enveloppe,
   rasterisation, ouverture. `lib/agences/`, `lib/locataire/`, `lib/garant/` les actions de
   chaque acteur. `lib/courriels/` Resend. `lib/content/` tous les textes et les montants.
@@ -112,13 +114,20 @@ npm run build
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## État au 4 septembre 2026
+## État au 5 septembre 2026
 
-Trente-cinq PR fusionnées. Les phases 0 à 7 de la feuille de route sont livrées côté dépôt.
+Quarante PR fusionnées. Les phases 0 à 7 de la feuille de route sont livrées côté dépôt.
 Resend est configuré avec un domaine vérifié. Stripe est en cours de création par Lounes.
+
+Le 5 septembre, depuis une session cloud : la feuille de route est entrée dans le dépôt, la
+migration 0019 a retiré à `anon` toute fonction au profit du rôle `serveur`, la
+Content-Security-Policy est posée, et l'espace agence affiche l'adresse de support dès qu'elle
+existe. Trois dettes fermées : PostgREST, CSP, réponse oracle.
 
 Ce qui reste ne se code pas, et se fait de son côté :
 
+0. **Appliquer la migration 0019** dans l'éditeur SQL de Supabase, avant tout : sans elle, la
+   porte du locataire, les liens et le compteur de débit répondent « réessaie » à tout le monde.
 1. Stripe : clés dans Vercel, webhook `/api/paiement/webhook` sur `checkout.session.completed`,
    redéploiement, puis un tour avec la carte de test. Vérifier ensuite les journaux du webhook.
 2. pg_cron : activer l'extension et planifier la purge, SQL dans
@@ -129,9 +138,10 @@ Ce qui reste ne se code pas, et se fait de son côté :
    traitement, mentions légales, modèle d'acte.
 6. La revue de sécurité externe, périmètre dans `docs/exploitation/revue-de-securite.md`.
 7. Le compte Universign, qui débloque la signature (tâche 34) puis l'encaissement à l'acte (43).
-8. L'adresse de support à fixer, puis à afficher dans l'espace agence.
+8. L'adresse de support à fixer, puis à poser dans Vercel sous `EMAIL_SUPPORT` : l'espace agence
+   l'affiche et les courriels y répondent dès qu'elle existe.
 9. Le jour du point hebdomadaire et l'endroit du compte rendu.
 
 Ce qui reste à coder, quand ces comptes existeront : la signature électronique de l'acte, la
-facturation effective des actes, l'affichage de l'adresse de support, et la phase 8, un deuxième
+facturation effective des actes, et la phase 8, un deuxième
 cas d'usage, pas avant que la location tourne seule.
