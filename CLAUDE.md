@@ -141,7 +141,8 @@ Ce qui reste ne se code pas, et se fait de son côté :
    redéploiement, puis un tour avec la carte de test. Vérifier ensuite les journaux du webhook.
 3. pg_cron : activer l'extension et planifier la purge, SQL dans
    `docs/exploitation/sauvegardes-et-restauration.md`.
-4. Région Vercel des fonctions en Europe, `fra1`.
+4. Région Vercel des fonctions en Europe : `fra1` est fixée dans `vercel.json`. Vérifier après
+   déploiement qu'une route dynamique répond avec un `x-vercel-id` en `fra1`.
 5. Une restauration réellement effectuée, datée dans le document.
 6. Un conseil pour ce qui est marqué Juridique : conditions générales, registre, accord de
    traitement, mentions légales, modèle d'acte.

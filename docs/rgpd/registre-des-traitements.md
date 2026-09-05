@@ -73,16 +73,17 @@ suivies d'un compte, durée du compte pour les autres.
 
 ## Sous-traitants
 
-| Sous-traitant                      | Rôle                                        | Localisation                                                                                 | DPA                             |
-| ---------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------- |
-| Supabase                           | base de données, stockage, authentification | région UE choisie à l'ADR 0001, **à vérifier dans le projet**                                | **à signer**                    |
-| Vercel                             | hébergement, fonctions, clé maîtresse       | fonctions en `iad1` (États-Unis) par défaut : **à basculer en région UE** (`fra1` ou `cdg1`) | **à signer**                    |
-| Resend                             | envoi des courriels                         | **à vérifier** : région de traitement et transferts                                          | **à signer**                    |
-| Universign (Cryptolog, Signaturit) | signature électronique                      | QTSP UE, centres en France (ADR 0005)                                                        | **à signer**, compte non ouvert |
+| Sous-traitant                      | Rôle                                        | Localisation                                                                                                                         | DPA                             |
+| ---------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| Supabase                           | base de données, stockage, authentification | région UE choisie à l'ADR 0001, **à vérifier dans le projet**                                                                        | **à signer**                    |
+| Vercel                             | hébergement, fonctions, clé maîtresse       | fonctions en `fra1` (Francfort), fixé dans `vercel.json` le 5 septembre 2026 et tenu par un test ; **à vérifier sur un déploiement** | **à signer**                    |
+| Resend                             | envoi des courriels                         | **à vérifier** : région de traitement et transferts                                                                                  | **à signer**                    |
+| Universign (Cryptolog, Signaturit) | signature électronique                      | QTSP UE, centres en France (ADR 0005)                                                                                                | **à signer**, compte non ouvert |
 
-Le point Vercel mérite un geste avant le premier dossier réel : la clé maîtresse et le
-déchiffrement s'exécutent dans les fonctions, donc là où elles tournent. Une région UE est un
-réglage de projet, pas une refonte.
+Le point Vercel est réglé par le dépôt plutôt que par un clic : la clé maîtresse et le
+déchiffrement s'exécutent dans les fonctions, donc là où elles tournent, et `vercel.json` fixe
+`fra1`. `tests/webhook.test.ts` refuse toute région hors Union européenne. Reste à lire, sur une
+réponse d'une route dynamique en production, un `x-vercel-id` qui commence par `fra1`.
 
 ## Ce que ce registre ne couvre pas encore
 

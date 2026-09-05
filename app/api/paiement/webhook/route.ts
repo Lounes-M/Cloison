@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { clientServeur } from '@/lib/acces/serveur'
 import { lireEvenement, paiementConfirme } from '@/lib/paiement/stripe'
+import { reponseAuMarquage } from '@/lib/paiement/webhook'
 
 /**
  * Ce que Stripe nous dit, et ce qu'on en fait.
@@ -9,11 +10,12 @@ import { lireEvenement, paiementConfirme } from '@/lib/paiement/stripe'
  * Deux barrieres, dans cet ordre. La signature de Stripe, verifiee sur le corps
  * brut : sans elle, n'importe quel `POST` marquerait un dossier regle. Puis le
  * role `serveur`, que seule notre signature de jeton fait exister, et qui n'a
- * qu'une fonction ouverte : `marquer_dossier_paye`.
+ * qu'une fonction ouverte pour cela : `marquer_dossier_paye`.
  *
  * Stripe rejoue un evenement tant qu'il ne recoit pas 200. On repond 200 des
  * qu'on a compris, meme pour un evenement qui ne nous concerne pas ; on repond
- * autre chose seulement quand on veut qu'il revienne.
+ * 503 seulement quand on veut qu'il revienne, c'est-a-dire quand l'echec est
+ * le notre et passager. Le partage est dans `lib/paiement/webhook.ts`.
  */
 export const runtime = 'nodejs'
 
@@ -26,17 +28,19 @@ export async function POST(requete: NextRequest) {
   if (!paiement) return NextResponse.json({ recu: true })
 
   const supabase = await clientServeur()
-  const { data, error } = await supabase.rpc('marquer_dossier_paye', {
+  const resultat = await supabase.rpc('marquer_dossier_paye', {
     le_dossier: paiement.dossierId,
     la_reference: paiement.reference,
   })
 
-  if (error) {
-    // Une anomalie (deux references pour un dossier) ne doit pas faire
-    // rejouer Stripe indefiniment : elle se lit dans les journaux.
-    console.error('[paiement] marquage refuse', paiement, error)
-    return NextResponse.json({ recu: true, marque: false })
+  const reponse = reponseAuMarquage(resultat)
+  if (resultat.error) {
+    console.error(
+      reponse.statut === 200 ? '[paiement] marquage refuse' : '[paiement] marquage a rejouer',
+      paiement,
+      resultat.error,
+    )
   }
 
-  return NextResponse.json({ recu: true, marque: data === true })
+  return NextResponse.json(reponse.corps, { status: reponse.statut })
 }
