@@ -15,9 +15,22 @@ export async function traiterDocument(
       JSON.stringify({ operation, type, filigrane, contenu: contenu.toString('base64') }),
     ),
   )
-  const resultat = JSON.parse(sortie.toString('utf8'))
+  let resultat: Record<string, unknown>
+  try {
+    const lu: unknown = JSON.parse(sortie.toString('utf8'))
+    if (!lu || typeof lu !== 'object' || Array.isArray(lu)) throw new Error()
+    resultat = lu as Record<string, unknown>
+  } catch {
+    // JSON.parse peut citer la sortie brute, donc du contenu documentaire,
+    // dans son erreur. L'appelant journalise uniquement ce message controle.
+    throw new Error('Reponse du moteur documentaire invalide')
+  }
   if (resultat.ok !== true) {
-    if (Number.isSafeInteger(resultat.pages) && resultat.pages > 40)
+    if (
+      typeof resultat.pages === 'number' &&
+      Number.isSafeInteger(resultat.pages) &&
+      resultat.pages > 40
+    )
       throw new Error(`Ce document compte ${resultat.pages} pages, au-dela des 40 traitees`)
     throw new Error('Document invalide ou trop volumineux a traiter')
   }
