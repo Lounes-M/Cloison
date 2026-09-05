@@ -30,7 +30,10 @@ export function BoutonsDecision({
   return (
     <div className="flex flex-col gap-4">
       {prise.statut === 'erreur' || refus.statut === 'erreur' ? (
-        <p className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {prise.statut === 'erreur'
             ? prise.message
             : refus.statut === 'erreur'

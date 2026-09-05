@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url'
 import { Client } from 'pg'
 import { SignJWT } from 'jose'
 
-export async function verifierPostgrest(db, adresse, secret) {
+export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
   for (const fichier of readdirSync('supabase/migrations')
     .filter((f) => f.endsWith('.sql'))
@@ -14,6 +14,9 @@ export async function verifierPostgrest(db, adresse, secret) {
   }
   await db.query("alter role authenticator login password 'cloison-test-only'")
   await db.query("notify pgrst, 'reload schema'")
+}
+
+export async function verifierPostgrest(db, adresse, secret) {
   let disponible = false
   for (let i = 0; i < 80; i++) {
     try {
@@ -84,7 +87,8 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const db = new Client({ connectionString: connexion })
   await db.connect()
   try {
-    await verifierPostgrest(db, adresse, secret)
+    if (process.argv.includes('--preparer')) await preparerBase(db)
+    else await verifierPostgrest(db, adresse, secret)
   } finally {
     await db.end()
   }

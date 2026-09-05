@@ -16,12 +16,18 @@ export function FormulaireSeuil({ seuilActuel }: { seuilActuel: string }) {
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       {etat.statut === 'enregistre' ? (
-        <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="status"
+          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {tableau.seuilSucces}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {etat.message}
         </p>
       ) : null}

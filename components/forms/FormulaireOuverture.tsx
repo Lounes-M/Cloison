@@ -41,7 +41,10 @@ export function FormulaireOuverture() {
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {etat.message}
         </p>
       ) : null}
@@ -74,7 +77,7 @@ export function FormulaireOuverture() {
         disabled={enCours}
         className={cn(
           'press outlined bg-flame shadow-brut rounded-brut cursor-pointer px-8 py-4',
-          'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
+          'text-ink text-[17px] font-bold disabled:cursor-wait disabled:opacity-70',
         )}
       >
         {enCours ? porte.envoi : porte.bouton}

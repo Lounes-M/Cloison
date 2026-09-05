@@ -106,7 +106,7 @@ export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: 
         accept="application/pdf,image/jpeg,image/png"
         disabled={enCours || preparation}
         onChange={auChoix}
-        className="sr-only"
+        className="border-ink rounded-xl border-2 p-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-4"
       />
 
       <button
@@ -121,7 +121,10 @@ export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: 
             : 'Déposer le fichier sélectionné'}
       </button>
       {erreur ? (
-        <p className="bg-flame outlined text-ink rounded-xl px-3 py-2 text-[13px] font-semibold">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-3 py-2 text-[13px] font-semibold"
+        >
           {erreur}
         </p>
       ) : null}

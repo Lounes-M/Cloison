@@ -71,15 +71,6 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s --health-timeout 5s --health-retries 10
-      postgrest:
-        image: postgrest/postgrest:v16.2
-        env:
-          PGRST_DB_URI: postgres://authenticator:cloison-test-only@postgres:5432/cloison_audit_test
-          PGRST_DB_SCHEMAS: public
-          PGRST_DB_ANON_ROLE: anon
-          PGRST_JWT_SECRET: local-isolated-postgrest-tests-32-characters-only
-        ports:
-          - 3001:3000
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -87,9 +78,26 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Preparer le schema avant de demarrer PostgREST
+        env:
+          PGTEST_URL: postgres://postgres:cloison-test-only@127.0.0.1:5432/cloison_audit_test
+          POSTGREST_TEST_URL: http://127.0.0.1:3001
+          POSTGREST_TEST_SECRET: local-isolated-postgrest-tests-32-characters-only
+        run: node scripts/test-postgrest.mjs --preparer
+      - name: Demarrer PostgREST avec son role deja cree
+        run: |
+          docker run --detach --name cloison-postgrest --network host \
+            --env PGRST_DB_URI=postgres://authenticator:cloison-test-only@127.0.0.1:5432/cloison_audit_test \
+            --env PGRST_DB_SCHEMAS=public --env PGRST_DB_ANON_ROLE=anon \
+            --env PGRST_SERVER_PORT=3001 \
+            --env PGRST_JWT_SECRET=local-isolated-postgrest-tests-32-characters-only \
+            postgrest/postgrest:v16.2
       - name: Revocation et droits via HTTP
         env:
           PGTEST_URL: postgres://postgres:cloison-test-only@127.0.0.1:5432/cloison_audit_test
           POSTGREST_TEST_URL: http://127.0.0.1:3001
           POSTGREST_TEST_SECRET: local-isolated-postgrest-tests-32-characters-only
         run: node scripts/test-postgrest.mjs
+      - name: Diagnostic PostgREST
+        if: failure()
+        run: docker logs cloison-postgrest || true

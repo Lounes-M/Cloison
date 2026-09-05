@@ -16,12 +16,18 @@ export function FormulaireNouveauDossier({ verifiee }: { verifiee: boolean }) {
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       {etat.statut === 'ouvert' ? (
-        <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="status"
+          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {tableau.nouveauSucces(etat.email)}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {etat.message}
         </p>
       ) : null}
