@@ -15,7 +15,13 @@ const ETAT_INITIAL: EtatGarant = { statut: 'inactif' }
  * revoque le lien precedent. Il n'y a donc pas de bouton « renvoyer » separe
  * qui laisserait croire que l'ancien lien vaut encore.
  */
-export function FormulaireGarant({ garantActuel }: { garantActuel: string | null }) {
+export function FormulaireGarant({
+  garantActuel,
+  verrouille = false,
+}: {
+  garantActuel: string | null
+  verrouille?: boolean
+}) {
   const [etat, envoyer, enCours] = useActionState(designerMonGarant, ETAT_INITIAL)
   const idChamp = useId()
 
@@ -24,13 +30,19 @@ export function FormulaireGarant({ garantActuel }: { garantActuel: string | null
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       {etat.statut === 'envoye' ? (
-        <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+        <p
+          role="status"
+          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {espace.garantSucces}
         </p>
       ) : null}
 
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined rounded-xl px-4 py-3 text-[14px] font-semibold text-white">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {etat.message}
         </p>
       ) : null}
@@ -46,6 +58,7 @@ export function FormulaireGarant({ garantActuel }: { garantActuel: string | null
           autoComplete="off"
           required
           defaultValue={valeurInitiale}
+          readOnly={verrouille}
           placeholder="garant@exemple.fr"
           aria-describedby={`${idChamp}-aide`}
           className={cn(

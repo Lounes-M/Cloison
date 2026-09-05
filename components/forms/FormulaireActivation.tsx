@@ -19,7 +19,7 @@ export function FormulaireActivation({ siren, cartePro }: { siren: string; carte
 
   if (etat.statut === 'demandee') {
     return (
-      <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+      <p role="status" className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
         {texte.succes}
       </p>
     )
@@ -30,7 +30,10 @@ export function FormulaireActivation({ siren, cartePro }: { siren: string; carte
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined rounded-xl px-4 py-3 text-[14px] font-semibold text-white">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {etat.message}
         </p>
       ) : null}

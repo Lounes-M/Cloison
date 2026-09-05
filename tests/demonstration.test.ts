@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
@@ -116,13 +117,10 @@ describe('ouvrir_dossier_de_demonstration', () => {
 
     // Ce que `remplirLaDemonstration` fait, rejoue ici avec les roles qu'il
     // emprunte : si une politique le refusait, c'est ici que ca se verrait.
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${id}'`)
-    await db.exec(`set request.jwt.claim.role_partie = 'locataire'`)
+    await devenirPorteur(db, id, 'locataire')
     await db.query(`update public.dossiers set loyer_cents = 115000 where id = '${id}'`)
 
-    await db.exec(`set request.jwt.claim.role_partie = 'garant'`)
+    await devenirPorteur(db, id, 'garant')
     await db.query(
       `insert into public.engagements (dossier_id, revenu_net_mensuel_cents) values ('${id}', 380000)`,
     )

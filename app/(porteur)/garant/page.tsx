@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 /** Tant que le dossier est la, le garant depose et corrige. Apres, il regarde. */
-const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'garant_insuffisant'])
+const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'])
 
 type Piece = { id: string; type: string; taille_octets: number; depose_le: string }
 
@@ -51,7 +51,12 @@ export default async function PageGarant() {
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { dossierId } = porteur.capacite
 
-  const [{ data: dossier }, { data: engagement }, { data: pieces }] = await Promise.all([
+  const [
+    { data: dossier },
+    { data: engagement },
+    { data: pieces },
+    { data: journal, error: erreurJournal },
+  ] = await Promise.all([
     supabase
       .from('dossiers')
       .select('reference, email_locataire, statut')
@@ -69,6 +74,7 @@ export default async function PageGarant() {
       .select('id, type, taille_octets, depose_le')
       .eq('dossier_id', dossierId)
       .order('depose_le', { ascending: true }),
+    supabase.rpc('mon_journal_acces'),
   ])
 
   if (!dossier) redirect('/lien-invalide')
@@ -78,7 +84,7 @@ export default async function PageGarant() {
   // La mention se compose quand l'agence a pris le dossier : c'est l'acte qui
   // vient ensuite, et il n'y a pas d'acte sans decision. Un dossier complet
   // peut deja la preparer.
-  const mentionAttendue = ['complet', 'transmis'].includes(String(dossier.statut))
+  const mentionAttendue = String(dossier.statut) === 'complet'
   const deposees = (pieces ?? []) as Piece[]
 
   const engagementAffiche: EngagementAffiche = engagement
@@ -126,7 +132,7 @@ export default async function PageGarant() {
         <ol className="flex flex-col gap-8">
           {natures.map((nature) => {
             const siennes = deposees.filter((p) => p.type === nature.valeur)
-            const complete = nature.attendu > 0 && siennes.length >= nature.attendu
+            const complete = nature.attendu > 0 && siennes.length > 0
 
             return (
               <li key={nature.valeur} className="border-ink border-t-2 pt-6">
@@ -159,6 +165,9 @@ export default async function PageGarant() {
                             )}
                           </span>
                         </span>
+                        <a className="font-bold underline" href={`/garant/pieces/${piece.id}`}>
+                          {depot.original}
+                        </a>
                         {ouvert ? <BoutonRetrait pieceId={piece.id} /> : null}
                       </li>
                     ))}
@@ -200,6 +209,54 @@ export default async function PageGarant() {
       ) : null}
 
       <section className="mt-14">
+        <h2 className="font-display text-2xl uppercase">Historique des accès</h2>
+        <p className="text-muted mt-2 text-sm">
+          Les 100 événements les plus récents de ton dossier.
+        </p>
+        {erreurJournal ? (
+          <p role="alert">L’historique est momentanément indisponible.</p>
+        ) : (
+          <ol className="mt-4 space-y-3">
+            {(journal ?? []).map(
+              (entree: {
+                id: string
+                action: string
+                acteur: string
+                identite: string | null
+                quand: string
+              }) => (
+                <li key={entree.id} className="border-ink border-t pt-3 text-sm">
+                  <time dateTime={entree.quand}>
+                    {new Date(entree.quand).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
+                  </time>
+                  {' : '}
+                  {(
+                    {
+                      dossier_consulte: 'Dossier consulté',
+                      piece_deposee: 'Pièce déposée',
+                      piece_retiree: 'Pièce retirée',
+                      piece_ouverte: 'Pièce ouverte',
+                      dossier_transmis: 'Dossier transmis',
+                    } as Record<string, string>
+                  )[entree.action] ?? 'Accès'}
+                  {' par '}
+                  {entree.identite ??
+                    (
+                      {
+                        agence: 'l’agence',
+                        garant: 'le garant',
+                        locataire: 'le locataire',
+                      } as Record<string, string>
+                    )[entree.acteur]}
+                  .
+                </li>
+              ),
+            )}
+            {!journal?.length ? <li>Aucun accès enregistré.</li> : null}
+          </ol>
+        )}
+      </section>
+      <section className="mt-14">
         <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
           {texteEngagement.aide}
@@ -209,7 +266,7 @@ export default async function PageGarant() {
         ) : (
           <p className="text-[15px] font-medium">
             {engagementAffiche
-              ? `${engagementAffiche.couvre === 'loyer' ? 'Le loyer seul' : 'Le loyer et les charges'}${engagementAffiche.montant ? `, jusqu’à ${engagementAffiche.montant} € par mois` : ''}${engagementAffiche.jusquAu ? `, jusqu’au ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? ', caution solidaire' : ''}.`
+              ? `${engagementAffiche.couvre === 'loyer' ? 'Le loyer seul' : 'Le loyer et les charges'}${engagementAffiche.montant ? `, jusqu’à ${engagementAffiche.montant} € au total` : ''}${engagementAffiche.jusquAu ? `, jusqu’au ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? ', caution solidaire' : ''}.`
               : 'Aucun engagement déclaré.'}
           </p>
         )}

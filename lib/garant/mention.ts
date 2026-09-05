@@ -132,11 +132,11 @@ export function normaliserLettres(texte: string): string {
  */
 export function montantsEnChiffres(texte: string): number[] {
   const trouves = new Set<number>()
-  const motif = /(\d{1,3}(?:[  .]\d{3})+|\d+)(?:[,.]\d{1,2})?\s*(?:€|euros?|eur)?/gi
+  const motif = /(\d{1,3}(?:[  .]\d{3})+|\d+)(?:[,.]00)?\s*(?:€|euros?\b|eur\b)/gi
 
   for (const correspondance of texte.matchAll(motif)) {
     const entier = Number(correspondance[1]!.replace(/[  .]/g, ''))
-    if (Number.isFinite(entier) && entier > 0) trouves.add(entier)
+    if (Number.isSafeInteger(entier) && entier > 0 && entier <= 999_999_999) trouves.add(entier)
   }
 
   return [...trouves]
@@ -163,16 +163,18 @@ export function verifierMention(texte: string, solidaire: boolean): Verdict {
   const manques: Element[] = []
   const plat = normaliserLettres(texte)
 
-  if (!plat.includes('caution')) manques.push('caution')
+  const negation = /\b(?:ne|pas|jamais|refuse)\b/.test(plat)
+  if (!plat.includes('caution') || negation) manques.push('caution')
 
   // Payer, et en cas de defaillance : les deux idees, pas une formule.
   const paie = /\bpa(?:yer|ie|ierai|iera|yerai)\b/.test(plat) || plat.includes('regler')
   const defaut = plat.includes('defaillance') || plat.includes('defaut') || plat.includes('impaye')
-  if (!paie || !defaut) manques.push('paiement')
+  if (!paie || !defaut || negation) manques.push('paiement')
 
   let montantEuros: number | null = null
   for (const chiffre of montantsEnChiffres(texte)) {
-    if (plat.includes(normaliserLettres(nombreEnLettres(chiffre)))) {
+    const mots = normaliserLettres(nombreEnLettres(chiffre))
+    if (new RegExp(`(?:^|[^a-z])${mots} euros?\\b`).test(plat)) {
       montantEuros = chiffre
       break
     }

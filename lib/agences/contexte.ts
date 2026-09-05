@@ -1,4 +1,5 @@
 import 'server-only'
+import { redirect } from 'next/navigation'
 
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
 import { rattacher, type Rattachement } from './rattachement'
@@ -42,6 +43,11 @@ export async function contexteAgence(): Promise<ContexteAgence> {
   const utilisateur = await utilisateurCourant()
   if (!utilisateur) return { etat: 'anonyme' }
 
+  const verification = await clientAgence()
+  const { data: niveau, error: niveauErreur } =
+    await verification.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (niveauErreur || niveau?.currentLevel !== 'aal2') redirect('/connexion/securite')
+
   const email = utilisateur.email ?? ''
   const rattachement = await rattacher()
   if (rattachement.etat !== 'rattache') return { etat: 'non-rattache', rattachement, email }
@@ -61,7 +67,7 @@ export async function contexteAgence(): Promise<ContexteAgence> {
   ])
 
   // Rattache mais sans agence lisible : incoherent, et on ne devine pas.
-  if (!agence) return { etat: 'anonyme' }
+  if (!agence || agence.statut === 'suspendue') return { etat: 'anonyme' }
 
   return {
     etat: 'rattache',

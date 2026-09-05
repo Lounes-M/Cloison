@@ -1,4 +1,6 @@
 import 'server-only'
+import { randomUUID } from 'node:crypto'
+import { clientServeur } from '@/lib/acces/serveur'
 
 import Stripe from 'stripe'
 
@@ -36,28 +38,72 @@ export async function creerSessionLocataire(options: {
   retourAnnule: string
 }): Promise<string | null> {
   try {
-    const session = await stripe().checkout.sessions.create({
-      mode: 'payment',
-      customer_email: options.email,
-      client_reference_id: options.dossierId,
-      metadata: { dossier_id: options.dossierId, reference: options.reference },
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: 'eur',
-            unit_amount: tarifs.locataireCents,
-            product_data: {
-              name: `Dossier Cloison ${options.reference}`,
-              description: 'Trois mois de coffre pour un dossier de garantie locative.',
+    const db = await clientServeur()
+    const api = stripe()
+    const { error: reservation } = await db
+      .from('sessions_paiement')
+      .upsert(
+        { dossier_id: options.dossierId },
+        { onConflict: 'dossier_id', ignoreDuplicates: true },
+      )
+    if (reservation) return null
+    const { data: etat, error: lecture } = await db
+      .from('sessions_paiement')
+      .select('tentative,session_ref,cree_le')
+      .eq('dossier_id', options.dossierId)
+      .single()
+    if (lecture || !etat) return null
+    let tentative = String(etat.tentative)
+    if (etat.session_ref) {
+      const ancienne = await api.checkout.sessions.retrieve(etat.session_ref)
+      if (ancienne.status === 'open') return ancienne.url
+      if (ancienne.status !== 'expired') return null
+      // Seule une session definitivement expiree peut etre remplacee.
+      tentative = randomUUID()
+      const { data: rotation, error } = await db
+        .from('sessions_paiement')
+        .update({ tentative, session_ref: null, cree_le: new Date().toISOString() })
+        .eq('dossier_id', options.dossierId)
+        .eq('tentative', etat.tentative)
+        .select('tentative')
+      if (error || rotation?.length !== 1) return null
+    } else if (Date.now() - new Date(etat.cree_le).getTime() > 23 * 60 * 60 * 1000) {
+      // Stripe ne garantit plus l'idempotence apres 24 h : reconciliation requise.
+      console.error('[paiement] tentative a reconcilier', options.dossierId)
+      return null
+    }
+    const session = await api.checkout.sessions.create(
+      {
+        mode: 'payment',
+        payment_method_types: ['card'],
+        customer_email: options.email,
+        client_reference_id: options.dossierId,
+        metadata: { dossier_id: options.dossierId, reference: options.reference },
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: 'eur',
+              unit_amount: tarifs.locataireCents,
+              product_data: {
+                name: `Dossier Cloison ${options.reference}`,
+                description: 'Trois mois de coffre pour un dossier de garantie locative.',
+              },
             },
           },
-        },
-      ],
-      success_url: options.retourOk,
-      cancel_url: options.retourAnnule,
-      locale: 'fr',
-    })
+        ],
+        success_url: options.retourOk,
+        cancel_url: options.retourAnnule,
+        locale: 'fr',
+      },
+      { idempotencyKey: `cloison:${options.dossierId}:${tentative}` },
+    )
+    const { error: inscription } = await db
+      .from('sessions_paiement')
+      .update({ session_ref: session.id })
+      .eq('dossier_id', options.dossierId)
+      .eq('tentative', tentative)
+    if (inscription) return null
 
     return session.url ?? null
   } catch (erreur) {
@@ -90,7 +136,13 @@ export function paiementConfirme(evenement: Stripe.Event): PaiementConfirme | nu
   if (evenement.type !== 'checkout.session.completed') return null
 
   const session = evenement.data.object
-  if (session.payment_status !== 'paid') return null
+  if (
+    session.payment_status !== 'paid' ||
+    session.mode !== 'payment' ||
+    session.currency !== 'eur' ||
+    session.amount_total !== tarifs.locataireCents
+  )
+    return null
 
   const dossierId = session.metadata?.dossier_id ?? session.client_reference_id
   if (!dossierId || !/^[0-9a-f-]{36}$/.test(dossierId)) return null

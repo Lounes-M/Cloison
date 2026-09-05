@@ -17,7 +17,7 @@ export const porte = {
   envoi: 'Ouverture…',
   succesTitre: 'Regarde tes e-mails.',
   succesTexte:
-    'Ton dossier est ouvert et ton lien vient de partir. Il est valable sept jours, et une seule fois.',
+    'Ton dossier est ouvert et ton lien vient de partir. Il est valable sept jours. Garde-le pour retrouver ton dossier.',
 } as const
 
 export const espace = {
@@ -37,7 +37,7 @@ export const espace = {
   expire: (date: string) => `Ce dossier expire le ${date}.`,
   loyerTitre: 'Le loyer',
   loyerAide:
-    'Charges comprises, par mois. C’est ce qui sert à établir si ton garant convient : sans lui, le dossier reste en attente.',
+    'Charges comprises, par mois. C’est ce qui sert à établir si ton garant convient : sans lui, le dossier reste en attente. Le loyer est figé après la déclaration du garant.',
   loyerChamp: 'Loyer mensuel, charges comprises',
   loyerBouton: 'Enregistrer',
   loyerEnvoi: 'Enregistrement…',
@@ -71,7 +71,7 @@ export const statuts: Record<
   garant_insuffisant: {
     libelle: 'Ce garant ne convient pas',
     explication:
-      'Le dossier n’ira pas plus loin avec ce garant. Tu peux en désigner un autre ci-dessous.',
+      'Contacte ton agence pour la suite. Les données de ce garant restent dans son dossier.',
     ton: 'flame',
   },
   transmis: {

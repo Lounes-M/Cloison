@@ -17,12 +17,12 @@ export const locataire: Record<string, { sujet: string; texte: string }> = {
   garant_insuffisant: {
     sujet: 'Ton dossier a besoin d’un autre garant',
     texte:
-      'Le dossier n’ira pas plus loin avec ce garant. Tu peux en désigner un autre depuis ton dossier, avec le lien que tu as reçu.',
+      'Le dossier n’ira pas plus loin avec ce garant. Pour solliciter une autre personne, ouvre un nouveau dossier : les données de ce garant restent isolées.',
   },
   transmis: {
     sujet: 'L’agence a pris ton dossier',
     texte:
-      'L’agence a pris ton dossier pour décider dessus. Les pièces de ton garant sont figées ; il va écrire son engagement. Tu seras prévenu de la suite.',
+      'L’agence a pris ton dossier pour décider dessus. Les pièces et la déclaration de ton garant sont maintenant figées. Tu seras prévenu de la suite.',
   },
   refuse: {
     sujet: 'Ton dossier n’a pas été retenu',
@@ -33,9 +33,9 @@ export const locataire: Record<string, { sujet: string; texte: string }> = {
 
 export const garant: Record<string, { sujet: string; texte: string }> = {
   transmis: {
-    sujet: 'L’agence a pris le dossier : ta mention t’attend',
+    sujet: 'L’agence a pris le dossier',
     texte:
-      'L’agence a pris le dossier auquel tu te portes garant. Il reste une chose que personne ne peut faire à ta place : écrire ta mention, avec tes mots. Reviens sur ton dépôt avec le lien que tu as reçu.',
+      'L’agence a pris le dossier auquel tu te portes garant. Tes pièces et ta déclaration sont figées. Tu peux consulter tes originaux et l’historique des accès depuis ton dépôt. Cette transmission ne constitue pas une signature.',
   },
   refuse: {
     sujet: 'Le dossier n’a pas été retenu',
@@ -53,7 +53,7 @@ export const agence: Record<string, { sujet: (reference: string) => string; text
   garant_insuffisant: {
     sujet: (reference) => `Dossier ${reference} : garant insuffisant`,
     texte:
-      'Le garant a déposé ses pièces, mais son ratio est sous votre seuil. Le locataire en est informé et peut en désigner un autre.',
+      'Le garant a déposé ses pièces, mais son ratio est sous votre seuil. Le locataire en est informé. Un autre garant nécessite un nouveau dossier.',
   },
 }
 

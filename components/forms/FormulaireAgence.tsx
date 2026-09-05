@@ -73,7 +73,7 @@ export function FormulaireAgence() {
           role="alert"
           // `scroll-mt` : le focus fait defiler jusqu'a l'alerte, et l'en-tete
           // collant la masquerait sans cette marge.
-          className="bg-flame outlined scroll-mt-28 rounded-xl px-4 py-3 text-[14px] font-bold text-white"
+          className="bg-flame outlined text-ink scroll-mt-28 rounded-xl px-4 py-3 text-[14px] font-bold"
         >
           {etat.message}
         </div>

@@ -23,8 +23,8 @@ describe('demandes_agence', () => {
     db = await baseDEssai()
   })
 
-  test('anon depose une demande', async () => {
-    await devenir(db, 'anon')
+  test('le serveur depose une demande', async () => {
+    await devenir(db, 'serveur')
     await db.query(DEMANDE)
 
     await redevenirProprietaire(db)
@@ -32,18 +32,20 @@ describe('demandes_agence', () => {
   })
 
   test('anon ne lit pas la liste, meme celle qu il vient d ecrire', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await db.query(DEMANDE)
 
+    await devenir(db, 'anon')
     // Le cas qui compte : la cle publiable est cote serveur aujourd'hui, mais
     // sa divulgation ne doit donner aucune lecture.
     expect(await compter(db, 'public.demandes_agence')).toBe(0)
   })
 
   test('anon ne modifie ni ne supprime, en silence', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await db.query(DEMANDE)
 
+    await devenir(db, 'anon')
     // Ces deux requetes ne levent pas : le droit de table existe, c'est la RLS
     // qui filtre. Elles reussissent donc en ne touchant rien, et un test qui
     // n'observerait que l'absence d'exception passerait alors meme que la
@@ -60,6 +62,11 @@ describe('demandes_agence', () => {
     ).toBe('nouvelle')
   })
 
+  test('anon ne contourne pas le formulaire par une insertion directe', async () => {
+    await devenir(db, 'anon')
+    expect(await refus(db, DEMANDE)).toContain('permission denied')
+  })
+
   test('un porteur de lien est refuse au niveau des droits, pas de la RLS', async () => {
     await devenir(db, 'porteur_lien')
 
@@ -71,7 +78,7 @@ describe('demandes_agence', () => {
   })
 
   test('une meme adresse ne cree pas deux demandes', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
     await db.query(DEMANDE)
 
     // La casse et les espaces ne doivent pas suffire a contourner l'unicite :
@@ -85,7 +92,7 @@ describe('demandes_agence', () => {
   })
 
   test('un volume inconnu est refuse par la base, pas seulement par Zod', async () => {
-    await devenir(db, 'anon')
+    await devenir(db, 'serveur')
 
     const message = await refus(
       db,

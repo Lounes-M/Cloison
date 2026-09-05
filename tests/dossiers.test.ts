@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, lignesTouchees, redevenirProprietaire, refus } from './base'
@@ -24,10 +25,7 @@ describe('cloisonnement du dossier', () => {
 
   /** Se presenter comme porteur d'un jeton de capacite. */
   async function porteur(role: 'locataire' | 'garant', id = dossier) {
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${id}'`)
-    await db.exec(`set request.jwt.claim.role_partie = '${role}'`)
+    await devenirPorteur(db, id, role)
   }
 
   async function id(reference: string): Promise<string> {
@@ -246,7 +244,9 @@ describe('cloisonnement du dossier', () => {
     test('fait avancer son dossier mais ne touche pas aux adresses', async () => {
       await devenir(db, 'authenticated', MARIE)
 
-      expect(await lignesTouchees(db, `update public.dossiers set statut = 'signe'`)).toBe(1)
+      expect(await refus(db, `update public.dossiers set statut = 'signe'`)).toContain(
+        'Transition interdite',
+      )
 
       expect(
         await refus(db, `update public.dossiers set email_locataire = 'pirate@exemple.fr'`),

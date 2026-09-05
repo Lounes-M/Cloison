@@ -30,6 +30,8 @@ grant usage on schema public to anon, authenticated, service_role;
 -- de mauvaises raisons.
 alter default privileges in schema public
   grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated, service_role;
 
 create schema if not exists auth;
 grant usage on schema auth to anon, authenticated, service_role;
@@ -44,7 +46,7 @@ create table auth.users (
 -- pose ce claim a la main avec `set request.jwt.claim.sub = '...'`.
 create or replace function auth.uid() returns uuid
   language sql stable
-  as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+  as $$ select (nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'sub')::uuid $$;
 
 -- ---------------------------------------------------------------------------
 -- Le schema `storage`, reduit a ce que nos politiques lisent

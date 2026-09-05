@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useId, useRef } from 'react'
+import { useActionState, useId, useRef, useState } from 'react'
 
 import { depot } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
@@ -19,7 +19,7 @@ const COTE_MAX = 2000
  * Une photo de telephone pese quatre a huit megaoctets, pour un document qui
  * se lit parfaitement a deux mille pixels de cote. La reduire ici fait passer
  * sous la borne pratique sans que la personne ait a s'en occuper, et sans
- * qu'un seul octet en clair sorte de son appareil avant le chiffrement.
+ * traitement par notre serveur, qui chiffre avant stockage.
  *
  * Rend le fichier tel quel si ce n'est pas une image, s'il est deja leger, ou
  * si le navigateur ne sait pas le decoder : le serveur nommera alors le
@@ -31,7 +31,10 @@ async function reduireSiPhoto(fichier: File): Promise<File> {
   try {
     const image = await createImageBitmap(fichier)
     const echelle = Math.min(1, COTE_MAX / Math.max(image.width, image.height))
-    if (echelle === 1 && fichier.size <= TAILLE_MAX_DEPOT) return fichier
+    if (echelle === 1 && fichier.size <= TAILLE_MAX_DEPOT) {
+      image.close()
+      return fichier
+    }
 
     const toile = document.createElement('canvas')
     toile.width = Math.round(image.width * echelle)
@@ -53,6 +56,7 @@ async function reduireSiPhoto(fichier: File): Promise<File> {
 export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: string }) {
   const [etat, envoyer, enCours] = useActionState(deposerUnePiece, ETAT_INITIAL)
   const idChamp = useId()
+  const [preparation, preparer] = useState(false)
   const champ = useRef<HTMLInputElement>(null)
 
   const erreur = etat.statut === 'erreur' && etat.nature === nature ? etat.message : null
@@ -64,14 +68,17 @@ export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: 
     const fichier = entree?.files?.[0]
     if (!entree || !fichier) return
 
-    const reduit = await reduireSiPhoto(fichier)
-    if (reduit !== fichier) {
-      const transfert = new DataTransfer()
-      transfert.items.add(reduit)
-      entree.files = transfert.files
+    preparer(true)
+    try {
+      const reduit = await reduireSiPhoto(fichier)
+      if (reduit !== fichier) {
+        const transfert = new DataTransfer()
+        transfert.items.add(reduit)
+        entree.files = transfert.files
+      }
+    } finally {
+      preparer(false)
     }
-
-    entree.form?.requestSubmit()
   }
 
   return (
@@ -97,13 +104,27 @@ export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: 
         // moment du choix. Sans cette liste, le serveur le refuserait en le
         // nommant, ce qui est correct mais coute un aller-retour.
         accept="application/pdf,image/jpeg,image/png"
-        disabled={enCours}
+        disabled={enCours || preparation}
         onChange={auChoix}
-        className="sr-only"
+        className="border-ink rounded-xl border-2 p-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-4"
       />
 
+      <button
+        type="submit"
+        disabled={enCours || preparation}
+        className="outlined bg-cobalt rounded-xl px-4 py-3 font-bold text-white disabled:opacity-70"
+      >
+        {preparation
+          ? 'Préparation de la photo…'
+          : enCours
+            ? depot.envoi
+            : 'Déposer le fichier sélectionné'}
+      </button>
       {erreur ? (
-        <p className="bg-flame outlined rounded-xl px-3 py-2 text-[13px] font-semibold text-white">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-3 py-2 text-[13px] font-semibold"
+        >
           {erreur}
         </p>
       ) : null}

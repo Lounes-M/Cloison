@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { courrielsPour } from '@/lib/courriels/notifications'
@@ -29,7 +30,8 @@ describe('courrielsPour', () => {
   test('transmis : le locataire et le garant, pas l agence', () => {
     const envois = courrielsPour({ ...DOSSIER, statut: 'transmis' }, ['marie@agence-lyon3.fr'])
     expect(envois.map((e) => e.a)).toEqual(['locataire@exemple.fr', 'garant@exemple.fr'])
-    expect(envois[1]!.texte).toContain('mention')
+    expect(envois[1]!.texte).toContain('figées')
+    expect(envois[1]!.texte).toContain('ne constitue pas une signature')
   })
 
   test('garant insuffisant : le locataire et l agence, sans le pourquoi', () => {
@@ -128,10 +130,7 @@ describe('contacts_agence_du_dossier', () => {
   })
 
   test('le garant obtient les adresses de l agence de son dossier, et rien d autre', async () => {
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${dossier}'`)
-    await db.exec(`set request.jwt.claim.role_partie = 'garant'`)
+    await devenirPorteur(db, dossier, 'garant')
 
     expect(await contacts(dossier)).toEqual(['marie@agence-lyon3.fr'])
     // Un autre dossier, meme en le nommant : rien.
@@ -153,10 +152,7 @@ describe('contacts_agence_du_dossier', () => {
 
   test('un dossier sans agence ne rend personne', async () => {
     const libre = await ouvrir('libre@exemple.fr')
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${libre}'`)
-    await db.exec(`set request.jwt.claim.role_partie = 'garant'`)
+    await devenirPorteur(db, libre, 'garant')
     expect(await contacts(libre)).toEqual([])
   })
 })

@@ -1,0 +1,23 @@
+name: Maintenance
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: maintenance-production
+  cancel-in-progress: false
+jobs:
+  reprise:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Purge physique et reprise des courriels
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$CRON_SECRET"
+          curl --fail --silent --show-error --max-time 70 \
+            --header "Authorization: Bearer $CRON_SECRET" \
+            https://cloison.immo/api/maintenance

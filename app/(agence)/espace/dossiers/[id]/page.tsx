@@ -18,7 +18,7 @@ const tons = {
   sky: 'bg-sky',
   sun: 'bg-sun',
   mint: 'bg-mint',
-  flame: 'bg-flame text-white',
+  flame: 'bg-flame text-ink',
   paper: 'bg-paper',
 } as const
 

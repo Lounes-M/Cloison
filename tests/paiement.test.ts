@@ -207,7 +207,7 @@ describe('ce que la base tient', () => {
     const { rows } = await db.query<{ purger_les_dossiers_expires: number }>(
       'select public.purger_les_dossiers_expires()',
     )
-    expect(rows[0]!.purger_les_dossiers_expires).toBe(0)
+    expect(rows[0]!.purger_les_dossiers_expires).toBe(1)
     expect(await compter(db, 'public.dossiers')).toBe(1)
   })
 })
@@ -219,6 +219,9 @@ describe('ce que Stripe nous dit', () => {
       object: {
         id: 'cs_test_123456789',
         payment_status: 'paid',
+        mode: 'payment',
+        currency: 'eur',
+        amount_total: 900,
         client_reference_id: '44444444-4444-4444-4444-444444444444',
         metadata: { dossier_id: '44444444-4444-4444-4444-444444444444' },
         ...surcharge,

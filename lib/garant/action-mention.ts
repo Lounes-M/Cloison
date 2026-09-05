@@ -65,7 +65,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   // decide si la renonciation est exigee.
   const { data: engagement } = await supabase
     .from('engagements')
-    .select('solidaire')
+    .select('solidaire, montant_max_cents')
     .eq('dossier_id', dossierId)
     .maybeSingle()
 
@@ -78,11 +78,11 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   }
 
   const verdict = verifierMention(analyse.data.mention, Boolean(engagement.solidaire))
-  if (!verdict.ok) {
+  if (!verdict.ok || verdict.montantEuros * 100 !== Number(engagement.montant_max_cents)) {
     return {
       statut: 'erreur',
       message: 'Il manque quelque chose a ta mention.',
-      manques: verdict.manques,
+      manques: verdict.ok ? ['montant'] : verdict.manques,
       valeurs,
     }
   }

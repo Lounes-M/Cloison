@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
@@ -79,10 +80,7 @@ describe('ouvrir_dossier_avec_lien', () => {
   test('avec ce jeton, le locataire lit son dossier et rien de plus', async () => {
     const ouvert = await ouvrir(db, 'locataire@exemple.fr')
 
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${ouvert.dossier_id}'`)
-    await db.exec(`set request.jwt.claim.role_partie = 'locataire'`)
+    await devenirPorteur(db, ouvert.dossier_id, 'locataire')
 
     // Ce que la page `/locataire` demande, et ce qu'elle obtient.
     const { rows } = await db.query<{ statut: string; reference: string }>(

@@ -40,7 +40,7 @@ export function FormulaireMention({
 
   if (etat.statut === 'apposee') {
     return (
-      <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+      <p role="status" className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
         {texte.succes}
       </p>
     )
@@ -52,7 +52,10 @@ export function FormulaireMention({
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       {etat.statut === 'erreur' ? (
-        <div className="bg-flame outlined rounded-xl px-4 py-3 text-[14px] font-semibold text-white">
+        <div
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           <p>{etat.message}</p>
           {manques.length > 0 ? (
             <ul className="mt-2 list-disc pl-5 font-medium">

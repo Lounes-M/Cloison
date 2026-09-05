@@ -62,7 +62,7 @@ Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les reli
 - **Jetons de capacité** : JWT HS256 signé avec `SUPABASE_JWT_SECRET`, cookie `cloison_capacite`
   HttpOnly, révocation par `jetons_actifs`. Le lien est réémissible, le jeton non.
 - **Chiffrement par enveloppe** (ADR 0003) : une clé par dossier, scellée par `CLE_MAITRESSE`
-  qui vit chez Vercel. Purge à trois mois par pg_cron, actes signés exceptés.
+  qui vit chez Vercel. Purge des justificatifs a trois mois via maintenance et file Storage ; seuls les actes signes sont conserves.
 - **Rasterisation et filigrane nominatif** (ADR 0004) : pdfjs-dist et @napi-rs/canvas, 150 dpi,
   jamais MuPDF, qui est sous AGPL. Le journal `journal_acces` est en écriture seule.
 - **Limitation de débit** dans Postgres, par empreintes HMAC dérivées de la clé maîtresse, en
@@ -71,8 +71,7 @@ Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les reli
   sur l'applicatif par le middleware, statique sur le site public. Un segment applicatif nouveau
   s'ajoute à `SEGMENTS_APPLICATIFS` et au `matcher` du middleware, un test le rappelle.
 - **Resend** pour les courriels, **Stripe** Checkout hébergée pour le paiement, importé d'un seul
-  fichier, `lib/paiement/stripe.ts`. **Universign** prévu pour la signature (ADR 0005), compte
-  non ouvert.
+  fichier, `lib/paiement/stripe.ts`. **Universign** prévu pour la signature (ADR 0005), portail connecte, activation API et modele contractuel pris en charge par Lounes.
 - **Tarifs** décidés le 4 septembre 2026 : 9 € une fois pour le locataire, avant le lien du
   garant, sans remboursement ; 29 € par acte signé pour l'agence, collaborateurs illimités et
   gratuits. Les montants vivent dans `lib/content/tarifs.ts`.
@@ -104,8 +103,7 @@ Détail dans `.env.example`.
 
 ## Où sont les choses
 
-- `supabase/migrations/` 0001 à 0019 ; 0001 à 0018 appliquées en production au 4 septembre 2026,
-  la 0019 attend son application.
+- `supabase/migrations/` : appliquer dans l’ordre ; voir le suivi de l’audit pour les versions locales et deployees.
 - `lib/acces/` sessions, jetons, débit, rôle serveur. `lib/coffre/` dépôt, enveloppe,
   rasterisation, ouverture. `lib/agences/`, `lib/locataire/`, `lib/garant/` les actions de
   chaque acteur. `lib/courriels/` Resend. `lib/content/` tous les textes et les montants.
@@ -115,43 +113,14 @@ Détail dans `.env.example`.
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## État au 5 septembre 2026
+## Etat au 5 septembre 2026, apres audit
 
-Quarante PR fusionnées. Les phases 0 à 7 de la feuille de route sont livrées côté dépôt.
-Resend est configuré avec un domaine vérifié. Stripe est en cours de création par Lounes.
+Le suivi vivant de la remise a niveau est `docs/audit-suivi.md`.
+L'audit a rouvert les regles d'acces, les transitions, la purge et plusieurs parcours.
+Ne pas presenter les phases 0 a 7 comme terminees. La signature exige encore un
+modele contractuel valide et l'integration du compte Universign.
 
-Le 5 septembre, depuis une session cloud : la feuille de route est entrée dans le dépôt, la
-migration 0019 a retiré à `anon` toute fonction au profit du rôle `serveur`, la
-Content-Security-Policy est posée, et l'espace agence affiche l'adresse de support dès qu'elle
-existe. Trois dettes fermées : PostgREST, CSP, réponse oracle.
-
-Ce qui reste ne se code pas, et se fait de son côté :
-
-0. **Appliquer la migration 0019** dans l'éditeur SQL de Supabase, avant tout : sans elle, la
-   porte du locataire, les liens et le compteur de débit répondent « réessaie » à tout le monde.
-1. **Rattacher `cloison.immo`** : Vercel, Settings puis Domains, avec `www` redirigé vers l'apex,
-   les deux enregistrements DNS chez le registrar, puis redéployer. Ensuite, dans l'ordre : Supabase,
-   Authentication puis URL Configuration, ajouter `https://cloison.immo/connexion/verifie` et
-   passer le Site URL dessus ; Resend, vérifier `cloison.immo` comme domaine d'envoi et passer
-   `EMAIL_EXPEDITEUR` sur `Cloison <bonjour@cloison.immo>` ; Stripe, déclarer le webhook sur
-   `https://cloison.immo/api/paiement/webhook` ; une redirection de `support@cloison.immo` vers
-   ta boîte, puis `EMAIL_SUPPORT`. Rien à changer dans le code : l'URL du site se déduit du domaine
-   de production Vercel.
-2. Stripe : clés dans Vercel, webhook `/api/paiement/webhook` sur `checkout.session.completed`,
-   redéploiement, puis un tour avec la carte de test. Vérifier ensuite les journaux du webhook.
-3. pg_cron : activer l'extension et planifier la purge, SQL dans
-   `docs/exploitation/sauvegardes-et-restauration.md`.
-4. Région Vercel des fonctions en Europe : `fra1` est fixée dans `vercel.json`. Vérifier après
-   déploiement qu'une route dynamique répond avec un `x-vercel-id` en `fra1`.
-5. Une restauration réellement effectuée, datée dans le document.
-6. Un conseil pour ce qui est marqué Juridique : conditions générales, registre, accord de
-   traitement, mentions légales, modèle d'acte.
-7. La revue de sécurité externe, périmètre dans `docs/exploitation/revue-de-securite.md`.
-8. Le compte Universign, qui débloque la signature (tâche 34) puis l'encaissement à l'acte (43).
-9. L'adresse de support à fixer, puis à poser dans Vercel sous `EMAIL_SUPPORT` : l'espace agence
-   l'affiche et les courriels y répondent dès qu'elle existe.
-10. Le jour du point hebdomadaire et l'endroit du compte rendu.
-
-Ce qui reste à coder, quand ces comptes existeront : la signature électronique de l'acte, la
-facturation effective des actes, et la phase 8, un deuxième
-cas d'usage, pas avant que la location tourne seule.
+Supabase, Vercel et Stripe CLI sont accessibles depuis le poste de Lounes.
+Verification en lecture seule : aucun dossier ni piece en production ; migration 0019
+non appliquee et pg_cron absent. Les nouvelles migrations restent locales tant que leur
+application n'a pas ete verifiee. La fusion seule ne met pas le schema a jour.

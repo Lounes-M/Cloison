@@ -1,7 +1,7 @@
 import 'server-only'
 
-import { createClient } from '@supabase/supabase-js'
-import { Resend } from 'resend'
+import { clientServeur } from '@/lib/acces/serveur'
+import { envoyer } from '@/lib/courriels/envoi'
 import { env } from '@/lib/env'
 import { VOLUMES, type DemandeAgence } from './schema'
 
@@ -19,26 +19,18 @@ const DOUBLON = '23505'
 export type ResultatEnregistrement =
   { statut: 'enregistree' } | { statut: 'deja-connue' } | { statut: 'echec'; raison: string }
 
-function clientSupabase() {
-  return createClient(env.supabaseUrl, env.supabasePublishableKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-}
-
 export async function enregistrerDemande(
   demande: DemandeAgence,
   source: string,
 ): Promise<ResultatEnregistrement> {
-  const { error } = await clientSupabase()
-    .from('demandes_agence')
-    .insert({
-      nom_agence: demande.nomAgence,
-      email: demande.email,
-      ville: demande.ville,
-      dossiers_par_an: demande.dossiersParAn,
-      message: demande.message ?? null,
-      source,
-    })
+  const { error } = await (await clientServeur()).from('demandes_agence').insert({
+    nom_agence: demande.nomAgence,
+    email: demande.email,
+    ville: demande.ville,
+    dossiers_par_an: demande.dossiersParAn,
+    message: demande.message ?? null,
+    source,
+  })
 
   if (error) {
     // Une agence qui envoie deux fois n'a pas commis d'erreur : on le lui dit
@@ -77,18 +69,9 @@ export async function notifierDemande(demande: DemandeAgence): Promise<void> {
     .join('\n')
 
   try {
-    const { error } = await new Resend(env.resendApiKey).emails.send({
-      from: env.emailExpediteur,
-      to: env.emailDestinataire,
-      replyTo: demande.email,
-      subject: sujet,
-      text: corps,
-    })
-
-    if (error) {
-      console.error('[demande-agence] notification non envoyée', error)
-    }
-  } catch (erreur) {
-    console.error('[demande-agence] notification non envoyée', erreur)
+    const accepte = await envoyer(env.emailDestinataire, sujet, corps, undefined, demande.email)
+    if (!accepte) console.error('[demande-agence] notification non mise en file')
+  } catch {
+    console.error('[demande-agence] notification non mise en file')
   }
 }

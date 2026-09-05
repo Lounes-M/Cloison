@@ -28,7 +28,7 @@ export function Problem() {
               ))}
             </div>
           </div>
-          <p className="bg-flame font-display shadow-brut-sm outlined absolute right-2.5 -bottom-6 rotate-3 rounded-xl px-4 py-2.5 text-sm text-white uppercase">
+          <p className="bg-flame font-display shadow-brut-sm outlined text-ink absolute right-2.5 -bottom-6 rotate-3 rounded-xl px-4 py-2.5 text-sm uppercase">
             {problem.conversation.stamp}
           </p>
         </Reveal>

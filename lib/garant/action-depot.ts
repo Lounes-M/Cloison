@@ -1,5 +1,8 @@
 'use server'
 
+import { verifierDocument } from '@/lib/coffre/validation-document'
+import { verifierContenu } from '@/lib/coffre/type-reel'
+import { clientStockage } from '@/lib/acces/stockage'
 import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
@@ -63,8 +66,20 @@ export async function deposerUnePiece(
     const avant = await statutActuel(supabase, porteur.capacite.dossierId)
 
     const contenu = Buffer.from(await fichier.arrayBuffer())
+    const format = verifierContenu(contenu)
+    if (!format.accepte) return { statut: 'erreur', message: format.raison, nature }
+    try {
+      await verifierDocument(contenu, format.type)
+    } catch {
+      return {
+        statut: 'erreur',
+        message:
+          'Ce document est invalide, protégé ou trop grand. Exporte une copie lisible de moins de 40 pages.',
+        nature,
+      }
+    }
     const resultat = await deposer(
-      baseSupabase(supabase),
+      baseSupabase(supabase, await clientStockage(porteur.capacite)),
       porteur.capacite.dossierId,
       nature as NatureDePiece,
       contenu,
@@ -101,8 +116,11 @@ export async function retirerUnePiece(
   if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE }
 
   try {
-    const resultat = await retirerPiece(baseSupabase(clientPorteurDeLien(porteur.jeton)), pieceId)
+    const supabase = clientPorteurDeLien(porteur.jeton)
+    const avant = await statutActuel(supabase, porteur.capacite.dossierId)
+    const resultat = await retirerPiece(baseSupabase(supabase), pieceId)
     if (!resultat.retiree) return { statut: 'erreur', message: resultat.raison }
+    await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
   } catch (erreur) {
     console.error('[garant] retrait impossible', erreur)
     return { statut: 'erreur', message: "Le retrait n'a pas abouti. Reessaie dans un instant." }

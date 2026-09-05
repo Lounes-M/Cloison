@@ -57,7 +57,10 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
       ) : null}
 
       {etat.statut === 'erreur' ? (
-        <p className="bg-flame outlined rounded-xl px-4 py-3 text-[14px] font-semibold text-white">
+        <p
+          role="alert"
+          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
           {etat.message}
         </p>
       ) : null}
