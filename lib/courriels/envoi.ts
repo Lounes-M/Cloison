@@ -24,6 +24,10 @@ export async function envoyer(
   try {
     const { error } = await new Resend(env.resendApiKey).emails.send({
       from: env.emailExpediteur,
+      // Le garant et le locataire n'ont pas d'adresse de support propre : leur
+      // courriel repond a la meme adresse que celle de l'agence, quand elle
+      // est posee. Sans elle, une reponse part vers l'expediteur, comme avant.
+      ...(env.emailSupport ? { replyTo: env.emailSupport } : {}),
       to: destinataires,
       subject: sujet,
       text: texte,

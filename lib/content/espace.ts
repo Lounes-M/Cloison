@@ -44,6 +44,19 @@ export const tableau = {
     'Dossier de démonstration. Rien ici n’est réel : les pièces le disent en travers de chaque page.',
 } as const
 
+/**
+ * Le canal de support, tel que docs/exploitation/embarquement-agence.md le
+ * promet : une adresse, un delai tenu, une personne. Affiche seulement quand
+ * l'adresse est posee.
+ */
+export const support = {
+  titre: 'Un dossier bloqué ?',
+  texte: (adresse: string) =>
+    `Écrivez à ${adresse}. Une personne vous répond sous quatre heures ouvrées pour un dossier bloqué, sous un jour ouvré pour le reste, du lundi au vendredi de 9 h à 18 h.`,
+  limite:
+    'Nous n’ouvrons jamais une pièce à votre place : le journal des accès est écrit au nom de qui agit.',
+} as const
+
 export const activation = {
   titre: 'Demander l’activation',
   texte:

@@ -1,6 +1,8 @@
 import { connection } from 'next/server'
 
 import { Logo } from '@/components/brand/Logo'
+import { support } from '@/lib/content/espace'
+import { env } from '@/lib/env'
 
 /**
  * L'espace agence.
@@ -20,6 +22,8 @@ export default async function LayoutAgence({ children }: { children: React.React
   // alors refuses par le navigateur, sans bruit.
   await connection()
 
+  const adresseDeSupport = env.emailSupport
+
   return (
     <div className="bg-paper flex min-h-dvh flex-col">
       <header className="border-ink flex items-center border-b-2 px-6 py-5 md:px-10">
@@ -31,6 +35,18 @@ export default async function LayoutAgence({ children }: { children: React.React
       <main className="flex flex-1 items-center justify-center px-6 py-16 md:px-10">
         {children}
       </main>
+
+      {/* Le canal de support, promis dans l'embarquement : il n'apparait
+          qu'une fois l'adresse fixee. Afficher une adresse qui ne repond a
+          personne serait pire que ne rien afficher. */}
+      {adresseDeSupport ? (
+        <footer className="border-ink border-t-2 px-6 py-5 md:px-10">
+          <p className="text-muted mx-auto max-w-[880px] text-[13px] leading-relaxed font-medium">
+            <strong className="text-ink">{support.titre}</strong> {support.texte(adresseDeSupport)}{' '}
+            {support.limite}
+          </p>
+        </footer>
+      ) : null}
     </div>
   )
 }

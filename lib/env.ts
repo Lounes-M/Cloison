@@ -95,4 +95,16 @@ export const env = {
   get emailDestinataire() {
     return requise('EMAIL_DESTINATAIRE')
   },
+
+  /**
+   * L'adresse de support, ou rien.
+   *
+   * Optionnelle sans valeur de repli : tant qu'elle n'est pas fixee, l'espace
+   * agence n'affiche rien plutot qu'une adresse qui ne repondrait a personne,
+   * et les courriels partent sans `replyTo`. Le jour ou elle est posee, tout
+   * s'affiche et repond sans autre changement.
+   */
+  get emailSupport(): string | null {
+    return process.env.EMAIL_SUPPORT?.trim() || null
+  },
 }
