@@ -30,6 +30,8 @@ grant usage on schema public to anon, authenticated, service_role;
 -- de mauvaises raisons.
 alter default privileges in schema public
   grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated, service_role;
 
 create schema if not exists auth;
 grant usage on schema auth to anon, authenticated, service_role;

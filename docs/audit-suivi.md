@@ -53,7 +53,7 @@ Il a ete execute avec PostgreSQL 17 et PostgREST 16.2 locaux ; une tache CI le r
 Le harnais Storage reste minimal : ce test ne prouve pas le fonctionnement du
 service Storage Supabase complet.
 
-Aucune migration 0019 a 0027 n'a encore ete appliquee en production.
+Aucune migration 0019 a 0028 n'a encore ete appliquee en production.
 CRON_SECRET est configure dans Vercel Production et GitHub Actions. La route
 reste a deployer. L'expediteur Resend est configure ; la livraison effective,
 l'exercice de restauration et la validation des ecrans authentifies restent a verifier.
@@ -113,7 +113,24 @@ hors du checkout a partir des traces des routes agence et garant.
 
 La repetition du 6 septembre a montre que l'estimation initiale etait incomplete :
 0010 a 0013 et 0017 manquent aussi, alors que des migrations plus recentes sont presentes.
-Le plan de quatorze migrations a passe une repetition transactionnelle sur Supabase,
+Le plan de quinze migrations a passe une repetition transactionnelle sur Supabase,
 terminee par annulation et verification distincte. Aucun changement de schema n'est conserve.
 Le script `scripts/preparer-rattrapage-production.mjs` fournit le SQL unique et ses
 preconditions ; voir `docs/exploitation/rattrapage-production.md` pour l'application.
+
+## Droits implicites Supabase
+
+La lecture de `pg_default_acl` en production montre des grants EXECUTE explicites
+pour anon et authenticated sur les nouvelles fonctions. Le harnais ne reproduisait
+que les droits de table. Une fois ce defaut reproduit, le nouveau test a echoue :
+la recuperation de lien et plusieurs fonctions internes restaient executables.
+La migration 0028 retire ces droits sur les seules fonctions applicatives et
+retablit une liste explicite d'appelants. Les extensions et fonctions gerees par
+Supabase ne sont pas modifiees. Le harnais conserve le defaut permissif pour
+prevenir une regression lors des prochaines migrations.
+
+La suite complete passe maintenant 372 tests dans 38 suites avec les droits de
+fonctions Supabase reproduits. Le bucket `pieces` est prive et TOTP est active
+pour l'enrolement et la verification. Avant correction, la lecture des privileges
+confirme notamment `marquer_dossier_paye` executable par anon et authenticated.
+La verification HTTP couvre desormais ces refus en plus des claims et revocations.

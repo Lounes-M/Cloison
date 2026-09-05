@@ -19,6 +19,7 @@ const migrations = [
   '0025_courriels_durables.sql',
   '0026_journal_du_garant.sql',
   '0027_notifications_de_statut.sql',
+  '0028_privileges_explicites_des_fonctions.sql',
 ]
 const repetition = process.argv.includes('--repetition')
 const entete = `-- CLOISON : rattrapage du schema observe le 6 septembre 2026.
@@ -50,6 +51,9 @@ morceaux.push(`
 do $$ begin
   if has_function_privilege('anon','public.emettre_jeton(uuid,text,interval)','execute')
     or not has_function_privilege('serveur','public.emettre_jeton(uuid,text,interval)','execute')
+    or has_function_privilege('anon','public.retrouver_lien_locataire(text,text)','execute')
+    or has_function_privilege('authenticated','public.purger_les_dossiers_expires()','execute')
+    or has_function_privilege('anon','public.pieces_suffisantes(uuid)','execute')
     or to_regclass('public.courriels_sortants') is null
     or to_regclass('public.objets_a_supprimer') is null
     or to_regprocedure('public.recalculer_dossier(uuid)') is null then

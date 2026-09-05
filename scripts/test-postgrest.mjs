@@ -70,6 +70,54 @@ export async function verifierPostgrest(db, adresse, secret) {
   const anonyme = await lire()
   assert(anonyme.status === 401 || JSON.stringify(anonyme.body) === '[]')
   console.log('OK : aucun acces anonyme')
+  const fonctionsInternes = [
+    ['marquer_dossier_paye', { le_dossier: dossier.id, la_reference: 'pi_refuse_audit_http' }],
+    [
+      'retrouver_lien_locataire',
+      { courriel: 'http@audit.invalid', reference_dossier: 'HTTP12345678' },
+    ],
+    ['pieces_suffisantes', { le_dossier: dossier.id }],
+    ['purger_les_dossiers_expires', {}],
+    ['emettre_jeton', { le_dossier: dossier.id, la_partie: 'locataire', duree: '7 days' }],
+  ]
+  const avant = (
+    await db.query(
+      'select paye_le, jti from dossiers d join jetons_actifs j on j.dossier_id=d.id where d.id=$1',
+      [dossier.id],
+    )
+  ).rows
+  for (const jwt of [
+    null,
+    await signer({ role: 'authenticated', sub: '11111111-1111-1111-1111-111111111111' }),
+  ]) {
+    for (const [fonction, argumentsRpc] of fonctionsInternes) {
+      const r = await fetch(`${adresse}/rpc/${fonction}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(jwt ? { Authorization: `Bearer ${jwt}` } : {}),
+        },
+        body: JSON.stringify(argumentsRpc),
+        signal: AbortSignal.timeout(5000),
+      })
+      assert([401, 403].includes(r.status), `${fonction} accessible : HTTP ${r.status}`)
+      assert.equal(
+        (await r.json()).code,
+        '42501',
+        `${fonction} doit etre refusee par les droits SQL`,
+      )
+    }
+  }
+  const apres = (
+    await db.query(
+      'select paye_le, jti from dossiers d join jetons_actifs j on j.dossier_id=d.id where d.id=$1',
+      [dossier.id],
+    )
+  ).rows
+  assert.deepEqual(apres, avant)
+  console.log(
+    'OK : paiement, recuperation, purge et calcul internes refuses via HTTP, sans mutation',
+  )
 }
 
 if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
