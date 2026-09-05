@@ -26,3 +26,13 @@ test('un PDF geant ou trop long est refuse au depot', async () => {
     verifierDocument(Buffer.from(await long.save()), 'application/pdf'),
   ).rejects.toThrow()
 })
+
+test('une entete PNG avec dimensions valides mais sans pixels est refusee', async () => {
+  const faux = Buffer.alloc(33)
+  Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(faux)
+  faux.writeUInt32BE(13, 8)
+  faux.write('IHDR', 12)
+  faux.writeUInt32BE(100, 16)
+  faux.writeUInt32BE(100, 20)
+  await expect(verifierDocument(faux, 'image/png')).rejects.toThrow()
+})

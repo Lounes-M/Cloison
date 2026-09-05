@@ -116,13 +116,19 @@ const nextConfig: NextConfig = {
   // route qui les importe (« non-ecmascript placeable asset »).
   serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
 
-  // Les polices standard de pdf.js vivent dans `node_modules` et ne sont
-  // atteintes par aucun `import` : le tracage de fichiers ne les emporterait
-  // pas de lui-meme, et pdf.js rendrait alors les pages SANS leur texte, avec
-  // un simple avertissement. C'est le piege que `lib/coffre/rasterisation.ts`
-  // fait echouer bruyamment ; cette ligne est ce que son message reclame.
+  // Le processus documentaire charge ses modules sur disque, hors du bundle.
+  // Les traces doivent transporter ses sources, polices et binaires natifs.
+  // Inclure toutes les routes couvre aussi les actions serveur du garant.
   outputFileTracingIncludes: {
-    '/espace/pieces/[id]': ['./node_modules/pdfjs-dist/standard_fonts/**'],
+    '/*': [
+      './workers/**',
+      './node_modules/pdfjs-dist/**',
+      './node_modules/pdf-lib/**',
+      './node_modules/@pdf-lib/**',
+      './node_modules/pako/**',
+      './node_modules/tslib/**',
+      './node_modules/@napi-rs/canvas*/**',
+    ],
   },
 
   experimental: {

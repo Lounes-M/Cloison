@@ -14,6 +14,7 @@ export async function envoyer(
   sujet: string,
   texte: string,
   identifiant?: string,
+  repondreA?: string,
 ): Promise<boolean> {
   const destinataires = Array.isArray(a) ? a.filter(Boolean) : [a]
   if (destinataires.length === 0) return false
@@ -22,7 +23,7 @@ export async function envoyer(
     const db = await clientServeur()
     const contenu = {
       from: env.emailExpediteur,
-      ...(env.emailSupport ? { replyTo: env.emailSupport } : {}),
+      ...((repondreA ?? env.emailSupport) ? { replyTo: repondreA ?? env.emailSupport } : {}),
       to: destinataires,
       subject: sujet,
       text: texte,

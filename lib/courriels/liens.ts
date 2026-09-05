@@ -1,8 +1,6 @@
 import 'server-only'
 
-import { Resend } from 'resend'
-
-import { env } from '@/lib/env'
+import { envoyer } from './envoi'
 
 /**
  * Les courriels qui portent un lien.
@@ -22,31 +20,6 @@ import { env } from '@/lib/env'
 
 /** Ce que le courriel montre du dossier : sa reference, rien d'autre. */
 type Envoi = { a: string; url: string; reference: string }
-
-async function envoyer(a: string, sujet: string, texte: string): Promise<boolean> {
-  try {
-    const { error } = await new Resend(env.resendApiKey).emails.send({
-      from: env.emailExpediteur,
-      // Le garant et le locataire n'ont pas d'adresse de support propre : leur
-      // courriel repond a la meme adresse que celle de l'agence, quand elle
-      // est posee. Sans elle, une reponse part vers l'expediteur, comme avant.
-      ...(env.emailSupport ? { replyTo: env.emailSupport } : {}),
-      to: a,
-      subject: sujet,
-      text: texte,
-    })
-
-    if (error) {
-      console.error('[courriel] envoi refuse', sujet, error)
-      return false
-    }
-
-    return true
-  } catch (erreur) {
-    console.error('[courriel] envoi impossible', sujet, erreur)
-    return false
-  }
-}
 
 /** Le premier lien du locataire, juste apres l'ouverture. */
 export function envoyerLienLocataire({ a, url, reference }: Envoi): Promise<boolean> {

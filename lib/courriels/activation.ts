@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { Resend } from 'resend'
+import { envoyer } from './envoi'
 
 import { env } from '@/lib/env'
 
@@ -54,22 +54,9 @@ export async function notifierDemandeActivation(demande: DemandeActivation): Pro
   ].join('\n')
 
   try {
-    const { error } = await new Resend(env.resendApiKey).emails.send({
-      from: env.emailExpediteur,
-      to: env.emailDestinataire,
-      replyTo: demande.demandeePar,
-      subject: sujet,
-      text: corps,
-    })
-
-    if (error) {
-      console.error('[activation] notification non envoyee', error)
-      return false
-    }
-
-    return true
-  } catch (erreur) {
-    console.error('[activation] notification impossible', erreur)
+    return await envoyer(env.emailDestinataire, sujet, corps, undefined, demande.demandeePar)
+  } catch {
+    console.error('[activation] notification impossible')
     return false
   }
 }

@@ -161,3 +161,10 @@ Ta page de vision liste déjà la suite : caution bancaire, hébergeant pour un 
 - Toute lecture vérifie le rôle côté serveur. Jamais un filtrage côté client, jamais une route devinable.
 - Une pièce arrivée à échéance est détruite, pas masquée. L'acte signé est la seule exception.
 - Tout accès à une pièce laisse une trace nominative, en écriture seule.
+
+### Reprise apres audit, 6 septembre 2026
+
+Le detail des corrections et preuves vit dans `docs/audit-suivi.md`. Le traitement
+documentaire est deplace dans un processus interrompable avec limites de ressources.
+Les phases contractuelles ne sont pas terminees : Lounes prend en charge l'activation
+Universign et le modele d'acte ; l'integration et sa validation dependent de ces elements.

@@ -62,7 +62,7 @@ Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les reli
 - **Jetons de capacité** : JWT HS256 signé avec `SUPABASE_JWT_SECRET`, cookie `cloison_capacite`
   HttpOnly, révocation par `jetons_actifs`. Le lien est réémissible, le jeton non.
 - **Chiffrement par enveloppe** (ADR 0003) : une clé par dossier, scellée par `CLE_MAITRESSE`
-  qui vit chez Vercel. Purge à trois mois par pg_cron, actes signés exceptés.
+  qui vit chez Vercel. Purge des justificatifs a trois mois via maintenance et file Storage ; seuls les actes signes sont conserves.
 - **Rasterisation et filigrane nominatif** (ADR 0004) : pdfjs-dist et @napi-rs/canvas, 150 dpi,
   jamais MuPDF, qui est sous AGPL. Le journal `journal_acces` est en écriture seule.
 - **Limitation de débit** dans Postgres, par empreintes HMAC dérivées de la clé maîtresse, en
@@ -71,8 +71,7 @@ Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les reli
   sur l'applicatif par le middleware, statique sur le site public. Un segment applicatif nouveau
   s'ajoute à `SEGMENTS_APPLICATIFS` et au `matcher` du middleware, un test le rappelle.
 - **Resend** pour les courriels, **Stripe** Checkout hébergée pour le paiement, importé d'un seul
-  fichier, `lib/paiement/stripe.ts`. **Universign** prévu pour la signature (ADR 0005), compte
-  non ouvert.
+  fichier, `lib/paiement/stripe.ts`. **Universign** prévu pour la signature (ADR 0005), portail connecte, activation API et modele contractuel pris en charge par Lounes.
 - **Tarifs** décidés le 4 septembre 2026 : 9 € une fois pour le locataire, avant le lien du
   garant, sans remboursement ; 29 € par acte signé pour l'agence, collaborateurs illimités et
   gratuits. Les montants vivent dans `lib/content/tarifs.ts`.

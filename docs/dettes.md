@@ -79,27 +79,24 @@ que `supabase db push` fasse partie du déploiement et que la CI échoue si le s
 demande des identifiants Supabase dans les secrets GitHub, ce qui est une décision à prendre et pas
 seulement une ligne à écrire.
 
-### La purge laisse des octets orphelins dans Storage
+### Purge physique et restauration a verifier en production
 
-**Constaté le** 4 septembre 2026, en écrivant la purge à trois mois.
+**Revu le** 6 septembre 2026, pendant l'audit.
 
-`purger_les_dossiers_expires` supprime les lignes de `storage.objects` et les dossiers, mais pas les
-fichiers physiques : Supabase ne les efface qu'à travers son API, qu'une fonction SQL n'a pas, et
-que le dépôt n'appelle jamais avec une clé de service, par choix. Les octets restent donc dans le
-seau, sans ligne qui les désigne.
+La migration 0021 remplace la suppression SQL de `storage.objects` par une file
+traitee via l'API Storage. Les justificatifs des dossiers signes expirent aussi ;
+l'acte signe reste une exception distincte. La route de maintenance et sa reprise
+sont implementees, mais les migrations et cette route ne sont pas encore deployees.
 
-**Pourquoi ce n'est pas un trou de confidentialité** : c'est l'effacement cryptographique de l'ADR 0003. La clé du dossier part avec lui, et des octets scellés sans clé sont des octets inertes. Un
-test le vérifie : après purge, la table `cles_dossier` est vide pour ce dossier. Ce qui reste est un
-**coût de stockage**, pas un risque.
+La suppression de la cle active ne suffit pas a promettre un effacement definitif :
+une sauvegarde peut contenir une ancienne cle de dossier. Le controle des sauvegardes,
+leur retention et l'exercice de restauration restent necessaires. La lecture de
+l'API Supabase ne liste aucune sauvegarde et indique PITR desactive ; aucune copie
+de secours de la cle maitresse n'a ete verifiee.
 
-**Ce qui n'est pas non plus en place** : l'ordonnancement. La fonction existe ; pg_cron doit être
-activé dans Supabase et le `cron.schedule` posé depuis le tableau de bord, parce que PGlite n'a pas
-pg_cron et qu'une migration qui ne rejoue pas dans les tests n'est pas une migration de ce dépôt.
-Tant que ce n'est pas fait, la purge est prouvée, pas exécutée.
-
-**Signal de sortie** : une alerte de taille sur le seau `pieces`, ou le premier mois où la facture
-Storage devient lisible. Alors : un nettoyage périodique des objets sans ligne, depuis une fonction
-serveur qui aurait, elle, une clé de service dédiée à ce seul usage.
+**Signal de sortie** : verifier sur le service Storage la suppression des octets,
+le traitement des echecs et un exercice de restauration documente. Voir
+`docs/exploitation/sauvegardes-et-restauration.md` et `docs/audit-suivi.md`.
 
 ### Quatre mégaoctets par pièce, pas vingt
 
@@ -137,13 +134,16 @@ service.
 **ClamAV auto-hébergé tiendrait la promesse, mais ne rentre pas dans une fonction Vercel** : il lui
 faut un service séparé, sa base de signatures et sa mise à jour. C'est de l'infrastructure à tenir.
 
-**Ce qui rend l'attente tenable** : personne ne reçoit jamais le fichier d'origine. La rasterisation
+**Protection existante** : l'agence recoit une version rasterisee. Le garant peut recuperer
+son propre original, apres controle d'acces et journalisation. La rasterisation
 de l'ADR 0004 transforme la pièce en images avant qu'elle atteigne l'agence, ce qui détruit le
 JavaScript embarqué, les formulaires et les fichiers joints d'un PDF. Ce n'est plus une intention :
 `tests/rasterisation.test.ts` construit un PDF portant réellement du `/JavaScript`, l'affirme présent
-en entrée, et vérifie qu'il a disparu en sortie, y compris selon `getJSActions()` de pdf.js. Le risque résiduel n'est donc
-pas l'agence : c'est notre propre rastériseur, exposé à un fichier hostile. Cela se traite par
-l'isolation du décodage, pas par des signatures.
+en entrée, et vérifie qu'il a disparu en sortie, y compris selon `getJSActions()` de pdf.js. Le decodeur reste expose aux fichiers hostiles. Depuis le 6 septembre, il tourne
+dans un processus interrompable, sans secrets dans son environnement, avec des limites
+de temps, concurrence, pixels et sortie. Il conserve cependant les droits systeme du
+compte serveur : ce n'est pas une sandbox et le plafond du tas V8 ne borne pas les
+allocations natives. L'isolation systeme et la politique antivirus restent a evaluer.
 
 **Signal de sortie** : la revue de sécurité externe de la phase 5. On y arrive avec la question déjà
 posée et le raisonnement écrit, plutôt qu'avec une case à cocher. Si la rasterisation devait être

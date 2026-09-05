@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { clientServeur } from '@/lib/acces/serveur'
-import { Resend } from 'resend'
+import { envoyer } from '@/lib/courriels/envoi'
 import { env } from '@/lib/env'
 import { VOLUMES, type DemandeAgence } from './schema'
 
@@ -69,18 +69,9 @@ export async function notifierDemande(demande: DemandeAgence): Promise<void> {
     .join('\n')
 
   try {
-    const { error } = await new Resend(env.resendApiKey).emails.send({
-      from: env.emailExpediteur,
-      to: env.emailDestinataire,
-      replyTo: demande.email,
-      subject: sujet,
-      text: corps,
-    })
-
-    if (error) {
-      console.error('[demande-agence] notification non envoyée', error)
-    }
-  } catch (erreur) {
-    console.error('[demande-agence] notification non envoyée', erreur)
+    const accepte = await envoyer(env.emailDestinataire, sujet, corps, undefined, demande.email)
+    if (!accepte) console.error('[demande-agence] notification non mise en file')
+  } catch {
+    console.error('[demande-agence] notification non mise en file')
   }
 }

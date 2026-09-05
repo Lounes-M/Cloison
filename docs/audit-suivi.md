@@ -19,6 +19,7 @@ configuration de production.
 - Depot Storage reserve a un jeton serveur court, validation structurelle et limites de pixels.
 - Collecte de demandes agence reservee au serveur.
 - Courriels chiffres en file, baux de traitement, reprise idempotente et reconciliation.
+  Les liens locataire/garant et les notifications agence utilisent aussi cette file.
 - Notifications creees dans la transaction du changement de statut.
 - Journal des acces visible au garant, isole par dossier ; reprise d'enrolement MFA.
 - Loyer fige et garant non remplacable expliques dans les formulaires.
@@ -54,7 +55,7 @@ service Storage Supabase complet.
 
 Aucune migration 0019 a 0027 n'a encore ete appliquee en production.
 CRON_SECRET est configure dans Vercel Production et GitHub Actions. La route
-reste a deployer. La livraison Resend sur domaine verifie,
+reste a deployer. L'expediteur Resend est configure ; la livraison effective,
 l'exercice de restauration et la validation des ecrans authentifies restent a verifier.
 La connexion Universign est confirmee le 6 septembre dans le workspace Cloison. Aucun acte n'a ete signe,
 aucune facture agence emise, et aucun changement n'a ete fusionne dans main.
@@ -77,3 +78,33 @@ Aucun abonnement n'a ete modifie et aucune transaction n'a ete envoyee.
 Le modele d'acte valide reste a fournir, meme apres activation de l'API.
 
 Reference technique : [creation des cles API](https://apps.universign.com/docs/fr/developer_tools/API_keys/).
+
+## Traitement documentaire, 6 septembre
+
+Le decodage et la rasterisation passent dans un processus Node distinct, arrete
+apres 15 secondes, avec deux traitements simultanes au maximum par instance.
+Les flux sont plafonnes, les dimensions restent controlees avant allocation,
+et les images doivent etre reellement decodables. Aucun secret applicatif n'est
+transmis dans l'environnement du processus et aucun original temporaire n'est ecrit.
+Cela ne constitue pas une sandbox systeme : le processus conserve les droits du
+compte serveur et la limite du tas JavaScript ne borne pas la memoire native.
+Un service documentaire isole avec quotas systeme reste une amelioration a evaluer.
+
+Les tests ciblent notamment le blocage CPU, la sortie excessive, la concurrence,
+l'heritage des secrets et une fausse image PNG. Quatre protections ont ete desactivees
+temporairement : les quatre tests correspondants ont echoue, avant restauration.
+Les dependances du processus sont incluses explicitement dans les traces Next.js.
+Reference : [tracage des fichiers Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/output).
+
+Lounes prend en charge l'activation Universign et le modele contractuel ; les autres
+corrections et verifications continuent. Ces deux dependances ne sont pas marquees livrees.
+
+## Courriels et controle complet
+
+Le 6 septembre, Resend affiche `cloison.immo` verifie, region Irlande.
+`EMAIL_EXPEDITEUR` a ete ajoute a Vercel Production avec
+`Cloison <notifications@cloison.immo>`. Il prendra effet au prochain deploiement.
+Aucun courriel de test n'a ete envoye ; la livraison effective reste a prouver.
+Le controle local complet passe 370 tests dans 37 suites, avec typage, lint,
+format et controles de variables publiques. Le build execute ensuite le moteur
+hors du checkout a partir des traces des routes agence et garant.
