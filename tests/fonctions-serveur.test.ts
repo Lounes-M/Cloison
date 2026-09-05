@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
@@ -70,9 +71,7 @@ describe('les fonctions reservees au serveur', () => {
   })
 
   test('un porteur de lien n atteint aucune de ces fonctions', async () => {
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.dossier_id = '${dossier}'`)
-    await db.exec(`set request.jwt.claim.role_partie = 'locataire'`)
+    await devenirPorteur(db, dossier, 'locataire')
     for (const [nom, sql] of appels()) {
       expect(await refus(db, sql), nom).toContain('permission denied')
     }

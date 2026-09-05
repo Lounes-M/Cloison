@@ -44,7 +44,7 @@ create table auth.users (
 -- pose ce claim a la main avec `set request.jwt.claim.sub = '...'`.
 create or replace function auth.uid() returns uuid
   language sql stable
-  as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+  as $$ select (nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'sub')::uuid $$;
 
 -- ---------------------------------------------------------------------------
 -- Le schema `storage`, reduit a ce que nos politiques lisent

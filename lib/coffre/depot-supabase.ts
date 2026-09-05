@@ -89,7 +89,10 @@ export async function inscrireAuJournal(
   return true
 }
 
-export function baseSupabase(supabase: SupabaseClient): DepotBase {
+export function baseSupabase(
+  supabase: SupabaseClient,
+  stockage: SupabaseClient = supabase,
+): DepotBase {
   return {
     cleScellee: (dossierId) => lireCleScellee(supabase, dossierId),
 
@@ -109,7 +112,7 @@ export function baseSupabase(supabase: SupabaseClient): DepotBase {
     },
 
     async televerser(chemin, scelle) {
-      const { error } = await supabase.storage.from(SEAU).upload(chemin, scelle, {
+      const { error } = await stockage.storage.from(SEAU).upload(chemin, scelle, {
         // Des octets scelles ne sont d'aucun type. Annoncer autre chose
         // inviterait un navigateur a les interpreter le jour ou ils seraient
         // servis directement.
@@ -128,7 +131,7 @@ export function baseSupabase(supabase: SupabaseClient): DepotBase {
     },
 
     async retirerObjet(chemin) {
-      const { error } = await supabase.storage.from(SEAU).remove([chemin])
+      const { error } = await stockage.storage.from(SEAU).remove([chemin])
 
       // On ne remonte pas cet echec : il survient pendant le rattrapage d'un
       // autre echec, et l'objet reste chiffre, sans ligne qui le designe.

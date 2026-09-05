@@ -6,6 +6,7 @@ import { createRequire } from 'node:module'
 import { createCanvas, loadImage, type Canvas, type SKRSContext2D } from '@napi-rs/canvas'
 import { PDFDocument } from 'pdf-lib'
 
+import { verifierDocument, verifierDimensions } from './validation-document'
 import type { TypeAccepte } from './type-reel'
 
 /**
@@ -138,6 +139,7 @@ function enContexteDom(ctx: SKRSContext2D): CanvasRenderingContext2D {
 
 /** Une toile blanche : un PDF transparent deviendrait noir sans elle. */
 function toileBlanche(largeur: number, hauteur: number) {
+  verifierDimensions(largeur, hauteur)
   const toile = createCanvas(Math.ceil(largeur), Math.ceil(hauteur))
   const ctx = toile.getContext('2d')
   ctx.fillStyle = '#ffffff'
@@ -156,6 +158,7 @@ async function pagesDuPdf(contenu: Buffer, filigrane: string) {
   const chargement = pdfjs.getDocument({
     data: new Uint8Array(contenu),
     standardFontDataUrl: racineDesPolices(),
+    maxImageSize: 12_000_000,
   })
 
   try {
@@ -228,6 +231,7 @@ export async function rasteriser(
   typeReel: TypeAccepte,
   filigrane: string,
 ): Promise<Buffer> {
+  await verifierDocument(contenu, typeReel)
   const pages =
     typeReel === 'application/pdf'
       ? await pagesDuPdf(contenu, filigrane)

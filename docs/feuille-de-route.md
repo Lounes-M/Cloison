@@ -1,5 +1,8 @@
 # Feuille de route Cloison
 
+> Reouverture apres audit du 5 septembre 2026 : les cases historiques ci-dessous
+> ne valent pas validation du produit. Etat corrige et travaux en cours : [suivi de l’audit](audit-suivi.md).
+
 De la landing en ligne au premier acte de cautionnement signé pour de vrai. Neuf phases, dans l'ordre, chacune débloquant la suivante. Export du 4 septembre 2026 ; la version vivante est l'artefact `https://claude.ai/code/artifact/64a581c3-18ff-4255-86ac-735d5523dc7e`.
 
 Légende : `[x]` fait ; `[ ]` à faire ; **À toi** attend un compte, un conseil ou un geste de Lounes ; **Juridique** à faire valider par un professionnel ; **Décision** à trancher, pas à coder.

@@ -50,11 +50,12 @@ export const natures = [
 export type NatureValeur = (typeof natures)[number]['valeur']
 
 export const depot = {
+  original: 'Télécharger mon original',
   titre: 'Ton dépôt',
   demandePar: (email: string) => `${email} t’a désigné comme garant.`,
   reference: 'Référence',
   discretion:
-    'Tout ce que tu déposes est chiffré avant d’arriver chez nous, et le locataire n’y a pas accès. Il voit seulement que le dossier avance.',
+    'Tes pièces sont chiffrées par notre serveur avant leur stockage, et le locataire n’y a pas accès. Il voit seulement que le dossier avance.',
   piecesTitre: 'Tes pièces',
   formats: 'PDF, JPEG ou PNG, 4 Mo par fichier. Une photo bien cadrée suffit.',
   ajouter: 'Ajouter',
@@ -71,13 +72,13 @@ export const engagement = {
   aide: 'Ce que tu déclares ici figurera dans l’acte de cautionnement. Tu peux le corriger tant que le dossier n’est pas parti.',
   revenu: 'Ton revenu net mensuel',
   revenuAide:
-    'En euros, ce que tu touches par mois après impôt à la source. Tes bulletins en sont la preuve : l’agence les compare. Vide, le dossier reste en attente.',
+    'En euros, ce que tu touches au total après impôt à la source. Tes bulletins en sont la preuve : l’agence les compare. Vide, le dossier reste en attente.',
   couvre: 'Tu couvres',
   couvreOptions: [
     { valeur: 'loyer_charges', libelle: 'Le loyer et les charges' },
     { valeur: 'loyer', libelle: 'Le loyer seul' },
   ] as const,
-  montant: 'Montant maximum, par mois',
+  montant: 'Montant maximum, au total',
   montantAide: 'En euros. Laisse vide si tu ne veux pas de plafond.',
   jusquAu: 'Jusqu’au',
   jusquAuAide: 'Laisse vide pour la durée du bail.',

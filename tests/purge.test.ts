@@ -94,10 +94,12 @@ describe('purger_les_dossiers_expires', () => {
       'public.cles_dossier',
       'public.jetons_actifs',
       'public.journal_acces',
-      'storage.objects',
     ]) {
       expect(await compter(db, table)).toBe(0)
     }
+
+    expect(await compter(db, 'public.objets_a_supprimer')).toBe(1)
+    expect(await compter(db, 'storage.objects')).toBe(1)
 
     // Le jeton ne vaut plus rien, meme parfaitement signe : `jeton_est_actif`
     // ne trouve plus la ligne. C'est ce qui ferme la porte avant que le lien
@@ -118,14 +120,15 @@ describe('purger_les_dossiers_expires', () => {
     expect(await compter(db, 'storage.objects')).toBe(1)
   })
 
-  test('un acte signe echappe a la regle, meme expire', async () => {
+  test('un dossier signe conserve son enveloppe mais perd les justificatifs expires', async () => {
     // Le piege nomme par la feuille de route. L'acte est un contrat : il
     // survit au bail. Un test qui le purgerait validerait un bug.
     await dossier('signe@exemple.fr', { expire: true, statut: 'signe' })
 
-    expect(await purger()).toBe(0)
+    expect(await purger()).toBe(1)
     expect(await compter(db, 'public.dossiers')).toBe(1)
-    expect(await compter(db, 'public.cles_dossier')).toBe(1)
+    expect(await compter(db, 'public.cles_dossier')).toBe(0)
+    expect(await compter(db, 'public.objets_a_supprimer')).toBe(1)
     expect(await compter(db, 'storage.objects')).toBe(1)
   })
 
@@ -135,7 +138,7 @@ describe('purger_les_dossiers_expires', () => {
     await dossier('c@exemple.fr', { expire: false })
     await dossier('d@exemple.fr', { expire: true, statut: 'signe' })
 
-    expect(await purger()).toBe(2)
+    expect(await purger()).toBe(3)
     await redevenirProprietaire(db)
     const { rows } = await db.query<{ email_locataire: string }>(
       'select email_locataire from public.dossiers order by 1',
@@ -149,8 +152,12 @@ describe('purger_les_dossiers_expires', () => {
 
     await purger()
     await redevenirProprietaire(db)
-    const { rows } = await db.query<{ name: string }>('select name from storage.objects')
-    expect(rows).toEqual([{ name: `${vivant}/bulletin` }])
+    const { rows } = await db.query<{ chemin: string }>(
+      'select chemin from public.objets_a_supprimer',
+    )
+    expect(rows).toHaveLength(1)
+    expect(rows[0]!.chemin).not.toBe(`${vivant}/bulletin`)
+    expect(await compter(db, 'storage.objects')).toBe(2)
   })
 
   test('personne ne l appelle par l API', async () => {

@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import {
@@ -78,7 +79,7 @@ describe('montantsEnChiffres', () => {
     // Le reste du texte peut contenir des chiffres qui ne sont pas le plafond ;
     // on garde tous les candidats et c'est la concordance avec les lettres qui
     // tranche.
-    expect(montantsEnChiffres('le 3 septembre 2026, 12 000 euros')).toEqual([3, 2026, 12_000])
+    expect(montantsEnChiffres('le 3 septembre 2026, 12 000 euros')).toEqual([12_000])
   })
 })
 
@@ -142,10 +143,7 @@ describe('ce que la base tient', () => {
   let dossier: string
 
   async function porteur(role: 'locataire' | 'garant') {
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${dossier}'`)
-    await db.exec(`set request.jwt.claim.role_partie = '${role}'`)
+    await devenirPorteur(db, dossier, role)
   }
 
   beforeEach(async () => {

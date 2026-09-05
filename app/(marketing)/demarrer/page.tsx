@@ -1,3 +1,4 @@
+import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import type { Metadata } from 'next'
 
 import { FormulaireOuverture } from '@/components/forms/FormulaireOuverture'
@@ -25,6 +26,7 @@ export default function PageDemarrer() {
       </p>
 
       <FormulaireOuverture />
+      <FormulaireContinuite mode="retrouver" />
     </Section>
   )
 }

@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, lignesTouchees, redevenirProprietaire, refus } from './base'
@@ -20,10 +21,7 @@ describe('cles de dossier', () => {
   let dossier: string
 
   async function porteur(role: 'locataire' | 'garant') {
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${dossier}'`)
-    await db.exec(`set request.jwt.claim.role_partie = '${role}'`)
+    await devenirPorteur(db, dossier, role)
   }
 
   beforeEach(async () => {

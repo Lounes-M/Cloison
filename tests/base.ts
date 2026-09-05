@@ -62,13 +62,15 @@ export async function devenir(
   sub?: string,
 ) {
   await db.exec(`set role ${role}`)
-  await db.exec(`set request.jwt.claim.sub = '${sub ?? ''}'`)
+  await db.query("select set_config('request.jwt.claims', $1, false)", [
+    JSON.stringify({ role, sub, aal: 'aal2' }),
+  ])
 }
 
 /** Repasse en superutilisateur, qui contourne RLS et voit donc la verite. */
 export async function redevenirProprietaire(db: PGlite) {
   await db.exec('reset role')
-  await db.exec(`set request.jwt.claim.sub = ''`)
+  await db.exec(`set request.jwt.claims = '{}'`)
 }
 
 /**
@@ -113,4 +115,26 @@ export async function compter(db: PGlite, table: string): Promise<number> {
 export async function lignesTouchees(db: PGlite, sql: string): Promise<number> {
   const resultat = await db.query(sql)
   return resultat.affectedRows ?? 0
+}
+
+/** Fixture de capacite active. Le jeton est cree en proprietaire, puis seule
+ * la requete sous porteur_lien mesure les droits. Aucun claim scalaire. */
+export async function devenirPorteur(db: PGlite, dossierId: string, partie: string) {
+  await redevenirProprietaire(db)
+  const { rows } = await db.query<{ jti: string }>(
+    `insert into public.jetons_actifs(dossier_id, partie, jti, expire_le)
+     values ($1, $2, gen_random_uuid(), now() + interval '7 days')
+     on conflict (dossier_id, partie) do update set jti=excluded.jti, expire_le=excluded.expire_le
+     returning jti`,
+    [dossierId, partie],
+  )
+  await db.query("select set_config('request.jwt.claims', $1, false)", [
+    JSON.stringify({
+      role: 'porteur_lien',
+      dossier_id: dossierId,
+      role_partie: partie,
+      jti: rows[0]!.jti,
+    }),
+  ])
+  await db.exec('set role porteur_lien')
 }

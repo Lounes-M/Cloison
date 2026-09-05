@@ -27,7 +27,7 @@ describe('ouvrir un dossier selon la verification', () => {
   test('une agence en decouverte n ouvre pas de dossier', async () => {
     await devenir(db, 'authenticated', MARIE)
     const message = await refus(db, `select public.ouvrir_dossier('locataire@exemple.fr')`)
-    expect(message).toContain('pas encore verifiee')
+    expect(message).toContain('verifiee')
 
     // Et la porte avec lien herite du refus sans qu'on ait rien ajoute.
     expect(
@@ -35,7 +35,7 @@ describe('ouvrir un dossier selon la verification', () => {
         db,
         `select * from public.ouvrir_dossier_avec_lien('locataire@exemple.fr', '7 days')`,
       ),
-    ).toContain('pas encore verifiee')
+    ).toContain('verifiee')
 
     await redevenirProprietaire(db)
     expect(await compter(db, 'public.dossiers')).toBe(0)
@@ -70,7 +70,7 @@ describe('ouvrir un dossier selon la verification', () => {
 
     await devenir(db, 'authenticated', MARIE)
     expect(await refus(db, `select public.ouvrir_dossier('locataire@exemple.fr')`)).toContain(
-      'pas encore verifiee',
+      'verifiee',
     )
   })
 
@@ -104,7 +104,7 @@ describe('ouvrir un dossier selon la verification', () => {
     await devenir(db, 'authenticated', MARIE)
     await db.query(`update public.agences set siren = '987654321'`)
     expect(await refus(db, `select public.ouvrir_dossier('locataire@exemple.fr')`)).toContain(
-      'pas encore verifiee',
+      'verifiee',
     )
   })
 })

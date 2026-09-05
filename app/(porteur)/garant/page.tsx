@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 /** Tant que le dossier est la, le garant depose et corrige. Apres, il regarde. */
-const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'garant_insuffisant'])
+const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'])
 
 type Piece = { id: string; type: string; taille_octets: number; depose_le: string }
 
@@ -78,7 +78,7 @@ export default async function PageGarant() {
   // La mention se compose quand l'agence a pris le dossier : c'est l'acte qui
   // vient ensuite, et il n'y a pas d'acte sans decision. Un dossier complet
   // peut deja la preparer.
-  const mentionAttendue = ['complet', 'transmis'].includes(String(dossier.statut))
+  const mentionAttendue = String(dossier.statut) === 'complet'
   const deposees = (pieces ?? []) as Piece[]
 
   const engagementAffiche: EngagementAffiche = engagement
@@ -126,7 +126,7 @@ export default async function PageGarant() {
         <ol className="flex flex-col gap-8">
           {natures.map((nature) => {
             const siennes = deposees.filter((p) => p.type === nature.valeur)
-            const complete = nature.attendu > 0 && siennes.length >= nature.attendu
+            const complete = nature.attendu > 0 && siennes.length > 0
 
             return (
               <li key={nature.valeur} className="border-ink border-t-2 pt-6">
@@ -159,6 +159,9 @@ export default async function PageGarant() {
                             )}
                           </span>
                         </span>
+                        <a className="font-bold underline" href={`/garant/pieces/${piece.id}`}>
+                          {depot.original}
+                        </a>
                         {ouvert ? <BoutonRetrait pieceId={piece.id} /> : null}
                       </li>
                     ))}

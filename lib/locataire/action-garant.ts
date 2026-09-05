@@ -6,12 +6,8 @@ import { z } from 'zod'
 
 import { consommerDebit } from '@/lib/acces/debit'
 import { clientServeur } from '@/lib/acces/serveur'
-import {
-  capaciteDepuisCookies,
-  clientPorteurDeLien,
-  emettreLien,
-  urlDuLien,
-} from '@/lib/acces/session'
+import { capaciteDepuisCookies, clientPorteurDeLien, urlDuLien } from '@/lib/acces/session'
+import { signerJeton } from '@/lib/acces/jeton'
 import { envoyerLienGarant } from '@/lib/courriels/liens'
 
 /**
@@ -116,27 +112,18 @@ export async function designerMonGarant(
       }
     }
 
-    const { error } = await supabase
-      .from('dossiers')
-      .update({ email_garant: courriel })
-      .eq('id', dossierId)
-
-    if (error) {
-      console.error('[locataire] designation refusee', error)
+    const { data: emissions, error } = await supabase.rpc('designer_garant_avec_lien', { courriel })
+    const emis = Array.isArray(emissions) ? emissions[0] : null
+    if (error || !emis?.jti || !emis.expire_le) {
       return {
         statut: 'erreur',
-        message: "La designation n'a pas abouti. Reessaie dans un instant.",
+        message:
+          'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.',
         valeur: saisie,
       }
     }
-
-    const lien = await emettreLien(dossierId, 'garant')
-    if (!lien) {
-      return {
-        statut: 'erreur',
-        message: "Le lien n'a pas pu etre emis. Reessaie dans un instant.",
-        valeur: saisie,
-      }
+    const lien = {
+      jeton: await signerJeton(dossierId, 'garant', emis.jti, new Date(emis.expire_le)),
     }
 
     const envoye = await envoyerLienGarant({
@@ -157,7 +144,8 @@ export async function designerMonGarant(
     console.error('[locataire] designation impossible', erreur)
     return {
       statut: 'erreur',
-      message: "La designation n'a pas abouti. Reessaie dans un instant.",
+      message:
+        'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.',
       valeur: saisie,
     }
   }

@@ -1,3 +1,4 @@
+import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import type { Metadata } from 'next'
 
 import { Button } from '@/components/ui/Button'
@@ -23,6 +24,7 @@ export default function PageLienInvalide() {
       <p className="mt-4 text-[15px] leading-relaxed font-medium">{lienInvalide.texte}</p>
       <p className="text-muted mt-6 text-[14px] font-medium">{lienInvalide.locataire}</p>
       <p className="text-muted mt-2 text-[14px] font-medium">{lienInvalide.garant}</p>
+      <FormulaireContinuite mode="retrouver" />
       <div className="mt-8">
         <Button href="/demarrer">{lienInvalide.bouton}</Button>
       </div>

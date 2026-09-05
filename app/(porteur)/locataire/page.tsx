@@ -1,3 +1,4 @@
+import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -45,7 +46,7 @@ export default async function PageLocataire({
   const { data: dossier } = await supabase
     .from('dossiers')
     .select(
-      'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration',
+      'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration, loyer_verrouille',
     )
     .eq('id', porteur.capacite.dossierId)
     .maybeSingle()
@@ -86,6 +87,7 @@ export default async function PageLocataire({
           {espace.loyerAide}
         </p>
         <FormulaireLoyer loyerActuel={loyer} />
+        {!dossier.agence_id ? <FormulaireContinuite mode="agence" /> : null}
       </section>
 
       {aRegler || dossier.paye_le ? (

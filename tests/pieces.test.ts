@@ -1,3 +1,4 @@
+import { devenirPorteur } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
@@ -27,10 +28,7 @@ describe('depot des pieces', () => {
   let dossier: string
 
   async function porteur(role: 'locataire' | 'garant', surLeDossier = dossier) {
-    await db.exec('set role porteur_lien')
-    await db.exec(`set request.jwt.claim.sub = ''`)
-    await db.exec(`set request.jwt.claim.dossier_id = '${surLeDossier}'`)
-    await db.exec(`set request.jwt.claim.role_partie = '${role}'`)
+    await devenirPorteur(db, surLeDossier, role)
   }
 
   /** Un dossier neuf, par le seul chemin qui en cree. */
@@ -164,8 +162,14 @@ describe('depot des pieces', () => {
   // Les octets
   // -------------------------------------------------------------------------
 
-  test('le garant envoie ses octets dans le repertoire de son dossier', async () => {
+  test('le garant ne televerse pas directement des octets non controles', async () => {
     await porteur('garant')
+    expect(await refus(db, insertionObjet(`${dossier}/direct`))).toContain('permission denied')
+  })
+
+  test('le serveur depose les octets du garant dans le repertoire de son dossier', async () => {
+    await porteur('garant')
+    await db.exec('reset role; set role depot_piece')
     await db.query(insertionObjet(`${dossier}/bulletin-mars`))
     expect(await compter(db, 'storage.objects')).toBe(1)
   })
@@ -173,6 +177,7 @@ describe('depot des pieces', () => {
   test('le garant ne pose rien dans le repertoire d un autre dossier', async () => {
     const autre = await ouvrirDossier('autre@exemple.fr')
     await porteur('garant')
+    await db.exec('reset role; set role depot_piece')
 
     // Le pendant, cote octets, de la contrainte `chemin_dans_le_dossier`.
     expect(await refus(db, insertionObjet(`${autre}/vole`))).toContain('row-level security')
@@ -184,6 +189,7 @@ describe('depot des pieces', () => {
     await db.query(`insert into storage.buckets (id, name) values ('autre', 'autre')`)
 
     await porteur('garant')
+    await db.exec('reset role; set role depot_piece')
     expect(await refus(db, insertionObjet(`${dossier}/x`, 'autre'))).toContain('row-level security')
   })
 
@@ -193,7 +199,7 @@ describe('depot des pieces', () => {
 
     await porteur('locataire')
     expect(await compter(db, 'storage.objects')).toBe(0)
-    expect(await refus(db, insertionObjet(`${dossier}/ajoute`))).toContain('row-level security')
+    expect(await refus(db, insertionObjet(`${dossier}/ajoute`))).toContain('permission denied')
   })
 
   test('une agence lit les octets de ses dossiers seulement', async () => {
