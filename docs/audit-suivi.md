@@ -17,7 +17,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 | Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
-| Sauvegarde                      | Export chiffre et restauration PGlite fictive verifies                                                                                                 | Restauration de production et copie de secours de la cle maitresse non demontrees |
+| Sauvegarde                      | Export chiffre, restauration PGlite et restauration PostgreSQL native fictives verifies                                                                | Restauration de production et copie de secours de la cle maitresse non demontrees |
 | Courriels                       | Files chiffrees, reprise et transport testes ; configuration expediteur verifiee                                                                       | Livraison reelle au destinataire non prouvee                                      |
 | Signature et facturation agence | Socle technique uniquement ; Universign et modele contractuel pris en charge par Lounes                                                                | Aucun acte signe ni facturation agence valides de bout en bout                    |
 
@@ -305,3 +305,27 @@ avant deploiement. Aucun fichier de migration deja applique n'est modifie.
 Validation locale de 0030 : 430 tests dans 51 suites, types, lint, format et
 controles publics passes. Les huit scenarios concurrents incluent la finalisation
 apres expiration du dossier ou du jeton ; leur garde retiree produit un echec.
+
+## Preuve supplementaire de restauration native, 6 septembre
+
+Deux executions sur deux clusters PostgreSQL 17.10 independants ont reussi avec
+les vrais clients pg_dump, pg_dumpall et pg_restore 17.6 officiels. Apres export
+custom chiffre, suppression de l'export clair et arret de la source, la cible
+neuve retrouve 22 tables, 101 contraintes et 38 politiques identiques. Roles,
+adhesions, proprietaires, ACL et activation RLS sont compares. Les refus locataire,
+jeton invalide et RPC anonyme, ainsi qu'une contrainte invalide, restent effectifs.
+Une DEK scellee puis l'objet fictif sont dechiffres avec une KEK fictive conservee
+hors archive ; une autre KEK est refusee. Derniere execution : 2,159 secondes,
+hors acquisition et compilation des outils ; ce n'est pas un RTO de production.
+
+Les roles sont exportes sans mots de passe. Les deux clusters utilisent le meme
+bootstrap postgres ; seul son CREATE ROLE deja present et les directives psql
+sont retires de l'export de roles genere par l'exercice. Une cible avec un autre
+bootstrap avait echoue sur GRANTED BY postgres : cette dependance reste explicite.
+
+Limites : schema Auth minimal du harnais, objet chiffre local, aucune copie Storage
+distante, aucun rendu agence, aucun export Supabase reel, aucune cle Vercel ni
+preuve de cle de secours. Ce script d'exercice local n'est pas encore integre a
+la CI. Les clusters et donnees fictives ont ete supprimes. La prochaine etape
+est de rendre ce protocole reproductible et de valider le contrat d'export ;
+le prerequis de restauration de production reste ouvert.
