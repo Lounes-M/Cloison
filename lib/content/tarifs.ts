@@ -24,7 +24,7 @@ export const paiementLocataire = {
   regle:
     'Le paiement n’est pas remboursé si le dossier expire sans décision de l’agence : tu achètes trois mois de coffre, pas un résultat.',
   attente: 'Le lien de ton garant partira une fois le dossier réglé.',
-  bouton: 'Régler 9 € et envoyer le lien',
+  bouton: 'Régler 9 €',
   envoi: 'Redirection…',
   regle_le: (date: string) => `Dossier réglé le ${date}.`,
   indisponible: 'Le paiement n’est pas disponible pour l’instant. Réessaie dans un moment.',

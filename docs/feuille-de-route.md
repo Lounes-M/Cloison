@@ -1,7 +1,7 @@
 # Feuille de route Cloison
 
 De la landing au premier dossier reel allant jusqu'a un acte signe.
-Version de travail du 6 septembre 2026, apres les PR 43 a 47. Le
+Version de travail du 6 septembre 2026, apres les PR 43 a 49. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
@@ -16,7 +16,7 @@ avance techniquement sans attendre cette dependance.
 - [x] **02** Ajouter les pages d'erreur applicatives et globales.
 - [x] **03** Activer Dependabot. Les incompatibilites d'outillage restent suivies dans les dettes.
 - [x] **04** Deployer Vercel et le domaine. Le domaine canonique est www.cloison.immo.
-- [ ] **05** Verifier toutes les animations au scroll dans un navigateur. La note historique contredisait sa case ; preuve complete a refaire.
+- [x] **05** Verifier les animations au scroll dans un navigateur. PR50 : les 16 blocs Reveal de / et les 17 de /agences se revelent sur ordinateur et mobile ; mouvement reduit et fallback sans JavaScript visibles, bascule Parcours au clavier sans JavaScript verifiee.
 
 ## Phase 1. Landing et collecte
 
@@ -73,7 +73,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 
 ## Phase 6. Paiement et facturation
 
-- [ ] **42** Valider le parcours complet de paiement locataire dans un environnement Stripe de test representatif. Checkout et protections webhook/idempotence implementes. PR49 : reprise apres reponses perdues et rotation concurrente testees avec doubles ; idempotence de creation verifiee sur Stripe test, session fictive expiree. Aucun paiement complet realise.
+- [x] **42** Exercer le parcours de paiement locataire en mode Stripe test. PR50 : navigateur, Next et PostgreSQL/PostgREST locaux, Checkout et webhook fournisseur ; succes nominal, refus de fonds, annulation, echec puis succes 3D Secure verifies. Aucun encaissement reel. Identite commerciale et configuration du compte de production restent a confirmer avant lancement.
 - [ ] **43** Terminer la facturation agence liee a une signature reelle verifiee.
 - [x] **44** Tester l'interdiction des chemins de paiement pour le garant.
 - [ ] **45** Finaliser et faire valider CGU et CGV. Les brouillons du depot ne valent pas validation.

@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 48
+## Etat courant au 6 septembre 2026, apres PR 49
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,7 +13,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 48 fusionnees ; main bc18cab ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34022838275)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
+| Livraison du socle              | PR 43 a 49 fusionnees ; main 06d0e54 ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34025975711)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
 | Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
@@ -27,6 +27,51 @@ Vercel dpl_8GNn3hDxSmaWwN6t9VB5X2nBafSY est Ready sur www.cloison.immo.
 Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
 son journal est constant et ne contient pas son corps. Aucun paiement effectue.
 Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
+
+## Passe 50 : paiement navigateur et webhook
+
+Le parcours de paiement est maintenant exerce dans un vrai navigateur, avec le
+build Next, PostgreSQL/PostgREST locaux et le service Stripe en mode test. Le
+listener Stripe transmet les evenements au webhook local avec son secret ; aucun
+webhook de production n'a ete reconfigure. Les trois dossiers sont fictifs.
+
+- Carte de test nominale : paiement de 900 centimes, evenement recu en 200,
+  marquage SQL et retour navigateur confirmes, echeance prolongee a trois mois.
+- Fonds insuffisants : refus visible ; dossier non paye, retour annule verifie.
+- 3D Secure : echec simule laisse le dossier non paye, puis authentification de
+  test reussie et retour au dossier paye.
+
+Les deux paiements fictifs restent dans l'historique Stripe de test. La session
+refusee a ete expiree, la base locale detruite et les processus arretes. Aucun
+encaissement reel, courriel ou justificatif personnel dans ces essais.
+Le compte utilise affiche LM Services et DRIFTERR.APP : identite commerciale a
+clarifier avant tout changement susceptible d'affecter un autre projet.
+La correspondance avec le compte de production et sa configuration restent a
+verifier ; le succes local ne constitue pas une validation du mode live.
+
+Le webhook ne journalise plus les details SQL ni les references de paiement ;
+les exceptions de lecture ou de transport rendent un 503 JSON constant. Cinq
+echecs initiaux et un sabotage de signature sont reproduits, puis corriges.
+Le harnais CI traverse Next/PostgREST : six refus sans RPC de marquage, paiement
+signe et replay sans changement de date, reference ou echeance. Un mauvais secret
+sur le cas positif fait echouer le harnais. Les signatures CI sont fictives ;
+elles se distinguent du listener fournisseur utilise dans le navigateur.
+
+Le bouton annonce seulement le reglement : l'envoi au garant demande ensuite de
+saisir son adresse et de confirmer.
+
+Controle navigateur public : 16 blocs Reveal sur / et 17 sur /agences, tous
+reveles sur ordinateur et mobile (390 x 844), sans debordement horizontal constate
+sur les etapes controlees. En mouvement reduit, les 33 blocs sont immediatement
+visibles sans animation. Sans JavaScript, le fallback rend les 33 blocs visibles
+apres son delai de 4,4 secondes ; la bascule Parcours reste utilisable au clavier,
+avec un seul panneau affiche. Les reglages temporaires du navigateur sont retires.
+Le fallback s'applique aussi lorsque JavaScript fonctionne : les blocs peuvent
+etre deja visibles lors d'un scroll tardif ; cette limite du mouvement est conservee.
+
+Controle global local : 485 tests dans 57 suites, types, lint, format et build.
+Les statuts de CI et de livraison sont suivis dans la
+[PR 50](https://github.com/Lounes-M/Cloison/pull/50).
 
 ## Passe 49 : reprise du paiement locataire
 

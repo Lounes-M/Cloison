@@ -1,0 +1,127 @@
+import { NextRequest } from 'next/server'
+import Stripe from 'stripe'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+
+const { rpc, serveur } = vi.hoisted(() => ({ rpc: vi.fn(), serveur: vi.fn() }))
+vi.mock('@/lib/acces/serveur', () => ({ clientServeur: serveur }))
+vi.mock('@/lib/env', () => ({
+  env: {
+    stripeSecretKey: 'sk_test_webhook_fixture',
+    stripeWebhookSecret: 'whsec_webhook_fixture',
+  },
+}))
+import { POST } from '@/app/api/paiement/webhook/route'
+
+const ADRESSE = 'webhook-confidentiel@example.invalid'
+const SECRET = 'secret-fictif-ne-pas-journaliser'
+const DOSSIER = '11111111-1111-4111-8111-111111111111'
+const stripe = new Stripe('sk_test_webhook_fixture')
+function requete(signatureValide = true, type = 'checkout.session.completed') {
+  const payload = JSON.stringify({
+    id: 'evt_fixture',
+    type,
+    data: {
+      object: {
+        id: 'cs_fixture',
+        customer_email: ADRESSE,
+        payment_status: 'paid',
+        mode: 'payment',
+        currency: 'eur',
+        amount_total: 900,
+        metadata: { dossier_id: DOSSIER },
+      },
+    },
+  })
+  // Signature locale du vrai SDK ; aucune API Stripe n'est appelee.
+  const signature = stripe.webhooks.generateTestHeaderString({
+    payload,
+    secret: signatureValide ? 'whsec_webhook_fixture' : 'whsec_autre_fixture',
+  })
+  return new NextRequest('https://example.invalid/api/paiement/webhook', {
+    method: 'POST',
+    headers: { 'stripe-signature': signature },
+    body: payload,
+  })
+}
+beforeEach(() => {
+  vi.clearAllMocks()
+  serveur.mockResolvedValue({ rpc })
+  rpc.mockResolvedValue({ data: true, error: null })
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+})
+afterEach(() => vi.restoreAllMocks())
+function verifierConfidentialite() {
+  const traces = JSON.stringify(vi.mocked(console.error).mock.calls)
+  for (const sensible of [ADRESSE, SECRET, DOSSIER, 'cs_fixture'])
+    expect(traces).not.toContain(sensible)
+}
+
+test('une signature refusee par le vrai SDK ne contacte jamais la base', async () => {
+  const reponse = await POST(requete(false))
+  expect(reponse.status).toBe(400)
+  expect(serveur).not.toHaveBeenCalled()
+  expect(rpc).not.toHaveBeenCalled()
+  verifierConfidentialite()
+})
+
+test('un evenement signe sans paiement concerne est acquitte sans base', async () => {
+  const reponse = await POST(requete(true, 'invoice.created'))
+  expect(reponse.status).toBe(200)
+  expect(await reponse.json()).toEqual({ recu: true })
+  expect(serveur).not.toHaveBeenCalled()
+})
+
+test('un paiement signe valide appelle le marquage avec les references attendues', async () => {
+  const reponse = await POST(requete())
+  expect(reponse.status).toBe(200)
+  expect(await reponse.json()).toEqual({ recu: true, marque: true })
+  expect(rpc).toHaveBeenCalledExactlyOnceWith('marquer_dossier_paye', {
+    le_dossier: DOSSIER,
+    la_reference: 'cs_fixture',
+  })
+  expect(console.error).not.toHaveBeenCalled()
+})
+
+for (const [code, statut, message] of [
+  ['23505', 200, '[paiement] marquage refuse'],
+  ['42501', 503, '[paiement] marquage a rejouer'],
+] as const) {
+  test(`le refus SQL ${code} preserve la reponse metier sans journaliser details ou paiement`, async () => {
+    rpc.mockResolvedValue({
+      data: null,
+      error: {
+        code,
+        message: `Erreur fictive concernant ${ADRESSE}`,
+        details: `Valeur privee ${SECRET}`,
+        hint: 'Ne jamais copier les donnees dans le journal',
+      },
+    })
+    const reponse = await POST(requete())
+    expect(reponse.status).toBe(statut)
+    expect(await reponse.json()).toEqual(
+      statut === 200 ? { recu: true, marque: false, anomalie: true } : { recu: false },
+    )
+    verifierConfidentialite()
+    expect(console.error).toHaveBeenCalledExactlyOnceWith(message)
+  })
+}
+
+for (const etape of ['client', 'rpc', 'lecture-corps']) {
+  test(`une exception ${etape} rend un 503 controle et permet le rejeu`, async () => {
+    const erreur = new Error(`Panne fictive ${ADRESSE} ${SECRET}`)
+    const appel = requete()
+    if (etape === 'client') serveur.mockRejectedValueOnce(erreur)
+    if (etape === 'rpc') rpc.mockRejectedValueOnce(erreur)
+    if (etape === 'lecture-corps') vi.spyOn(appel, 'text').mockRejectedValueOnce(erreur)
+    const reponse = await POST(appel)
+    expect(reponse.status).toBe(503)
+    expect(await reponse.json()).toEqual({ recu: false })
+    verifierConfidentialite()
+    expect(console.error).toHaveBeenCalledExactlyOnceWith('[paiement] webhook a rejouer')
+    if (etape === 'lecture-corps') expect(serveur).not.toHaveBeenCalled()
+    // Le meme evenement signe peut aboutir lors de la prochaine tentative.
+    const reprise = await POST(requete())
+    expect(reprise.status).toBe(200)
+    expect(await reprise.json()).toEqual({ recu: true, marque: true })
+  })
+}
