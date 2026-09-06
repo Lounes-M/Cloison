@@ -1,7 +1,7 @@
 # Feuille de route Cloison
 
 De la landing au premier dossier reel allant jusqu'a un acte signe.
-Version de travail du 6 septembre 2026, apres les PR 43 a 52. Le
+Version de travail du 6 septembre 2026, apres les PR 43 a 53. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
@@ -41,7 +41,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 ## Phase 3. Socle technique et preuves d'acces
 
 - [x] **18** Separer les routes marketing et les espaces applicatifs.
-- [x] **19** Implementer dossiers, pieces, roles et RLS. Migrations appliquees jusqu'a 0030, refus controles par SQL, HTTP et Storage.
+- [x] **19** Implementer dossiers, pieces, roles et RLS. Migrations appliquees jusqu'a 0031, refus controles par SQL, HTTP et Storage.
 - [x] **20** Verifier rattachement, MFA, renouvellement, suspension et exclusion dans un navigateur avec Supabase Auth reel. PR52 : build local, comptes fictifs, entree technique sans courriel ; deconnexion reelle et panne simulee verifiees. La reception du lien magique de production reste en tache 35.
 - [x] **21** Implementer les capacites locataire/garant et leur revocation. Les essais refusent un cookie et un lien revoques.
 - [x] **22** Chiffrer les pieces avant Storage avec une cle scellee par dossier. La copie de secours de la cle maitresse reste a prouver.

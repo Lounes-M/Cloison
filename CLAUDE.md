@@ -114,7 +114,7 @@ Détail dans `.env.example`.
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## Etat au 6 septembre 2026, apres PR 52
+## Etat au 6 septembre 2026, apres PR 53
 
 Le suivi vivant de la remise a niveau est `docs/audit-suivi.md`.
 L'audit a rouvert les regles d'acces, les transitions, la purge et plusieurs parcours.
@@ -179,3 +179,8 @@ Le lot 53 ajoute une supervision agregee et une photographie du pilote sur
 28 jours. La migration 0031 exige une application explicite ; consulter la PR
 et docs/exploitation/supervision-deploiement.md pour son etat reel. Les alertes
 sont des echecs de workflow GitHub, pas une preuve de reception humaine.
+
+La PR 53 (2783ede) est fusionnee et deployee. La migration 0031 est appliquee,
+apres repetition transactionnelle et CI de PR verte. Ne pas la rejouer.
+Le workflow Supervision 34039463089 est vert en production, compteurs a zero.
+556 tests dans 64 suites avant le lot filigrane. Voir la PR pour la CI main.

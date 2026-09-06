@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 52
+## Etat courant au 6 septembre 2026, apres PR 53
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,8 +13,8 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                                           |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 52 fusionnees ; main aa7701f ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34037765814)                                   | Une CI verte seule ne prouve pas les parcours reels                                                       |
-| Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                                                |
+| Livraison du socle              | PR 43 a 53 fusionnees ; main 2783ede ; livraison suivie dans la PR 53                                                                                  | Une CI verte seule ne prouve pas les parcours reels                                                       |
+| Migrations                      | Rattrapage documente jusqu'a 0031 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                                                |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Auth/MFA navigateur verifies avec entree technique ; lien magique et dernier rendu mobile restent ouverts |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                                        |
 | Sauvegarde                      | Export chiffre, restauration PGlite et restauration PostgreSQL native fictives verifies                                                                | Restauration de production et copie de secours de la cle maitresse non demontrees                         |
@@ -56,11 +56,10 @@ sur 28 jours des dossiers encore presents, pas un taux de conversion historique.
 
 Les tests couvrent droits SQL, seuils, dates, files, format strict, pannes HTTP,
 redirections, secret, cache, journaux et codes de sortie du programme reel.
-Dix-neuf sabotages ont ete detectes. La repetition transactionnelle 0031 sur Supabase a reussi ; apres rollback, fonction et index sont absents. Son application et sa livraison effective seront consignees dans la PR.
+Dix-neuf sabotages ont ete detectes. La repetition transactionnelle 0031 sur Supabase a reussi ; apres rollback, fonction et index sont absents. 0031 est maintenant appliquee, apres CI de PR verte sur 724391d. Droits SQL et RPC verifies, serveur autorise et anonyme refuse 401/42501. Vercel dpl_GmJ2CC7Nr9kNVq4FpacDkcMfhzxg est Ready ; le [workflow Supervision](https://github.com/Lounes-M/Cloison/actions/runs/34039463089) est vert avec compteurs a zero. Voir la PR 53 pour la CI main.
 Controle global local : 556 tests dans 64 suites, types, lint, format, typographie et build reussis.
 Les taches 40 et 48 restent ouvertes pour la reception humaine des alertes et
 les observations du pilote reel. Voir les runbooks de supervision et du pilote.
-
 
 ## Passe 52 : Auth reel et deconnexion agence
 
