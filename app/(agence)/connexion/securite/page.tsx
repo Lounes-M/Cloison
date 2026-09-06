@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
 import { FormulaireSecurite } from '@/components/forms/FormulaireSecurite'
-import { seDeconnecter } from '@/lib/agences/action-securite'
 import { securite } from '@/lib/content/securite'
 export default async function PageSecurite() {
   if (!(await utilisateurCourant())) redirect('/connexion')
@@ -15,9 +14,6 @@ export default async function PageSecurite() {
       <h1 className="font-display text-3xl">{securite.titre}</h1>
       <p className="mt-4">{securite.aide}</p>
       <FormulaireSecurite initial={{ facteur }} />
-      <form action={seDeconnecter}>
-        <button className="mt-8 underline">{securite.deconnexion}</button>
-      </form>
     </div>
   )
 }

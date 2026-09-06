@@ -114,7 +114,7 @@ Détail dans `.env.example`.
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## Etat au 6 septembre 2026, apres PR 50
+## Etat au 6 septembre 2026, apres PR 51
 
 Le suivi vivant de la remise a niveau est `docs/audit-suivi.md`.
 L'audit a rouvert les regles d'acces, les transitions, la purge et plusieurs parcours.
@@ -122,7 +122,7 @@ Ne pas presenter les phases 0 a 7 comme terminees. La signature exige encore un
 modele contractuel valide et l'integration du compte Universign.
 
 Supabase, Vercel et Stripe CLI sont accessibles depuis le poste de Lounes.
-Les PR 43 a 50 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0030
+Les PR 43 a 51 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0030
 est applique en production. Les controles de droits ont ete rejoues via l'API publique.
 Le domaine canonique est www.cloison.immo ; le domaine sans www redirige en 308.
 Le suivi vivant et les limites avant le premier dossier reel sont dans docs/audit-suivi.md.
@@ -165,3 +165,7 @@ Ne pas ajouter erreur fournisseur, chemin, identifiant, jeton ou donnees saisies
 aux appels console. Le test journaux-confidentialite couvre le code applicatif ;
 le journal SQL nominatif des acces est distinct. Procedure dans
 docs/exploitation/journaux-applicatifs.md.
+
+La PR 51 (fde6fc3) a nettoye les journaux applicatifs explicites et les pannes
+du retour Auth ; CI main 34029897926 verte, 512 tests et production verifiee.
+Les erreurs de plateforme et traces historiques restent hors de cette preuve.
