@@ -112,6 +112,13 @@ export function baseSupabase(
     },
 
     async televerser(chemin, scelle) {
+      // La reservation survit au processus, y compris si la reponse de
+      // l'upload est perdue. La maintenance arbitre ensuite avec l'inscription.
+      const { error: reservation } = await stockage.rpc('reserver_depot', { le_chemin: chemin })
+      if (reservation) {
+        console.error('[coffre] reservation du depot refusee')
+        return false
+      }
       const { error } = await stockage.storage.from(SEAU).upload(chemin, scelle, {
         // Des octets scelles ne sont d'aucun type. Annoncer autre chose
         // inviterait un navigateur a les interpreter le jour ou ils seraient
@@ -140,7 +147,7 @@ export function baseSupabase(
     },
 
     async inscrirePiece(piece: PieceAInscrire) {
-      const { data, error } = await supabase
+      const { data, error } = await stockage
         .from('pieces')
         .insert({
           dossier_id: piece.dossierId,

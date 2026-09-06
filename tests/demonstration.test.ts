@@ -1,4 +1,4 @@
-import { devenirPorteur } from './base'
+import { devenirDepot, devenirPorteur, reserverObjetDEssai } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
@@ -124,12 +124,14 @@ describe('ouvrir_dossier_de_demonstration', () => {
     await db.query(
       `insert into public.engagements (dossier_id, revenu_net_mensuel_cents) values ('${id}', 380000)`,
     )
+    await devenirDepot(db, id)
     for (const nature of [
       'bulletin_paie',
       'avis_imposition',
       'piece_identite',
       'justificatif_domicile',
     ]) {
+      await reserverObjetDEssai(db, id, `${id}/${nature}`)
       await db.query(
         `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
          values ('${id}', '${nature}', '${id}/${nature}', 1024, 'application/pdf')`,

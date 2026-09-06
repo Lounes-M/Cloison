@@ -1,4 +1,4 @@
-import { devenirPorteur } from './base'
+import { devenirPorteur, devenirDepot, reserverObjetDEssai } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
@@ -70,9 +70,15 @@ describe('depot des pieces', () => {
   // Les metadonnees
   // -------------------------------------------------------------------------
 
+  async function depot(suffixe: string, taille = 1024, surLeDossier = dossier) {
+    await reserverObjetDEssai(db, surLeDossier, `${surLeDossier}/${suffixe}`)
+    await devenirDepot(db, surLeDossier)
+    await db.query(insertionPiece(surLeDossier, suffixe, taille))
+  }
+
   test('le garant depose une piece dans son dossier', async () => {
     await porteur('garant')
-    await db.query(insertionPiece(dossier, 'bulletin-mars'))
+    await depot('bulletin-mars')
     expect(await compter(db, 'public.pieces')).toBe(1)
   })
 
@@ -108,13 +114,13 @@ describe('depot des pieces', () => {
     // La cloison qui fait le produit : il suit son dossier sans voir les
     // pieces de son garant.
     expect(await compter(db, 'public.pieces')).toBe(0)
-    expect(await refus(db, insertionPiece(dossier, 'ajoute'))).toContain('row-level security')
+    expect(await refus(db, insertionPiece(dossier, 'ajoute'))).toContain('permission denied')
   })
 
   test('le garant d un autre dossier ne depose pas ici', async () => {
     const autre = await ouvrirDossier('autre@exemple.fr')
     await porteur('garant', autre)
-    expect(await refus(db, insertionPiece(dossier, 'intrus'))).toContain('row-level security')
+    expect(await refus(db, insertionPiece(dossier, 'intrus'))).toContain('permission denied')
   })
 
   // -------------------------------------------------------------------------
@@ -124,10 +130,11 @@ describe('depot des pieces', () => {
   test('un dossier s arrete a vingt pieces', async () => {
     await porteur('garant')
     for (let i = 0; i < 20; i += 1) {
-      await db.query(insertionPiece(dossier, `piece-${i}`))
+      await depot(`piece-${i}`)
     }
     expect(await compter(db, 'public.pieces')).toBe(20)
 
+    await reserverObjetDEssai(db, dossier, `${dossier}/piece-20`)
     const message = await refus(db, insertionPiece(dossier, 'piece-20'))
     expect(message).toContain('vingt pieces')
   })
@@ -135,12 +142,13 @@ describe('depot des pieces', () => {
   test('un dossier s arrete a soixante megaoctets', async () => {
     await porteur('garant')
     for (let i = 0; i < 3; i += 1) {
-      await db.query(insertionPiece(dossier, `grosse-${i}`, 20 * MEGAOCTET))
+      await depot(`grosse-${i}`, 20 * MEGAOCTET)
     }
     expect(await compter(db, 'public.pieces')).toBe(3)
 
     // Soixante megaoctets pile passent ; un octet de plus, non. Le message
     // doit dire lequel des deux plafonds a stoppe la personne.
+    await reserverObjetDEssai(db, dossier, `${dossier}/un-octet`)
     const message = await refus(db, insertionPiece(dossier, 'un-octet', 1))
     expect(message).toContain('megaoctets')
   })
@@ -149,10 +157,10 @@ describe('depot des pieces', () => {
     const autre = await ouvrirDossier('autre@exemple.fr')
 
     await porteur('garant')
-    for (let i = 0; i < 20; i += 1) await db.query(insertionPiece(dossier, `piece-${i}`))
+    for (let i = 0; i < 20; i += 1) await depot(`piece-${i}`)
 
     await porteur('garant', autre)
-    await db.query(insertionPiece(autre, 'premiere'))
+    await depot('premiere', 1024, autre)
 
     await redevenirProprietaire(db)
     expect(await compter(db, 'public.pieces')).toBe(21)
@@ -169,6 +177,7 @@ describe('depot des pieces', () => {
 
   test('le serveur depose les octets du garant dans le repertoire de son dossier', async () => {
     await porteur('garant')
+    await reserverObjetDEssai(db, dossier, `${dossier}/bulletin-mars`, false)
     await db.exec('reset role; set role depot_piece')
     await db.query(insertionObjet(`${dossier}/bulletin-mars`))
     expect(await compter(db, 'storage.objects')).toBe(1)

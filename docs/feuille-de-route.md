@@ -179,3 +179,8 @@ la reprise durable des retraits, le traitement des pannes de pages et la fiabili
 des notifications. Voir `docs/audit-suivi.md` pour la livraison et les limites.
 La restauration de production, le parcours navigateur authentifie complet et la
 chaine contractuelle ne deviennent pas termines par ces seules preuves.
+
+La passe 0030 ajoute la reservation durable avant depot et la reprise des processus
+interrompus. Le formulaire HTTP de coffre a aussi ete exerce sur Vercel et Supabase
+reels avec un PDF fictif, restitution exacte et retrait journalise. Le detail des
+preuves et du deploiement figure dans le suivi d'audit.

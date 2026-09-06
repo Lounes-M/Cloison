@@ -199,7 +199,7 @@ detruire son objet. Les chemins abandonnes ne peuvent pas etre reinscrits apres
 acquittement de la file. Le role serveur de maintenance devient le seul role
 applicatif autorise a supprimer physiquement un objet Storage.
 
-Limite restante : un arret brutal apres upload et avant programmation du nettoyage
+Limite identifiee en PR 45 : un arret brutal apres upload et avant programmation du nettoyage
 peut encore laisser un objet orphelin jusqu'a l'expiration du dossier. Une reservation
 avant upload exige aussi de serialiser l'ecriture Storage et sa finalisation ; un
 simple delai ne prouve pas l'absence de course. Ce protocole n'est pas revendique ici.
@@ -223,3 +223,34 @@ n'est modifiee. Les preuves de livraison sont ajoutees a la PR apres CI et appli
 Verification locale finale de cette passe : 414 tests dans 49 suites, controle
 complet et build reussis. Le nouveau build a repasse les six preuves de parcours
 HTTP, les refus PostgREST et les deux scenarios de concurrence PostgreSQL.
+
+## Reservations avant depot, passe 0030
+
+La PR 45 est fusionnee (e86a38e), sa CI main 34002900424 est verte, et la
+migration 0029 est appliquee. La maintenance de production 34003084484 passe.
+Un formulaire HTTP natif React a depose un PDF fictif sur Vercel, restitue son
+original identique et journalise, puis retire sa piece et programme son nettoyage.
+La fixture et ses objets ont ete nettoyes. Cela eprouve le chiffrement Vercel et
+Storage reels, sans constituer un test navigateur avec hydratation ou MFA agence.
+Le harnais reproductible est `scripts/essai-coffre-http.mjs` ; son appelant doit
+fournir une fixture demonstration `.invalid` et garantir son nettoyage en finally.
+
+La migration 0030 traite la fenetre de crash du depot : reservation durable avant
+upload, delai de quinze minutes non renouvelable, consommation atomique avec la
+piece, reprise des reservations expirees par maintenance. Les operations prennent
+les verrous dans le meme ordre, dossier puis reservation ; les echeances sont
+relues apres attente. Le quota compte pieces et reservations, vingt au maximum.
+L'inscription des metadonnees exige desormais le role serveur depot_piece et une
+reservation : le navigateur ne peut pas fabriquer une piece sans validation serveur.
+Les chemins nettoyes restent interdits apres acquittement de leur file.
+
+Les tests PostgreSQL concurrents couvrent expiration pendant attente, finalisation
+et reprise dans les deux ordres. Les sabotages retirant les verrous ou remplacant
+l'horloge fraiche ont ete vus rouges. Ces garanties concernent le protocole SQL ;
+les caches CDN et les ecritures physiques internes du fournisseur restent distincts.
+La migration 0030 exige repetition annulee, CI verte puis application explicite
+avant deploiement. Aucun fichier de migration deja applique n'est modifie.
+
+Validation locale de 0030 : 430 tests dans 51 suites, types, lint, format et
+controles publics passes. Les huit scenarios concurrents incluent la finalisation
+apres expiration du dossier ou du jeton ; leur garde retiree produit un echec.

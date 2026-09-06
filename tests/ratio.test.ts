@@ -1,4 +1,4 @@
-import { devenirPorteur } from './base'
+import { devenirDepot, devenirPorteur, reserverObjetDEssai } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, devenir, redevenirProprietaire, refus } from './base'
@@ -37,8 +37,9 @@ describe('recalcul du dossier', () => {
   }
 
   async function deposerToutesLesPieces() {
-    await porteur('garant')
+    await devenirDepot(db, dossier)
     for (const nature of NATURES) {
+      await reserverObjetDEssai(db, dossier, `${dossier}/${nature}`)
       await db.query(
         `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
          values ($1, $2, $3, 1024, 'application/pdf')`,
