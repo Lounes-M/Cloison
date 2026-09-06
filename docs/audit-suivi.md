@@ -87,7 +87,6 @@ geometrie etaient rouges avant correction ; les essais existants de rasterisatio
 continuent de verifier l'absence de texte selectionnable et de contenu actif.
 Trois sabotages supplementaires (espacement, mots coupes, identite tronquee) sont detectes. Le rendu corrige est inspecte en PNG ; le parcours HTTP est rejoue avec succes, puis les fixtures sont nettoyees. Les preuves de livraison seront consignees dans la PR.
 
-
 ## Passe 53 : supervision et photographie du pilote
 
 Le lot ajoute une lecture SQL agregee reservee au serveur, une route protegee
