@@ -125,8 +125,10 @@ export function lireEvenement(corps: string, signature: string | null): Stripe.E
   if (!signature) return null
   try {
     return stripe().webhooks.constructEvent(corps, signature, env.stripeWebhookSecret)
-  } catch (erreur) {
-    console.error('[paiement] evenement refuse', erreur)
+  } catch {
+    // L'erreur du SDK contient le corps brut du webhook dans payload.
+    // Une signature refusee ne doit jamais copier ce contenu dans les logs.
+    console.error('[paiement] evenement refuse')
     return null
   }
 }

@@ -53,31 +53,20 @@ Sans conséquence immédiate (TypeScript 6 est parfaitement fonctionnel) mais l'
 
 ## Décidées, à revoir plus tard
 
-### Les migrations s'appliquent à la main, et rien ne le vérifie
+### Derive du schema de production non controlee automatiquement
 
-**Constaté le** 3 septembre 2026, en fusionnant la limitation de débit.
+**Revu le** 6 septembre 2026, apres PR 47.
 
-Il n'y a ni `supabase/config.toml` ni étape de déploiement : les migrations sont copiées à la main
-dans l'éditeur SQL de Supabase. Le dépôt sait donc ce que le schéma **devrait** être, et rien ne
-sait ce qu'il **est**.
+Les migrations jusqu'a 0030 ont ete appliquees par lots explicites, avec repetition
+transactionnelle et controle distinct des droits reels. Il existe donc des preuves
+de rattrapage ; l'ancienne affirmation selon laquelle rien ne verifie le schema
+n'est plus exacte. En revanche, la CI reconstruit toujours un schema local : elle
+ne detecte pas automatiquement une derive ulterieure de Supabase a chaque livraison.
 
-Ce n'est pas théorique. La migration 0008 crée `consommer_debit`, que le formulaire agence appelle
-désormais à chaque envoi. Entre la fusion et son application, le formulaire répond « réessaie dans
-quelques minutes » à tout le monde. L'échec est fermé, donc sans fuite, mais un déploiement peut
-casser une page en production sans qu'aucun test ni aucune CI ne s'en aperçoive : ils tournent tous
-contre PGlite, qui rejoue les migrations depuis zéro et ne peut par construction jamais être en
-retard.
-
-**Ce qui ne servirait à rien** : vérifier que les numéros se suivent, ou qu'aucun fichier n'a été
-modifié après coup. Ces contrôles sont faciles et ne répondent pas à la question posée, qui est
-« qu'est-ce qui est appliqué là-bas ». Un garde-fou qui rassure sans mesurer est pire que pas de
-garde-fou.
-
-**Signal de sortie** : le premier déploiement de la phase 4, qui livrera plusieurs migrations d'un
-coup au lieu d'une. Alors : le CLI Supabase branché en CI avec un projet de préproduction, de sorte
-que `supabase db push` fasse partie du déploiement et que la CI échoue si le schéma diverge. Cela
-demande des identifiants Supabase dans les secrets GitHub, ce qui est une décision à prendre et pas
-seulement une ligne à écrire.
+**Signal de sortie** : un controle de derive sur un environnement approprie et un
+processus de deploiement SQL coordonne avec l'application. Ne pas traiter une CI
+locale verte comme une preuve d'application distante et ne pas modifier une
+migration deja appliquee.
 
 ### Purge physique et restauration a verifier en production
 

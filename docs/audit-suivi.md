@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 46
+## Etat courant au 6 septembre 2026, apres PR 47
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,7 +13,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 46 fusionnees ; main a9fedaf ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34004455629)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
+| Livraison du socle              | PR 43 a 47 fusionnees ; main 4b2e50f ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34020893019)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
 | Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
@@ -29,13 +29,37 @@ fixtures demonstration fictives, toutes nettoyees ; le controle final a retrouve
 zero dossier et zero piece. Les preuves detaillees sont dans la
 [PR 46](https://github.com/Lounes-M/Cloison/pull/46).
 
+## Passe 48 : sauvegarde, restauration et journaux de paiement
+
+La restauration native, jusqu'ici executee manuellement, devient un harnais
+versionne pour la CI. Un contrat d'export impose version, format, date, tailles,
+empreintes et inventaire exact des objets avant toute nouvelle archive et avant
+extraction d'une archive recente. Les anciennes archives restent identifiees comme
+une verification d'integrite seule. Les 27 tests cibles passent apres contre-epreuves
+sur contrat et archive falsifies. L'exercice natif retrouve 22 tables, 101 contraintes,
+38 politiques et 88 fonctions ; trois sabotages sont detectes. La verification
+globale passe : 466 tests dans 55 suites, types, lint, format et build.
+Le mode Docker et la livraison sont suivis dans la
+[PR 48](https://github.com/Lounes-M/Cloison/pull/48). Aucun export de production ni changement de cle maitresse dans cette passe.
+
+La feuille de route est requalifiee tache par tache : les apercus externes, Auth
+reel, reception de courriels, acte, paiement complet, restauration de production
+et alertes operationnelles ne sont plus presentes comme termines sans preuve.
+
+Une erreur de signature Stripe invalide contient le corps HTTP brut dans sa
+propriete payload. La journalisation de cette erreur a reproduit une copie du
+corps dans les logs avec le vrai SDK et des donnees fictives, sans appel reseau.
+Un journal constant et un test de non-divulgation corrigent cette fuite, avec
+contre-epreuve rouge puis verte. Aucun double
+paiement ni contournement de signature n'a ete reproduit dans cette revue.
+
 ## Passe 47 : maintenance et renouvellement MFA
 
 Defaut reproduit : une exception de notification ou de courriel empechait la purge
 des donnees expirees. Six tests ont echoue sur l'ancienne route. La correction
 execute la purge en premier et isole les trois phases ; chaque panne garde un
 bilan 503, sans interrompre les autres phases ni exposer une erreur de service.
-Les compteurs invalides sont refuses. Huit tests de phases et un test HTTP couvrent la maintenance ; verification globale en cours.
+Les compteurs invalides sont refuses. Huit tests de phases et un test HTTP couvrent la maintenance ; verification globale et livraison terminees en PR 47.
 Controle complet local : 441 tests dans 53 suites, types, lint, format et build
 passes. Le harnais HTTP MFA passe aussi sur ce build : page OTP rendue, un seul
 renouvellement SDK et cookie frais retourne, apres un echec sur l'ancien build.
@@ -50,7 +74,7 @@ Le navigateur reel atteint la page de connexion depuis /espace, sans session age
 active ; le parcours authentifie complet reste ouvert. Aucun lien de connexion
 n'a ete envoye dans cette passe.
 
-L'emballage chiffre accepte un dump vide et une configuration non JSON : ce sont
+Constat au debut de la PR 47 : l'emballage chiffre acceptait un dump vide et une configuration non JSON : ce sont
 des octets integres, pas une preuve de sauvegarde exploitable. L'essai fictif l'a
 confirme, sans donnees distantes. Prochain lot sauvegarde : contrat d'export valide,
 puis pg_dump/pg_restore PostgreSQL avec roles et donnees Auth fictives. L'outil
