@@ -191,3 +191,11 @@ Le PDF de production est inspecte avec marquage visible, acces AAL2 et refus
 inter-agences verifies, fixtures nettoyees. 560 tests dans 66 suites sur ce lot.
 La detection du schema ajoutee ensuite exige deux references revues explicitement ;
 voir docs/exploitation/derive-schema.md avant toute future migration SQL.
+
+La PR 56 (d298674) est fusionnee et deployee, CI main 34043063293 verte.
+0032 est appliquee et immuable ; empreintes de schema locales et Supabase
+versionnees, droits reels verifies. 601 tests dans 69 suites. Supervision
+34043331193 verte apres acquittement de cinq entrees de purge sans objet restant.
+La cadence cron GitHub est indicative ; plusieurs heures entre executions observees.
+Le lot suivant aligne la presentation publique sur le pilote : ne pas presenter
+la signature comme ouverte ni le ratio declare comme une verification des pieces.

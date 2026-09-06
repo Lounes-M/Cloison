@@ -16,15 +16,25 @@ export const tarifs = {
   /** Le garant. Il n'y a pas de montant parce qu'il n'y en aura jamais. */
 } as const
 
+const euros = (centimes: number) =>
+  new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(centimes / 100)
+export const prixLocataire = euros(tarifs.locataireCents)
+export const prixActe = euros(tarifs.acteCents)
+
 export const paiementLocataire = {
   titre: 'Régler ton dossier',
-  prix: '9 €',
+  prix: prixLocataire,
   texte:
     'Une fois, pour trois mois de coffre : ton garant dépose ses pièces de son côté, l’agence reçoit un dossier complet, et tu suis l’avancement.',
   regle:
     'Le paiement n’est pas remboursé si le dossier expire sans décision de l’agence : tu achètes trois mois de coffre, pas un résultat.',
   attente: 'Le lien de ton garant partira une fois le dossier réglé.',
-  bouton: 'Régler 9 €',
+  bouton: `Régler ${prixLocataire}`,
   envoi: 'Redirection…',
   regle_le: (date: string) => `Dossier réglé le ${date}.`,
   indisponible: 'Le paiement n’est pas disponible pour l’instant. Réessaie dans un moment.',

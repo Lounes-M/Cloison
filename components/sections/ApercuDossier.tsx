@@ -58,14 +58,14 @@ export function ApercuDossier() {
             ))}
           </div>
 
-          <div className="flex gap-2.5">
-            <div className="bg-sun border-ink flex-1 rounded-xl border-2 px-3.5 py-3">
+          <div className="flex flex-wrap gap-2.5">
+            <div className="bg-sun border-ink min-w-20 flex-1 rounded-xl border-2 px-3.5 py-3">
               <p className="text-[10.5px] font-bold tracking-[0.06em] uppercase">
                 {apercuDossier.ratio.libelle}
               </p>
               <p className="font-display text-xl">{apercuDossier.ratio.valeur}</p>
             </div>
-            <div className="bg-sky border-ink flex flex-2 items-center justify-between rounded-xl border-2 px-3.5 py-3">
+            <div className="bg-sky border-ink flex min-w-40 flex-2 flex-wrap items-center justify-between gap-2 rounded-xl border-2 px-3.5 py-3">
               <div>
                 <p className="text-[10.5px] font-bold tracking-[0.06em] uppercase">
                   {apercuDossier.acte.libelle}

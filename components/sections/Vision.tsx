@@ -53,7 +53,7 @@ export function Vision() {
             </ul>
 
             <div className="mt-9">
-              <Button href="#parcours" tone="flame">
+              <Button href="/demarrer" tone="flame">
                 {vision.cta} →
               </Button>
             </div>

@@ -3,7 +3,7 @@ export const site = {
   name: 'Cloison',
   tagline: 'Le coffre à trois clés',
   description:
-    "Cloison prend la caution locative de A à Z. Tu crées ton dossier, ton garant dépose ses pièces de son côté, l'agence reçoit un dossier complet. Personne ne voit ce qu'il ne doit pas voir.",
+    "Cloison prépare le dossier de caution locative dans trois espaces séparés. Tu crées ton dossier, ton garant dépose ses pièces de son côté, l'agence reçoit un dossier complet. Personne ne voit ce qu'il ne doit pas voir.",
   // Resolue au build dans `next.config.ts` : domaine explicite, sinon domaine
   // de production Vercel, sinon localhost. Toujours definie.
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 
 import { FormulaireOuverture } from '@/components/forms/FormulaireOuverture'
 import { Section } from '@/components/ui/Section'
+import { pilote } from '@/lib/content/pilote'
 import { porte } from '@/lib/content/locataire'
 
 export const metadata: Metadata = {
@@ -25,6 +26,9 @@ export default function PageDemarrer() {
         {porte.sousTitre}
       </p>
 
+      <p className="border-ink bg-sun mb-8 rounded-xl border-2 p-4 text-sm leading-relaxed">
+        {pilote.avantOuverture}
+      </p>
       <FormulaireOuverture />
       <FormulaireContinuite mode="retrouver" />
     </Section>

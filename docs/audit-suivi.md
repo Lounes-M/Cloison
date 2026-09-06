@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 55
+## Etat courant au 7 septembre 2026, apres PR 56
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,20 +13,42 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                                           |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 55 fusionnees ; main bff673b ; livraison suivie dans la PR 55                                                                                  | Une CI verte seule ne prouve pas les parcours reels                                                       |
-| Migrations                      | Rattrapage documente jusqu'a 0031 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                                                |
+| Livraison du socle              | PR 43 a 56 fusionnees ; main d298674 ; CI main 34043063293 verte                                                                                       | Une CI verte seule ne prouve pas les parcours reels                                                       |
+| Migrations                      | Migrations jusqu'a 0032 appliquees ; controle du schema deploye et droits verifies                                                                     | Ne jamais rejouer ou modifier une migration deja appliquee                                                |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Auth/MFA navigateur verifies avec entree technique ; lien magique et dernier rendu mobile restent ouverts |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                                        |
 | Sauvegarde                      | Export chiffre, restauration PGlite et restauration PostgreSQL native fictives verifies                                                                | Restauration de production et copie de secours de la cle maitresse non demontrees                         |
 | Courriels                       | Files chiffrees, reprise et transport testes ; configuration expediteur verifiee                                                                       | Livraison reelle au destinataire non prouvee                                                              |
 | Signature et facturation agence | Socle technique uniquement ; Universign et modele contractuel pris en charge par Lounes                                                                | Aucun acte signe ni facturation agence valides de bout en bout                                            |
 
-La PR 48 a passe 466 tests dans 55 suites, le build, les controles Next/PostgREST,
-le renouvellement MFA et la restauration native sur deux conteneurs PostgreSQL.
-Vercel dpl_8GNn3hDxSmaWwN6t9VB5X2nBafSY est Ready sur www.cloison.immo.
-Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
-son journal est constant et ne contient pas son corps. Aucun paiement effectue.
-Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
+601 tests dans 69 suites sur main d298674. Vercel
+dpl_JAowrv6fkvLVZUiMYDRUDVjDbjP8 Ready ; filigrane de production visible,
+acces AAL2 et refus inter-agences verifies sur document fictif. Les cinq entrees
+de purge signalees par Supervision ont ete acquittees par la maintenance
+34043271491 sans erreur ni courriel envoye ; Supervision 34043331193 verte.
+Les executions planifiees ulterieures examinees jusqu'au 7 septembre sont vertes.
+Le cron GitHub ne garantit pas la cadence demandee : plus de deux heures entre
+executions ont ete observees. Reception humaine et couverture d'incident ouvertes.
+
+## Passe 57 : presentation publique du pilote
+
+La verification navigateur de l'accueil a reproduit un bouton Creer mon dossier
+inerte dans la section parcours et un dernier CTA qui renvoyait a cette meme
+section. Les deux dirigent maintenant vers /demarrer. La contre-epreuve navigateur
+sur l'ancienne production echoue sur le CTA absent ; le parcours corrige est
+verifie sans envoi de formulaire.
+
+Les textes publics distinguent le coffre du parcours de signature encore non
+ouvert. Le ratio est presente comme calcule sur le revenu declare, sans pretendre
+authentifier les justificatifs. Les tarifs viennent des montants centraux :
+9 euros locataire, 29 euros par acte signe et archive lorsque disponible, garant
+gratuit. L'ouverture affiche l'etat du pilote avant le formulaire. Les objectifs
+commerciaux sont identifies comme tels et le delai de reception du courriel
+n'est plus garanti a une minute. Pas de nouvelle promesse juridique.
+
+Verification visuelle et de navigation sur accueil, agences et demarrer, en
+390 et 1440 pixels. Le hero agence debordait a 320 pixels : grille et repli des blocs corriges, contre-epreuve rouge puis verte en 320/390/1440, bascule au clavier verifiee. Le parcours Auth mobile et les apercus LinkedIn/WhatsApp
+restent distincts de ces pages publiques. Livraison et CI suivies dans la PR 57.
 
 ## Passe 56 : controle de derive du schema
 
@@ -44,9 +66,7 @@ similaire n'est present en production lors du controle.
 
 41 tests cibles couvrent les mutations du catalogue, les refus des quatre roles,
 les references strictes, les erreurs HTTP, la non-divulgation et l'independance
-des etapes. Treize sabotages sont detectes. Cinq cas supplementaires ont ete vus rouges puis corriges : droits par colonne publics/Storage, tables partitionnees, vues materialisees et droits futurs. Le controle complet local passe 594 tests dans 68 suites avant integration de la PR 55 ; build et integration native reussis. La repetition 0032 est annulee ; la
-fonction est absente en production. Application et livraison restent a suivre
-dans la PR. Voir [derive du schema](exploitation/derive-schema.md).
+des etapes. Treize sabotages sont detectes. Cinq cas supplementaires ont ete vus rouges puis corriges : droits par colonne publics/Storage, tables partitionnees, vues materialisees et droits futurs. Le controle complet local passe 594 tests dans 68 suites avant integration de la PR 55 ; build et integration native reussis. La repetition 0032 a ete annulee, puis la migration appliquee apres CI verte sur a064695. Les droits SQL et RPC reels sont verifies ; voir la PR 56 pour les preuves de livraison. Voir [derive du schema](exploitation/derive-schema.md).
 
 ## Passe 55 : police du filigrane en production
 
