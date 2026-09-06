@@ -184,3 +184,10 @@ La PR 53 (2783ede) est fusionnee et deployee. La migration 0031 est appliquee,
 apres repetition transactionnelle et CI de PR verte. Ne pas la rejouer.
 Le workflow Supervision 34039463089 est vert en production, compteurs a zero.
 556 tests dans 64 suites avant le lot filigrane. Voir la PR pour la CI main.
+
+La PR 55 (bff673b) corrige une police implicite absente sur Vercel. Le filigrane
+utilise une police embarquee explicite ; les traces de build verifient des pixels.
+Le PDF de production est inspecte avec marquage visible, acces AAL2 et refus
+inter-agences verifies, fixtures nettoyees. 560 tests dans 66 suites sur ce lot.
+La detection du schema ajoutee ensuite exige deux references revues explicitement ;
+voir docs/exploitation/derive-schema.md avant toute future migration SQL.

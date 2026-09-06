@@ -240,6 +240,24 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     noter(
       'supervision HTTP : refus anonymes, rapport agrege exact sans cache via Next et PostgREST',
     )
+    for (const authorization of [undefined, 'Bearer invalide']) {
+      const r = await fetch(`${site}/api/schema`, {
+        headers: authorization ? { Authorization: authorization } : {},
+        redirect: 'error',
+      })
+      assert.equal(r.status, 401)
+    }
+    assert(!appels.some((a) => a.chemin === '/rpc/empreinte_schema'))
+    const schema = await fetch(`${site}/api/schema`, {
+      headers: { Authorization: 'Bearer supervision-strictement-locale' },
+      redirect: 'error',
+    })
+    // La base du harnais n'est pas la reference Supabase : ne pas l'accepter par repli.
+    assert.equal(schema.status, 503)
+    assert.equal(schema.headers.get('cache-control'), 'no-store')
+    assert.deepEqual(await schema.json(), { conforme: false })
+    assert(appels.some((a) => a.chemin === '/rpc/empreinte_schema'))
+    noter('schema HTTP : refus anonymes et schema du harnais refuse sans detail via Next/PostgREST')
     const {
       rows: [aPayer],
     } = await db.query(

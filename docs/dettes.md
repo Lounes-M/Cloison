@@ -53,7 +53,7 @@ Sans conséquence immédiate (TypeScript 6 est parfaitement fonctionnel) mais l'
 
 ## Décidées, à revoir plus tard
 
-### Derive du schema de production non controlee automatiquement
+### Controle de derive du schema en cours de livraison
 
 **Revu le** 6 septembre 2026, apres PR 47.
 
@@ -61,7 +61,7 @@ Les migrations jusqu'a 0030 ont ete appliquees par lots explicites, avec repetit
 transactionnelle et controle distinct des droits reels. Il existe donc des preuves
 de rattrapage ; l'ancienne affirmation selon laquelle rien ne verifie le schema
 n'est plus exacte. En revanche, la CI reconstruit toujours un schema local : elle
-ne detecte pas automatiquement une derive ulterieure de Supabase a chaque livraison.
+ne prouvait pas une absence de derive ulterieure de Supabase. Le nouveau lot ajoute des empreintes approuvees et un controle horaire ; voir docs/exploitation/derive-schema.md et la PR de livraison avant de considerer ce controle deploye.
 
 **Signal de sortie** : un controle de derive sur un environnement approprie et un
 processus de deploiement SQL coordonne avec l'application. Ne pas traiter une CI
