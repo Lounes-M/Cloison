@@ -29,19 +29,23 @@ fixtures demonstration fictives, toutes nettoyees ; le controle final a retrouve
 zero dossier et zero piece. Les preuves detaillees sont dans la
 [PR 46](https://github.com/Lounes-M/Cloison/pull/46).
 
-## Passe en cours : maintenance et renouvellement MFA
+## Passe 47 : maintenance et renouvellement MFA
 
 Defaut reproduit : une exception de notification ou de courriel empechait la purge
 des donnees expirees. Six tests ont echoue sur l'ancienne route. La correction
 execute la purge en premier et isole les trois phases ; chaque panne garde un
 bilan 503, sans interrompre les autres phases ni exposer une erreur de service.
 Les compteurs invalides sont refuses. Huit tests de phases et un test HTTP couvrent la maintenance ; verification globale en cours.
-Controle global et livraison encore en cours ; ne pas confondre avec la production.
+Controle complet local : 441 tests dans 53 suites, types, lint, format et build
+passes. Le harnais HTTP MFA passe aussi sur ce build : page OTP rendue, un seul
+renouvellement SDK et cookie frais retourne, apres un echec sur l'ancien build.
+Le statut de livraison, la CI du commit final et les controles apres deploiement
+sont consignes dans la [PR 47](https://github.com/Lounes-M/Cloison/pull/47).
 
 La revue Auth/MFA a reproduit un renouvellement de session perdu sur la page
 /connexion/securite : le vrai SDK renouvelle deux fois, mais aucun Set-Cookie ne
 parvient au navigateur. La page MFA doit participer au renouvellement du middleware.
-Correction du middleware et test du vrai SDK prepares : cookie rendu au navigateur et a la requete interne, un seul renouvellement. Le harnais scripts/verifier-session-mfa-http.mjs rejoue cette verification apres build dans la CI ; aucun contournement MFA observe.
+Le middleware et le test du vrai SDK corrigent ce point : cookie rendu au navigateur et a la requete interne, un seul renouvellement. Le harnais scripts/verifier-session-mfa-http.mjs rejoue cette verification apres build dans la CI ; aucun contournement MFA observe.
 Le navigateur reel atteint la page de connexion depuis /espace, sans session agence
 active ; le parcours authentifie complet reste ouvert. Aucun lien de connexion
 n'a ete envoye dans cette passe.
