@@ -97,7 +97,12 @@ async function moteurPdf() {
  * Dessine apres la page et non avant : ce qui est en dessous ne se recadre
  * pas. Repete, parce qu'une seule mention se recadre justement.
  */
-function poserFiligrane(ctx: SKRSContext2D, largeur: number, hauteur: number, texte: string) {
+export function poserFiligrane(
+  ctx: SKRSContext2D,
+  largeur: number,
+  hauteur: number,
+  texte: string,
+) {
   const taille = Math.max(14, Math.round(largeur / 42))
 
   ctx.save()
@@ -110,12 +115,42 @@ function poserFiligrane(ctx: SKRSContext2D, largeur: number, hauteur: number, te
   ctx.translate(largeur / 2, hauteur / 2)
   ctx.rotate(-Math.PI / 6)
 
-  const pas = taille * 9
+  // Mesurer le texte reel : un pas fixe superposait les adresses longues.
+  // Chaque bloc conserve toute l identite, repartie en lignes si necessaire.
+  const lignes: string[] = []
+  const largeurMax = largeur * 0.65
+  let ligne = ''
+  for (const mot of texte.split(/(?<=\s)/u)) {
+    if (ligne && ctx.measureText(ligne + mot).width > largeurMax) {
+      lignes.push(ligne)
+      ligne = ''
+    }
+    // Une adresse exceptionnellement longue doit aussi tenir sans etre tronquee.
+    for (const caractere of mot) {
+      if (ligne && ctx.measureText(ligne + caractere).width > largeurMax) {
+        lignes.push(ligne)
+        ligne = ''
+      }
+      ligne += caractere
+    }
+  }
+  if (ligne) lignes.push(ligne)
+  const largeurBloc = Math.max(0, ...lignes.map((l) => ctx.measureText(l).width))
+  const interligne = taille * 1.4
+  const pasX = Math.max(taille * 9 * 1.6, largeurBloc + taille * 3)
+  const pasY = Math.max(taille * 9, lignes.length * interligne + taille * 3)
   const portee = Math.ceil(Math.hypot(largeur, hauteur) / 2)
 
-  for (let y = -portee; y <= portee; y += pas) {
-    for (let x = -portee; x <= portee; x += pas * 1.6) {
-      ctx.fillText(texte, x, y)
+  // Ancrer une copie complete au centre, pas uniquement des fragments aux bords.
+  for (let iy = -Math.ceil(portee / pasY); iy <= Math.ceil(portee / pasY); iy++) {
+    for (let ix = -Math.ceil(portee / pasX); ix <= Math.ceil(portee / pasX); ix++) {
+      for (const [numero, contenu] of lignes.entries()) {
+        ctx.fillText(
+          contenu,
+          ix * pasX,
+          iy * pasY + (numero - (lignes.length - 1) / 2) * interligne,
+        )
+      }
     }
   }
 

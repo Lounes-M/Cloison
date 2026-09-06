@@ -28,6 +28,23 @@ Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
 son journal est constant et ne contient pas son corps. Aucun paiement effectue.
 Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
 
+## Passe 54 : filigrane lisible et ouverture agence reelle
+
+Une session Supabase Auth AAL2 reelle a consulte un PDF fictif chiffre dans le
+Storage du projet, via le build Next local. Refus anonyme (401), AAL1 (307 vers
+MFA), agence etrangere (404 identique a une piece absente), acces autorise (200
+sans cache), journal nominatif unique et suspension (401) sont verifies. Les
+fixtures de demonstration sont supprimees, objets Storage et comptes inclus.
+Cette preuve HTTP ne remplace pas le parcours navigateur complet de production.
+La cle maitresse est une cle fictive propre a l'essai, jamais la cle Vercel.
+
+L'inspection visuelle a trouve des repetitions superposees avec une adresse
+longue. Le pas fixe du filigrane est remplace par un espacement mesure et des
+lignes qui conservent toute l'identite, avec une copie centree. Deux tests de
+geometrie etaient rouges avant correction ; les essais existants de rasterisation
+continuent de verifier l'absence de texte selectionnable et de contenu actif.
+Trois sabotages supplementaires (espacement, mots coupes, identite tronquee) sont detectes. Le rendu corrige est inspecte en PNG ; le parcours HTTP est rejoue avec succes, puis les fixtures sont nettoyees. Les preuves de livraison seront consignees dans la PR.
+
 ## Passe 53 : supervision et photographie du pilote
 
 Le lot ajoute une lecture SQL agregee reservee au serveur, une route protegee
@@ -43,6 +60,7 @@ Dix-neuf sabotages ont ete detectes. La repetition transactionnelle 0031 sur Sup
 Controle global local : 556 tests dans 64 suites, types, lint, format, typographie et build reussis.
 Les taches 40 et 48 restent ouvertes pour la reception humaine des alertes et
 les observations du pilote reel. Voir les runbooks de supervision et du pilote.
+
 
 ## Passe 52 : Auth reel et deconnexion agence
 
