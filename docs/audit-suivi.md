@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 50
+## Etat courant au 6 septembre 2026, apres PR 51
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,7 +13,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 50 fusionnees ; main 63d0858 ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34028339369)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
+| Livraison du socle              | PR 43 a 51 fusionnees ; main fde6fc3 ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34029897926)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
 | Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
@@ -27,6 +27,43 @@ Vercel dpl_8GNn3hDxSmaWwN6t9VB5X2nBafSY est Ready sur www.cloison.immo.
 Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
 son journal est constant et ne contient pas son corps. Aucun paiement effectue.
 Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
+
+## Passe 52 : Auth reel et deconnexion agence
+
+Deux comptes et agences fictifs isoles ont ete utilises avec le vrai service
+Supabase Auth et la base du projet, via le build Next local dans un navigateur.
+L entree de session est technique, provisionnee sans courriel : cet essai ne
+valide pas la reception ni le clic du lien magique de production.
+
+Premier passage : code TOTP incorrect refuse, code correct accepte, AAL2 observe,
+creation d agence et role administrateur verifies. Le renouvellement est provoque
+en vieillissant uniquement la date locale du cookie, sans modifier le JWT signe ;
+un vrai appel refresh_token est observe et la session persiste au rechargement.
+La suspension bloque l espace, la reactivation le rend, puis l exclusion empeche
+le rattachement automatique. Aucun dossier ni piece crees pendant ces essais.
+
+Un defaut est reproduit : apres MFA, l espace ne proposait aucune deconnexion.
+Le formulaire est maintenant dans le layout agence. Sa visibilite depend seulement
+du cookie local pour rester utilisable pendant une panne ; cela ne donne aucun
+droit, les pages verifient toujours Auth et la base.
+La deconnexion vise cette session et efface ses cookies, fragments et verificateurs
+PKCE meme si le fournisseur echoue. Les cookies des autres projets et la capacite
+locataire/garant sont preserves. Une panne distante ne prouve pas la revocation
+immediate d un jeton deja copie ; cette limite reste explicite.
+
+Deuxieme passage : MFA et espace accessibles avec le correctif, deconnexion reelle
+confirmee par Supabase, puis /espace refuse. Une panne 503 du logout est ensuite
+simulee dans le proxy local : les cookies sont tout de meme effaces et /espace
+reste refuse. Les comptes, facteurs et agences fictifs sont supprimes et les
+processus arretes ; les journaux du fournisseur ont leur retention propre.
+
+Controle global local : 518 tests dans 61 suites, types, lint, format, typographie
+et build reussis. Six tests cibles couvrent l affichage du formulaire, les pannes et le perimetre des
+cookies. Cinq echecs initiaux sont corriges ; trois sabotages rendent rouges
+l absence d effacement, l effacement d un autre projet et le bouton anonyme.
+Le Mac s est verrouille apres les essais : le dernier controle visuel mobile
+reste a reprendre. Voir [le runbook Auth](exploitation/auth-agence.md) et la
+[PR 52](https://github.com/Lounes-M/Cloison/pull/52) pour la livraison.
 
 ## Passe 51 : confidentialite des journaux applicatifs
 

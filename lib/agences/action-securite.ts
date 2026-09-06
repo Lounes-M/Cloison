@@ -1,4 +1,6 @@
 'use server'
+import { cookies } from 'next/headers'
+import { estCookieAgence } from '@/lib/acces/cookies-agence'
 import { redirect } from 'next/navigation'
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
 import { securite } from '@/lib/content/securite'
@@ -37,7 +39,18 @@ export async function verifierSecondFacteur(
   redirect('/espace')
 }
 export async function seDeconnecter() {
-  const db = await clientAgence()
-  await db.auth.signOut()
+  try {
+    const db = await clientAgence()
+    const { error } = await db.auth.signOut({ scope: 'local' })
+    if (error) console.error('[connexion] revocation distante non confirmee')
+  } catch {
+    console.error('[connexion] revocation distante non confirmee')
+  }
+  // Une panne du fournisseur ne doit pas conserver la session sur cet appareil.
+  // Les autres projets et la capacite locataire/garant ne sont pas concernes.
+  const magasin = await cookies()
+  for (const { name } of magasin.getAll()) {
+    if (estCookieAgence(name)) magasin.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax' })
+  }
   redirect('/connexion')
 }

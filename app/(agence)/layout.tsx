@@ -1,3 +1,7 @@
+import { cookies } from 'next/headers'
+import { estCookieSessionAgence } from '@/lib/acces/cookies-agence'
+import { seDeconnecter } from '@/lib/agences/action-securite'
+import { securite } from '@/lib/content/securite'
 import { connection } from 'next/server'
 
 import { Logo } from '@/components/brand/Logo'
@@ -12,8 +16,8 @@ import { env } from '@/lib/env'
  * d'un bouton « Demarrer ». Le layout marketing le disait deja en creux quand
  * il a ete separe du layout racine ; voici l'autre moitie.
  *
- * Le logo reste, et rien d'autre. Il ramene au site public, ce qui est la seule
- * navigation utile tant qu'il n'y a qu'un ecran.
+ * Le logo ramene au site public ; la deconnexion reste accessible depuis chaque
+ * ecran agence, y compris apres le second facteur et une exclusion.
  */
 export default async function LayoutAgence({ children }: { children: React.ReactNode }) {
   // Rendu a chaque requete, jamais prerendu : la Content-Security-Policy de
@@ -23,13 +27,25 @@ export default async function LayoutAgence({ children }: { children: React.React
   await connection()
 
   const adresseDeSupport = env.emailSupport
+  // La presence du cookie ne sert qu a afficher la sortie, meme si Auth est
+  // indisponible. Les pages verifient toujours l identite et les droits.
+  const afficherSortie = (await cookies())
+    .getAll()
+    .some(({ name, value }) => Boolean(value) && estCookieSessionAgence(name))
 
   return (
     <div className="bg-paper flex min-h-dvh flex-col">
-      <header className="border-ink flex items-center border-b-2 px-6 py-5 md:px-10">
+      <header className="border-ink flex flex-wrap items-center justify-between gap-4 border-b-2 px-6 py-5 md:px-10">
         {/* `Logo` est deja un lien vers l'accueil : l'envelopper en produirait
             deux imbriques, ce qui est invalide et illisible au clavier. */}
         <Logo className="text-2xl" />
+        {afficherSortie ? (
+          <form action={seDeconnecter}>
+            <button className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold underline underline-offset-4">
+              {securite.deconnexion}
+            </button>
+          </form>
+        ) : null}
       </header>
 
       <main className="flex flex-1 items-center justify-center px-6 py-16 md:px-10">
