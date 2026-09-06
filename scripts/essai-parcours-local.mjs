@@ -289,7 +289,7 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     const apresPaiement = await etatPaiement()
     assert(apresPaiement.paye_le instanceof Date, 'Paiement inscrit dans PostgreSQL')
     assert.equal(apresPaiement.paiement_ref, 'cs_test_parcours_fictif')
-    noter('webhook Stripe local signe de 900 EUR : vrai marquage via Next et PostgREST')
+    noter('webhook Stripe local signe de 900 centimes EUR : vrai marquage via Next et PostgREST')
     const rejoue = await webhook()
     assert.equal(rejoue.status, 200)
     assert.deepEqual(await rejoue.json(), { recu: true, marque: true })
