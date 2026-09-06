@@ -42,9 +42,9 @@ lues integralement : une premiere version trop restreinte manquait un octroi de
 service_role a authenticated ; le test a ete vu rouge puis corrige. Aucun octroi
 similaire n'est present en production lors du controle.
 
-36 tests cibles couvrent les mutations du catalogue, les refus des quatre roles,
+41 tests cibles couvrent les mutations du catalogue, les refus des quatre roles,
 les references strictes, les erreurs HTTP, la non-divulgation et l'independance
-des etapes. Treize sabotages sont detectes. Le controle complet local passe 594 tests dans 68 suites avant integration de la PR 55 ; build et integration native reussis. La repetition 0032 est annulee ; la
+des etapes. Treize sabotages sont detectes. Cinq cas supplementaires ont ete vus rouges puis corriges : droits par colonne publics/Storage, tables partitionnees, vues materialisees et droits futurs. Le controle complet local passe 594 tests dans 68 suites avant integration de la PR 55 ; build et integration native reussis. La repetition 0032 est annulee ; la
 fonction est absente en production. Application et livraison restent a suivre
 dans la PR. Voir [derive du schema](exploitation/derive-schema.md).
 

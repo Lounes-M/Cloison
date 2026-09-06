@@ -68,3 +68,19 @@ test('une adhesion privilegiee indirecte du role agence ne passe pas inapercue',
   expect(apres.empreintes.adhesions).not.toBe(avant.empreintes.adhesions)
   expect(schemaConforme(apres, reference)).toBe(false)
 })
+
+for (const [categorie, sql] of [
+  ['colonnes', 'grant select (email_locataire) on public.dossiers to anon'],
+  ['stockage', 'grant select (name) on storage.objects to anon'],
+  ['tables', 'create materialized view public.intrusion as select 1 as secret'],
+  ['tables', 'create table public.partition_intrusion (id int) partition by range (id)'],
+  ['schema', 'alter default privileges in schema public grant select on tables to porteur_lien'],
+] as const) {
+  test(`un changement de catalogue supplementaire est detecte : ${sql}`, async () => {
+    const avant = await lire()
+    await db.exec(sql)
+    const apres = await lire()
+    expect(apres.empreintes[categorie]).not.toBe(avant.empreintes[categorie])
+    expect(schemaConforme(apres, reference)).toBe(false)
+  })
+}
