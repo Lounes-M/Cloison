@@ -46,7 +46,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - [x] **21** Implementer les capacites locataire/garant et leur revocation. Les essais refusent un cookie et un lien revoques.
 - [x] **22** Chiffrer les pieces avant Storage avec une cle scellee par dossier. La copie de secours de la cle maitresse reste a prouver.
 - [ ] **23** Completer le perimetre de validation documentaire. Type reel, decodage, dimensions, processus interrompable et quotas applicatifs livres ; antivirus reporte par decision documentee. La rasterisation n'est pas une sandbox systeme.
-- [x] **24** Implementer et tester la rasterisation et le filigrane nominatif. Lot 54 : ouverture HTTP via Auth AAL2 et Storage reels sur PDF fictif, refus autre agence et suspension ; filigrane long corrige. Le clic navigateur de production reste distinct.
+- [x] **24** Implementer et tester la rasterisation et le filigrane nominatif. Lot 54 : ouverture HTTP via Auth AAL2 et Storage reels sur PDF fictif, refus autre agence et suspension ; filigrane long corrige. L'essai Vercel a ensuite revele une police de filigrane absente ; correctif du lot 55 en validation. Le clic navigateur de production reste distinct.
 - [x] **25** Journaliser les acces avant restitution ; ecriture seule et separation par dossier testees.
 - [x] **26** Tester les interdictions, pannes et transitions. Les sabotages doivent faire echouer les protections concernees. PR51 : journaux explicites sans donnees dynamiques, refus Auth en cas de panne et non-divulgation des erreurs fournisseur couverts.
 - [x] **27** Executer les controles en CI, y compris HTTP, concurrence PostgreSQL et renouvellement MFA. Limitation de debit partagee en base.
