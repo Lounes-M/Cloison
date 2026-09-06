@@ -14,17 +14,52 @@ export async function GET(request: Request) {
   if (!secret || recu.length !== attendu.length || !timingSafeEqual(recu, attendu)) {
     return new NextResponse(null, { status: 401 })
   }
+  let db: Awaited<ReturnType<typeof clientServeur>>
   try {
-    const db = await clientServeur()
-    const notifications = await livrerNotifications(db)
-    const courriels = await distribuerCourriels(db)
-    const purge = await purgerCoffres(db)
-    return NextResponse.json(
-      { notifications, courriels, purge },
-      { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200 },
-    )
+    db = await clientServeur()
   } catch {
-    console.error('[maintenance] purge impossible')
-    return NextResponse.json({ erreur: true }, { status: 503 })
+    console.error('[maintenance] connexion indisponible')
+    return NextResponse.json(
+      {
+        notifications: { echecs: 1 },
+        courriels: { traites: 0, echecs: 1 },
+        purge: { traites: 0, echecs: 1 },
+      },
+      { status: 503 },
+    )
+  }
+
+  // La retention passe avant les envois. Chaque phase rend son propre bilan :
+  // une panne de courriel ne doit jamais empecher la destruction des donnees.
+  const purge = await executerLot('purge', () => purgerCoffres(db))
+  let notifications = { echecs: 1 }
+  try {
+    notifications = { echecs: compteur((await livrerNotifications(db)).echecs) }
+  } catch {
+    console.error('[maintenance] notifications indisponibles')
+  }
+  const courriels = await executerLot('courriels', () => distribuerCourriels(db))
+  return NextResponse.json(
+    { notifications, courriels, purge },
+    { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200 },
+  )
+}
+
+function compteur(valeur: number): number {
+  if (!Number.isSafeInteger(valeur) || valeur < 0) throw new Error('Compteur invalide')
+  return valeur
+}
+
+async function executerLot(
+  phase: 'purge' | 'courriels',
+  executer: () => Promise<{ traites: number; echecs: number }>,
+) {
+  try {
+    const bilan = await executer()
+    return { traites: compteur(bilan.traites), echecs: compteur(bilan.echecs) }
+  } catch {
+    // Le nom vient de cette route, jamais d'une reponse de service.
+    console.error('[maintenance] phase indisponible', phase)
+    return { traites: 0, echecs: 1 }
   }
 }

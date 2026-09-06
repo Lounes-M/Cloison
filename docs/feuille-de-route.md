@@ -184,3 +184,12 @@ La passe 0030 ajoute la reservation durable avant depot et la reprise des proces
 interrompus. Le formulaire HTTP de coffre a aussi ete exerce sur Vercel et Supabase
 reels avec un PDF fictif, restitution exacte et retrait journalise. Le detail des
 preuves et du deploiement figure dans le suivi d'audit.
+
+Les PR 45 et 46 sont fusionnees et deployees, 0030 appliquee. Une maintenance
+non vide a repris un depot fictif interrompu et supprime son objet. Le suivi
+d'audit comporte desormais un etat courant separe de la chronologie. La passe
+suivante traite l'independance de la purge face aux pannes de courriels.
+
+La meme passe corrige le renouvellement de session sur la page MFA : un composant
+serveur seul ne pouvait pas transmettre le nouveau cookie. La preuve utilise le
+vrai SDK avec un serveur Auth fictif ; elle reste distincte d'un essai Auth reel.

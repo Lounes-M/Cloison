@@ -5,6 +5,53 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Etat courant au 6 septembre 2026, apres PR 46
+
+Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
+les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
+Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouvert.
+
+| Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Livraison du socle              | PR 43 a 46 fusionnees ; main a9fedaf ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34004455629)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
+| Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
+| Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
+| Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
+| Sauvegarde                      | Export chiffre et restauration PGlite fictive verifies                                                                                                 | Restauration de production et copie de secours de la cle maitresse non demontrees |
+| Courriels                       | Files chiffrees, reprise et transport testes ; configuration expediteur verifiee                                                                       | Livraison reelle au destinataire non prouvee                                      |
+| Signature et facturation agence | Socle technique uniquement ; Universign et modele contractuel pris en charge par Lounes                                                                | Aucun acte signe ni facturation agence valides de bout en bout                    |
+
+La PR 46 a passe 430 tests dans 51 suites, le build, les controles Next/PostgREST
+et huit scenarios concurrents PostgreSQL. Le deploiement Vercel
+[dpl_HjnqoE4n8PH2738G5vEbCrktF4kh](https://vercel.com/drifterr/cloison/HjnqoE4n8PH2738G5vEbCrktF4kh)
+est Ready et dessert www.cloison.immo. Les essais reels ont utilise uniquement des
+fixtures demonstration fictives, toutes nettoyees ; le controle final a retrouve
+zero dossier et zero piece. Les preuves detaillees sont dans la
+[PR 46](https://github.com/Lounes-M/Cloison/pull/46).
+
+## Passe en cours : maintenance et renouvellement MFA
+
+Defaut reproduit : une exception de notification ou de courriel empechait la purge
+des donnees expirees. Six tests ont echoue sur l'ancienne route. La correction
+execute la purge en premier et isole les trois phases ; chaque panne garde un
+bilan 503, sans interrompre les autres phases ni exposer une erreur de service.
+Les compteurs invalides sont refuses. Huit tests de phases et un test HTTP couvrent la maintenance ; verification globale en cours.
+Controle global et livraison encore en cours ; ne pas confondre avec la production.
+
+La revue Auth/MFA a reproduit un renouvellement de session perdu sur la page
+/connexion/securite : le vrai SDK renouvelle deux fois, mais aucun Set-Cookie ne
+parvient au navigateur. La page MFA doit participer au renouvellement du middleware.
+Correction du middleware et test du vrai SDK prepares : cookie rendu au navigateur et a la requete interne, un seul renouvellement. Le harnais scripts/verifier-session-mfa-http.mjs rejoue cette verification apres build dans la CI ; aucun contournement MFA observe.
+Le navigateur reel atteint la page de connexion depuis /espace, sans session agence
+active ; le parcours authentifie complet reste ouvert. Aucun lien de connexion
+n'a ete envoye dans cette passe.
+
+L'emballage chiffre accepte un dump vide et une configuration non JSON : ce sont
+des octets integres, pas une preuve de sauvegarde exploitable. L'essai fictif l'a
+confirme, sans donnees distantes. Prochain lot sauvegarde : contrat d'export valide,
+puis pg_dump/pg_restore PostgreSQL avec roles et donnees Auth fictives. L'outil
+actuel reste explicitement un emballage et une extraction, sans execution SQL.
+
 ## Corrections livrees par la PR 43
 
 - Claims JSON PostgREST, validite du jeton et expiration du dossier dans les politiques.
@@ -26,7 +73,7 @@ configuration de production.
 - Loyer fige et garant non remplacable expliques dans les formulaires.
 - Texte sombre sur les fonds orange pour ameliorer le contraste.
 
-## Verification de production en lecture seule
+## Constat historique du 5 septembre, avant rattrapage
 
 Le 5 septembre, le projet Supabase Cloison contient zero dossier et zero piece.
 La migration 0019 n'est pas appliquee : anon possede encore l'emission de jetons,
