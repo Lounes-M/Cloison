@@ -72,7 +72,7 @@ export async function creerSessionLocataire(options: {
       // Marge avant la retention minimale Stripe de 24 h ; une date incoherente
       // ne doit pas prolonger cette fenetre. Tolerance de cinq minutes entre horloges.
       if (!Number.isFinite(age) || age < -5 * 60 * 1000 || age >= 23 * 60 * 60 * 1000) {
-        console.error('[paiement] tentative a reconcilier', options.dossierId)
+        console.error('[paiement] tentative a reconcilier')
         return null
       }
     }

@@ -37,10 +37,7 @@ export async function enregistrerDemande(
     // comme d'une reussite, et on ne renotifie pas.
     if (error.code === DOUBLON) return { statut: 'deja-connue' }
 
-    console.error('[demande-agence] insertion refusée', {
-      code: error.code,
-      message: error.message,
-    })
+    console.error('[demande-agence] insertion refusée')
     return { statut: 'echec', raison: error.message }
   }
 

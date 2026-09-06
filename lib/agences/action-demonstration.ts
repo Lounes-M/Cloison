@@ -20,7 +20,7 @@ export async function ouvrirMaDemonstration(): Promise<void> {
 
   const { data, error } = await contexte.supabase.rpc('ouvrir_dossier_de_demonstration')
   if (error || typeof data !== 'string') {
-    console.error('[demonstration] ouverture refusee', error)
+    console.error('[demonstration] ouverture refusee')
     redirect('/espace')
   }
 
@@ -35,7 +35,7 @@ export async function ouvrirMaDemonstration(): Promise<void> {
 
   if (!count) {
     const complet = await remplirLaDemonstration(dossierId)
-    if (!complet) console.error('[demonstration] remplissage incomplet', dossierId)
+    if (!complet) console.error('[demonstration] remplissage incomplet')
   }
 
   revalidatePath('/espace')

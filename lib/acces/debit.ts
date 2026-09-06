@@ -77,7 +77,7 @@ export async function consommerDebit(
   })
 
   if (error) {
-    console.error('[debit] comptage impossible', sujet, error)
+    console.error('[debit] comptage impossible')
     return false
   }
 

@@ -99,7 +99,7 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
     l_action: 'dossier_consulte',
     la_piece: null,
   })
-  if (inscription) console.error('[agence] consultation non journalisee', inscription)
+  if (inscription) console.error('[agence] consultation non journalisee')
 
   const statut = statuts[String(d.statut)] ?? statuts.ouvert!
   const ratio = e?.ratio == null ? null : Number(e.ratio)

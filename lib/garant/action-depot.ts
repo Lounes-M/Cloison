@@ -90,8 +90,8 @@ export async function deposerUnePiece(
     // La derniere piece peut avoir fait passer le dossier a complet : c'est la
     // base qui l'a decide, et c'est ici qu'on le dit.
     await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
-  } catch (erreur) {
-    console.error('[garant] depot impossible', erreur)
+  } catch {
+    console.error('[garant] depot impossible')
     return {
       statut: 'erreur',
       message: "Le depot n'a pas abouti. Reessaie dans un instant.",
@@ -121,8 +121,8 @@ export async function retirerUnePiece(
     const resultat = await retirerPiece(baseSupabase(supabase), pieceId)
     if (!resultat.retiree) return { statut: 'erreur', message: resultat.raison }
     await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
-  } catch (erreur) {
-    console.error('[garant] retrait impossible', erreur)
+  } catch {
+    console.error('[garant] retrait impossible')
     return { statut: 'erreur', message: "Le retrait n'a pas abouti. Reessaie dans un instant." }
   }
 

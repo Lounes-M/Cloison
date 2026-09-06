@@ -24,9 +24,8 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // En attendant un vrai collecteur d'erreurs, la console serveur/navigateur
-    // reste le point de collecte.
-    console.error(error)
+    // Le navigateur ne recoit aucun detail supplementaire dans la console.
+    console.error('[interface] chargement impossible')
   }, [error])
 
   return (

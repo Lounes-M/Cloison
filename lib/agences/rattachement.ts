@@ -69,7 +69,7 @@ export async function rattacher(nom?: string): Promise<Rattachement> {
   })
 
   const resultat = interpreterRattachement(data, error)
-  if (resultat.etat === 'panne') console.error('[agence] rattachement impossible', error)
+  if (resultat.etat === 'panne') console.error('[agence] rattachement impossible')
 
   return resultat
 }

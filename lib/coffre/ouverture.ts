@@ -104,18 +104,18 @@ export async function ouvrirPiecePourLAgence(
     // etape leve, plutot que de rendre des octets qu'on prendrait pour un
     // document.
     contenu = ouvrir(scelle, ouvrir(scellee, cleMaitresse()))
-  } catch (erreur) {
-    console.error('[coffre] dechiffrement impossible', piece.chemin, erreur)
+  } catch {
+    console.error('[coffre] dechiffrement impossible')
     return { ouverte: false, raison: INDISPONIBLE }
   }
 
   try {
     return { ouverte: true, pdf: await rasteriser(contenu, piece.typeReel, filigrane) }
-  } catch (erreur) {
+  } catch {
     // Un document que le moteur refuse ne repart pas en clair pour autant : ce
     // serait rendre a l'agence exactement ce qu'on s'emploie a ne pas lui
     // donner.
-    console.error('[coffre] rasterisation impossible', piece.chemin, erreur)
+    console.error('[coffre] rasterisation impossible')
     return { ouverte: false, raison: INDISPONIBLE }
   }
 }

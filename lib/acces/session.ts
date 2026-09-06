@@ -54,7 +54,7 @@ export async function emettreLien(
 
   const emis = Array.isArray(data) ? data[0] : data
   if (error || !emis?.jti || !emis?.expire_le) {
-    console.error('[acces] emission refusee', error)
+    console.error('[acces] emission refusee')
     return null
   }
 
@@ -90,7 +90,7 @@ export async function resoudreCapacite(jeton: string | undefined): Promise<Capac
   if (error) {
     // En cas de doute on refuse. Laisser passer parce que la base n'a pas
     // repondu reviendrait a desactiver la revocation le jour ou elle sert.
-    console.error('[acces] verification impossible', error)
+    console.error('[acces] verification impossible')
     return null
   }
 
@@ -123,7 +123,7 @@ export async function ouvrirDossierAvecLien(
 
   const ouvert = Array.isArray(data) ? data[0] : data
   if (error || !ouvert?.dossier_id || !ouvert?.reference || !ouvert?.jti || !ouvert?.expire_le) {
-    console.error('[acces] ouverture refusee', error)
+    console.error('[acces] ouverture refusee')
     return null
   }
 

@@ -151,7 +151,7 @@ export async function deposer(
   // La regle s'inverse a l'ouverture d'une piece, ou le journal EST la trace :
   // la, on n'ouvre pas ce qu'on ne peut pas inscrire.
   if (!(await base.journaliser(dossierId, 'piece_deposee', pieceId))) {
-    console.error('[coffre] depot non journalise', chemin)
+    console.error('[coffre] depot non journalise')
   }
 
   return { depose: true, chemin, pieceId }

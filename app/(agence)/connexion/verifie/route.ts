@@ -30,17 +30,15 @@ export async function GET(requete: NextRequest) {
     return NextResponse.redirect(versConnexion)
   }
 
-  const supabase = await clientAgence()
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-  if (error) {
-    // Un lien deja utilise ou perime arrive ici. Rien de plus n'est dit a
-    // l'ecran : c'est le meme message pour les deux, et il invite simplement a
-    // en redemander un.
-    console.error('[connexion] echange refuse', error)
-    versConnexion.searchParams.set('echec', 'lien')
-    return NextResponse.redirect(versConnexion)
+  try {
+    const supabase = await clientAgence()
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) return NextResponse.redirect(versEspace)
+    console.error('[connexion] echange refuse')
+  } catch {
+    // Une panne Auth ne doit pas transmettre son erreur brute au framework.
+    console.error('[connexion] echange indisponible')
   }
-
-  return NextResponse.redirect(versEspace)
+  versConnexion.searchParams.set('echec', 'lien')
+  return NextResponse.redirect(versConnexion)
 }

@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 49
+## Etat courant au 6 septembre 2026, apres PR 50
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,7 +13,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 49 fusionnees ; main 06d0e54 ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34025975711)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
+| Livraison du socle              | PR 43 a 50 fusionnees ; main 63d0858 ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34028339369)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
 | Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
@@ -27,6 +27,35 @@ Vercel dpl_8GNn3hDxSmaWwN6t9VB5X2nBafSY est Ready sur www.cloison.immo.
 Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
 son journal est constant et ne contient pas son corps. Aucun paiement effectue.
 Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
+
+## Passe 51 : confidentialite des journaux applicatifs
+
+Le controle du code a trouve des erreurs fournisseur brutes dans les journaux de
+connexion, capacites, depot, ouverture, actions agence/garant/locataire et paiement.
+Certains appels ajoutaient un chemin de piece ou un identifiant de dossier.
+Les appels explicites a la console n acceptent desormais que des libelles constants,
+avec des categories finies pour la maintenance et le webhook.
+
+Deux nouveaux fichiers de tests couvrent 27 scenarios : analyse syntaxique du
+code applicatif et pannes simulees aux frontieres Auth, SQL, Storage et moteur
+documentaire. Le controle source et 14 cas de panne etaient rouges avant correction.
+Quatre contre-epreuves supplementaires refusent un mauvais aiguillage Auth,
+un appel fournisseur sans code, une exception brute et un analyseur desactive.
+Les exceptions sont formatees comme dans une console ; JSON.stringify seul aurait
+masque le message des objets Error dans le test.
+
+Le retour de connexion traite maintenant aussi les exceptions de creation du
+client ou d echange de code avec la meme redirection d echec, sans erreur brute.
+La page d erreur globale ne promet plus qu aucune donnee n a ete perdue ou exposee :
+une panne de chargement ne permet pas de le savoir.
+
+Ce lot ne prouve pas une fuite historique en production et ne supprime pas les
+anciens journaux. Il ne controle pas les traces propres a Next, aux dependances
+ou a l hebergeur. Le journal SQL nominatif des acces reste distinct et conserve.
+Voir [la procedure de diagnostic](exploitation/journaux-applicatifs.md).
+Controle global local : 512 tests dans 59 suites, types, lint, format et typographie
+reussis. Les validations de build, CI et livraison sont consignees dans la
+[PR 51](https://github.com/Lounes-M/Cloison/pull/51).
 
 ## Passe 50 : paiement navigateur et webhook
 

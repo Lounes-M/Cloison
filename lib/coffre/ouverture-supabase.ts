@@ -28,7 +28,7 @@ export function baseOuvertureSupabase(supabase: SupabaseClient): OuvertureBase {
         .maybeSingle()
 
       if (error || !data) {
-        if (error) console.error('[coffre] lecture de la piece impossible', error)
+        if (error) console.error('[coffre] lecture de la piece impossible')
         return null
       }
 
@@ -47,7 +47,7 @@ export function baseOuvertureSupabase(supabase: SupabaseClient): OuvertureBase {
       const { data, error } = await supabase.storage.from(SEAU).download(chemin)
 
       if (error || !data) {
-        if (error) console.error('[coffre] telechargement refuse', error)
+        if (error) console.error('[coffre] telechargement refuse')
         return null
       }
 

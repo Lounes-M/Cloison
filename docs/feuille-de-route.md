@@ -1,7 +1,7 @@
 # Feuille de route Cloison
 
 De la landing au premier dossier reel allant jusqu'a un acte signe.
-Version de travail du 6 septembre 2026, apres les PR 43 a 49. Le
+Version de travail du 6 septembre 2026, apres les PR 43 a 50. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
@@ -48,7 +48,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - [ ] **23** Completer le perimetre de validation documentaire. Type reel, decodage, dimensions, processus interrompable et quotas applicatifs livres ; antivirus reporte par decision documentee. La rasterisation n'est pas une sandbox systeme.
 - [x] **24** Implementer et tester la rasterisation et le filigrane nominatif. Le parcours agence reel reste a exercer avec la tache 20.
 - [x] **25** Journaliser les acces avant restitution ; ecriture seule et separation par dossier testees.
-- [x] **26** Tester les interdictions, pannes et transitions. Les sabotages doivent faire echouer les protections concernees.
+- [x] **26** Tester les interdictions, pannes et transitions. Les sabotages doivent faire echouer les protections concernees. PR51 : journaux explicites sans donnees dynamiques, refus Auth en cas de panne et non-divulgation des erreurs fournisseur couverts.
 - [x] **27** Executer les controles en CI, y compris HTTP, concurrence PostgreSQL et renouvellement MFA. Limitation de debit partagee en base.
 
 ## Phase 4. Les trois espaces et le parcours contractuel

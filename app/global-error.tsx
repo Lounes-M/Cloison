@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { erreurs } from '@/lib/content/erreurs'
 import { fontVariables } from './fonts'
 import './globals.css'
 
@@ -21,7 +22,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error(error)
+    console.error('[interface] application indisponible')
   }, [error])
 
   return (
@@ -34,9 +35,7 @@ export default function GlobalError({
             Le site est momentanément indisponible.
           </h1>
 
-          <p className="max-w-[440px] text-lg font-semibold">
-            Aucune donnée n&apos;a été perdue ni exposée. Réessaie dans un instant.
-          </p>
+          <p className="max-w-[440px] text-lg font-semibold">{erreurs.indisponibilite}</p>
 
           <button
             type="button"

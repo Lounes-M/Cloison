@@ -99,7 +99,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     .eq('dossier_id', dossierId)
 
   if (error) {
-    console.error('[garant] mention refusee', error)
+    console.error('[garant] mention refusee')
     return {
       statut: 'erreur',
       message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",

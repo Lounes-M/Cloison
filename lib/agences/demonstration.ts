@@ -116,7 +116,7 @@ export async function remplirLaDemonstration(dossierId: string): Promise<boolean
     .update({ loyer_cents: LOYER_CENTS })
     .eq('id', dossierId)
   if (loyer) {
-    console.error('[demonstration] loyer refuse', loyer)
+    console.error('[demonstration] loyer refuse')
     complet = false
   }
 
@@ -132,7 +132,7 @@ export async function remplirLaDemonstration(dossierId: string): Promise<boolean
     revenu_net_mensuel_cents: REVENU_CENTS,
   })
   if (engagement) {
-    console.error('[demonstration] engagement refuse', engagement)
+    console.error('[demonstration] engagement refuse')
     complet = false
   }
 
@@ -146,7 +146,7 @@ export async function remplirLaDemonstration(dossierId: string): Promise<boolean
       await pdfDeDemonstration(piece.titre, piece.lignes),
     )
     if (!resultat.depose) {
-      console.error('[demonstration] depot refuse', piece.nature, resultat.raison)
+      console.error('[demonstration] depot refuse')
       complet = false
     }
   }

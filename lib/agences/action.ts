@@ -111,8 +111,8 @@ export async function envoyerDemandeAgence(
     }
 
     return { statut: 'succes' }
-  } catch (erreur) {
-    console.error('[demande-agence] échec inattendu', erreur)
+  } catch {
+    console.error('[demande-agence] échec inattendu')
     return {
       statut: 'erreur',
       message: "Nous n'avons pas pu enregistrer ta demande. Réessaie dans un instant.",
