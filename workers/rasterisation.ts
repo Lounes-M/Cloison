@@ -1,7 +1,13 @@
 import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
-import { createCanvas, loadImage, type Canvas, type SKRSContext2D } from '@napi-rs/canvas'
+import {
+  createCanvas,
+  loadImage,
+  GlobalFonts,
+  type Canvas,
+  type SKRSContext2D,
+} from '@napi-rs/canvas'
 import { PDFDocument } from 'pdf-lib'
 
 import { verifierDocument } from './validation-document.ts'
@@ -103,12 +109,21 @@ export function poserFiligrane(
   hauteur: number,
   texte: string,
 ) {
+  const police = 'CloisonFiligrane'
+  if (texte && !GlobalFonts.has(police)) {
+    // Les fonctions serverless peuvent n avoir aucune police systeme.
+    // Ce fichier est deja transporte avec les polices standard de pdf.js.
+    const fichier = `${racineDesPolices()}LiberationSans-Regular.ttf`
+    if (!GlobalFonts.registerFromPath(fichier, police)) {
+      throw new Error('Police du filigrane indisponible')
+    }
+  }
   const taille = Math.max(14, Math.round(largeur / 42))
 
   ctx.save()
   ctx.globalAlpha = 0.18
   ctx.fillStyle = '#101010'
-  ctx.font = `${taille}px sans-serif`
+  ctx.font = `${taille}px ${police}`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
 

@@ -28,6 +28,27 @@ Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
 son journal est constant et ne contient pas son corps. Aucun paiement effectue.
 Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
 
+## Passe 55 : police du filigrane en production
+
+Le parcours HTTP complet a ete exerce apres PR 54 sur Vercel : depot par le
+formulaire garant, original restitue a l'identique, acces agence AAL2 reel,
+refus autre agence, suspension, journal puis retrait. Les fixtures sont nettoyees.
+L'inspection du PDF de production a toutefois montre une absence de filigrane,
+malgre la rasterisation : le rendu dependait d'une police systeme implicite.
+Les tests et le rendu local n'avaient pas ferme cette difference d'environnement.
+
+Le moteur enregistre desormais LiberationSans-Regular.ttf, deja transporte avec
+pdf.js, sous une famille explicite. Une police illisible fait echouer l'ouverture
+au lieu de restituer silencieusement un document non marque. Les tests verifient
+l'enregistrement et l'usage de cette famille ainsi que l'encre produite ; le
+chargement automatique des polices systeme est desactive dans le sous-processus.
+Sur macOS, cela ne prouve pas l'absence de tout fallback natif du systeme.
+
+Le controle des fichiers traces au build rend une page blanche marquee et exige
+des pixels visibles. Le simple compte de pages avait laisse passer le defaut.
+Controle global local : 560 tests dans 66 suites, types, lint, format, typographie et build reussis. La validation definitive sur Vercel et la livraison seront consignees dans la PR.
+Aucun document reel n'a ete utilise ; aucune cle de production n'a ete extraite.
+
 ## Passe 54 : filigrane lisible et ouverture agence reelle
 
 Une session Supabase Auth AAL2 reelle a consulte un PDF fictif chiffre dans le
