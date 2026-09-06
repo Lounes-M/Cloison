@@ -38,7 +38,7 @@ export default function Error({
         </h1>
 
         <p className="max-w-[440px] text-lg font-semibold">
-          Aucune donnée n&apos;a été perdue ni exposée. Réessaie, et si ça recommence, écris-nous.
+          Le chargement n&apos;a pas pu aboutir. Réessaie, et si ça recommence, écris-nous.
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">

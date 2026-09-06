@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { Client } from 'pg'
 import { SignJWT } from 'jose'
+import { verifierConcurrenceDepot } from './verifier-concurrence-depot.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -136,7 +137,10 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   await db.connect()
   try {
     if (process.argv.includes('--preparer')) await preparerBase(db)
-    else await verifierPostgrest(db, adresse, secret)
+    else {
+      await verifierPostgrest(db, adresse, secret)
+      await verifierConcurrenceDepot(connexion)
+    }
   } finally {
     await db.end()
   }

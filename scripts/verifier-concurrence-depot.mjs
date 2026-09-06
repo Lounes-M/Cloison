@@ -1,0 +1,177 @@
+import assert from 'node:assert/strict'
+import { randomUUID } from 'node:crypto'
+import { Client } from 'pg'
+
+/** Deux connexions PostgreSQL reelles, exclusivement sur une base locale jetable. */
+export async function verifierConcurrenceDepot(connexion) {
+  const url = new URL(connexion)
+  assert(
+    ['postgres:', 'postgresql:'].includes(url.protocol) &&
+      ['localhost', '127.0.0.1'].includes(url.hostname) &&
+      url.pathname === '/cloison_audit_test' &&
+      !url.search,
+    'Base locale jetable cloison_audit_test obligatoire, sans options URL',
+  )
+  const config = { connectionString: connexion, connectionTimeoutMillis: 5000 }
+  const a = new Client(config)
+  const b = new Client(config)
+  const dossiers = []
+  let attente
+  let connecteA = false,
+    connecteB = false
+  try {
+    await a.connect()
+    connecteA = true
+    await b.connect()
+    connecteB = true
+    for (const client of [a, b]) {
+      await client.query(
+        "set statement_timeout='5s'; set idle_in_transaction_session_timeout='15s'",
+      )
+    }
+    const pidA = (await a.query('select pg_backend_pid() as pid')).rows[0].pid
+    const pidB = (await b.query('select pg_backend_pid() as pid')).rows[0].pid
+    async function fixture() {
+      const id = randomUUID(),
+        jti = randomUUID(),
+        chemin = `${id}/${randomUUID()}`
+      dossiers.push(id)
+      await a.query(
+        "insert into dossiers(id,email_locataire) values ($1,'concurrence@example.invalid')",
+        [id],
+      )
+      await a.query(
+        "insert into jetons_actifs(dossier_id,partie,jti,expire_le) values ($1,'garant',$2,now()+interval '1 hour')",
+        [id, jti],
+      )
+      await a.query("insert into storage.objects(bucket_id,name) values ('pieces',$1)", [chemin])
+      return { id, jti, chemin }
+    }
+    async function commencer(client, f) {
+      await client.query('begin')
+      await client.query("select set_config('request.jwt.claims',$1,true)", [
+        JSON.stringify({
+          role: 'porteur_lien',
+          role_partie: 'garant',
+          dossier_id: f.id,
+          jti: f.jti,
+        }),
+      ])
+      await client.query('set local role porteur_lien')
+    }
+    const inscrire = (client, f) =>
+      client.query(
+        "insert into pieces(dossier_id,type,chemin,taille_octets,type_reel) values ($1,'bulletin_paie',$2,100,'application/pdf')",
+        [f.id, f.chemin],
+      )
+    const abandonner = (client, f) =>
+      client.query('select programmer_suppression_objet($1)', [f.chemin])
+    async function constaterAttente() {
+      const limite = Date.now() + 3000
+      while (Date.now() < limite) {
+        const { rows } = await a.query(
+          'select wait_event_type, pg_blocking_pids(pid) as bloqueurs from pg_stat_activity where pid=$1',
+          [pidB],
+        )
+        if (rows[0]?.wait_event_type === 'Lock' && rows[0].bloqueurs.includes(pidA)) return
+        await new Promise((r) => setTimeout(r, 20))
+      }
+      assert.fail('La seconde connexion ne bloque pas sur la transaction concurrente')
+    }
+    const suivre = (promesse) =>
+      promesse.then(
+        () => ({ code: null }),
+        (erreur) => ({ code: erreur.code }),
+      )
+    const premiere = await fixture()
+    await commencer(a, premiere)
+    await inscrire(a, premiere)
+    await a.query('reset role')
+    await commencer(b, premiere)
+    attente = suivre(abandonner(b, premiere))
+    await constaterAttente()
+    await a.query('commit')
+    assert.equal((await attente).code, null)
+    await b.query('commit')
+    assert.equal(
+      (await a.query('select count(*)::int as n from pieces where chemin=$1', [premiere.chemin]))
+        .rows[0].n,
+      1,
+    )
+    assert.equal(
+      (
+        await a.query('select count(*)::int as n from objets_a_supprimer where chemin=$1', [
+          premiere.chemin,
+        ])
+      ).rows[0].n,
+      0,
+    )
+    assert.equal(
+      (
+        await a.query('select count(*)::int as n from chemins_abandonnes where chemin=$1', [
+          premiere.chemin,
+        ])
+      ).rows[0].n,
+      0,
+    )
+    console.log('OK : inscription non commise bloque abandon ; apres commit aucune mise en file')
+
+    const seconde = await fixture()
+    await commencer(a, seconde)
+    await abandonner(a, seconde)
+    await a.query('reset role')
+    await commencer(b, seconde)
+    attente = suivre(inscrire(b, seconde))
+    await constaterAttente()
+    await a.query('commit')
+    assert.equal((await attente).code, '23514')
+    await b.query('rollback')
+    assert.equal(
+      (
+        await a.query('select count(*)::int as n from objets_a_supprimer where chemin=$1', [
+          seconde.chemin,
+        ])
+      ).rows[0].n,
+      1,
+    )
+    assert.equal(
+      (
+        await a.query('select count(*)::int as n from chemins_abandonnes where chemin=$1', [
+          seconde.chemin,
+        ])
+      ).rows[0].n,
+      1,
+    )
+    await a.query('delete from objets_a_supprimer where chemin=$1', [seconde.chemin])
+    await commencer(b, seconde)
+    assert.equal((await suivre(inscrire(b, seconde))).code, '23514')
+    await b.query('rollback')
+    assert.equal(
+      (await a.query('select count(*)::int as n from pieces where chemin=$1', [seconde.chemin]))
+        .rows[0].n,
+      0,
+    )
+    console.log(
+      'OK : abandon non commis bloque inscription puis refuse 23514, meme apres acquittement',
+    )
+  } finally {
+    // Liberer d'abord le bloqueur, puis attendre le bloque ; aucun rejet non observe.
+    if (connecteA) await a.query('rollback').catch(() => {})
+    await attente
+    if (connecteB) await b.query('rollback').catch(() => {})
+    try {
+      if (connecteA) {
+        await a.query('reset role')
+        await a.query('delete from dossiers where id=any($1::uuid[])', [dossiers])
+        for (const id of dossiers) {
+          await a.query("delete from storage.objects where bucket_id='pieces' and name like $1", [
+            `${id}/%`,
+          ])
+          await a.query('delete from objets_a_supprimer where chemin like $1', [`${id}/%`])
+        }
+      }
+    } finally {
+      await Promise.allSettled([a.end(), b.end()])
+    }
+  }
+}

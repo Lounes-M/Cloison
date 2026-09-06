@@ -4,54 +4,10 @@ import { useActionState, useId, useRef, useState } from 'react'
 
 import { depot } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
-import { TAILLE_MAX_DEPOT } from '@/lib/garant/validation'
+import { reduireSiPhoto } from './reduire-photo'
 import { cn } from '@/lib/utils'
 
 const ETAT_INITIAL: EtatDepot = { statut: 'inactif' }
-
-/** Au-dela, une photo est reduite dans le navigateur avant de partir. */
-const SEUIL_REDUCTION = 1.2 * 1024 * 1024
-const COTE_MAX = 2000
-
-/**
- * Reduit une photo dans le navigateur, sans rien envoyer.
- *
- * Une photo de telephone pese quatre a huit megaoctets, pour un document qui
- * se lit parfaitement a deux mille pixels de cote. La reduire ici fait passer
- * sous la borne pratique sans que la personne ait a s'en occuper, et sans
- * traitement par notre serveur, qui chiffre avant stockage.
- *
- * Rend le fichier tel quel si ce n'est pas une image, s'il est deja leger, ou
- * si le navigateur ne sait pas le decoder : le serveur nommera alors le
- * format, HEIC compris.
- */
-async function reduireSiPhoto(fichier: File): Promise<File> {
-  if (!fichier.type.startsWith('image/') || fichier.size <= SEUIL_REDUCTION) return fichier
-
-  try {
-    const image = await createImageBitmap(fichier)
-    const echelle = Math.min(1, COTE_MAX / Math.max(image.width, image.height))
-    if (echelle === 1 && fichier.size <= TAILLE_MAX_DEPOT) {
-      image.close()
-      return fichier
-    }
-
-    const toile = document.createElement('canvas')
-    toile.width = Math.round(image.width * echelle)
-    toile.height = Math.round(image.height * echelle)
-    toile.getContext('2d')?.drawImage(image, 0, 0, toile.width, toile.height)
-    image.close()
-
-    const blob = await new Promise<Blob | null>((resoudre) =>
-      toile.toBlob(resoudre, 'image/jpeg', 0.85),
-    )
-    if (!blob) return fichier
-
-    return new File([blob], fichier.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' })
-  } catch {
-    return fichier
-  }
-}
 
 export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: string }) {
   const [etat, envoyer, enCours] = useActionState(deposerUnePiece, ETAT_INITIAL)

@@ -36,7 +36,8 @@ ne peuvent pas etre exportes : ils n'ont pas ete remplaces pour contourner cette
 
 ## Points restant ouverts avant le premier dossier reel
 
-- Parcours authentifies de bout en bout et service Storage reel : depot, lecture et suppression.
+- Parcours navigateur authentifies de bout en bout combinant formulaires, Auth agence et Storage.
+  Les preuves HTTP porteurs et Storage isolees sont decrites plus bas.
 - Modele contractuel valide, generation d'acte, chaine Universign et facturation agence.
 - Integration Universign et tests complets du parcours contractuel dependants du modele valide.
 - Sauvegarde recuperable avec cle de secours, exercice de restauration et revue externe.
@@ -171,3 +172,54 @@ des dependances documentaires tracees passent egalement.
 Les erreurs JSON du moteur documentaire sont remplacees par un message controle :
 un test a reproduit la presence d'un contenu fictif dans l'erreur brute avant correction.
 L'audit npm des dependances de production ne signale aucune vulnerabilite connue.
+
+## Nouvelle passe parallele hors Universign, 6 septembre
+
+- Les pages authentifiees distinguent panne de base et donnees absentes. Les erreurs
+  sont generiques et passent par l'ecran permettant de reessayer. Les scenarios
+  de panne ont ete vus rouges puis verts.
+- La reduction photo conserve l'original sans Canvas, ferme ses ressources en cas
+  d'erreur et aplatit la transparence sur blanc avant JPEG.
+- Les notifications de categories differentes ne partagent plus leur identifiant
+  quand l'adresse est identique. Elles sont mises en file ; le travailleur livre
+  dix messages maximum par passage, avec trois secondes de transport par message.
+  Une reponse Resend sans identifiant ne vaut plus livraison. La reconciliation
+  decouverte pendant le passage apparait dans son bilan.
+- Un export local chiffre et une extraction controlee sont disponibles. L'exercice
+  restaure une vraie base PGlite et un objet fictif apres suppression de la source,
+  puis dechiffre avec une cle maitresse fictive independante. Ce n'est pas encore
+  une sauvegarde et restauration Supabase de production.
+- Le service Storage reel a ete exerce avec des fixtures chiffrees, des refus
+  d'acces et une suppression API. La copie CDN peut subsister apres suppression
+  a l'origine ; voir `docs/exploitation/essais-storage.md`.
+
+La migration 0029 ajoute la reprise durable des retraits et protege contre une
+inscription reussie dont la reponse HTTP a ete perdue : le nettoyage ne peut plus
+detruire son objet. Les chemins abandonnes ne peuvent pas etre reinscrits apres
+acquittement de la file. Le role serveur de maintenance devient le seul role
+applicatif autorise a supprimer physiquement un objet Storage.
+
+Limite restante : un arret brutal apres upload et avant programmation du nettoyage
+peut encore laisser un objet orphelin jusqu'a l'expiration du dossier. Une reservation
+avant upload exige aussi de serialiser l'ecriture Storage et sa finalisation ; un
+simple delai ne prouve pas l'absence de course. Ce protocole n'est pas revendique ici.
+
+Un harnais traverse desormais Next et PostgREST sur un vrai PostgreSQL local :
+liens signes, cookies HttpOnly, separation des donnees et revocation sont eprouves
+avec des fixtures non vides. Une politique RLS ouverte volontairement a fait echouer
+l'essai avant restauration. La CI le rejoue. Il ne constitue pas un test navigateur
+avec hydratation, soumission de formulaire ou authentification agence Supabase.
+
+Deux connexions PostgreSQL reelles eprouvent la concurrence inscription/abandon.
+Le blocage est constate via les verrous Postgres, puis chaque ordre de commit est
+verifie. Retirer le verrou de programmation a reproduit une mise en file incorrecte.
+La CI rejoue ces scenarios. Le mode demonstration utilise aussi le client de depot
+serveur introduit en 0024 ; il ne tente plus un upload avec le role porteur interdit.
+
+La migration 0029 doit etre appliquee avant le deploiement de cette passe. Elle est
+repetee en transaction annulee sur le projet cible ; aucune migration precedente
+n'est modifiee. Les preuves de livraison sont ajoutees a la PR apres CI et application.
+
+Verification locale finale de cette passe : 414 tests dans 49 suites, controle
+complet et build reussis. Le nouveau build a repasse les six preuves de parcours
+HTTP, les refus PostgREST et les deux scenarios de concurrence PostgreSQL.

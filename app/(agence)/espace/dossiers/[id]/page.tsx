@@ -54,7 +54,12 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
   if (contexte.etat !== 'rattache') redirect('/connexion')
   const { supabase, agence } = contexte
 
-  const [{ data: d }, { data: e }, { data: pieces }, { data: journal }] = await Promise.all([
+  const [
+    { data: d, error: erreurDossier },
+    { data: e, error: erreurEngagement },
+    { data: pieces, error: erreurPieces },
+    { data: journal, error: erreurJournal },
+  ] = await Promise.all([
     supabase
       .from('dossiers')
       .select(
@@ -81,6 +86,10 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
       .order('quand', { ascending: false })
       .limit(30),
   ])
+
+  if (erreurDossier || erreurEngagement || erreurPieces || erreurJournal) {
+    throw new Error('Chargement du dossier indisponible.')
+  }
 
   // La RLS a decide : un dossier d'une autre agence n'existe pas pour celle-ci.
   if (!d) notFound()

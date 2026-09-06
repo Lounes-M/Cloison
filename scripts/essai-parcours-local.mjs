@@ -1,0 +1,249 @@
+import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
+import { spawn } from 'node:child_process'
+import { once } from 'node:events'
+import { SignJWT } from 'jose'
+import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
+
+// Aucun service externe ni identifiant reel : ce harnais traverse le build
+// Next puis un vrai PostgREST adosse aux migrations de la base locale jetable.
+export const SECRET_PARCOURS_LOCAL = 'local-isolated-postgrest-tests-32-characters-only'
+
+export async function verifierParcoursLocaux(db, adresseRest, secret) {
+  const rest = new URL(adresseRest)
+  assert(['127.0.0.1', 'localhost'].includes(rest.hostname), 'PostgREST local obligatoire')
+  assert.equal(secret, SECRET_PARCOURS_LOCAL, 'Secret fictif du harnais obligatoire')
+  // Docker publie un port local mais Postgres voit l'adresse de son conteneur.
+  // Verifier le pair TCP du client, pas inet_server_addr() cote serveur.
+  assert(
+    ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(db.connection.stream.remoteAddress),
+    'Connexion PostgreSQL locale obligatoire',
+  )
+  assert.equal(
+    (await db.query('select current_database() as nom')).rows[0].nom,
+    'cloison_audit_test',
+    'Base jetable nommee obligatoire',
+  )
+  assert.equal(
+    Number((await db.query('select count(*) from dossiers')).rows[0].count),
+    0,
+    'Base jetable vide obligatoire',
+  )
+
+  const preuves = []
+  const noter = (preuve) => {
+    preuves.push(preuve)
+    console.log(`OK : ${preuve}`)
+  }
+  const appels = []
+  const proxy = createServer(async (requete, reponse) => {
+    try {
+      if (!requete.url.startsWith('/rest/v1/')) {
+        reponse.writeHead(404).end()
+        return
+      }
+      const destination = new URL(requete.url.replace(/^\/rest\/v1/, ''), rest)
+      const headers = new Headers()
+      for (const [nom, valeur] of Object.entries(requete.headers)) {
+        if (nom !== 'host' && valeur !== undefined) headers.set(nom, String(valeur))
+      }
+      const morceaux = []
+      for await (const morceau of requete) morceaux.push(morceau)
+      const resultat = await fetch(destination, {
+        method: requete.method,
+        headers,
+        body: morceaux.length ? Buffer.concat(morceaux) : undefined,
+        redirect: 'error',
+        signal: AbortSignal.timeout(5_000),
+      })
+      appels.push({ chemin: destination.pathname, statut: resultat.status })
+      reponse.writeHead(resultat.status, Object.fromEntries(resultat.headers))
+      reponse.end(Buffer.from(await resultat.arrayBuffer()))
+    } catch {
+      reponse.writeHead(502).end()
+    }
+  })
+  proxy.listen(0, '127.0.0.1')
+  await once(proxy, 'listening')
+  const api = `http://127.0.0.1:${proxy.address().port}`
+  // Un port attribue par le noyau evite de prendre le serveur d'un autre essai.
+  const reservation = createServer()
+  reservation.listen(0, '127.0.0.1')
+  await once(reservation, 'listening')
+  const port = reservation.address().port
+  await new Promise((resolve) => reservation.close(resolve))
+  const site = `http://127.0.0.1:${port}`
+  let sortie = ''
+  const next = spawn(
+    process.execPath,
+    ['node_modules/next/dist/bin/next', 'start', '--hostname', '127.0.0.1', '--port', String(port)],
+    {
+      cwd: process.cwd(),
+      env: {
+        PATH: process.env.PATH,
+        NODE_ENV: 'production',
+        NEXT_TELEMETRY_DISABLED: '1',
+        NEXT_PUBLIC_SITE_URL: site,
+        SUPABASE_URL: api,
+        SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_fixture_locale',
+        SUPABASE_JWT_SECRET: secret,
+        CLE_MAITRESSE: Buffer.alloc(32, 1).toString('base64'),
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  )
+  next.stdout.on('data', (b) => {
+    sortie = (sortie + b).slice(-8_000)
+  })
+  next.stderr.on('data', (b) => {
+    sortie = (sortie + b).slice(-8_000)
+  })
+  const requeter = (chemin, cookie) =>
+    fetch(new URL(chemin, site), {
+      headers: cookie ? { Cookie: cookie } : {},
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10_000),
+    })
+  try {
+    let pret = false
+    for (let i = 0; i < 80; i++) {
+      try {
+        if ((await requeter('/')).ok) {
+          pret = true
+          break
+        }
+      } catch {
+        /* Demarrage. */
+      }
+      if (next.exitCode !== null) break
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+    assert(pret, `Build Next local indisponible : ${sortie}`)
+    const {
+      rows: [dossier],
+    } = await db.query(
+      "insert into dossiers(email_locataire,email_garant,reference,loyer_cents) values ('locataire@parcours.invalid','garant@parcours.invalid','PARCOURS1234',85000) returning id",
+    )
+    const {
+      rows: [autre],
+    } = await db.query(
+      "insert into dossiers(email_locataire,reference) values ('autre@parcours.invalid','AUTRE1234567') returning id",
+    )
+    await db.query(
+      "insert into engagements(dossier_id,montant_max_cents,revenu_net_mensuel_cents,nom,prenom) values ($1,123456700,98765400,'CONFIDENTIELPARCOURS','Garant')",
+      [dossier.id],
+    )
+    await db.query(
+      "insert into pieces(dossier_id,type,chemin,taille_octets,type_reel) values ($1,'bulletin_paie',$2,1024,'application/pdf')",
+      [dossier.id, `${dossier.id}/piece-fictive`],
+    )
+    const tokens = {}
+    for (const partie of ['locataire', 'garant']) {
+      const {
+        rows: [lien],
+      } = await db.query(
+        "insert into jetons_actifs(dossier_id,partie,jti,expire_le) values ($1,$2,gen_random_uuid(),now()+interval '1 hour') returning jti",
+        [dossier.id, partie],
+      )
+      tokens[partie] = await new SignJWT({
+        role: 'porteur_lien',
+        dossier_id: dossier.id,
+        role_partie: partie,
+      })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setJti(lien.jti)
+        .setExpirationTime('1h')
+        .sign(new TextEncoder().encode(secret))
+    }
+    const cookies = {}
+    for (const partie of ['locataire', 'garant']) {
+      const connexion = await requeter(`/lien/${tokens[partie]}`)
+      assert.equal(connexion.status, 307)
+      assert.equal(new URL(connexion.headers.get('location'), site).pathname, `/${partie}`)
+      const cookie = connexion.headers.get('set-cookie')
+      assert.match(cookie, /HttpOnly/i)
+      assert.match(cookie, /SameSite=lax/i)
+      cookies[partie] = cookie.split(';')[0]
+      const page = await requeter(`/${partie}`, cookies[partie])
+      const html = await page.text()
+      assert.equal(page.status, 200, `${partie} : ${sortie}`)
+      assert(html.includes('PARCOURS1234'), 'Dossier attendu rendu par Next')
+      assert(!html.includes('AUTRE1234567'), 'Autre dossier absent du rendu')
+      assert(!html.includes(tokens[partie]), 'JWT absent du HTML')
+      if (partie === 'locataire') {
+        assert(!html.includes('CONFIDENTIELPARCOURS'), 'Identite du garant absente du HTML')
+        assert(!html.includes((987654).toLocaleString('fr-FR')), 'Revenu du garant absent du HTML')
+      } else {
+        assert(
+          html.includes((987654).toLocaleString('fr-FR')),
+          'Revenu confidentiel vraiment present pour le garant',
+        )
+      }
+      noter(`${partie} : lien verifie par SQL, cookie HttpOnly et rendu Next du seul dossier`)
+    }
+    const croise = await requeter('/garant', cookies.locataire)
+    assert.equal(croise.status, 307)
+    assert.equal(new URL(croise.headers.get('location'), site).pathname, '/locataire')
+    noter('locataire redirige hors de l espace garant')
+    for (const table of ['pieces', 'engagements']) {
+      const r = await fetch(`${adresseRest}/${table}?dossier_id=eq.${dossier.id}&select=*`, {
+        headers: { Authorization: `Bearer ${tokens.locataire}` },
+      })
+      assert.equal(r.status, 200)
+      assert.deepEqual(await r.json(), [])
+    }
+    const tiers = await fetch(`${adresseRest}/dossiers?id=eq.${autre.id}&select=id`, {
+      headers: { Authorization: `Bearer ${tokens.locataire}` },
+    })
+    assert.deepEqual(await tiers.json(), [])
+    noter('PostgREST refuse au locataire les pieces, engagements et dossiers tiers')
+    await db.query(
+      "update jetons_actifs set jti=gen_random_uuid() where dossier_id=$1 and partie='locataire'",
+      [dossier.id],
+    )
+    for (const chemin of ['/locataire', `/lien/${tokens.locataire}`]) {
+      const refuse = await requeter(chemin, cookies.locataire)
+      assert.equal(refuse.status, 307)
+      assert.equal(new URL(refuse.headers.get('location'), site).pathname, '/lien-invalide')
+    }
+    noter('revocation SQL refuse le cookie deja etabli et le lien initial')
+    const faux = await requeter(`/lien/${tokens.garant.slice(0, -10)}INVALIDE00`)
+    assert.equal(new URL(faux.headers.get('location'), site).pathname, '/lien-invalide')
+    noter('signature falsifiee refusee par Next')
+    assert(appels.some((a) => a.chemin === '/rpc/jeton_est_actif' && a.statut === 200))
+    assert(appels.some((a) => a.chemin === '/dossiers' && a.statut === 200))
+    return {
+      nature: 'HTTP Next et PostgREST reels, sans navigateur ni Supabase Auth ou Storage',
+      preuves,
+    }
+  } finally {
+    next.kill('SIGTERM')
+    if (next.exitCode === null) await once(next, 'exit')
+    proxy.closeAllConnections()
+    await new Promise((resolve) => proxy.close(resolve))
+  }
+}
+
+// Entree CI : seules la base jetable et l'API boucle locale sont acceptees.
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  const connexion = process.env.PGTEST_URL
+  const cible = new URL(connexion ?? 'http://invalide')
+  assert(
+    ['127.0.0.1', 'localhost'].includes(cible.hostname) && cible.pathname === '/cloison_audit_test',
+    'Base locale jetable cloison_audit_test obligatoire',
+  )
+  const { Client } = await import('pg')
+  const db = new Client({ connectionString: connexion })
+  await db.connect()
+  try {
+    await verifierParcoursLocaux(
+      db,
+      process.env.POSTGREST_TEST_URL,
+      process.env.POSTGREST_TEST_SECRET,
+    )
+  } finally {
+    await db.end()
+  }
+}

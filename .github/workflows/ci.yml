@@ -92,6 +92,14 @@ jobs:
             --env PGRST_SERVER_PORT=3001 \
             --env PGRST_JWT_SECRET=local-isolated-postgrest-tests-32-characters-only \
             postgrest/postgrest:v16.2
+      - name: Build pour les parcours HTTP authentifies
+        run: npm run build
+      - name: Parcours porteurs via Next et PostgREST reels
+        env:
+          PGTEST_URL: postgres://postgres:cloison-test-only@127.0.0.1:5432/cloison_audit_test
+          POSTGREST_TEST_URL: http://127.0.0.1:3001
+          POSTGREST_TEST_SECRET: local-isolated-postgrest-tests-32-characters-only
+        run: node scripts/essai-parcours-local.mjs
       - name: Revocation et droits via HTTP
         env:
           PGTEST_URL: postgres://postgres:cloison-test-only@127.0.0.1:5432/cloison_audit_test

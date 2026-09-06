@@ -93,10 +93,11 @@ export default async function PageEspace() {
   const { agence, role, supabase, email } = contexte
   const verifiee = agence.statut === 'verifiee'
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('dossiers')
     .select('id, reference, email_locataire, statut, cree_le, demonstration, engagements(ratio)')
     .order('cree_le', { ascending: false })
+  if (error) throw new Error('Chargement du dossier indisponible.')
   const lignes = (data ?? []) as Ligne[]
 
   const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
