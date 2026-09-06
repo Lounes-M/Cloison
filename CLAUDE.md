@@ -114,7 +114,7 @@ Détail dans `.env.example`.
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## Etat au 6 septembre 2026, apres PR 48
+## Etat au 6 septembre 2026, apres PR 49
 
 Le suivi vivant de la remise a niveau est `docs/audit-suivi.md`.
 L'audit a rouvert les regles d'acces, les transitions, la purge et plusieurs parcours.
@@ -122,7 +122,7 @@ Ne pas presenter les phases 0 a 7 comme terminees. La signature exige encore un
 modele contractuel valide et l'integration du compte Universign.
 
 Supabase, Vercel et Stripe CLI sont accessibles depuis le poste de Lounes.
-Les PR 43 a 48 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0030
+Les PR 43 a 49 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0030
 est applique en production. Les controles de droits ont ete rejoues via l'API publique.
 Le domaine canonique est www.cloison.immo ; le domaine sans www redirige en 308.
 Le suivi vivant et les limites avant le premier dossier reel sont dans docs/audit-suivi.md.
@@ -148,3 +148,9 @@ v1 explicitement limitee a l'integrite et automatise la restauration PostgreSQL
 native en CI. Elle corrige les logs des webhooks Stripe invalides. CI main
 34022838275 verte, 466 tests et production verifiee. Aucune restauration de
 production ni disponibilite de cle de secours ne sont demontrees.
+
+La PR 49 (06d0e54) exige la confirmation SQL de session_ref avant retour Checkout,
+refuse les dates de reprise incoherentes et protege les erreurs de creation Stripe.
+CI main 34025975711 verte, 477 tests. Le runbook reprise-paiement distingue les
+doubles applicatifs des essais fournisseur ; voir la passe suivante pour le
+parcours navigateur de test et les limites de production.

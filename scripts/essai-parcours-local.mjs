@@ -3,6 +3,7 @@ import { createServer } from 'node:http'
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { SignJWT } from 'jose'
+import Stripe from 'stripe'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -31,6 +32,9 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     'Base jetable vide obligatoire',
   )
 
+  // Le SDK signe localement les fixtures ; aucune methode reseau n'est appelee.
+  const secretWebhook = 'whsec_parcours_strictement_local_non_secret'
+  const stripe = new Stripe('sk_test_parcours_strictement_local_non_secret')
   const preuves = []
   const noter = (preuve) => {
     preuves.push(preuve)
@@ -89,6 +93,8 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
         SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_fixture_locale',
         SUPABASE_JWT_SECRET: secret,
         CLE_MAITRESSE: Buffer.alloc(32, 1).toString('base64'),
+        STRIPE_SECRET_KEY: 'sk_test_parcours_strictement_local_non_secret',
+        STRIPE_WEBHOOK_SECRET: secretWebhook,
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     },
@@ -212,10 +218,96 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     const faux = await requeter(`/lien/${tokens.garant.slice(0, -10)}INVALIDE00`)
     assert.equal(new URL(faux.headers.get('location'), site).pathname, '/lien-invalide')
     noter('signature falsifiee refusee par Next')
+    const {
+      rows: [aPayer],
+    } = await db.query(
+      "insert into dossiers(email_locataire,reference) values ('paiement@parcours.invalid','STRIPELOCAL1234') returning id",
+    )
+    const etatPaiement = async () =>
+      (
+        await db.query('select paye_le,paiement_ref,expire_le from dossiers where id=$1', [
+          aPayer.id,
+        ])
+      ).rows[0]
+    const avantPaiement = await etatPaiement()
+    assert.equal(avantPaiement.paye_le, null)
+    assert.equal(avantPaiement.paiement_ref, null)
+    const evenement = (surcharge = {}) => ({
+      id: 'evt_parcours_fictif',
+      object: 'event',
+      type: 'checkout.session.completed',
+      livemode: false,
+      data: {
+        object: {
+          id: 'cs_test_parcours_fictif',
+          object: 'checkout.session',
+          payment_status: 'paid',
+          mode: 'payment',
+          currency: 'eur',
+          amount_total: 900,
+          client_reference_id: aPayer.id,
+          metadata: { dossier_id: aPayer.id },
+          ...surcharge,
+        },
+      },
+    })
+    async function webhook(surcharge = {}, signature = 'valide') {
+      const corps = JSON.stringify(evenement(surcharge))
+      const headers = { 'Content-Type': 'application/json' }
+      if (signature !== 'absente') {
+        headers['stripe-signature'] = stripe.webhooks.generateTestHeaderString({
+          payload: corps,
+          secret: signature === 'valide' ? secretWebhook : 'whsec_autre_fixture_locale',
+        })
+      }
+      return fetch(`${site}/api/paiement/webhook`, {
+        method: 'POST',
+        headers,
+        body: corps,
+        redirect: 'error',
+        signal: AbortSignal.timeout(10_000),
+      })
+    }
+    for (const [nom, surcharge, signature, statut] of [
+      ['signature absente', {}, 'absente', 400],
+      ['signature falsifiee', {}, 'falsifiee', 400],
+      ['montant incorrect', { amount_total: 899 }, 'valide', 200],
+      ['devise incorrecte', { currency: 'usd' }, 'valide', 200],
+      ['mode incorrect', { mode: 'subscription' }, 'valide', 200],
+      ['paiement non regle', { payment_status: 'unpaid' }, 'valide', 200],
+    ]) {
+      const refus = await webhook(surcharge, signature)
+      assert.equal(refus.status, statut, `Webhook ${nom} : ${sortie}`)
+      await refus.arrayBuffer()
+      assert.deepEqual(await etatPaiement(), avantPaiement, `Webhook ${nom} sans mutation`)
+      noter(`webhook Stripe local : ${nom} ne marque aucun paiement`)
+    }
+    assert(!appels.some((a) => a.chemin === '/rpc/marquer_dossier_paye'))
+    const confirme = await webhook()
+    assert.equal(confirme.status, 200, `Webhook valide : ${sortie}`)
+    assert.deepEqual(await confirme.json(), { recu: true, marque: true })
+    const apresPaiement = await etatPaiement()
+    assert(apresPaiement.paye_le instanceof Date, 'Paiement inscrit dans PostgreSQL')
+    assert.equal(apresPaiement.paiement_ref, 'cs_test_parcours_fictif')
+    noter('webhook Stripe local signe de 900 centimes EUR : vrai marquage via Next et PostgREST')
+    const rejoue = await webhook()
+    assert.equal(rejoue.status, 200)
+    assert.deepEqual(await rejoue.json(), { recu: true, marque: true })
+    assert.deepEqual(
+      await etatPaiement(),
+      apresPaiement,
+      'Rejeu sans nouveau marquage ni prolongation',
+    )
+    assert.equal(
+      appels.filter((a) => a.chemin === '/rpc/marquer_dossier_paye' && a.statut === 200).length,
+      2,
+    )
+    noter('rejeu du webhook : reference, date de paiement et echeance SQL strictement inchangees')
     assert(appels.some((a) => a.chemin === '/rpc/jeton_est_actif' && a.statut === 200))
     assert(appels.some((a) => a.chemin === '/dossiers' && a.statut === 200))
     return {
-      nature: 'HTTP Next et PostgREST reels, sans navigateur ni Supabase Auth ou Storage',
+      nature:
+        'HTTP Next et PostgREST reels, webhook Stripe signe localement ; sans Checkout distant, navigateur, Supabase Auth ou Storage',
       preuves,
     }
   } finally {

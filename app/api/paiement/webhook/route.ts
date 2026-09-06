@@ -20,27 +20,33 @@ import { reponseAuMarquage } from '@/lib/paiement/webhook'
 export const runtime = 'nodejs'
 
 export async function POST(requete: NextRequest) {
-  const corps = await requete.text()
-  const evenement = lireEvenement(corps, requete.headers.get('stripe-signature'))
-  if (!evenement) return new NextResponse('signature refusee', { status: 400 })
+  try {
+    const corps = await requete.text()
+    const evenement = lireEvenement(corps, requete.headers.get('stripe-signature'))
+    if (!evenement) return new NextResponse('signature refusee', { status: 400 })
 
-  const paiement = paiementConfirme(evenement)
-  if (!paiement) return NextResponse.json({ recu: true })
+    const paiement = paiementConfirme(evenement)
+    if (!paiement) return NextResponse.json({ recu: true })
 
-  const supabase = await clientServeur()
-  const resultat = await supabase.rpc('marquer_dossier_paye', {
-    le_dossier: paiement.dossierId,
-    la_reference: paiement.reference,
-  })
+    const supabase = await clientServeur()
+    const resultat = await supabase.rpc('marquer_dossier_paye', {
+      le_dossier: paiement.dossierId,
+      la_reference: paiement.reference,
+    })
 
-  const reponse = reponseAuMarquage(resultat)
-  if (resultat.error) {
-    console.error(
-      reponse.statut === 200 ? '[paiement] marquage refuse' : '[paiement] marquage a rejouer',
-      paiement,
-      resultat.error,
-    )
+    const reponse = reponseAuMarquage(resultat)
+    if (resultat.error) {
+      // Les details SQL peuvent contenir des valeurs privees du paiement.
+      console.error(
+        reponse.statut === 200 ? '[paiement] marquage refuse' : '[paiement] marquage a rejouer',
+      )
+    }
+
+    return NextResponse.json(reponse.corps, { status: reponse.statut })
+  } catch {
+    // Une exception de transport ou de configuration doit rester rejouable,
+    // sans laisser le framework journaliser une erreur potentiellement privee.
+    console.error('[paiement] webhook a rejouer')
+    return NextResponse.json({ recu: false }, { status: 503 })
   }
-
-  return NextResponse.json(reponse.corps, { status: reponse.statut })
 }
