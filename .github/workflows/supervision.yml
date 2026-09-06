@@ -21,3 +21,8 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: node scripts/executer-supervision.mjs
+      - name: Derive du schema de production
+        if: ${{ !cancelled() }}
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: node scripts/verifier-schema-distant.mjs

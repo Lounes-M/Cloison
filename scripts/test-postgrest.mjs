@@ -73,6 +73,7 @@ export async function verifierPostgrest(db, adresse, secret) {
   console.log('OK : aucun acces anonyme')
   const fonctionsInternes = [
     ['rapport_exploitation', {}],
+    ['empreinte_schema', {}],
     ['marquer_dossier_paye', { le_dossier: dossier.id, la_reference: 'pi_refuse_audit_http' }],
     [
       'retrouver_lien_locataire',

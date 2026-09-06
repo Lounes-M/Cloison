@@ -28,6 +28,26 @@ Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
 son journal est constant et ne contient pas son corps. Aucun paiement effectue.
 Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
 
+## Passe 56 : controle de derive du schema
+
+Le lot ajoute douze empreintes de catalogue reservees au serveur, une reference
+locale controlee en CI et une reference Supabase explicite, puis une route de
+verification sans cache. Le workflow Supervision appelle ce controle meme si
+l'etape des compteurs echoue. Le controle ne publie que conforme ou non conforme.
+
+Les comparaisons natives retrouvent les memes tables, contraintes, indexes,
+politiques et declencheurs applicatifs. Les differences de plateforme et de
+sources historiques sont examinees dans le runbook. Les adhesions de roles sont
+lues integralement : une premiere version trop restreinte manquait un octroi de
+service_role a authenticated ; le test a ete vu rouge puis corrige. Aucun octroi
+similaire n'est present en production lors du controle.
+
+36 tests cibles couvrent les mutations du catalogue, les refus des quatre roles,
+les references strictes, les erreurs HTTP, la non-divulgation et l'independance
+des etapes. Treize sabotages sont detectes. La repetition 0032 est annulee ; la
+fonction est absente en production. Application et livraison restent a suivre
+dans la PR. Voir [derive du schema](exploitation/derive-schema.md).
+
 ## Passe 55 : police du filigrane en production
 
 Le parcours HTTP complet a ete exerce apres PR 54 sur Vercel : depot par le
@@ -49,6 +69,7 @@ des pixels visibles. Le simple compte de pages avait laisse passer le defaut.
 Controle global local : 560 tests dans 66 suites, types, lint, format, typographie et build reussis. La validation definitive sur Vercel et la livraison seront consignees dans la PR.
 Aucun document reel n'a ete utilise ; aucune cle de production n'a ete extraite.
 
+
 ## Passe 54 : filigrane lisible et ouverture agence reelle
 
 Une session Supabase Auth AAL2 reelle a consulte un PDF fictif chiffre dans le
@@ -65,6 +86,7 @@ lignes qui conservent toute l'identite, avec une copie centree. Deux tests de
 geometrie etaient rouges avant correction ; les essais existants de rasterisation
 continuent de verifier l'absence de texte selectionnable et de contenu actif.
 Trois sabotages supplementaires (espacement, mots coupes, identite tronquee) sont detectes. Le rendu corrige est inspecte en PNG ; le parcours HTTP est rejoue avec succes, puis les fixtures sont nettoyees. Les preuves de livraison seront consignees dans la PR.
+
 
 ## Passe 53 : supervision et photographie du pilote
 

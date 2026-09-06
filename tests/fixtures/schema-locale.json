@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "empreintes": {
+    "roles": "76dd5acb0764df1369c8b01fd114c46e78ba0b0b0bbdefa2124006f00ad3518b",
+    "bucket": "df5651bc40713202bd865db07e8d6b9046377b65ccea7611c273e6782d99753b",
+    "schema": "460fcb67645894d51f2a6be756b12a068effd467a6579a9fe8a1b06d4caf64f3",
+    "tables": "714c5ca0b6c051bcdd1f33a73a727d6b5664acce2add4e7ecf05359f7fe53c18",
+    "indexes": "d2305e5284060be0361121d3ee95e4b046cf4c87522f8a37b2ff40272a3a7251",
+    "colonnes": "330f5daa550c788a8aaf83ceaf742cb0654fa8077ac713bcc9507260b4e0a6cc",
+    "stockage": "e947a679fef075c9462fb183ea06d204d6676be86ee1fcb5d37b468be921e5ce",
+    "adhesions": "5bfd330fa6ec63cc6ec91bd680b36003f9b34ca22070aa06b50e5abed4ee5b31",
+    "fonctions": "86d6f092924254ddadf257ad2776628875a5b87c47f41fa806c30bf24eeae9b3",
+    "politiques": "e3578b8b3051bcdc87f77edfb1cd2e832c35b99f41ce14d5bd2833d88d0cb6b6",
+    "contraintes": "934a0c5d153d8d27c1c8167fc254934aca2e2c861f8ea252f3acb106fbdf30d0",
+    "declencheurs": "a8c45a29b0aa370e312675b60fa44de854de2150336e9705d498baa04dcfd9cb"
+  }
+}
