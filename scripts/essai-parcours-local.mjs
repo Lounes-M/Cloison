@@ -14,8 +14,17 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
   const rest = new URL(adresseRest)
   assert(['127.0.0.1', 'localhost'].includes(rest.hostname), 'PostgREST local obligatoire')
   assert.equal(secret, SECRET_PARCOURS_LOCAL, 'Secret fictif du harnais obligatoire')
-  const origineBase = (await db.query('select host(inet_server_addr()) as adresse')).rows[0].adresse
-  assert(['127.0.0.1', '::1'].includes(origineBase), 'Postgres local obligatoire')
+  // Docker publie un port local mais Postgres voit l'adresse de son conteneur.
+  // Verifier le pair TCP du client, pas inet_server_addr() cote serveur.
+  assert(
+    ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(db.connection.stream.remoteAddress),
+    'Connexion PostgreSQL locale obligatoire',
+  )
+  assert.equal(
+    (await db.query('select current_database() as nom')).rows[0].nom,
+    'cloison_audit_test',
+    'Base jetable nommee obligatoire',
+  )
   assert.equal(
     Number((await db.query('select count(*) from dossiers')).rows[0].count),
     0,
