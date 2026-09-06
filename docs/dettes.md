@@ -86,7 +86,10 @@ seulement une ligne à écrire.
 La migration 0021 remplace la suppression SQL de `storage.objects` par une file
 traitee via l'API Storage. Les justificatifs des dossiers signes expirent aussi ;
 l'acte signe reste une exception distincte. La route de maintenance et sa reprise
-sont deployees avec la PR 43 ; la verification du retrait physique sur un objet de test reste a faire.
+sont deployees avec la PR 43. Un objet fictif chiffre a maintenant ete depose,
+relu et supprime via l'API Storage, avec absence des metadonnees et refus a l'origine.
+Une copie CDN chiffree a encore ete observee apres suppression : le delai de
+propagation ne vaut pas effacement instantane. Voir `docs/exploitation/essais-storage.md`.
 
 La suppression de la cle active ne suffit pas a promettre un effacement definitif :
 une sauvegarde peut contenir une ancienne cle de dossier. Le controle des sauvegardes,

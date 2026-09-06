@@ -45,6 +45,7 @@ export interface DepotBase {
   cleScellee(dossierId: string): Promise<Buffer | null>
   poserCleScellee(dossierId: string, scellee: Buffer): Promise<'posee' | 'deja' | 'echec'>
   televerser(chemin: string, scelle: Buffer): Promise<boolean>
+  /** Programme le nettoyage durable ; ne supprime pas une piece inscrite. */
   retirerObjet(chemin: string): Promise<void>
 
   /** Rend l'identifiant de la piece inscrite, ou rien si l'inscription a echoue. */
@@ -101,9 +102,10 @@ async function cleDuDossier(base: DepotBase, dossierId: string): Promise<Buffer>
  *
  * Les octets partent avant la ligne, et jamais l'inverse. Des deux etats
  * incoherents possibles, on choisit le moins nuisible : un objet orphelin dans
- * Storage est invisible, chiffre et sans consequence, alors qu'une ligne sans
+ * Storage reste chiffre, alors qu'une ligne sans
  * objet ferait voir a l'agence une piece qui ne s'ouvre pas. Et l'orphelin est
- * quand meme retire dans la foulee.
+ * programme pour nettoyage. Un crash avant programmation laisse toutefois
+ * l'objet orphelin jusqu'a la purge d'expiration du dossier.
  */
 export async function deposer(
   base: DepotBase,
@@ -156,7 +158,7 @@ export async function deposer(
 }
 
 /**
- * Retire une piece : journal, ligne, octets, dans cet ordre.
+ * Retire une piece : journal, ligne et file de nettoyage atomique.
  *
  * Le journal d'abord, et ce n'est pas un choix de style. `journaliser` verifie
  * que la piece appartient au dossier en la relisant dans `pieces` : une fois
@@ -169,7 +171,7 @@ export async function deposer(
  * pas abouti : c'est le sens dans lequel on prefere se tromper, comme a
  * l'ouverture.
  *
- * Les octets en dernier. Un objet orphelin est invisible et chiffre ; une
+ * La maintenance traite ensuite les octets en file. Une
  * ligne sans objet ferait voir a l'agence une piece qui ne s'ouvre pas.
  */
 export async function retirerPiece(base: DepotBase, pieceId: string): Promise<Retrait> {

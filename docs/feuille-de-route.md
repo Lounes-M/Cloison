@@ -173,3 +173,9 @@ La PR 43 est fusionnee, deployee et ses migrations sont appliquees. Les controle
 HTTP refusent les fonctions sensibles au role anonyme. Le suivi de livraison
 corrige la verification de maintenance et les erreurs documentaires journalisables.
 Les cases historiques ne prouvent toujours ni restauration reelle ni signature.
+
+La passe suivante ajoute des preuves de restauration locale et de Storage reel,
+la reprise durable des retraits, le traitement des pannes de pages et la fiabilite
+des notifications. Voir `docs/audit-suivi.md` pour la livraison et les limites.
+La restauration de production, le parcours navigateur authentifie complet et la
+chaine contractuelle ne deviennent pas termines par ces seules preuves.

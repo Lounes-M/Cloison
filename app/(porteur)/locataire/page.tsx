@@ -43,13 +43,15 @@ export default async function PageLocataire({
   if (porteur.capacite.partie !== 'locataire') redirect('/garant')
 
   const supabase = clientPorteurDeLien(porteur.jeton)
-  const { data: dossier } = await supabase
+  const { data: dossier, error: erreurDossier } = await supabase
     .from('dossiers')
     .select(
       'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration, loyer_verrouille, garant_verrouille',
     )
     .eq('id', porteur.capacite.dossierId)
     .maybeSingle()
+
+  if (erreurDossier) throw new Error('Chargement du dossier indisponible.')
 
   // Un jeton valide sans dossier lisible : le dossier a ete efface. Le lien est
   // donc perime, meme si sa signature tient encore.

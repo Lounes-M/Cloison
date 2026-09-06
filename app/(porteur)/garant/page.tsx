@@ -52,9 +52,9 @@ export default async function PageGarant() {
   const { dossierId } = porteur.capacite
 
   const [
-    { data: dossier },
-    { data: engagement },
-    { data: pieces },
+    { data: dossier, error: erreurDossier },
+    { data: engagement, error: erreurEngagement },
+    { data: pieces, error: erreurPieces },
     { data: journal, error: erreurJournal },
   ] = await Promise.all([
     supabase
@@ -77,6 +77,9 @@ export default async function PageGarant() {
     supabase.rpc('mon_journal_acces'),
   ])
 
+  if (erreurDossier || erreurEngagement || erreurPieces) {
+    throw new Error('Chargement du dossier indisponible.')
+  }
   if (!dossier) redirect('/lien-invalide')
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))

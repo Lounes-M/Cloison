@@ -3,7 +3,8 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PDFDocument, StandardFonts, degrees, rgb } from 'pdf-lib'
 
-import { clientPorteurDeLien, emettreLien } from '@/lib/acces/session'
+import { clientPorteurDeLien, emettreLien, resoudreCapacite } from '@/lib/acces/session'
+import { clientStockage } from '@/lib/acces/stockage'
 import { deposer, type NatureDePiece } from '@/lib/coffre/depot'
 import { baseSupabase } from '@/lib/coffre/depot-supabase'
 
@@ -101,6 +102,8 @@ export async function remplirLaDemonstration(dossierId: string): Promise<boolean
   const garant = await emettreLien(dossierId, 'garant')
   const locataire = await emettreLien(dossierId, 'locataire')
   if (!garant || !locataire) return false
+  const capacite = await resoudreCapacite(garant.jeton)
+  if (!capacite) return false
 
   const commeGarant = clientPorteurDeLien(garant.jeton)
   const commeLocataire = clientPorteurDeLien(locataire.jeton)
@@ -134,7 +137,7 @@ export async function remplirLaDemonstration(dossierId: string): Promise<boolean
   }
 
   // Les pieces, par le garant, scellees comme les vraies.
-  const base = baseSupabase(commeGarant as SupabaseClient)
+  const base = baseSupabase(commeGarant as SupabaseClient, await clientStockage(capacite))
   for (const piece of PIECES) {
     const resultat = await deposer(
       base,

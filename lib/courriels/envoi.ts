@@ -8,13 +8,18 @@ import { distribuerCourriels } from './file'
 
 import { env } from '@/lib/env'
 
-/** Retourne vrai des que le courriel est durablement accepte en file. */
+/**
+ * Retourne vrai des que le courriel est durablement accepte en file.
+ * Les notifications differees seront distribuees par la maintenance ; les
+ * liens tentent aussi une livraison immediate apres leur sauvegarde.
+ */
 export async function envoyer(
   a: string | string[],
   sujet: string,
   texte: string,
   identifiant?: string,
   repondreA?: string,
+  differer = false,
 ): Promise<boolean> {
   const destinataires = Array.isArray(a) ? a.filter(Boolean) : [a]
   if (destinataires.length === 0) return false
@@ -34,7 +39,7 @@ export async function envoyer(
     })
     if (error) return false
     try {
-      await distribuerCourriels(db, id)
+      if (!differer) await distribuerCourriels(db, id)
     } catch {
       console.error('[courriel] reprise necessaire')
     }

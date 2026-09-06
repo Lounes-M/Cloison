@@ -13,16 +13,11 @@ import {
 import { adresseDuSite, envoyer } from './envoi'
 
 /**
- * Prevenir qui doit l'etre quand un dossier change d'etat.
- *
- * Les changements de statut naissent dans la base, par les declencheurs de la
- * migration 0011, et la base n'envoie pas de courriel. C'est donc chaque action
- * qui, apres avoir ecrit, relit le statut et previent si elle l'a fait changer.
- * Le contrat de ce module : on lui dit ce qu'etait le statut avant, il regarde
- * ce qu'il est maintenant.
- *
- * Aucun courriel a un porteur de lien ne contient de lien. En emettre un
- * nouveau revoquerait celui qu'il tient, et sa session en cours tomberait.
+ * Les changements de statut sont programmes dans la transaction SQL.
+ * Les actions et la maintenance transferent leurs courriels dans la file
+ * chiffree, avec une cle stable par evenement, categorie et destinataire.
+ * La distribution reseau revient au lot borne de la maintenance.
+ * Aucun courriel de statut aux porteurs ne contient de lien de capacite.
  */
 
 type Dossier = {
@@ -36,12 +31,18 @@ type Dossier = {
 
 /** Ce que chaque statut fait ecrire, et a qui. Pur, donc testable. */
 export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
-  const envois: { a: string | string[]; sujet: string; texte: string }[] = []
+  const envois: {
+    categorie: 'locataire' | 'garant' | 'agence'
+    a: string | string[]
+    sujet: string
+    texte: string
+  }[] = []
   const signature = `\n\nRéférence du dossier : ${dossier.reference}\n\n${pied}`
 
   const auLocataire = textesLocataire[dossier.statut]
   if (auLocataire) {
     envois.push({
+      categorie: 'locataire',
       a: dossier.email_locataire,
       sujet: auLocataire.sujet,
       texte: auLocataire.texte + signature,
@@ -51,6 +52,7 @@ export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
   const auGarant = textesGarant[dossier.statut]
   if (auGarant && dossier.email_garant) {
     envois.push({
+      categorie: 'garant',
       a: dossier.email_garant,
       sujet: auGarant.sujet,
       texte: auGarant.texte + signature,
@@ -60,6 +62,7 @@ export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
   const aLAgence = textesAgence[dossier.statut]
   if (aLAgence && contactsAgence.length > 0) {
     envois.push({
+      categorie: 'agence',
       a: contactsAgence,
       sujet: aLAgence.sujet(dossier.reference),
       texte: `${aLAgence.texte}\n\n${adresseDuSite()}/espace/dossiers/${dossier.id}${signature}`,
@@ -69,14 +72,7 @@ export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
   return envois
 }
 
-/**
- * Relit le dossier et previent si le statut a change.
- *
- * `supabase` est le client de celui qui vient d'ecrire : la RLS decide de ce
- * qu'il relit, et `contacts_agence_du_dossier` de ce qu'il apprend de
- * l'agence. Un dossier de demonstration ne previent personne : ses adresses
- * n'existent pas.
- */
+/** Met en file les notifications durables sans bloquer l'action sur Resend. */
 export async function prevenirSiLeStatutAChange(
   supabase: SupabaseClient,
   dossierId: string,
@@ -104,11 +100,12 @@ export async function livrerNotifications(db: SupabaseClient, dossierId?: string
     for (const envoi of courrielsPour(evenement.dossier as Dossier, evenement.contacts ?? [])) {
       for (const adresse of Array.isArray(envoi.a) ? envoi.a : [envoi.a]) {
         const hex = createHash('sha256')
-          .update(`${evenement.id}:${adresse}`)
+          .update(`${evenement.id}:${envoi.categorie}:${adresse}`)
           .digest('hex')
           .slice(0, 32)
         const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
-        if (!(await envoyer(adresse, envoi.sujet, envoi.texte, id))) accepte = false
+        if (!(await envoyer(adresse, envoi.sujet, envoi.texte, id, undefined, true)))
+          accepte = false
       }
     }
     if (accepte) {

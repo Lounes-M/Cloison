@@ -122,7 +122,13 @@ Ne pas presenter les phases 0 a 7 comme terminees. La signature exige encore un
 modele contractuel valide et l'integration du compte Universign.
 
 Supabase, Vercel et Stripe CLI sont accessibles depuis le poste de Lounes.
-La PR 43 est fusionnee et deployee. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0028
+Les PR 43 et 44 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0028
 est applique en production. Les controles de droits ont ete rejoues via l'API publique.
 Le domaine canonique est www.cloison.immo ; le domaine sans www redirige en 308.
 Le suivi vivant et les limites avant le premier dossier reel sont dans docs/audit-suivi.md.
+
+La passe de validation ajoute `scripts/essai-parcours-local.mjs` (Next/PostgREST),
+`verifier-concurrence-depot.mjs`, `verifier-storage-reel.mjs` (fixtures ciblees) et
+`sauvegarde-locale.mjs` (export chiffre, extraction uniquement). La migration 0029
+reserve le retrait Storage a la maintenance et rend son nettoyage durable.
+Voir le suivi d'audit et la PR de livraison pour son application effective.

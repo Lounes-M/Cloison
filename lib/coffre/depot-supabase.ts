@@ -131,11 +131,12 @@ export function baseSupabase(
     },
 
     async retirerObjet(chemin) {
-      const { error } = await stockage.storage.from(SEAU).remove([chemin])
-
-      // On ne remonte pas cet echec : il survient pendant le rattrapage d'un
-      // autre echec, et l'objet reste chiffre, sans ligne qui le designe.
-      if (error) console.error('[coffre] objet orphelin non retire', chemin, error)
+      // La base arbitre avec l'inscription sous le meme verrou. Une reponse
+      // d'inscription perdue ne doit jamais detruire une piece deja inscrite.
+      const { error } = await supabase.rpc('programmer_suppression_objet', {
+        le_chemin: chemin,
+      })
+      if (error) console.error('[coffre] programmation du nettoyage impossible')
     },
 
     async inscrirePiece(piece: PieceAInscrire) {

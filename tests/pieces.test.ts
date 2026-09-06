@@ -236,15 +236,17 @@ describe('depot des pieces', () => {
     expect(await refus(db, insertionObjet(`${dossier}/ajoute`))).toContain('row-level security')
   })
 
-  test('le garant retire ses octets tant que le dossier n est pas parti', async () => {
+  test('le garant ne retire jamais directement ses octets', async () => {
     await redevenirProprietaire(db)
     await db.query(insertionObjet(`${dossier}/bulletin-mars`))
 
     await porteur('garant')
-    await db.query(`delete from storage.objects where name = '${dossier}/bulletin-mars'`)
+    expect(
+      await refus(db, `delete from storage.objects where name = '${dossier}/bulletin-mars'`),
+    ).toContain('permission denied')
 
     await redevenirProprietaire(db)
-    expect(await compter(db, 'storage.objects')).toBe(0)
+    expect(await compter(db, 'storage.objects')).toBe(1)
   })
 
   test('une fois le dossier transmis, les octets ne bougent plus', async () => {
@@ -253,9 +255,10 @@ describe('depot des pieces', () => {
     await db.query(`update public.dossiers set statut = 'transmis' where id = '${dossier}'`)
 
     await porteur('garant')
-    // Ni erreur ni effet : la politique ne selectionne aucune ligne. C'est le
-    // refus silencieux de Postgres, et il faut le constater sur le compte.
-    await db.query(`delete from storage.objects where name = '${dossier}/bulletin-mars'`)
+    // La permission DELETE elle-meme est retiree : seul le serveur traite la file.
+    expect(
+      await refus(db, `delete from storage.objects where name = '${dossier}/bulletin-mars'`),
+    ).toContain('permission denied')
 
     await redevenirProprietaire(db)
     expect(await compter(db, 'storage.objects')).toBe(1)
