@@ -140,8 +140,8 @@ export async function designerMonGarant(
         valeur: saisie,
       }
     }
-  } catch (erreur) {
-    console.error('[locataire] designation impossible', erreur)
+  } catch {
+    console.error('[locataire] designation impossible')
     return {
       statut: 'erreur',
       message:

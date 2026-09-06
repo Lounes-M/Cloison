@@ -96,8 +96,8 @@ export async function ouvrirMonDossier(
         valeur: saisie,
       }
     }
-  } catch (erreur) {
-    console.error('[porte] ouverture impossible', erreur)
+  } catch {
+    console.error('[porte] ouverture impossible')
     return {
       statut: 'erreur',
       message: "Le dossier n'a pas pu etre ouvert. Reessaie dans un instant.",

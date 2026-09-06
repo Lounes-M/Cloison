@@ -47,7 +47,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
       .eq('id', porteur.capacite.dossierId)
 
     if (error) {
-      console.error('[locataire] loyer refuse', error)
+      console.error('[locataire] loyer refuse')
       return {
         statut: 'erreur',
         message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
@@ -58,8 +58,8 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
     // Le loyer est l'autre terme du ratio : si le garant avait deja tout
     // depose, c'est cette saisie qui tranche.
     await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
-  } catch (erreur) {
-    console.error('[locataire] loyer impossible', erreur)
+  } catch {
+    console.error('[locataire] loyer impossible')
     return {
       statut: 'erreur',
       message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",

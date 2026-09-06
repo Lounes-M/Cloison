@@ -58,7 +58,7 @@ export async function lireCleScellee(supabase: SupabaseClient, dossierId: string
     .maybeSingle()
 
   if (error) {
-    console.error('[coffre] lecture de la cle impossible', error)
+    console.error('[coffre] lecture de la cle impossible')
     return null
   }
 
@@ -82,7 +82,7 @@ export async function inscrireAuJournal(
   })
 
   if (error) {
-    console.error('[coffre] inscription au journal refusee', error)
+    console.error('[coffre] inscription au journal refusee')
     return false
   }
 
@@ -107,7 +107,7 @@ export function baseSupabase(
       // notre lecture et notre ecriture, et `depot.ts` sait quoi en faire.
       if (error.code === DOUBLON) return 'deja'
 
-      console.error('[coffre] pose de la cle refusee', error)
+      console.error('[coffre] pose de la cle refusee')
       return 'echec'
     },
 
@@ -130,7 +130,7 @@ export function baseSupabase(
       })
 
       if (error) {
-        console.error('[coffre] televersement refuse', error)
+        console.error('[coffre] televersement refuse')
         return false
       }
 
@@ -160,7 +160,7 @@ export function baseSupabase(
         .single()
 
       if (error || !data?.id) {
-        console.error('[coffre] inscription de la piece refusee', error)
+        console.error('[coffre] inscription de la piece refusee')
         return null
       }
 
@@ -175,7 +175,7 @@ export function baseSupabase(
         .maybeSingle()
 
       if (error || !data) {
-        if (error) console.error('[coffre] lecture de la piece impossible', error)
+        if (error) console.error('[coffre] lecture de la piece impossible')
         return null
       }
 
@@ -189,7 +189,7 @@ export function baseSupabase(
       const { data, error } = await supabase.from('pieces').delete().eq('id', pieceId).select('id')
 
       if (error) {
-        console.error('[coffre] suppression de la piece refusee', error)
+        console.error('[coffre] suppression de la piece refusee')
         return false
       }
 

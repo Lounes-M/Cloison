@@ -97,10 +97,10 @@ export async function envoyerLienDeConnexion(
     })
 
     // Meme en cas d'erreur cote Supabase, la reponse ne change pas. Le journal
-    // du serveur, lui, la garde entiere.
-    if (error) console.error('[connexion] envoi refuse', error)
-  } catch (erreur) {
-    console.error('[connexion] envoi impossible', erreur)
+    // du serveur ne conserve qu un libelle constant, sans details fournisseur.
+    if (error) console.error('[connexion] envoi refuse')
+  } catch {
+    console.error('[connexion] envoi impossible')
   }
 
   return { statut: ENVOYE }

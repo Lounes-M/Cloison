@@ -85,8 +85,8 @@ export async function ouvrirUnDossier(
         valeur: saisie,
       }
     }
-  } catch (erreur) {
-    console.error('[agence] ouverture impossible', erreur)
+  } catch {
+    console.error('[agence] ouverture impossible')
     return {
       statut: 'erreur',
       message: "Le dossier n'a pas pu etre ouvert. Reessayez dans un instant.",
@@ -124,7 +124,7 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
     .select('id')
 
   if (error || !Array.isArray(data) || data.length === 0) {
-    if (error) console.error('[agence] prise refusee', error)
+    if (error) console.error('[agence] prise refusee')
     return { statut: 'erreur', message: "Ce dossier n'est pas complet, ou n'est plus le votre." }
   }
 
@@ -134,7 +134,7 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
     l_action: 'dossier_transmis',
     la_piece: null,
   })
-  if (journal) console.error('[agence] prise non journalisee', journal)
+  if (journal) console.error('[agence] prise non journalisee')
 
   // Le locataire apprend que l'agence decide ; le garant, que sa mention
   // l'attend. Ni l'un ni l'autre ne recoit de lien : ils ont le leur.
@@ -160,7 +160,7 @@ export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Pro
     .select('id')
 
   if (error || !Array.isArray(data) || data.length === 0) {
-    if (error) console.error('[agence] refus refuse', error)
+    if (error) console.error('[agence] refus refuse')
     return { statut: 'erreur', message: 'Ce dossier ne peut pas etre refuse dans son etat actuel.' }
   }
 
@@ -208,7 +208,7 @@ export async function reglerLeSeuil(_p: EtatSeuil, donnees: FormData): Promise<E
     .select('id')
 
   if (error || !Array.isArray(data) || data.length === 0) {
-    if (error) console.error('[agence] seuil refuse', error)
+    if (error) console.error('[agence] seuil refuse')
     return {
       statut: 'erreur',
       message: 'Seul un administrateur de l’agence peut modifier le seuil.',

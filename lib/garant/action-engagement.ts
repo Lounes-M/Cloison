@@ -71,7 +71,7 @@ export async function declarerMonEngagement(
       : await supabase.from('engagements').insert({ dossier_id: dossierId, ...colonnes })
 
     if (error) {
-      console.error('[garant] engagement refuse', error)
+      console.error('[garant] engagement refuse')
       return {
         statut: 'erreur',
         message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
@@ -81,8 +81,8 @@ export async function declarerMonEngagement(
     // Le revenu declare est un des deux termes du ratio : la base a peut-etre
     // tranche a l'instant.
     await prevenirSiLeStatutAChange(supabase, dossierId, avant)
-  } catch (erreur) {
-    console.error('[garant] engagement impossible', erreur)
+  } catch {
+    console.error('[garant] engagement impossible')
     return {
       statut: 'erreur',
       message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",

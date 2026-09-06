@@ -59,7 +59,11 @@ async function executerLot(
     return { traites: compteur(bilan.traites), echecs: compteur(bilan.echecs) }
   } catch {
     // Le nom vient de cette route, jamais d'une reponse de service.
-    console.error('[maintenance] phase indisponible', phase)
+    console.error(
+      phase === 'purge'
+        ? '[maintenance] purge indisponible'
+        : '[maintenance] courriels indisponibles',
+    )
     return { traites: 0, echecs: 1 }
   }
 }

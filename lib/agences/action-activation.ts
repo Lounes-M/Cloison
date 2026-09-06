@@ -68,7 +68,7 @@ export async function demanderLActivation(
     .select('id')
 
   if (error || !Array.isArray(data) || data.length === 0) {
-    if (error) console.error('[activation] demande refusee', error)
+    if (error) console.error('[activation] demande refusee')
     return {
       statut: 'erreur',
       message: 'Seul un administrateur de l’agence peut demander l’activation.',
