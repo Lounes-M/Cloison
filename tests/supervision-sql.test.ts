@@ -121,3 +121,31 @@ test('la cohorte ne compte ni les vieux dossiers ni le futur et ne contient aucu
   expect(r.pilote.complets_ou_transmis).toBe(0)
   expect(r.pilote.marques_signes).toBe(0)
 })
+
+test('les compteurs du pilote distinguent les dossiers des pieces et des statuts', async () => {
+  const a = (
+    await db.query<{ id: string }>(
+      "insert into agences(nom,domaine) values ('Pilote','pilote.invalid') returning id",
+    )
+  ).rows[0]!.id
+  const d = (
+    await db.query<{ id: string }>(
+      "insert into dossiers(email_locataire,agence_id,email_garant,statut) values ('a@audit.invalid',$1,'g@audit.invalid','signe'),('b@audit.invalid',$1,null,'transmis'),('c@audit.invalid',null,null,'ouvert') returning id",
+      [a],
+    )
+  ).rows
+  for (const suffixe of ['un', 'deux'])
+    await db.query(
+      "insert into pieces(dossier_id,type,chemin,taille_octets,type_reel) values ($1,'bulletin_paie',$2,100,'application/pdf')",
+      [d[2]!.id, `${d[2]!.id}/${suffixe}`],
+    )
+  expect((await rapport()).pilote).toEqual({
+    jours: 28,
+    dossiers_presents: 3,
+    avec_agence: 2,
+    garant_designe: 1,
+    avec_piece_presente: 1,
+    complets_ou_transmis: 2,
+    marques_signes: 1,
+  })
+})

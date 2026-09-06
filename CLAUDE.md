@@ -114,7 +114,7 @@ Détail dans `.env.example`.
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## Etat au 6 septembre 2026, apres PR 51
+## Etat au 6 septembre 2026, apres PR 52
 
 Le suivi vivant de la remise a niveau est `docs/audit-suivi.md`.
 L'audit a rouvert les regles d'acces, les transitions, la purge et plusieurs parcours.
@@ -169,3 +169,13 @@ docs/exploitation/journaux-applicatifs.md.
 La PR 51 (fde6fc3) a nettoye les journaux applicatifs explicites et les pannes
 du retour Auth ; CI main 34029897926 verte, 512 tests et production verifiee.
 Les erreurs de plateforme et traces historiques restent hors de cette preuve.
+
+La PR 52 (aa7701f) a verifie Auth/MFA dans un navigateur avec des comptes fictifs
+et le vrai fournisseur, puis corrige la deconnexion accessible et ses pannes.
+518 tests dans 61 suites ; reception du lien magique et dernier rendu mobile
+restent ouverts. La livraison est documentee dans la PR 52.
+
+Le lot 53 ajoute une supervision agregee et une photographie du pilote sur
+28 jours. La migration 0031 exige une application explicite ; consulter la PR
+et docs/exploitation/supervision-deploiement.md pour son etat reel. Les alertes
+sont des echecs de workflow GitHub, pas une preuve de reception humaine.
