@@ -114,7 +114,7 @@ Détail dans `.env.example`.
   accès anormaux, embarquement d'agence, suivi du pilote. `docs/juridique/` conditions
   générales, brouillon. `docs/dettes.md` ce qu'on doit.
 
-## Etat au 5 septembre 2026, apres audit
+## Etat au 6 septembre 2026, apres PR 47
 
 Le suivi vivant de la remise a niveau est `docs/audit-suivi.md`.
 L'audit a rouvert les regles d'acces, les transitions, la purge et plusieurs parcours.
@@ -122,7 +122,7 @@ Ne pas presenter les phases 0 a 7 comme terminees. La signature exige encore un
 modele contractuel valide et l'integration du compte Universign.
 
 Supabase, Vercel et Stripe CLI sont accessibles depuis le poste de Lounes.
-Les PR 43 a 46 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0030
+Les PR 43 a 47 sont fusionnees et deployees. La maintenance est verifiee en production. Le rattrapage 0010 a 0013, 0017, puis 0019 a 0030
 est applique en production. Les controles de droits ont ete rejoues via l'API publique.
 Le domaine canonique est www.cloison.immo ; le domaine sans www redirige en 308.
 Le suivi vivant et les limites avant le premier dossier reel sont dans docs/audit-suivi.md.
@@ -137,3 +137,8 @@ La PR 46 (a9fedaf) a livre la reservation avant upload et la reprise des depots
 interrompus. La migration 0030 est appliquee : ne pas la rejouer. Le parcours coffre
 HTTP et une reprise non vide sont verifies en production. Voir la section Etat
 courant du suivi d'audit pour distinguer preuves actuelles et historique.
+
+La PR 47 (4b2e50f) a corrige l'independance des phases de maintenance et le cookie
+renouvele sur la page MFA. CI main 34020893019 verte ; maintenance non vide
+34020976461 verifiee en production. La feuille de route qualifie les preuves
+de chaque case ; les parcours Auth, paiement et signature complets restent ouverts.

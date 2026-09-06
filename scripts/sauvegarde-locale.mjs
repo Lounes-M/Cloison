@@ -4,6 +4,7 @@ import { resolve, join, dirname, isAbsolute } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { sceller, ouvrir } from '../lib/coffre/enveloppe.ts'
+import { verifierContratExport } from './contrat-export.mjs'
 
 // Petit export pilote, charge en memoire. Aucun appel SQL ou reseau dans cet outil.
 const MAX_FICHIER = 64 * 1024 * 1024
@@ -96,9 +97,11 @@ export async function sauvegarder(source, destination, cle) {
   ) {
     throw new Error('Export incomplet : base et configuration requises.')
   }
-  const archive = sceller(Buffer.from(JSON.stringify({ version: 1, fichiers })), cle)
+  const octets = new Map(fichiers.map((f) => [f.chemin, Buffer.from(f.contenu, 'base64')]))
+  const contrat = verifierContratExport(octets.get('configuration.json'), octets)
+  const archive = sceller(Buffer.from(JSON.stringify({ version: 2, fichiers })), cle)
   await writeFile(destination, archive, { flag: 'wx', mode: 0o600 })
-  return { fichiers: fichiers.length, octets: total, sha256: empreinte(archive) }
+  return { fichiers: fichiers.length, octets: total, sha256: empreinte(archive), ...contrat }
 }
 
 /** Extraction uniquement, dans un repertoire neuf. N'execute jamais base.dump. */
@@ -112,7 +115,7 @@ export async function restaurer(archive, destination, cle) {
     throw new Error('Archive illisible, alteree ou cle incorrecte.')
   }
   if (
-    manifeste?.version !== 1 ||
+    ![1, 2].includes(manifeste?.version) ||
     !Array.isArray(manifeste.fichiers) ||
     manifeste.fichiers.length > MAX_FICHIERS
   ) {
@@ -141,6 +144,12 @@ export async function restaurer(archive, destination, cle) {
   }
   if (!chemins.has('base.dump') || !chemins.has('configuration.json'))
     throw new Error('Export incomplet.')
+  const octets = new Map(valides.map((f) => [f.chemin, f.octets]))
+  const contrat =
+    manifeste.version === 2
+      ? verifierContratExport(octets.get('configuration.json'), octets)
+      : { verification: 'integrite-seule' }
+  // Le contrat de la version 2 est valide AVANT toute creation de destination.
   // mkdir exclusif : aucune ecriture si destination deja presente, meme vide.
   await mkdir(destination, { mode: 0o700 })
   try {
@@ -153,7 +162,7 @@ export async function restaurer(archive, destination, cle) {
     await rm(destination, { recursive: true, force: true })
     throw erreur
   }
-  return { fichiers: valides.length, octets: total }
+  return { fichiers: valides.length, octets: total, ...contrat }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
