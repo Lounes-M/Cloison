@@ -13,7 +13,8 @@ import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
  *    dans la reponse, ou le navigateur l'applique. Un script qui n'a pas ce
  *    nonce ne s'execute pas, et c'est tout l'interet.
  *
- * 2. Le rafraichissement de la session d'agence, sous `/espace` seulement.
+ * 2. Le rafraichissement de la session d'agence, sous `/espace` et sur
+ *    `/connexion/securite`, qui verifie aussi la session avant le code MFA.
  *    Un jeton Supabase expire vite et se renouvelle avec un jeton de
  *    rafraichissement. Un composant serveur ne peut pas ecrire de cookie :
  *    sans ce passage, la session mourrait a la premiere expiration et
@@ -45,7 +46,10 @@ export async function middleware(requete: NextRequest) {
 
   let reponse = suivant()
 
-  if (requete.nextUrl.pathname.startsWith('/espace')) {
+  if (
+    requete.nextUrl.pathname.startsWith('/espace') ||
+    requete.nextUrl.pathname === '/connexion/securite'
+  ) {
     // Les memes accesseurs que partout ailleurs : une variable absente doit
     // echouer bruyamment, pas se replier sur une chaine vide qui produirait
     // une erreur reseau incomprehensible trois appels plus loin.

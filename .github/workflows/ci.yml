@@ -51,6 +51,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Session MFA via Next et SDK reels
+        run: node scripts/verifier-session-mfa-http.mjs
+
       # Rejoue apres le build : c'est la seule etape ou les fichiers servis au
       # navigateur existent, donc la seule ou une fuite reelle peut etre vue.
       - name: Fuites dans le bundle client
