@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 53
+## Etat courant au 6 septembre 2026, apres PR 55
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,7 +13,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                                           |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 53 fusionnees ; main 2783ede ; livraison suivie dans la PR 53                                                                                  | Une CI verte seule ne prouve pas les parcours reels                                                       |
+| Livraison du socle              | PR 43 a 55 fusionnees ; main bff673b ; livraison suivie dans la PR 55                                                                                  | Une CI verte seule ne prouve pas les parcours reels                                                       |
 | Migrations                      | Rattrapage documente jusqu'a 0031 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                                                |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Auth/MFA navigateur verifies avec entree technique ; lien magique et dernier rendu mobile restent ouverts |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                                        |
@@ -44,7 +44,7 @@ similaire n'est present en production lors du controle.
 
 36 tests cibles couvrent les mutations du catalogue, les refus des quatre roles,
 les references strictes, les erreurs HTTP, la non-divulgation et l'independance
-des etapes. Treize sabotages sont detectes. La repetition 0032 est annulee ; la
+des etapes. Treize sabotages sont detectes. Le controle complet local passe 594 tests dans 68 suites avant integration de la PR 55 ; build et integration native reussis. La repetition 0032 est annulee ; la
 fonction est absente en production. Application et livraison restent a suivre
 dans la PR. Voir [derive du schema](exploitation/derive-schema.md).
 
@@ -66,9 +66,8 @@ Sur macOS, cela ne prouve pas l'absence de tout fallback natif du systeme.
 
 Le controle des fichiers traces au build rend une page blanche marquee et exige
 des pixels visibles. Le simple compte de pages avait laisse passer le defaut.
-Controle global local : 560 tests dans 66 suites, types, lint, format, typographie et build reussis. La validation definitive sur Vercel et la livraison seront consignees dans la PR.
+Controle global local : 560 tests dans 66 suites, types, lint, format, typographie et build reussis. La PR 55 est fusionnee apres CI verte sur 87d559c. Le parcours HTTP de production est rejoue sur main bff673b : depot, original exact, AAL2, refus anonyme/AAL1/autre agence, suspension, journal et retrait reussis. Le PNG du PDF produit par Vercel est inspecte : adresse fictive complete, date et Cloison visibles. Toutes les fixtures sont nettoyees. Voir la PR pour la CI main.
 Aucun document reel n'a ete utilise ; aucune cle de production n'a ete extraite.
-
 
 ## Passe 54 : filigrane lisible et ouverture agence reelle
 
