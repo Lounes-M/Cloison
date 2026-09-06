@@ -95,6 +95,7 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
         CLE_MAITRESSE: Buffer.alloc(32, 1).toString('base64'),
         STRIPE_SECRET_KEY: 'sk_test_parcours_strictement_local_non_secret',
         STRIPE_WEBHOOK_SECRET: secretWebhook,
+        CRON_SECRET: 'supervision-strictement-locale',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     },
@@ -218,6 +219,27 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     const faux = await requeter(`/lien/${tokens.garant.slice(0, -10)}INVALIDE00`)
     assert.equal(new URL(faux.headers.get('location'), site).pathname, '/lien-invalide')
     noter('signature falsifiee refusee par Next')
+    for (const autorisation of ['', 'Bearer secret-falsifie']) {
+      const refuse = await fetch(`${site}/api/supervision`, {
+        headers: { Authorization: autorisation },
+        redirect: 'error',
+      })
+      assert.equal(refuse.status, 401)
+      await refuse.arrayBuffer()
+    }
+    assert(!appels.some((a) => a.chemin === '/rpc/rapport_exploitation'))
+    const supervision = await fetch(`${site}/api/supervision`, {
+      headers: { Authorization: 'Bearer supervision-strictement-locale' },
+      redirect: 'error',
+    })
+    assert.equal(supervision.status, 200)
+    assert.equal(supervision.headers.get('cache-control'), 'no-store')
+    const attendu = (await db.query('select public.rapport_exploitation() as rapport')).rows[0]
+      .rapport
+    assert.deepEqual(await supervision.json(), attendu)
+    noter(
+      'supervision HTTP : refus anonymes, rapport agrege exact sans cache via Next et PostgREST',
+    )
     const {
       rows: [aPayer],
     } = await db.query(
