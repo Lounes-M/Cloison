@@ -67,10 +67,14 @@ export async function creerSessionLocataire(options: {
         .eq('tentative', etat.tentative)
         .select('tentative')
       if (error || rotation?.length !== 1) return null
-    } else if (Date.now() - new Date(etat.cree_le).getTime() > 23 * 60 * 60 * 1000) {
-      // Stripe ne garantit plus l'idempotence apres 24 h : reconciliation requise.
-      console.error('[paiement] tentative a reconcilier', options.dossierId)
-      return null
+    } else {
+      const age = Date.now() - new Date(etat.cree_le).getTime()
+      // Marge avant la retention minimale Stripe de 24 h ; une date incoherente
+      // ne doit pas prolonger cette fenetre. Tolerance de cinq minutes entre horloges.
+      if (!Number.isFinite(age) || age < -5 * 60 * 1000 || age >= 23 * 60 * 60 * 1000) {
+        console.error('[paiement] tentative a reconcilier', options.dossierId)
+        return null
+      }
     }
     const session = await api.checkout.sessions.create(
       {
@@ -98,16 +102,21 @@ export async function creerSessionLocataire(options: {
       },
       { idempotencyKey: `cloison:${options.dossierId}:${tentative}` },
     )
-    const { error: inscription } = await db
+    const { data: confirmation, error: inscription } = await db
       .from('sessions_paiement')
       .update({ session_ref: session.id })
       .eq('dossier_id', options.dossierId)
       .eq('tentative', tentative)
-    if (inscription) return null
+      .select('session_ref')
+    // Une reponse sans erreur peut pourtant n'avoir modifie aucune ligne :
+    // dossier supprime ou tentative remplacee pendant l'appel a Stripe.
+    if (inscription || confirmation?.length !== 1 || confirmation[0]?.session_ref !== session.id)
+      return null
 
     return session.url ?? null
-  } catch (erreur) {
-    console.error('[paiement] session impossible', erreur)
+  } catch {
+    // Les erreurs du SDK peuvent contenir l'adresse client ou d'autres donnees brutes.
+    console.error('[paiement] session impossible')
     return null
   }
 }
