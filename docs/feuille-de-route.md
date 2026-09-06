@@ -73,7 +73,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 
 ## Phase 6. Paiement et facturation
 
-- [ ] **42** Valider le parcours complet de paiement locataire dans un environnement Stripe de test representatif. Checkout et protections webhook/idempotence implementes ; leur presence ne vaut pas preuve de bout en bout.
+- [ ] **42** Valider le parcours complet de paiement locataire dans un environnement Stripe de test representatif. Checkout et protections webhook/idempotence implementes. PR49 : reprise apres reponses perdues et rotation concurrente testees avec doubles ; idempotence de creation verifiee sur Stripe test, session fictive expiree. Aucun paiement complet realise.
 - [ ] **43** Terminer la facturation agence liee a une signature reelle verifiee.
 - [x] **44** Tester l'interdiction des chemins de paiement pour le garant.
 - [ ] **45** Finaliser et faire valider CGU et CGV. Les brouillons du depot ne valent pas validation.

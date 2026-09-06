@@ -5,7 +5,7 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 6 septembre 2026, apres PR 47
+## Etat courant au 6 septembre 2026, apres PR 48
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.
@@ -13,7 +13,7 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 
 | Sujet                           | Etat et preuve                                                                                                                                         | Limite restante                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Livraison du socle              | PR 43 a 47 fusionnees ; main 4b2e50f ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34020893019)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
+| Livraison du socle              | PR 43 a 48 fusionnees ; main bc18cab ; [CI main verte](https://github.com/Lounes-M/Cloison/actions/runs/34022838275)                                   | Une CI verte seule ne prouve pas les parcours reels                               |
 | Migrations                      | Rattrapage documente jusqu'a 0030 applique ; droits de reservation et d'inscription controles                                                          | Ne jamais rejouer ou modifier une migration deja appliquee                        |
 | Depot et retrait                | Formulaires HTTP natifs sur Vercel, PDF fictif restitue a l'identique, journal et retrait verifies                                                     | Hydratation navigateur et parcours agence Auth/MFA non verifies de bout en bout   |
 | Reprise apres interruption      | [Maintenance non vide reussie](https://github.com/Lounes-M/Cloison/actions/runs/34004605271) : un objet supprime, file acquittee, upload tardif refuse | La copie CDN chiffree peut subsister apres suppression a l'origine                |
@@ -21,13 +21,35 @@ Chaque nouvelle passe ajoute ici son resultat, ses preuves et ce qui reste ouver
 | Courriels                       | Files chiffrees, reprise et transport testes ; configuration expediteur verifiee                                                                       | Livraison reelle au destinataire non prouvee                                      |
 | Signature et facturation agence | Socle technique uniquement ; Universign et modele contractuel pris en charge par Lounes                                                                | Aucun acte signe ni facturation agence valides de bout en bout                    |
 
-La PR 46 a passe 430 tests dans 51 suites, le build, les controles Next/PostgREST
-et huit scenarios concurrents PostgreSQL. Le deploiement Vercel
-[dpl_HjnqoE4n8PH2738G5vEbCrktF4kh](https://vercel.com/drifterr/cloison/HjnqoE4n8PH2738G5vEbCrktF4kh)
-est Ready et dessert www.cloison.immo. Les essais reels ont utilise uniquement des
-fixtures demonstration fictives, toutes nettoyees ; le controle final a retrouve
-zero dossier et zero piece. Les preuves detaillees sont dans la
-[PR 46](https://github.com/Lounes-M/Cloison/pull/46).
+La PR 48 a passe 466 tests dans 55 suites, le build, les controles Next/PostgREST,
+le renouvellement MFA et la restauration native sur deux conteneurs PostgreSQL.
+Vercel dpl_8GNn3hDxSmaWwN6t9VB5X2nBafSY est Ready sur www.cloison.immo.
+Accueil 200, maintenance anonyme 401 et webhook fictif invalide 400 verifies ;
+son journal est constant et ne contient pas son corps. Aucun paiement effectue.
+Les preuves detaillees sont dans la [PR 48](https://github.com/Lounes-M/Cloison/pull/48).
+
+## Passe 49 : reprise du paiement locataire
+
+Douze tests cibles passent apres cinq contre-epreuves rouges : inscription SQL
+sans ligne modifiee, date invalide, date future d'un jour, borne exacte de 23 heures
+et copie de l'adresse client dans une erreur SDK journalisee. La confirmation
+SQL exige desormais la ligne modifiee ; une date incoherente ferme la reprise,
+avec tolerance de cinq minutes entre horloges. Le journal d'erreur est constant.
+Les dates impossibles constituent un durcissement defensif, pas une exploitation
+par un utilisateur reproduite.
+
+Les pertes de reponse Stripe et SQL avant/apres commit, ainsi que deux rotations
+concurrentes, conservaient deja une seule session dans le modele deterministe.
+Ce modele teste le code applicatif, pas une course PostgreSQL distante.
+Un essai distinct sur l'API Stripe en mode test retrouve la meme session avec la
+meme cle et refuse des parametres modifies. La session fictive a ete expiree ;
+aucun paiement ni courriel effectue. Cet essai n'est pas un paiement de bout en
+bout et ne ferme pas la tache 42. Les six scenarios initialement verts ont aussi
+ete vus rouges par sabotage dans une copie temporaire.
+Controle global local : 477 tests dans 56 suites, types, lint, format, typographie,
+variables publiques et build reussis. Le statut de livraison et les CI sont suivis
+dans la [PR 49](https://github.com/Lounes-M/Cloison/pull/49). Le contrat d'idempotence de Stripe est verifie dans sa
+[documentation officielle](https://docs.stripe.com/api/idempotent_requests?lang=node).
 
 ## Passe 48 : sauvegarde, restauration et journaux de paiement
 
