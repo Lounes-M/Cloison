@@ -1,7 +1,7 @@
 # Feuille de route Cloison
 
 De la landing au premier dossier reel allant jusqu'a un acte signe.
-Version de travail du 6 septembre 2026, apres les PR 43 a 51. Le
+Version de travail du 6 septembre 2026, apres les PR 43 a 52. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
@@ -68,7 +68,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - [x] **37** Eprouver la purge SQL et l'effacement Storage par API. Essais reels sur fixtures, reprise apres interruption et maintien de la purge en cas de panne de courriels. Le cache CDN chiffre et la retention des sauvegardes restent distincts.
 - [ ] **38** Demontrer une restauration de production et une cle de secours utilisable. Restaurations locales PGlite et PostgreSQL natives reussies ; elles ne couvrent pas Supabase, Storage et Auth de production complets. L'agent prepare les outils et essais ; le detenteur de la cle verifie sa copie de secours.
 - [ ] **39** Faire realiser une revue de securite independante ciblee sur les acces, documents et capacites.
-- [ ] **40** Valider le suivi des acces anormaux et la prise en charge d'une alerte. Les requetes et procedures ecrites ne constituent pas une alerte operationnelle eprouvee.
+- [ ] **40** Valider le suivi des acces anormaux et la prise en charge d'une alerte. Detection agregee et workflow horaire implementes dans le lot 53 ; reception et prise en charge humaine restent a exercer.
 - [x] **41** Rediger la procedure de violation de donnees. Responsables, contacts et exercice a confirmer pour le pilote.
 
 ## Phase 6. Paiement et facturation
@@ -82,7 +82,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 
 - [ ] **46** Embarquer les premieres agences selon la procedure ecrite, apres fermeture des prerequis.
 - [ ] **47** Valider le canal de support et la capacite a tenir les delais affiches. Une adresse visible ne suffit pas.
-- [ ] **48** Mesurer creation, completion et delai jusqu'a signature ; requetes preparees, collecte pilote a exercer.
+- [ ] **48** Mesurer creation, completion et delai jusqu'a signature ; photographie agregee sur 28 jours implementee dans le lot 53 ; reception du lien, historique et signature reelle restent a exercer.
 - [ ] **49** Organiser le retour hebdomadaire des agences et alimenter le backlog avec les observations.
 
 ## Phase 8. Extension du produit
