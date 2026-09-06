@@ -1,4 +1,4 @@
-import { devenirPorteur } from './base'
+import { devenirDepot, devenirPorteur, reserverObjetDEssai } from './base'
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { baseDEssai, compter, devenir, lignesTouchees, redevenirProprietaire, refus } from './base'
@@ -87,14 +87,14 @@ describe('cloisonnement du dossier', () => {
     test('ne depose pas de piece a la place du garant', async () => {
       await porteur('locataire')
       // Le chemin et le type sont valides : ce qui refuse est bien la
-      // politique, pas une contrainte de forme.
+      // droit INSERT, pas une contrainte de forme.
       expect(
         await refus(
           db,
           `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
            values ('${dossier}', 'avis_imposition', '${dossier}/faux', 1000, 'application/pdf')`,
         ),
-      ).toContain('row-level security')
+      ).toContain('permission denied')
     })
 
     test('ne declare ni ne supprime l engagement', async () => {
@@ -159,13 +159,25 @@ describe('cloisonnement du dossier', () => {
       expect(await compter(db, 'public.pieces')).toBe(1)
     })
 
-    test('depose une piece', async () => {
-      await porteur('garant')
+    test('le serveur depose une piece validee pour le garant', async () => {
+      await devenirDepot(db, dossier)
+      await reserverObjetDEssai(db, dossier, `${dossier}/avis`)
       await db.query(
         `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
          values ('${dossier}', 'avis_imposition', '${dossier}/avis', 90000, 'application/pdf')`,
       )
       expect(await compter(db, 'public.pieces')).toBe(2)
+    })
+
+    test('ne fabrique pas directement une metadonnee de piece', async () => {
+      await porteur('garant')
+      expect(
+        await refus(
+          db,
+          `insert into public.pieces (dossier_id,type,chemin,taille_octets,type_reel)
+         values ('${dossier}','avis_imposition','${dossier}/direct',1024,'application/pdf')`,
+        ),
+      ).toContain('permission denied')
     })
 
     test('ne depose pas dans le dossier d un autre', async () => {
@@ -176,18 +188,18 @@ describe('cloisonnement du dossier', () => {
       await redevenirProprietaire(db)
       const autre = await id(rows[0]!.ouvrir_dossier)
 
-      // Jeton du dossier A, ecriture visee sur le dossier B.
-      await porteur('garant')
-      expect(
-        await refus(
-          db,
-          // Le chemin designe bien le dossier vise : sinon la contrainte
-          // `chemin_dans_le_dossier` refuserait la premiere, et ce test
-          // passerait sans avoir rien prouve de la RLS.
-          `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
-           values ('${autre}', 'bulletin_paie', '${autre}/vol', 1000, 'application/pdf')`,
-        ),
-      ).toContain('row-level security')
+      // Serveur de depot du dossier A, ecriture visee sur le dossier B.
+      await devenirDepot(db, dossier)
+      await reserverObjetDEssai(db, autre, `${autre}/vol`)
+      const insertion = `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
+        values ('${autre}', 'bulletin_paie', '${autre}/vol', 1000, 'application/pdf')`
+      expect(await refus(db, insertion)).toContain('Reservation indisponible')
+      // Isoler ensuite la RLS dans cette base jetable, sans masquer son refus
+      // derriere le controle de reservation qui s'execute avant elle.
+      await db.exec('reset role; alter table public.pieces disable trigger b_piece_reservation')
+      await db.exec('set role depot_piece')
+      expect(await refus(db, insertion)).toContain('row-level security')
+      await db.exec('reset role; alter table public.pieces enable trigger b_piece_reservation')
     })
 
     test('ne retire plus une piece une fois le dossier transmis', async () => {

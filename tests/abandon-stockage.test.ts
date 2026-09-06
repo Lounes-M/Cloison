@@ -1,6 +1,12 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { afterEach, beforeEach, expect, test } from 'vitest'
-import { baseDEssai, devenirPorteur, redevenirProprietaire, refus } from './base'
+import {
+  baseDEssai,
+  devenirPorteur,
+  redevenirProprietaire,
+  refus,
+  reserverObjetDEssai,
+} from './base'
 
 let db: PGlite
 const DOSSIER = '44444444-4444-4444-4444-444444444444'
@@ -17,6 +23,12 @@ beforeEach(async () => {
 })
 afterEach(async () => db?.close())
 
+async function inscrire() {
+  await reserverObjetDEssai(db, DOSSIER, CHEMIN)
+  await db.exec('set role depot_piece')
+  await db.exec(INSERER)
+  await db.exec('set role porteur_lien')
+}
 async function programmer() {
   return db.query('select public.programmer_suppression_objet($1)', [CHEMIN])
 }
@@ -29,7 +41,7 @@ async function compte() {
 }
 
 test('une inscription commise dont la reponse est perdue ne programme pas ses octets', async () => {
-  await db.exec(INSERER)
+  await inscrire()
   await programmer()
   expect(await compte()).toBe(0)
 })
@@ -39,20 +51,22 @@ test('un abandon programme reste irreinscriptible apres acquittement Storage', a
   expect(await compte()).toBe(1)
   await db.exec('delete from objets_a_supprimer')
   await devenirPorteur(db, DOSSIER, 'garant')
+  await db.exec('set role depot_piece')
   expect(await refus(db, INSERER)).toContain('abandonne')
 })
 
 test('le retrait programme atomiquement ses octets et interdit la reutilisation', async () => {
-  await db.exec(INSERER)
+  await inscrire()
   await db.exec(`delete from pieces where chemin='${CHEMIN}'`)
   expect(await compte()).toBe(1)
   await db.exec('delete from objets_a_supprimer')
   await devenirPorteur(db, DOSSIER, 'garant')
+  await db.exec('set role depot_piece')
   expect(await refus(db, INSERER)).toContain('abandonne')
 })
 
 test('la cascade dossier laisse la file de nettoyage', async () => {
-  await db.exec(INSERER)
+  await inscrire()
   await redevenirProprietaire(db)
   await db.exec(`delete from dossiers where id='${DOSSIER}'`)
   expect(await compte()).toBe(1)

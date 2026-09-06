@@ -138,3 +138,47 @@ export async function devenirPorteur(db: PGlite, dossierId: string, partie: stri
   ])
   await db.exec('set role porteur_lien')
 }
+
+/** Client serveur de depot associe a une capacite garant active. */
+export async function devenirDepot(db: PGlite, dossierId: string) {
+  await devenirPorteur(db, dossierId, 'garant')
+  await db.exec('set role depot_piece')
+}
+
+/** Prepare les dependances Storage d'une fixture historique, sans simuler
+ * une autorisation applicative. Le role et les claims de l'essai sont conserves. */
+export async function reserverObjetDEssai(
+  db: PGlite,
+  dossierId: string,
+  chemin: string,
+  objet = true,
+) {
+  const { rows } = await db.query<{ role: string }>("select current_setting('role') as role")
+  await db.exec('reset role')
+  try {
+    await db.query(
+      'insert into reservations_depot(chemin,dossier_id) values ($1,$2) on conflict do nothing',
+      [chemin, dossierId],
+    )
+    if (objet)
+      await db.query(
+        "insert into storage.objects(bucket_id,name) values ('pieces',$1) on conflict do nothing",
+        [chemin],
+      )
+  } finally {
+    const role = rows[0]!.role
+    if (
+      ![
+        'none',
+        'postgres',
+        'anon',
+        'authenticated',
+        'porteur_lien',
+        'depot_piece',
+        'serveur',
+      ].includes(role)
+    )
+      throw new Error('Role de fixture inconnu')
+    if (role !== 'none') await db.exec(`set role ${role}`)
+  }
+}

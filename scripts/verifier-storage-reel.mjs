@@ -92,6 +92,9 @@ try {
     const refus = await api(`/storage/v1/object/pieces/${chemin}`, role, 'POST', chiffre)
     await verifierRefus(refus, `depot ${nom}`)
   }
+  const reservation = await api('/rest/v1/rpc/reserver_depot', depot, 'POST', { le_chemin: chemin })
+  assert.ok(reservation.ok, `Reservation refusee HTTP ${reservation.status}`)
+  preuve('reservation serveur durable avant upload')
   const upload = await api(`/storage/v1/object/pieces/${chemin}`, depot, 'POST', chiffre)
   assert.ok(upload.ok, `Depot serveur refuse HTTP ${upload.status}`)
   const lecture = await api(`/storage/v1/object/authenticated/pieces/${chemin}`, garant)
