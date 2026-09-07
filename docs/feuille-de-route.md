@@ -118,10 +118,10 @@ Le produit a deux portes d'entrée qui débouchent sur le même dossier. Le loca
 
 ## Phase 6. Encaisser (3 / 4 faites)
 
-Le modèle est vrai, et tenu par la base : 9 € pour le locataire, 29 € par acte, rien pour le garant. Il ne reste qu'à créer le compte Stripe et poser ses deux clés.
+Le modèle est vrai, et tenu par la base : 9 € pour le locataire, 29 € par acte, rien pour le garant. Stripe est en mode réel depuis le 5 septembre 2026, tour complet vérifié.
 
 - [x] **42** Paiement locataire, une fois, pour un dossier valable trois mois
-      Décidé et livré : 9 €, une fois, après l'ouverture et avant le lien du garant, sans remboursement, dit avant de payer. C'est emettre_jeton qui refuse le lien tant que ce n'est pas réglé, pas l'écran. Restent chez toi le compte Stripe, ses deux clés et le webhook.
+      Décidé et livré : 9 €, une fois, après l'ouverture et avant le lien du garant, sans remboursement, dit avant de payer. C'est emettre_jeton qui refuse le lien tant que ce n'est pas réglé, pas l'écran. Compte Stripe activé, clés posées, webhook déclaré et vérifié en réel le 5 septembre 2026.
 - [ ] **43** Facturation agence à l'acte, collaborateurs illimités et gratuits **À toi**
       La ligne de 29 € se crée seule au passage à signé, jamais pour une démonstration, et un dossier facturé ne se purge pas. Les collaborateurs sont illimités et gratuits par construction. L'encaissement attend l'acte, donc Universign.
 - [x] **44** Un test qui échoue si un chemin de paiement devient atteignable par un garant
