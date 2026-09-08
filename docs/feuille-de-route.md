@@ -115,3 +115,5 @@ deconnexion porteur et du transport PDF sont detaillees dans
 - Les acces aux pieces sont journalises nominativement.
 
 Le versionnement des conditions et l'invalidation de la mention sont decrits dans [le runbook dedie](exploitation/conditions-engagement.md). La migration 0034 exige son deploiement explicite avant le code.
+
+Le [renouvellement du lien du garant](exploitation/reprise-garant.md) reste accessible au locataire apres transmission, sans modification du dossier.

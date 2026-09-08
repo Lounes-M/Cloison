@@ -21,6 +21,8 @@ export const porte = {
 } as const
 
 export const espace = {
+  garantRenouvellement:
+    'Tu peux renvoyer son acces au meme garant. Le dossier reste fige et le nouveau lien remplace le precedent.',
   titre: 'Ton dossier',
   reference: 'Référence',
   garantTitre: 'Ton garant',
@@ -98,8 +100,7 @@ export const statuts: Record<
 
 export const lienInvalide = {
   titre: 'Ce lien ne fonctionne plus',
-  texte:
-    'Il a expiré, a déjà servi, ou a été remplacé par un plus récent. Un seul lien vaut à la fois.',
+  texte: 'Il a expiré, a été révoqué ou remplacé par un plus récent. Un seul lien vaut à la fois.',
   locataire: 'Si tu es locataire, ouvre un nouveau dossier ou demande un nouveau lien.',
   garant: 'Si tu es garant, demande au locataire de te renvoyer le lien depuis son dossier.',
   bouton: 'Ouvrir un dossier',

@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { isValidElement, type ReactNode } from 'react'
+import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import PageLocataire from '@/app/(porteur)/locataire/page'
 import PageGarant from '@/app/(porteur)/garant/page'
 import PageEspace from '@/app/(agence)/espace/page'
@@ -82,6 +84,52 @@ beforeEach(() => {
 
 const locataire = () => PageLocataire({ searchParams: Promise.resolve({}) })
 const dossier = () => PageDossier({ params: Promise.resolve({ id: ID }) })
+
+function formulaireGarant(noeud: ReactNode): Record<string, unknown> | undefined {
+  if (Array.isArray(noeud)) return noeud.map(formulaireGarant).find(Boolean)
+  if (!isValidElement<{ children?: ReactNode }>(noeud)) return undefined
+  if (noeud.type === FormulaireGarant) return noeud.props
+  return formulaireGarant(noeud.props.children)
+}
+
+test.each(['transmis', 'refuse', 'signe'])(
+  'le lien du garant reste renouvelable apres %s sans changement de personne',
+  async (statut) => {
+    doublures.capacite.mockResolvedValue({
+      jeton: 'fictif',
+      capacite: { partie: 'locataire', dossierId: ID },
+    })
+    reponses.dossiers.data = {
+      id: ID,
+      reference: 'TEST',
+      statut,
+      expire_le: '2026-12-01',
+      paye_le: '2026-09-01',
+      email_garant: 'garant@example.invalid',
+      garant_verrouille: true,
+    }
+    expect(formulaireGarant(await locataire())).toMatchObject({
+      garantActuel: 'garant@example.invalid',
+      verrouille: true,
+    })
+  },
+)
+
+test('un dossier termine sans garant ne propose pas une nouvelle designation', async () => {
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  reponses.dossiers.data = {
+    id: ID,
+    reference: 'TEST',
+    statut: 'transmis',
+    expire_le: '2026-12-01',
+    paye_le: '2026-09-01',
+    email_garant: null,
+  }
+  expect(formulaireGarant(await locataire())).toBeUndefined()
+})
 
 // Les pages reelles sont executees avec une API locale doublee : ces tests
 // portent la presentation des pannes, pas l'application des politiques RLS.

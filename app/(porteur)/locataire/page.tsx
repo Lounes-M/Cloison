@@ -172,13 +172,15 @@ export default async function PageLocataire({
           <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
             {paiementLocataire.attente}
           </p>
-        ) : ouvert ? (
+        ) : ouvert ||
+          (garant && ['transmis', 'signe', 'refuse'].includes(String(dossier.statut))) ? (
           <>
             <FormulaireGarant
               dossierId={porteur.capacite.dossierId}
               garantActuel={garant}
-              verrouille={Boolean(dossier.garant_verrouille)}
+              verrouille={!ouvert || Boolean(dossier.garant_verrouille)}
             />
+            {!ouvert ? <p className="mt-3 text-sm">{espace.garantRenouvellement}</p> : null}
             {dossier.garant_verrouille ? (
               <p className="mt-3 text-sm">
                 Le garant invité reste associé à ce dossier. Pour désigner une autre personne, ouvre
