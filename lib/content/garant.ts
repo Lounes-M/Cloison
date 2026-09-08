@@ -50,6 +50,7 @@ export const natures = [
 export type NatureValeur = (typeof natures)[number]['valeur']
 
 export const depot = {
+  debit: 'Trop de documents ont été proposés récemment. Réessaie dans un quart d’heure.',
   original: 'Télécharger mon original',
   titre: 'Ton dépôt',
   demandePar: (email: string) => `${email} t’a désigné comme garant.`,

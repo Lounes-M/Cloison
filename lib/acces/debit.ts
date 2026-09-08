@@ -32,6 +32,9 @@ export const SUJETS = [
   'lien_locataire',
   'lien_garant',
   'ouverture_dossier',
+  'depot_dossier',
+  'depot_ip',
+  'depot_global',
 ] as const
 
 export type SujetDeDebit = (typeof SUJETS)[number]

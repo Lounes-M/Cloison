@@ -13,6 +13,8 @@ import { deposer, retirerPiece, type NatureDePiece } from '@/lib/coffre/depot'
 import { baseSupabase } from '@/lib/coffre/depot-supabase'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { TAILLE_MAX_DEPOT, natureDepuis } from '@/lib/garant/validation'
+import { autoriserAnalyse } from '@/lib/garant/debit-depot'
+import { depot as contenuDepot } from '@/lib/content/garant'
 
 /**
  * Le depot d'une piece par le garant, et son retrait.
@@ -21,9 +23,8 @@ import { TAILLE_MAX_DEPOT, natureDepuis } from '@/lib/garant/validation'
  * `lib/coffre/depot.ts`, ou une doublure permet de l'eprouver. Ici on lit le
  * jeton, on borne la taille, on nomme la nature, et on passe la main.
  *
- * Aucune limite de debit propre : les plafonds de la migration 0006 (vingt
- * pieces, soixante megaoctets par dossier) bornent deja ce qu'un lien peut
- * deposer, et ils le font dans la base, ou l'on ne les contourne pas.
+ * Les compteurs de la migration 0036 bornent aussi les tentatives invalides
+ * avant analyse, par dossier, adresse IP et pour l'ensemble de l'application.
  */
 
 export type EtatDepot =
@@ -68,6 +69,9 @@ export async function deposerUnePiece(
   if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE, nature }
 
   try {
+    if (!(await autoriserAnalyse(porteur.capacite.dossierId))) {
+      return { statut: 'erreur', message: contenuDepot.debit, nature }
+    }
     const supabase = clientPorteurDeLien(porteur.jeton)
     const avant = await statutActuel(supabase, porteur.capacite.dossierId)
 
