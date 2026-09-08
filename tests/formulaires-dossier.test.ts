@@ -42,6 +42,7 @@ function formulaire(dossier = A) {
   const f = new FormData()
   Object.entries({
     dossier,
+    versionConditions: '1',
     couvre: 'loyer',
     montant: '12000',
     revenu: '3200',
@@ -65,6 +66,73 @@ beforeEach(() => {
     throw new Error('Le client ne doit pas etre construit')
   })
 })
+
+for (const action of [declarerMonEngagement, apposerMaMention]) {
+  test.each(['', '-1', '2.5', '2147483648'])(
+    'refuse une version de formulaire invalide %s',
+    async (version) => {
+      h.session.mockResolvedValue({
+        jeton: 'fixture',
+        capacite: { dossierId: A, partie: 'garant' },
+      })
+      const f = formulaire()
+      f.set('versionConditions', version)
+      expect((await action(initial, f)).statut).toBe('erreur')
+      expect(h.client).not.toHaveBeenCalled()
+    },
+  )
+  test('refuse des conditions modifiees dans un autre onglet avant toute ecriture', async () => {
+    h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: A, partie: 'garant' } })
+    const q = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn(async () => ({
+        data: {
+          dossier_id: A,
+          version_conditions: 2,
+          solidaire: false,
+          montant_max_cents: 1200000,
+        },
+        error: null,
+      })),
+    }
+    h.client.mockReturnValue({ from: () => q })
+    expect((await action(initial, formulaire())).statut).toBe('erreur')
+    expect(q.update).not.toHaveBeenCalled()
+  })
+  test('la mise a jour atomique conserve le filtre de version', async () => {
+    h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: A, partie: 'garant' } })
+    let ecrit = false
+    let filtre = false
+    const q = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn((colonne: string, valeur: unknown) => {
+        if (ecrit && colonne === 'version_conditions' && valeur === 1) filtre = true
+        return q
+      }),
+      update: vi.fn(() => {
+        ecrit = true
+        return q
+      }),
+      maybeSingle: vi.fn(async () => ({
+        data:
+          ecrit && filtre
+            ? null
+            : {
+                dossier_id: A,
+                version_conditions: 1,
+                solidaire: false,
+                montant_max_cents: 1200000,
+              },
+        error: null,
+      })),
+    }
+    h.client.mockReturnValue({ from: () => q })
+    expect((await action(initial, formulaire())).statut).toBe('erreur')
+    expect(filtre).toBe(true)
+  })
+}
 
 for (const [nom, partie, action] of [
   ['engagement', 'garant', declarerMonEngagement],
@@ -107,7 +175,12 @@ test.each(
     jeton: 'fixture',
     capacite: { dossierId: A, partie: nom === 'loyer' ? 'locataire' : 'garant' },
   })
-  const lecture = { dossier_id: A, solidaire: false, montant_max_cents: 1200000 }
+  const lecture = {
+    dossier_id: A,
+    solidaire: false,
+    montant_max_cents: 1200000,
+    version_conditions: 1,
+  }
   let ecriture = false
   const q = {
     select: vi.fn().mockReturnThis(),

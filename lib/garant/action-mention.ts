@@ -8,6 +8,8 @@ import { z } from 'zod'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { verifierMention, type Element } from '@/lib/garant/mention'
+import { versionConditions } from '@/lib/garant/version-conditions'
+import { conditionsEngagement } from '@/lib/content/conditions-engagement'
 
 /**
  * Le garant se nomme, et appose sa mention.
@@ -64,6 +66,10 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     }
   }
 
+  const version = versionConditions(donnees)
+  if (version === null || version === 0) {
+    return { statut: 'erreur', message: conditionsEngagement.perimees, valeurs }
+  }
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { dossierId } = porteur.capacite
 
@@ -71,7 +77,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   // decide si la renonciation est exigee.
   const { data: engagement } = await supabase
     .from('engagements')
-    .select('solidaire, montant_max_cents')
+    .select('solidaire, montant_max_cents, version_conditions')
     .eq('dossier_id', dossierId)
     .maybeSingle()
 
@@ -81,6 +87,10 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
       message: 'Enregistre d abord un montant maximum dans la partie consacrée à ton engagement.',
       valeurs,
     }
+  }
+
+  if (Number(engagement.version_conditions) !== version) {
+    return { statut: 'erreur', message: conditionsEngagement.perimees, valeurs }
   }
 
   const verdict = verifierMention(analyse.data.mention, Boolean(engagement.solidaire))
@@ -106,6 +116,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
       mention_saisie_le: new Date().toISOString(),
     })
     .eq('dossier_id', dossierId)
+    .eq('version_conditions', version)
     .select('dossier_id')
     .maybeSingle()
 

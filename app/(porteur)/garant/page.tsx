@@ -65,7 +65,7 @@ export default async function PageGarant() {
     supabase
       .from('engagements')
       .select(
-        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, nom, prenom, adresse, mention, mention_saisie_le',
+        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, nom, prenom, adresse, mention, mention_saisie_le, version_conditions',
       )
       .eq('dossier_id', dossierId)
       .maybeSingle(),
@@ -196,6 +196,8 @@ export default async function PageGarant() {
           <h2 className="font-display text-2xl uppercase">{texteMention.titre}</h2>
           <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
           <FormulaireMention
+            key={Number(engagement?.version_conditions ?? 0)}
+            version={Number(engagement?.version_conditions ?? 0)}
             dossierId={dossierId}
             actuel={
               engagement
@@ -269,7 +271,12 @@ export default async function PageGarant() {
           {texteEngagement.aide}
         </p>
         {ouvert ? (
-          <FormulaireEngagement dossierId={dossierId} actuel={engagementAffiche} />
+          <FormulaireEngagement
+            key={Number(engagement?.version_conditions ?? 0)}
+            version={Number(engagement?.version_conditions ?? 0)}
+            dossierId={dossierId}
+            actuel={engagementAffiche}
+          />
         ) : (
           <p className="text-[15px] font-medium">
             {engagementAffiche
