@@ -171,7 +171,7 @@ export default async function PageGarant() {
                         <a className="font-bold underline" href={`/garant/pieces/${piece.id}`}>
                           {depot.original}
                         </a>
-                        {ouvert ? <BoutonRetrait pieceId={piece.id} /> : null}
+                        {ouvert ? <BoutonRetrait dossierId={dossierId} pieceId={piece.id} /> : null}
                       </li>
                     ))}
                   </ul>
@@ -179,7 +179,11 @@ export default async function PageGarant() {
 
                 {ouvert ? (
                   <div className="mt-4">
-                    <FormulaireDepot nature={nature.valeur} libelle={nature.libelle} />
+                    <FormulaireDepot
+                      dossierId={dossierId}
+                      nature={nature.valeur}
+                      libelle={nature.libelle}
+                    />
                   </div>
                 ) : null}
               </li>
@@ -193,6 +197,7 @@ export default async function PageGarant() {
           <h2 className="font-display text-2xl uppercase">{texteMention.titre}</h2>
           <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
           <FormulaireMention
+            dossierId={dossierId}
             actuel={
               engagement
                 ? {
@@ -265,7 +270,7 @@ export default async function PageGarant() {
           {texteEngagement.aide}
         </p>
         {ouvert ? (
-          <FormulaireEngagement actuel={engagementAffiche} />
+          <FormulaireEngagement dossierId={dossierId} actuel={engagementAffiche} />
         ) : (
           <p className="text-[15px] font-medium">
             {engagementAffiche

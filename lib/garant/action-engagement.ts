@@ -1,5 +1,8 @@
 'use server'
 
+import { formulaireDuDossier } from '@/lib/acces/formulaire'
+import { sessionPorteur } from '@/lib/content/session-porteur'
+
 import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
@@ -38,6 +41,9 @@ export async function declarerMonEngagement(
   if (!analyse.ok) return { statut: 'erreur', message: analyse.message }
 
   const porteur = await capaciteDepuisCookies()
+  if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
+    return { statut: 'erreur', message: sessionPorteur.autreDossier }
+  }
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
@@ -58,19 +64,23 @@ export async function declarerMonEngagement(
   }
 
   try {
-    const { data: existant } = await supabase
+    const { data: existant, error: erreurLecture } = await supabase
       .from('engagements')
       .select('dossier_id')
       .eq('dossier_id', dossierId)
       .maybeSingle()
 
+    if (erreurLecture) throw new Error('Lecture indisponible')
+
     const avant = await statutActuel(supabase, dossierId)
 
-    const { error } = existant
-      ? await supabase.from('engagements').update(colonnes).eq('dossier_id', dossierId)
-      : await supabase.from('engagements').insert({ dossier_id: dossierId, ...colonnes })
+    const ecriture = existant
+      ? supabase.from('engagements').update(colonnes).eq('dossier_id', dossierId)
+      : supabase.from('engagements').insert({ dossier_id: dossierId, ...colonnes })
 
-    if (error) {
+    const { data: enregistre, error } = await ecriture.select('dossier_id').maybeSingle()
+
+    if (error || !enregistre) {
       console.error('[garant] engagement refuse')
       return {
         statut: 'erreur',

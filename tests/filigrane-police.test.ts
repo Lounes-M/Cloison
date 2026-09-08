@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { createCanvas, GlobalFonts } from '@napi-rs/canvas'
 import { afterEach, expect, test, vi } from 'vitest'
 import { poserFiligrane } from '../workers/rasterisation'
@@ -8,8 +9,8 @@ afterEach(() => {
 })
 test('le filigrane utilise une police embarquee quand le chargement systeme est desactive', () => {
   const script = `
-    import { createCanvas, GlobalFonts } from ${JSON.stringify(resolve('node_modules/@napi-rs/canvas/index.js'))}
-    import { poserFiligrane } from ${JSON.stringify(resolve('workers/rasterisation.ts'))}
+    import { createCanvas, GlobalFonts } from ${JSON.stringify(pathToFileURL(resolve('node_modules/@napi-rs/canvas/index.js')).href)}
+    import { poserFiligrane } from ${JSON.stringify(pathToFileURL(resolve('workers/rasterisation.ts')).href)}
     const ctx=createCanvas(600,360).getContext('2d')
     ctx.fillStyle='#ffffff';ctx.fillRect(0,0,600,360)
     const polices=[];const dessiner=ctx.fillText.bind(ctx);ctx.fillText=(...args)=>{polices.push(ctx.font);dessiner(...args)}

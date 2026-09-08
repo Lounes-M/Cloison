@@ -1,5 +1,8 @@
 'use server'
 
+import { formulaireDuDossier } from '@/lib/acces/formulaire'
+import { sessionPorteur } from '@/lib/content/session-porteur'
+
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -51,6 +54,9 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   }
 
   const porteur = await capaciteDepuisCookies()
+  if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
+    return { statut: 'erreur', message: sessionPorteur.autreDossier }
+  }
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
@@ -87,7 +93,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     }
   }
 
-  const { error } = await supabase
+  const { data: enregistre, error } = await supabase
     .from('engagements')
     .update({
       nom: analyse.data.nom,
@@ -97,8 +103,10 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
       mention_saisie_le: new Date().toISOString(),
     })
     .eq('dossier_id', dossierId)
+    .select('dossier_id')
+    .maybeSingle()
 
-  if (error) {
+  if (error || !enregistre) {
     console.error('[garant] mention refusee')
     return {
       statut: 'erreur',

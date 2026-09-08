@@ -10,6 +10,10 @@ parcours reel. Aucun total de cases ne mesure la preparation au lancement.
 Universign et le modele contractuel sont pris en charge par Lounes ; le reste
 avance techniquement sans attendre cette dependance.
 
+La remise a niveau demandee le 8 septembre est suivie dans
+[Implementation de l'audit](implementation-audit-septembre.md), avec preuves et
+etat de livraison distincts pour chaque lot.
+
 ## Phase 0. Socle et presence publique
 
 - [x] **01** Supprimer le composant Badge inutilise.

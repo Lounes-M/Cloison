@@ -1,5 +1,8 @@
 'use server'
 
+import { formulaireDuDossier } from '@/lib/acces/formulaire'
+import { sessionPorteur } from '@/lib/content/session-porteur'
+
 import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
@@ -33,6 +36,9 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
   }
 
   const porteur = await capaciteDepuisCookies()
+  if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
+    return { statut: 'erreur', message: sessionPorteur.autreDossier }
+  }
   if (!porteur || porteur.capacite.partie !== 'locataire') {
     return { statut: 'erreur', message: 'Ton lien a expire. Demande-en un nouveau.' }
   }
@@ -41,12 +47,14 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
     const supabase = clientPorteurDeLien(porteur.jeton)
     const avant = await statutActuel(supabase, porteur.capacite.dossierId)
 
-    const { error } = await supabase
+    const { data: enregistre, error } = await supabase
       .from('dossiers')
       .update({ loyer_cents: cents })
       .eq('id', porteur.capacite.dossierId)
+      .select('id')
+      .maybeSingle()
 
-    if (error) {
+    if (error || !enregistre) {
       console.error('[locataire] loyer refuse')
       return {
         statut: 'erreur',

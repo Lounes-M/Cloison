@@ -9,12 +9,19 @@ import { cn } from '@/lib/utils'
 const ETAT_INITIAL: EtatLoyer = { statut: 'inactif' }
 
 /** Un champ, un bouton : le loyer, charges comprises. */
-export function FormulaireLoyer({ loyerActuel }: { loyerActuel: string }) {
+export function FormulaireLoyer({
+  loyerActuel,
+  dossierId,
+}: {
+  loyerActuel: string
+  dossierId: string
+}) {
   const [etat, envoyer, enCours] = useActionState(saisirMonLoyer, ETAT_INITIAL)
   const idChamp = useId()
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
+      <input type="hidden" name="dossier" value={dossierId ?? ''} />
       {etat.statut === 'enregistre' ? (
         <p
           role="status"

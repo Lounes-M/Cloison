@@ -1,5 +1,8 @@
 'use server'
 
+import { formulaireDuDossier } from '@/lib/acces/formulaire'
+import { sessionPorteur } from '@/lib/content/session-porteur'
+
 import { verifierDocument } from '@/lib/coffre/validation-document'
 import { verifierContenu } from '@/lib/coffre/type-reel'
 import { clientStockage } from '@/lib/acces/stockage'
@@ -59,6 +62,9 @@ export async function deposerUnePiece(
   }
 
   const porteur = await porteurGarant()
+  if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
+    return { statut: 'erreur', message: sessionPorteur.autreDossier }
+  }
   if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE, nature }
 
   try {
@@ -113,6 +119,9 @@ export async function retirerUnePiece(
   if (!/^[0-9a-f-]{36}$/.test(pieceId)) return { statut: 'erreur', message: 'Piece inconnue.' }
 
   const porteur = await porteurGarant()
+  if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
+    return { statut: 'erreur', message: sessionPorteur.autreDossier }
+  }
   if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE }
 
   try {

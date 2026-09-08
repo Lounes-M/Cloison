@@ -4,6 +4,7 @@ import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 import { expect, test } from 'vitest'
 // @ts-expect-error Programme Node autonome execute aussi en CI.
 import { verifierSchemaDistant } from '../scripts/verifier-schema-distant.mjs'
@@ -47,7 +48,7 @@ for (const cas of ['normal', 'alerte', 'invalide', 'reseau', 'http']) {
       writeFileSync(loader, source)
       const execution = spawnSync(
         process.execPath,
-        ['--import', loader, resolve('scripts/verifier-schema-distant.mjs')],
+        ['--import', pathToFileURL(loader).href, resolve('scripts/verifier-schema-distant.mjs')],
         {
           env: { ...process.env, CRON_SECRET: 'fixture-secrete' },
           encoding: 'utf8',

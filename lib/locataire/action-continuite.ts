@@ -1,4 +1,6 @@
 'use server'
+import { formulaireDuDossier } from '@/lib/acces/formulaire'
+import { sessionPorteur } from '@/lib/content/session-porteur'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -49,6 +51,9 @@ export async function rattacherMonDossier(
   form: FormData,
 ): Promise<EtatContinuite> {
   const porteur = await capaciteDepuisCookies()
+  if (porteur && !formulaireDuDossier(form, porteur.capacite.dossierId)) {
+    return { message: sessionPorteur.autreDossier }
+  }
   const domaine = String(form.get('domaine') ?? '')
     .trim()
     .toLowerCase()

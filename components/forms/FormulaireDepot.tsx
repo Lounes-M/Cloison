@@ -9,7 +9,15 @@ import { cn } from '@/lib/utils'
 
 const ETAT_INITIAL: EtatDepot = { statut: 'inactif' }
 
-export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: string }) {
+export function FormulaireDepot({
+  nature,
+  libelle,
+  dossierId,
+}: {
+  nature: string
+  libelle: string
+  dossierId: string
+}) {
   const [etat, envoyer, enCours] = useActionState(deposerUnePiece, ETAT_INITIAL)
   const idChamp = useId()
   const [preparation, preparer] = useState(false)
@@ -39,6 +47,7 @@ export function FormulaireDepot({ nature, libelle }: { nature: string; libelle: 
 
   return (
     <form action={envoyer} className="flex flex-col gap-2">
+      <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="nature" value={nature} />
 
       <label

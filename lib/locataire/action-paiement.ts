@@ -1,5 +1,6 @@
 'use server'
 
+import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import type { Route } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -15,9 +16,14 @@ import { creerSessionLocataire } from '@/lib/paiement/stripe'
  * Ce qui marque le dossier regle n'est pas ici : c'est l'evenement Stripe,
  * verifie, porte par le role `serveur`.
  */
-export async function payerMonDossier(): Promise<void> {
+export async function payerMonDossier(donnees: FormData): Promise<void> {
   const porteur = await capaciteDepuisCookies()
-  if (!porteur || porteur.capacite.partie !== 'locataire') redirect('/lien-invalide')
+  if (
+    !porteur ||
+    porteur.capacite.partie !== 'locataire' ||
+    !formulaireDuDossier(donnees, porteur.capacite.dossierId)
+  )
+    redirect('/lien-invalide')
 
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { data: dossier } = await supabase

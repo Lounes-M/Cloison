@@ -2,7 +2,10 @@
 import { useActionState } from 'react'
 import { retrouverMonDossier, rattacherMonDossier } from '@/lib/locataire/action-continuite'
 import { continuite } from '@/lib/content/continuite'
-export function FormulaireContinuite({ mode }: { mode: 'retrouver' | 'agence' }) {
+export function FormulaireContinuite({
+  mode,
+  dossierId,
+}: { mode: 'retrouver'; dossierId?: never } | { mode: 'agence'; dossierId: string }) {
   const [etat, action, pending] = useActionState(
     mode === 'retrouver' ? retrouverMonDossier : rattacherMonDossier,
     {},
@@ -13,6 +16,7 @@ export function FormulaireContinuite({ mode }: { mode: 'retrouver' | 'agence' })
         {mode === 'retrouver' ? continuite.retrouver : continuite.agence}
       </h2>
       <form action={action} className="mt-4 flex flex-col gap-3">
+        <input type="hidden" name="dossier" value={dossierId ?? ''} />
         {mode === 'retrouver' ? (
           <>
             <label htmlFor="email-retour">{continuite.email}</label>
