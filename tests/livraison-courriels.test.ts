@@ -74,9 +74,39 @@ test('une reponse sans identifiant Resend ne detruit pas le contenu chiffre', as
     traites: 0,
     echecs: 1,
   })
-  expect(rpc).toHaveBeenCalledWith('terminer_courriel', {
+  expect(rpc).toHaveBeenCalledWith('acquitter_courriel', {
     identifiant: 'id-fictif',
     le_bail: 'bail-fictif',
-    reussi: false,
+    reference_fournisseur: null,
   })
 })
+
+test.each([true, false, null])(
+  'la reference fournisseur et la confirmation SQL %s restent distinctes de la livraison',
+  async (confirmation) => {
+    ouvrir.mockReturnValue(Buffer.from('{}'))
+    envoyerResend.mockResolvedValue({ data: { id: 'resend_fictif' }, error: null })
+    const rpc = vi.fn(async (nom: string) => ({
+      data:
+        nom === 'prendre_courriels'
+          ? [{ id: 'id-fictif', contenu: '', bail: 'bail-fictif' }]
+          : nom === 'acquitter_courriel'
+            ? confirmation
+            : 0,
+      error: null,
+    }))
+    expect(await distribuerCourriels({ rpc } as unknown as SupabaseClient)).toEqual({
+      traites: confirmation === true ? 1 : 0,
+      echecs: confirmation === true ? 0 : 1,
+    })
+    expect(rpc).toHaveBeenCalledWith('acquitter_courriel', {
+      identifiant: 'id-fictif',
+      le_bail: 'bail-fictif',
+      reference_fournisseur: 'resend_fictif',
+    })
+    expect(envoyerResend).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: [{ name: 'cloison_id', value: 'id-fictif' }] }),
+      expect.any(Object),
+    )
+  },
+)

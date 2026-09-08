@@ -21,6 +21,7 @@ export async function distribuerCourriels(
   for (const message of data ?? []) {
     signal?.throwIfAborted()
     let reussi = false
+    let referenceFournisseur: string | null = null
     try {
       const contenu = JSON.parse(
         ouvrir(Buffer.from(message.contenu, 'base64'), cleMaitresse()).toString('utf8'),
@@ -31,19 +32,25 @@ export async function distribuerCourriels(
         idempotencyKey: `courriel/${message.id}`,
         signal: AbortSignal.any([AbortSignal.timeout(3_000), ...(signal ? [signal] : [])]),
       }
-      const resultat = await new Resend(env.resendApiKey).emails.send(contenu, options)
+      const resultat = await new Resend(env.resendApiKey).emails.send(
+        { ...contenu, tags: [{ name: 'cloison_id', value: message.id }] },
+        options,
+      )
       reussi =
-        !resultat.error && typeof resultat.data?.id === 'string' && resultat.data.id.length > 0
+        !resultat.error &&
+        typeof resultat.data?.id === 'string' &&
+        /^[A-Za-z0-9_-]{1,128}$/.test(resultat.data.id)
+      if (reussi) referenceFournisseur = resultat.data!.id
     } catch {
       // Ni contenu, ni adresse, ni lien dans les journaux.
       reussi = false
     }
-    const { error: acquittement } = await db.rpc('terminer_courriel', {
+    const { data: confirme, error: acquittement } = await db.rpc('acquitter_courriel', {
       identifiant: message.id,
       le_bail: message.bail,
-      reussi,
+      reference_fournisseur: referenceFournisseur,
     })
-    if (!reussi || acquittement) echecs++
+    if (!reussi || acquittement || confirme !== true) echecs++
     else traites++
   }
   // prendre_courriels peut avoir decouvert une issue ancienne pendant ce passage.
