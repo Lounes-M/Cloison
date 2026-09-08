@@ -41,3 +41,4 @@ yarn-error.log*
 # claude code (preferences locales)
 .claude/settings.local.json
 .env*
+/supabase/.temp/

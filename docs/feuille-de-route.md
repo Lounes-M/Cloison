@@ -14,6 +14,10 @@ La remise a niveau demandee le 8 septembre est suivie dans
 [Implementation de l'audit](implementation-audit-septembre.md), avec preuves et
 etat de livraison distincts pour chaque lot.
 
+L'expiration des acces agence est corrigee dans la migration 0033, repetee puis
+annulee avant livraison. Application et preuves effectives dans
+[le suivi du deploiement](exploitation/expiration-acces.md).
+
 ## Phase 0. Socle et presence publique
 
 - [x] **01** Supprimer le composant Badge inutilise.
