@@ -75,7 +75,7 @@ test('une ecriture avec une ancienne version ne touche aucune ligne', async () =
     [mention, dossier, version],
   )
   expect(ancien.rows).toHaveLength(0)
-  const actuel = await db.query(
+  const actuel = await db.query<{ version_conditions: number; mention: string | null }>(
     'select version_conditions, mention from public.engagements where dossier_id=$1',
     [dossier],
   )
@@ -95,7 +95,7 @@ test('une version fournie lors de INSERT ne remplace pas la version initiale', a
     "insert into public.dossiers(email_locataire) values ('insertion@example.invalid') returning id",
   )
   await devenirPorteur(db, rows[0]!.id, 'garant')
-  const insertion = await db.query(
+  const insertion = await db.query<{ version_conditions: number }>(
     'insert into public.engagements(dossier_id,version_conditions) values ($1,999) returning version_conditions',
     [rows[0]!.id],
   )
