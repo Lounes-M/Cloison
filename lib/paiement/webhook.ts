@@ -37,6 +37,7 @@ export type ReponseWebhook = { statut: number; corps: Record<string, boolean> }
 
 export function reponseAuMarquage(resultat: ResultatMarquage): ReponseWebhook {
   if (!resultat.error) {
+    if (typeof resultat.data !== 'boolean') return { statut: 503, corps: { recu: false } }
     return { statut: 200, corps: { recu: true, marque: resultat.data === true } }
   }
 

@@ -136,3 +136,8 @@ preparee dans 0041, avec repetition SQL reussie, avant application et fusion.
 Les parcours navigateur automatises, les profils documentaires, la rotation des
 cles, le rapprochement des paiements et la chaine contractuelle restent ouverts.
 Les preuves actualisees sont dans [le suivi des lots](implementation-audit-septembre.md).
+
+Le marquage d'un paiement refuse maintenant les confirmations SQL ambigues :
+seuls true et false sont des resultats interpretes, toute autre valeur demande
+un rejeu HTTP 503. Quatre contre-preuves observees rouges, puis 19 tests du
+marquage et de sa route passes. Aucun changement de montant ni remboursement.
