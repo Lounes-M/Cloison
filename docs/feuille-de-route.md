@@ -146,3 +146,9 @@ Le marquage d'un paiement refuse maintenant les confirmations SQL ambigues :
 seuls true et false sont des resultats interpretes, toute autre valeur demande
 un rejeu HTTP 503. Quatre contre-preuves observees rouges, puis 19 tests du
 marquage et de sa route passes. Aucun changement de montant ni remboursement.
+
+Au 8 septembre a 17 h 20, les migrations jusqu'a 0041 sont appliquees et les PR
+jusqu'a 82 sont fusionnees, avec CI main verte. Le lot 0042 du registre financier
+est prepare et repete sans application ; son etat et ses limites sont detailles
+dans le suivi des lots. Les formats de rotation sont livres, mais le rescellement
+de masse et la disponibilite des cles de secours restent ouverts.
