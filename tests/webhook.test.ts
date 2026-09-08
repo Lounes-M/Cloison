@@ -61,3 +61,12 @@ describe('la region des fonctions', () => {
     for (const region of config.regions) expect(europeennes.has(region), region).toBe(true)
   })
 })
+
+for (const data of [null, undefined, 'true', 1]) {
+  test(`une confirmation ambigue ${String(data)} reste rejouable`, () => {
+    expect(reponseAuMarquage({ data, error: null })).toEqual({
+      statut: 503,
+      corps: { recu: false },
+    })
+  })
+}
