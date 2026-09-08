@@ -187,8 +187,16 @@ export function verifierMention(texte: string, solidaire: boolean): Verdict {
     const cents = Math.round(chiffre * 100)
     const mots = normaliserLettres(nombreEnLettres(Math.floor(cents / 100)))
     const centimes = cents % 100
-    const suffixe = centimes ? ` ${normaliserLettres(nombreEnLettres(centimes))} centimes?\\b` : ''
-    if (new RegExp(`(?:^|[^a-z])${mots} euros?\\b${suffixe}`).test(plat)) {
+    const montantsEnLettres = new RegExp(
+      `(?:^|[^a-z])${mots} euros?\\b(?: ([a-z]+(?: [a-z]+){0,6}) centimes?\\b)?`,
+      'g',
+    )
+    const concorde = [...plat.matchAll(montantsEnLettres)].some((lecture) =>
+      lecture[1] === undefined
+        ? centimes === 0
+        : lecture[1] === normaliserLettres(nombreEnLettres(centimes)),
+    )
+    if (concorde) {
       montantEuros = chiffre
       break
     }
