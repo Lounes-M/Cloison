@@ -36,6 +36,16 @@ a jour de zero ligne. Les cas autorises avec une ligne retournee restent couvert
 Pas de migration SQL dans ce lot. Les ecritures avec retour utilisent les droits
 de lecture deja accordes au meme porteur.
 
+Controle complet local : 621 tests dans 70 suites, types, lint, format,
+typographie et variables publiques verts. La compilation Next est reussie et
+les deux traces documentaires sont executees apres correction du separateur de
+chemin Windows ; pixels du filigrane controles, aucune fuite dans le bundle.
+Les tests CLI utilisent des URL de fichiers pour les imports ESM. Les tests de
+restauration verifient les octets sur Windows ; les modes POSIX sont verifies
+sur Unix. La commande de sauvegarde refuse toujours une cle dont les permissions
+privees ne sont pas verifiables, donc reste fermee sur Windows. Les jonctions
+Windows et les liens Unix sont refuses sans supprimer les cibles existantes.
+
 ## Presentation publique
 
 PR 57 fusionnee le 8 septembre, commit a6b306e. La signature est presentee comme

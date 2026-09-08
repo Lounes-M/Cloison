@@ -1,6 +1,6 @@
 import { mkdtemp, mkdir, readFile, copyFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { dirname, join, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve, sep } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import assert from 'node:assert/strict'
 import { PDFDocument } from 'pdf-lib'
@@ -22,7 +22,7 @@ for (const route of [
     let moteurPresent = false
     for (const fichier of fichiers) {
       const source = resolve(dirname(trace), fichier)
-      const chemin = relative(racine, source)
+      const chemin = relative(racine, source).split(sep).join('/')
       if (
         !/^(workers\/|node_modules\/(pdfjs-dist|pdf-lib|@pdf-lib|pako|tslib|@napi-rs)\/)/.test(
           chemin,
