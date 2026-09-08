@@ -141,3 +141,8 @@ La lecture d'enveloppes versionnees et le trousseau de rotation sont prepares,
 avec activation distincte de la livraison des lecteurs. Le depot et les courriels
 utilisent les memes formats. Le rescellement en masse et la disponibilite des cles
 de secours restent ouverts ; voir [Rotation des cles](exploitation/rotation-cles.md).
+
+Le marquage d'un paiement refuse maintenant les confirmations SQL ambigues :
+seuls true et false sont des resultats interpretes, toute autre valeur demande
+un rejeu HTTP 503. Quatre contre-preuves observees rouges, puis 19 tests du
+marquage et de sa route passes. Aucun changement de montant ni remboursement.
