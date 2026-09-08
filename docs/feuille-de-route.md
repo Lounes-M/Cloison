@@ -119,3 +119,9 @@ Le versionnement des conditions et l'invalidation de la mention sont decrits dan
 Le [renouvellement du lien du garant](exploitation/reprise-garant.md) reste accessible au locataire apres transmission, sans modification du dossier.
 
 Le [dernier administrateur](exploitation/dernier-administrateur.md) est protege par le lot 0035, avec essais concurrents natifs ; application explicite requise.
+
+Le durcissement des webhooks mutualise la lecture bornee des corps Resend et
+Stripe : 64 Kio reels, dix secondes de lecture, annulation du flux et cinq secondes
+pour le marquage SQL du paiement. Deux regressions Stripe observees rouges avant
+correction, puis 21 tests des routes passes. Ce lot ne constitue pas le registre
+comptable ni le rapprochement des paiements, toujours ouverts.

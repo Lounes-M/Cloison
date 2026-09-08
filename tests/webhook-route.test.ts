@@ -112,7 +112,10 @@ for (const etape of ['client', 'rpc', 'lecture-corps']) {
     const appel = requete()
     if (etape === 'client') serveur.mockRejectedValueOnce(erreur)
     if (etape === 'rpc') rpc.mockRejectedValueOnce(erreur)
-    if (etape === 'lecture-corps') vi.spyOn(appel, 'text').mockRejectedValueOnce(erreur)
+    if (etape === 'lecture-corps')
+      vi.spyOn(appel.body!, 'getReader').mockImplementationOnce(() => {
+        throw erreur
+      })
     const reponse = await POST(appel)
     expect(reponse.status).toBe(503)
     expect(await reponse.json()).toEqual({ recu: false })
@@ -125,3 +128,17 @@ for (const etape of ['client', 'rpc', 'lecture-corps']) {
     expect(await reprise.json()).toEqual({ recu: true, marque: true })
   })
 }
+
+test('un webhook trop grand est refuse avant signature et SQL meme sans longueur annoncee', async () => {
+  const appel = new NextRequest('https://example.invalid/api/paiement/webhook', {
+    method: 'POST',
+    body: 'x'.repeat(65537),
+  })
+  expect((await POST(appel)).status).toBe(413)
+  expect(serveur).not.toHaveBeenCalled()
+})
+
+test('le marquage recoit un signal reseau borne', async () => {
+  expect((await POST(requete())).status).toBe(200)
+  expect(serveur).toHaveBeenCalledWith(expect.any(AbortSignal))
+})

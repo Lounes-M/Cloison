@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { lireCorpsWebhook } from '@/lib/http/corps-webhook'
 import { clientServeur } from '@/lib/acces/serveur'
 import { lireEvenement, paiementConfirme } from '@/lib/paiement/stripe'
 import { reponseAuMarquage } from '@/lib/paiement/webhook'
@@ -18,17 +19,21 @@ import { reponseAuMarquage } from '@/lib/paiement/webhook'
  * le notre et passager. Le partage est dans `lib/paiement/webhook.ts`.
  */
 export const runtime = 'nodejs'
+export const maxDuration = 20
 
 export async function POST(requete: NextRequest) {
   try {
-    const corps = await requete.text()
+    const corps = await lireCorpsWebhook(requete)
+    if (corps === null) return NextResponse.json({ recu: false }, { status: 413 })
     const evenement = lireEvenement(corps, requete.headers.get('stripe-signature'))
     if (!evenement) return new NextResponse('signature refusee', { status: 400 })
 
     const paiement = paiementConfirme(evenement)
     if (!paiement) return NextResponse.json({ recu: true })
 
-    const supabase = await clientServeur()
+    const supabase = await clientServeur(
+      AbortSignal.any([requete.signal, AbortSignal.timeout(5000)]),
+    )
     const resultat = await supabase.rpc('marquer_dossier_paye', {
       le_dossier: paiement.dossierId,
       la_reference: paiement.reference,
