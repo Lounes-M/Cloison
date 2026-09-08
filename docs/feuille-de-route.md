@@ -4,6 +4,11 @@ De la landing au premier dossier reel allant jusqu'a un acte signe.
 Version de travail du 7 septembre 2026, apres la livraison des PR 43 a 56. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
+La maintenance des dependances de septembre est detaillee dans
+[son suivi](exploitation/dependances-septembre.md). Le passage a Vitest 5,
+Supabase JS et Resend actualises conserve les controles d'acces existants et
+exige une CI complete avant fusion.
+
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
 Une implementation seule ne termine pas une tache exigeant une livraison ou un
 parcours reel. Aucun total de cases ne mesure la preparation au lancement.
@@ -152,3 +157,8 @@ jusqu'a 82 sont fusionnees, avec CI main verte. Le lot 0042 du registre financie
 est prepare et repete sans application ; son etat et ses limites sont detailles
 dans le suivi des lots. Les formats de rotation sont livres, mais le rescellement
 de masse et la disponibilite des cles de secours restent ouverts.
+
+PR83 est fusionnee et 0042 appliquee, avec CI finale et droits reels verifies.
+Le rescellement administratif de masse est prepare avec inventaire, comparaison
+atomique et reprise bornee ; sa livraison reste soumise aux controles complets.
+La disponibilite effective des cles de secours demeure une condition externe.

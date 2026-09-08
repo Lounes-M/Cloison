@@ -9,7 +9,8 @@ import { Client } from 'pg'
 import { preparerBase } from './test-postgrest.mjs'
 import { sauvegarder, restaurer } from './sauvegarde-locale.mjs'
 import { nouvelleCle, sceller, ouvrir } from '../lib/coffre/enveloppe.ts'
-import { ouvrirAvecTrousseau, scellerAvecTrousseau } from '../lib/coffre/rotation-format.ts'
+import { ouvrirAvecTrousseau } from '../lib/coffre/rotation-format.ts'
+import { rescellerEnveloppes } from './resceller-enveloppes.mjs'
 
 const sha256 = (contenu) => createHash('sha256').update(contenu).digest('hex')
 const NOM_BASE = 'cloison_restauration_test'
@@ -381,15 +382,14 @@ export async function verifierRestaurationPostgres(configuration) {
     // deja indisponible ; les objets ne sont ni remplaces ni rechiffres.
     const nouvelleKek = nouvelleCle()
     const trousseauRotation = { historique: kek, active: nouvelleKek, lecture: [] }
-    const enveloppeRotation = scellerAvecTrousseau(
-      ouvrirAvecTrousseau(cleScellee, trousseauRotation),
-      trousseauRotation,
+    const rotation = await rescellerEnveloppes(cible, trousseauRotation, { appliquer: true })
+    assert.equal(rotation.rescellees, 1)
+    assert.equal(rotation.echecs, 0)
+    assert.equal(rotation.courses, 0)
+    assert.equal(
+      (await rescellerEnveloppes(cible, trousseauRotation, { appliquer: true })).rescellees,
+      0,
     )
-    const rotation = await cible.query(
-      'update cles_dossier set cle_scellee=$1 where dossier_id=$2 and cle_scellee=$3',
-      [enveloppeRotation, id, cleScellee],
-    )
-    assert.equal(rotation.rowCount, 1)
     const copieRotation = (await cible.query('select cle_scellee from cles_dossier')).rows[0]
       .cle_scellee
     assert.deepEqual(
