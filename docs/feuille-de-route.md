@@ -18,6 +18,9 @@ L'expiration des acces agence est corrigee dans la migration 0033, repetee puis
 annulee avant livraison. Application et preuves effectives dans
 [le suivi du deploiement](exploitation/expiration-acces.md).
 
+Les budgets reseau et la detection de maintenance retardee sont decrits dans
+[Budgets de maintenance](exploitation/budgets-maintenance.md).
+
 ## Phase 0. Socle et presence publique
 
 - [x] **01** Supprimer le composant Badge inutilise.

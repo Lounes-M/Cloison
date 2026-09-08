@@ -5,7 +5,11 @@ import { ouvrir } from '@/lib/coffre/enveloppe'
 import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
 import { env } from '@/lib/env'
 
-export async function distribuerCourriels(db: SupabaseClient, identifiant?: string) {
+export async function distribuerCourriels(
+  db: SupabaseClient,
+  identifiant?: string,
+  signal?: AbortSignal,
+) {
   const { error: etat } = await db.rpc('etat_file_courriels')
   if (etat) throw new Error('Etat des courriels indisponible')
   const { data, error } = await db.rpc('prendre_courriels', {
@@ -15,6 +19,7 @@ export async function distribuerCourriels(db: SupabaseClient, identifiant?: stri
   let echecs = 0
   let traites = 0
   for (const message of data ?? []) {
+    signal?.throwIfAborted()
     let reussi = false
     try {
       const contenu = JSON.parse(
@@ -24,7 +29,7 @@ export async function distribuerCourriels(db: SupabaseClient, identifiant?: stri
       // Le signal traverse le SDK jusqu'a fetch, sans simple course de promesses.
       const options = {
         idempotencyKey: `courriel/${message.id}`,
-        signal: AbortSignal.timeout(3_000),
+        signal: AbortSignal.any([AbortSignal.timeout(3_000), ...(signal ? [signal] : [])]),
       }
       const resultat = await new Resend(env.resendApiKey).emails.send(contenu, options)
       reussi =

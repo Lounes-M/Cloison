@@ -25,7 +25,7 @@ import { env } from '@/lib/env'
  *
  * Cinq minutes de vie : le jeton sert a un appel, pas a une session.
  */
-export async function clientServeur() {
+export async function clientServeur(signal?: AbortSignal) {
   const jeton = await new SignJWT({ role: 'serveur' })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -34,6 +34,24 @@ export async function clientServeur() {
 
   return createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { Authorization: `Bearer ${jeton}` } },
+    global: {
+      headers: { Authorization: `Bearer ${jeton}` },
+      ...(signal
+        ? {
+            fetch: (input: RequestInfo | URL, options?: RequestInit) =>
+              fetch(input, {
+                ...options,
+                signal: AbortSignal.any([
+                  signal,
+                  ...(options?.signal
+                    ? [options.signal]
+                    : input instanceof Request
+                      ? [input.signal]
+                      : []),
+                ]),
+              }),
+          }
+        : {}),
+    },
   })
 }

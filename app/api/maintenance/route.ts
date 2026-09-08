@@ -15,8 +15,9 @@ export async function GET(request: Request) {
     return new NextResponse(null, { status: 401 })
   }
   let db: Awaited<ReturnType<typeof clientServeur>>
+  const budgetPurge = AbortSignal.timeout(15_000)
   try {
-    db = await clientServeur()
+    db = await clientServeur(budgetPurge)
   } catch {
     console.error('[maintenance] connexion indisponible')
     return NextResponse.json(
@@ -31,14 +32,22 @@ export async function GET(request: Request) {
 
   // La retention passe avant les envois. Chaque phase rend son propre bilan :
   // une panne de courriel ne doit jamais empecher la destruction des donnees.
-  const purge = await executerLot('purge', () => purgerCoffres(db))
+  const purge = await executerLot('purge', () => purgerCoffres(db, budgetPurge))
   let notifications = { echecs: 1 }
   try {
-    notifications = { echecs: compteur((await livrerNotifications(db)).echecs) }
+    const budget = AbortSignal.timeout(15_000)
+    notifications = {
+      echecs: compteur(
+        (await livrerNotifications(await clientServeur(budget), undefined, budget)).echecs,
+      ),
+    }
   } catch {
     console.error('[maintenance] notifications indisponibles')
   }
-  const courriels = await executerLot('courriels', () => distribuerCourriels(db))
+  const courriels = await executerLot('courriels', async () => {
+    const budget = AbortSignal.timeout(18_000)
+    return distribuerCourriels(await clientServeur(budget), undefined, budget)
+  })
   return NextResponse.json(
     { notifications, courriels, purge },
     { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200 },

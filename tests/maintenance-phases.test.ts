@@ -40,6 +40,33 @@ test('la purge precede notifications puis courriels', async () => {
   )
 })
 
+test('un budget de purge epuise laisse un budget neuf aux notifications et courriels', async () => {
+  const controleurs: AbortController[] = []
+  vi.spyOn(AbortSignal, 'timeout').mockImplementation(() => {
+    const controleur = new AbortController()
+    controleurs.push(controleur)
+    return controleur.signal
+  })
+  doubles.client.mockImplementation(async (signal: AbortSignal) => ({ signal }))
+  doubles.purge.mockImplementation(async (db: { signal: AbortSignal }) => {
+    controleurs[0]!.abort()
+    db.signal.throwIfAborted()
+  })
+  doubles.notifications.mockImplementation(async (db: { signal: AbortSignal }) => {
+    expect(db.signal.aborted).toBe(false)
+    return { echecs: 0 }
+  })
+  doubles.courriels.mockImplementation(async (db: { signal: AbortSignal }) => {
+    expect(db.signal.aborted).toBe(false)
+    return { traites: 1, echecs: 0 }
+  })
+  const bilan = await (await GET(requete())).json()
+  expect(bilan.purge.echecs).toBe(1)
+  expect(bilan.notifications.echecs).toBe(0)
+  expect(bilan.courriels).toEqual({ traites: 1, echecs: 0 })
+  expect(controleurs).toHaveLength(3)
+})
+
 for (const phase of ['notifications', 'courriels', 'purge'] as const) {
   test(`une panne ${phase} ne bloque aucune autre phase ni ne divulgue son erreur`, async () => {
     doubles[phase].mockRejectedValue(new Error('ADRESSE_PRIVEE secret-fictif'))

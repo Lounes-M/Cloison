@@ -6,16 +6,16 @@ dependant de ces elements reste fermee tant que ses conditions ne sont pas reuni
 
 ## Ordre de livraison
 
-| Lot | Perimetre                                                                                                      | Etat                                                      |
-| --- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1   | F01 formulaires lies au dossier affiche ; F07 confirmation des lignes ecrites                                  | Tests cibles verts, livraison en cours                    |
-| 2   | F02 expiration des acces agence ; F19 dernier administrateur ; F14 debit documentaire                          | A implementer avec nouvelle migration et repetition cible |
-| 3   | F03 unite du plafond ; F04 centimes ; F05 version des conditions ; F06 controle indicatif de mention           | A implementer                                             |
-| 4   | F08 renouvellement et deconnexion des porteurs                                                                 | A implementer                                             |
-| 5   | F09 supervision de cadence ; F10 budgets de maintenance ; F11 et F12 livraison des liens et courriels          | A implementer                                             |
-| 6   | F13 limites des documents ; F14 processus et quotas                                                            | A implementer                                             |
-| 7   | F15 chaine contractuelle et adaptateur ; F16 sauvegarde et rotation ; F22 rapprochement des paiements          | A implementer, activation fournisseur distincte           |
-| 8   | F17 pages d'information ; F18 pagination ; F19 gestion des membres ; F20 parcours ; F21 complements et profils | A implementer                                             |
+| Lot | Perimetre                                                                                                      | Etat                                                            |
+| --- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1   | F01 formulaires lies au dossier affiche ; F07 confirmation des lignes ecrites                                  | PR 64 fusionnee, main 32d7d69 ; 621 tests et build locaux verts |
+| 2   | F02 expiration des acces agence ; F19 dernier administrateur ; F14 debit documentaire                          | A implementer avec nouvelle migration et repetition cible       |
+| 3   | F03 unite du plafond ; F04 centimes ; F05 version des conditions ; F06 controle indicatif de mention           | A implementer                                                   |
+| 4   | F08 renouvellement et deconnexion des porteurs                                                                 | A implementer                                                   |
+| 5   | F09 supervision de cadence ; F10 budgets de maintenance ; F11 et F12 livraison des liens et courriels          | A implementer                                                   |
+| 6   | F13 limites des documents ; F14 processus et quotas                                                            | A implementer                                                   |
+| 7   | F15 chaine contractuelle et adaptateur ; F16 sauvegarde et rotation ; F22 rapprochement des paiements          | A implementer, activation fournisseur distincte                 |
+| 8   | F17 pages d'information ; F18 pagination ; F19 gestion des membres ; F20 parcours ; F21 complements et profils | A implementer                                                   |
 
 Les idees produit du rapport sont des ajouts a concevoir avec les regles d'acces
 et les obligations applicables, pas des fonctions declarees livrees par ce tableau.
