@@ -110,3 +110,5 @@ deconnexion porteur et du transport PDF sont detaillees dans
 - Les acces sont controles cote serveur et en base.
 - Les justificatifs expires sont purges ; la conservation de l'acte signe est distincte.
 - Les acces aux pieces sont journalises nominativement.
+
+Le [renouvellement du lien du garant](exploitation/reprise-garant.md) reste accessible au locataire apres transmission, sans modification du dossier.
