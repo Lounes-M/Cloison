@@ -201,3 +201,17 @@ Le rattrapage automatique vise les references historiques et celles des suivis
 recus ; il ne parcourt pas encore toutes les reservations Checkout sans aucun
 webhook. Cette extension, la resolution tracee des anomalies et la facturation
 agence restent ouvertes. Les integrations externes ne sont pas declarees activees.
+
+## Livraison du registre et rescellement administratif
+
+PR83 fusionnee en 75d9214 apres CI finale 34244402408 verte : 834 tests, build,
+restauration et concurrence PostgreSQL native. 0042 appliquee et immuable,
+empreinte et droits reels verifies apres application. Le controle de main et
+la supervision apres deploiement sont suivis separement.
+
+Le lot suivant prepare l'outil administratif de rescellement des cles de dossier
+et des courriels. Inventaire sans ecriture, comparaison de l'ancienne valeur,
+reprise par lots et refus de recreer un contenu supprime. Quatorze tests cibles
+passent apres trois, puis quatre echecs volontaires des gardes. Aucun droit
+applicatif supplementaire ni changement de cle en production. La CI complete
+et la verification native du meme moteur restent a confirmer avant fusion.
