@@ -20,7 +20,7 @@ import { env } from '@/lib/env'
  */
 
 function stripe(): Stripe {
-  return new Stripe(env.stripeSecretKey)
+  return new Stripe(env.stripeSecretKey, { timeout: 5000, maxNetworkRetries: 0 })
 }
 
 /**
@@ -36,23 +36,43 @@ export async function creerSessionLocataire(options: {
   email: string
   retourOk: string
   retourAnnule: string
+  tarifAttendu?: { version: string; montant: number }
 }): Promise<string | null> {
   try {
     const db = await clientServeur()
     const api = stripe()
-    const { error: reservation } = await db
-      .from('sessions_paiement')
-      .upsert(
-        { dossier_id: options.dossierId },
-        { onConflict: 'dossier_id', ignoreDuplicates: true },
-      )
+    const { error: reservation } = await db.from('sessions_paiement').upsert(
+      {
+        dossier_id: options.dossierId,
+        tarif_version: tarifs.versionLocataire,
+        montant_cents: tarifs.locataireCents,
+        devise: 'eur',
+      },
+      { onConflict: 'dossier_id', ignoreDuplicates: true },
+    )
     if (reservation) return null
     const { data: etat, error: lecture } = await db
       .from('sessions_paiement')
-      .select('tentative,session_ref,cree_le')
+      .select('tentative,session_ref,cree_le,tarif_version,montant_cents,devise')
       .eq('dossier_id', options.dossierId)
       .single()
-    if (lecture || !etat) return null
+    if (
+      lecture ||
+      !etat ||
+      typeof etat.tarif_version !== 'string' ||
+      !/^[a-z0-9-]{1,64}$/.test(etat.tarif_version) ||
+      !Number.isSafeInteger(etat.montant_cents) ||
+      etat.montant_cents < 1 ||
+      etat.montant_cents > 100000000 ||
+      etat.devise !== 'eur'
+    )
+      return null
+    if (
+      options.tarifAttendu &&
+      (options.tarifAttendu.version !== etat.tarif_version ||
+        options.tarifAttendu.montant !== etat.montant_cents)
+    )
+      return null
     let tentative = String(etat.tentative)
     if (etat.session_ref) {
       const ancienne = await api.checkout.sessions.retrieve(etat.session_ref)
@@ -82,13 +102,24 @@ export async function creerSessionLocataire(options: {
         payment_method_types: ['card'],
         customer_email: options.email,
         client_reference_id: options.dossierId,
-        metadata: { dossier_id: options.dossierId, reference: options.reference },
+        metadata: {
+          dossier_id: options.dossierId,
+          reference: options.reference,
+          tarif_version: etat.tarif_version,
+        },
+        payment_intent_data: {
+          metadata: {
+            dossier_id: options.dossierId,
+            tarif_version: etat.tarif_version,
+            produit: 'cloison_locataire',
+          },
+        },
         line_items: [
           {
             quantity: 1,
             price_data: {
               currency: 'eur',
-              unit_amount: tarifs.locataireCents,
+              unit_amount: etat.montant_cents,
               product_data: {
                 name: `Dossier Cloison ${options.reference}`,
                 description: 'Trois mois de coffre pour un dossier de garantie locative.',
@@ -159,4 +190,69 @@ export function paiementConfirme(evenement: Stripe.Event): PaiementConfirme | nu
   if (!dossierId || !/^[0-9a-f-]{36}$/.test(dossierId)) return null
 
   return { dossierId, reference: session.id }
+}
+
+/** Lecture fournisseur ciblee, avant de rattacher un remboursement ou un litige. */
+export async function retrouverSessionFinanciere(
+  referencePaiement: string,
+): Promise<{ reference_session: string; le_dossier: string } | null> {
+  if (!/^pi_[A-Za-z0-9_]{1,190}$/.test(referencePaiement))
+    throw new Error('Reference financiere invalide')
+  const resultat = await stripe().checkout.sessions.list({
+    payment_intent: referencePaiement,
+    limit: 2,
+  })
+  if (resultat.data.length === 0) return null
+  if (resultat.has_more || resultat.data.length !== 1) throw new Error('Session financiere ambigue')
+  const session = resultat.data[0]!
+  const dossier = session.metadata?.dossier_id
+  if (!dossier) return null
+  if (
+    session.mode !== 'payment' ||
+    !/^cs_[A-Za-z0-9_]{1,190}$/.test(session.id) ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dossier) ||
+    (session.client_reference_id &&
+      session.client_reference_id.toLowerCase() !== dossier.toLowerCase())
+  )
+    throw new Error('Session financiere incoherente')
+  const paiement =
+    typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id
+  if (paiement !== referencePaiement) throw new Error('Reference financiere incoherente')
+  return { reference_session: session.id, le_dossier: dossier }
+}
+
+/** Snapshot de la session fournisseur ; aucune creation, capture ni restitution de fonds. */
+export async function lireSessionPourRapprochement(referenceSession: string) {
+  if (!/^cs_[A-Za-z0-9_]{1,190}$/.test(referenceSession))
+    throw new Error('Reference financiere invalide')
+  const session = await stripe().checkout.sessions.retrieve(referenceSession)
+  const dossier = session.metadata?.dossier_id
+  const paiement =
+    typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null)
+  if (
+    session.id !== referenceSession ||
+    !dossier ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dossier) ||
+    (session.client_reference_id &&
+      session.client_reference_id.toLowerCase() !== dossier.toLowerCase()) ||
+    session.mode !== 'payment' ||
+    !Number.isSafeInteger(session.amount_total) ||
+    session.amount_total! < 1 ||
+    session.amount_total! > 100000000 ||
+    !session.currency ||
+    !/^[a-z]{3}$/.test(session.currency) ||
+    (paiement !== null && !/^pi_[A-Za-z0-9_]{1,190}$/.test(paiement))
+  )
+    throw new Error('Session financiere incoherente')
+  return {
+    reference_session: referenceSession,
+    reference_paiement: paiement,
+    le_dossier: dossier,
+    montant: session.amount_total!,
+    devise: session.currency,
+    version_tarif: session.metadata?.tarif_version ?? 'locataire-2026-09-04',
+    paye: session.payment_status === 'paid',
+  }
 }

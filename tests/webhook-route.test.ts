@@ -1,8 +1,17 @@
 import { NextRequest } from 'next/server'
 import Stripe from 'stripe'
+import type * as PaiementStripe from '@/lib/paiement/stripe'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
-const { rpc, serveur } = vi.hoisted(() => ({ rpc: vi.fn(), serveur: vi.fn() }))
+const { rpc, serveur, retrouver } = vi.hoisted(() => ({
+  rpc: vi.fn(),
+  serveur: vi.fn(),
+  retrouver: vi.fn(),
+}))
+vi.mock('@/lib/paiement/stripe', async (importOriginal) => ({
+  ...(await importOriginal<typeof PaiementStripe>()),
+  retrouverSessionFinanciere: retrouver,
+}))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: serveur }))
 vi.mock('@/lib/env', () => ({
   env: {
@@ -16,12 +25,13 @@ const ADRESSE = 'webhook-confidentiel@example.invalid'
 const SECRET = 'secret-fictif-ne-pas-journaliser'
 const DOSSIER = '11111111-1111-4111-8111-111111111111'
 const stripe = new Stripe('sk_test_webhook_fixture')
-function requete(signatureValide = true, type = 'checkout.session.completed') {
+function requete(signatureValide = true, type = 'checkout.session.completed', objet?: unknown) {
   const payload = JSON.stringify({
     id: 'evt_fixture',
+    created: 1767225600,
     type,
     data: {
-      object: {
+      object: objet ?? {
         id: 'cs_fixture',
         customer_email: ADRESSE,
         payment_status: 'paid',
@@ -46,10 +56,44 @@ function requete(signatureValide = true, type = 'checkout.session.completed') {
 beforeEach(() => {
   vi.clearAllMocks()
   serveur.mockResolvedValue({ rpc })
-  rpc.mockResolvedValue({ data: true, error: null })
+  rpc.mockResolvedValue({ data: { marque: true, anomalie: false }, error: null })
   vi.spyOn(console, 'error').mockImplementation(() => {})
 })
 afterEach(() => vi.restoreAllMocks())
+
+const remboursement = () =>
+  requete(true, 'charge.refunded', {
+    id: 'ch_fixture',
+    payment_intent: 'pi_fixture',
+    amount_refunded: 500,
+    currency: 'eur',
+  })
+test('un remboursement necrit que le contexte verifie chez le fournisseur', async () => {
+  retrouver.mockResolvedValueOnce({ reference_session: 'cs_fixture', le_dossier: DOSSIER })
+  rpc.mockResolvedValueOnce({ data: true, error: null })
+  expect((await POST(remboursement())).status).toBe(200)
+  expect(retrouver).toHaveBeenCalledExactlyOnceWith('pi_fixture')
+  expect(rpc).toHaveBeenCalledWith(
+    'enregistrer_suivi_paiement',
+    expect.objectContaining({ reference_session: 'cs_fixture', le_dossier: DOSSIER, montant: 500 }),
+  )
+})
+test('un remboursement exterieur a Cloison necrit aucune ligne', async () => {
+  retrouver.mockResolvedValueOnce(null)
+  expect((await POST(remboursement())).status).toBe(200)
+  expect(serveur).not.toHaveBeenCalled()
+})
+test('une attribution fournisseur indisponible fait rejouer le remboursement', async () => {
+  retrouver.mockRejectedValueOnce(new Error(SECRET))
+  expect((await POST(remboursement())).status).toBe(503)
+  expect(serveur).not.toHaveBeenCalled()
+  verifierConfidentialite()
+})
+test('un remboursement sans confirmation SQL est rejouable', async () => {
+  retrouver.mockResolvedValueOnce({ reference_session: 'cs_fixture', le_dossier: DOSSIER })
+  rpc.mockResolvedValueOnce({ data: null, error: null })
+  expect((await POST(remboursement())).status).toBe(503)
+})
 function verifierConfidentialite() {
   const traces = JSON.stringify(vi.mocked(console.error).mock.calls)
   for (const sensible of [ADRESSE, SECRET, DOSSIER, 'cs_fixture'])
@@ -75,16 +119,22 @@ test('un paiement signe valide appelle le marquage avec les references attendues
   const reponse = await POST(requete())
   expect(reponse.status).toBe(200)
   expect(await reponse.json()).toEqual({ recu: true, marque: true })
-  expect(rpc).toHaveBeenCalledExactlyOnceWith('marquer_dossier_paye', {
+  expect(rpc).toHaveBeenCalledExactlyOnceWith('enregistrer_paiement_locataire', {
     le_dossier: DOSSIER,
-    la_reference: 'cs_fixture',
+    reference_session: 'cs_fixture',
+    reference_paiement: null,
+    evenement: 'evt_fixture',
+    montant: 900,
+    devise: 'eur',
+    version_tarif: 'locataire-2026-09-04',
+    survenu: '2026-01-01T00:00:00.000Z',
   })
   expect(console.error).not.toHaveBeenCalled()
 })
 
 for (const [code, statut, message] of [
-  ['23505', 200, '[paiement] marquage refuse'],
-  ['42501', 503, '[paiement] marquage a rejouer'],
+  ['23505', 503, '[paiement] webhook a rejouer'],
+  ['42501', 503, '[paiement] webhook a rejouer'],
 ] as const) {
   test(`le refus SQL ${code} preserve la reponse metier sans journaliser details ou paiement`, async () => {
     rpc.mockResolvedValue({
@@ -98,9 +148,7 @@ for (const [code, statut, message] of [
     })
     const reponse = await POST(requete())
     expect(reponse.status).toBe(statut)
-    expect(await reponse.json()).toEqual(
-      statut === 200 ? { recu: true, marque: false, anomalie: true } : { recu: false },
-    )
+    expect(await reponse.json()).toEqual({ recu: false })
     verifierConfidentialite()
     expect(console.error).toHaveBeenCalledExactlyOnceWith(message)
   })
@@ -141,4 +189,16 @@ test('un webhook trop grand est refuse avant signature et SQL meme sans longueur
 test('le marquage recoit un signal reseau borne', async () => {
   expect((await POST(requete())).status).toBe(200)
   expect(serveur).toHaveBeenCalledWith(expect.any(AbortSignal))
+})
+
+test.each([
+  null,
+  undefined,
+  true,
+  { marque: true },
+  { marque: 'true', anomalie: false },
+  { marque: true, anomalie: false, prive: 'x' },
+])('une reponse de registre ambigue %j demande un rejeu', async (data) => {
+  rpc.mockResolvedValue({ data, error: null })
+  expect((await POST(requete())).status).toBe(503)
 })

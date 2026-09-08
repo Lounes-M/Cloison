@@ -272,14 +272,20 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     const avantPaiement = await etatPaiement()
     assert.equal(avantPaiement.paye_le, null)
     assert.equal(avantPaiement.paiement_ref, null)
+    const dateEvenement = Math.floor(Date.now() / 1000)
     const evenement = (surcharge = {}) => ({
-      id: 'evt_parcours_fictif',
+      id:
+        'evt_parcours_fictif' +
+        (Object.keys(surcharge).length ? '_' + Object.keys(surcharge).join('_') : ''),
+      created: dateEvenement,
       object: 'event',
       type: 'checkout.session.completed',
       livemode: false,
       data: {
         object: {
-          id: 'cs_test_parcours_fictif',
+          id:
+            'cs_test_parcours_fictif' +
+            (Object.keys(surcharge).length ? '_' + Object.keys(surcharge).join('_') : ''),
           object: 'checkout.session',
           payment_status: 'paid',
           mode: 'payment',
@@ -339,8 +345,9 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
       'Rejeu sans nouveau marquage ni prolongation',
     )
     assert.equal(
-      appels.filter((a) => a.chemin === '/rpc/marquer_dossier_paye' && a.statut === 200).length,
-      2,
+      appels.filter((a) => a.chemin === '/rpc/enregistrer_paiement_locataire' && a.statut === 200)
+        .length,
+      4,
     )
     noter('rejeu du webhook : reference, date de paiement et echeance SQL strictement inchangees')
     assert(appels.some((a) => a.chemin === '/rpc/jeton_est_actif' && a.statut === 200))
