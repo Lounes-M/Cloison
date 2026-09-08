@@ -79,7 +79,8 @@ export const engagement = {
     { valeur: 'loyer', libelle: 'Le loyer seul' },
   ] as const,
   montant: 'Montant maximum, au total',
-  montantAide: 'En euros. Laisse vide si tu ne veux pas de plafond.',
+  montantAide:
+    'En euros, pour la totalité de ton engagement. Un montant maximum est nécessaire pour préparer ta mention. Les centimes sont acceptés.',
   jusquAu: 'Jusqu’au',
   jusquAuAide: 'Laisse vide pour la durée du bail.',
   solidaire: 'Caution solidaire',
@@ -121,7 +122,8 @@ export const mention = {
   bouton: 'Apposer ma mention',
   corriger: 'Corriger ma mention',
   envoi: 'Vérification…',
-  succes: 'Mention apposée. L’acte peut être préparé.',
+  succes:
+    'Mention enregistrée. Les éléments repérés automatiquement restent à examiner avant la signature.',
   manques: {
     caution: 'On ne lit pas que tu t’engages en qualité de caution.',
     paiement: 'On ne lit pas que tu paieras en cas de défaillance du locataire.',

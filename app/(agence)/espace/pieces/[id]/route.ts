@@ -36,7 +36,21 @@ export async function GET(_requete: NextRequest, { params }: { params: Promise<{
   // les deux dirait ce qui existe.
   if (!ouverture.ouverte) return new NextResponse(ouverture.raison, { status: 404 })
 
-  return new NextResponse(new Uint8Array(ouverture.pdf), {
+  // Vercel borne les reponses tamponnees a 4,5 Mo. Le flux ne commence
+  // qu'apres autorisation, journalisation et rasterisation completes.
+  let position = 0
+  const flux = new ReadableStream<Uint8Array>({
+    pull(controleur) {
+      if (position >= ouverture.pdf.length) {
+        controleur.close()
+        return
+      }
+      const fin = Math.min(position + 64 * 1024, ouverture.pdf.length)
+      controleur.enqueue(new Uint8Array(ouverture.pdf.subarray(position, fin)))
+      position = fin
+    },
+  })
+  return new NextResponse(flux, {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="piece-${id.slice(0, 8)}.pdf"`,
