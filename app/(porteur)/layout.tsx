@@ -1,6 +1,8 @@
 import { connection } from 'next/server'
 
 import { Logo } from '@/components/brand/Logo'
+import { quitterMonDossier } from '@/lib/acces/action-porteur'
+import { sessionPorteur } from '@/lib/content/session-porteur'
 
 /**
  * L'espace des porteurs de lien : le locataire et le garant.
@@ -22,8 +24,16 @@ export default async function LayoutPorteur({ children }: { children: React.Reac
 
   return (
     <div className="bg-paper flex min-h-dvh flex-col">
-      <header className="border-ink flex items-center border-b-2 px-6 py-5 md:px-10">
+      <header className="border-ink flex flex-wrap items-center justify-between gap-4 border-b-2 px-6 py-5 md:px-10">
         <Logo className="text-2xl" />
+        <form action={quitterMonDossier}>
+          <button
+            type="submit"
+            className="cursor-pointer text-sm font-bold underline underline-offset-4"
+          >
+            {sessionPorteur.quitter}
+          </button>
+        </form>
       </header>
 
       <main className="flex flex-1 justify-center px-6 py-12 md:px-10 md:py-16">{children}</main>

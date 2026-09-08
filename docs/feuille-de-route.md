@@ -102,6 +102,10 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 
 ## Regles produit
 
+Les corrections du plafond, des centimes, de la preparation de mention, de la
+deconnexion porteur et du transport PDF sont detaillees dans
+[Montants et documents](exploitation/montants-et-documents.md).
+
 - Le garant ne paie jamais.
 - Le locataire ne voit ni piece ni montant.
 - Le garant retrouve son original ; le filigrane concerne la restitution agence.

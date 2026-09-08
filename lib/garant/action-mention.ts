@@ -75,16 +75,19 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     .eq('dossier_id', dossierId)
     .maybeSingle()
 
-  if (!engagement) {
+  if (!engagement || !engagement.montant_max_cents) {
     return {
       statut: 'erreur',
-      message: 'Declare d abord ce que tu couvres, plus haut sur cette page.',
+      message: 'Enregistre d abord un montant maximum dans la partie consacrée à ton engagement.',
       valeurs,
     }
   }
 
   const verdict = verifierMention(analyse.data.mention, Boolean(engagement.solidaire))
-  if (!verdict.ok || verdict.montantEuros * 100 !== Number(engagement.montant_max_cents)) {
+  if (
+    !verdict.ok ||
+    Math.round(verdict.montantEuros * 100) !== Number(engagement.montant_max_cents)
+  ) {
     return {
       statut: 'erreur',
       message: 'Il manque quelque chose a ta mention.',
