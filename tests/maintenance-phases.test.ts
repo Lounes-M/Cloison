@@ -7,6 +7,7 @@ const doubles = vi.hoisted(() => ({
   courriels: vi.fn(),
   purge: vi.fn(),
   liens: vi.fn(),
+  rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
 vi.mock('@/lib/courriels/notifications', () => ({ livrerNotifications: doubles.notifications }))
@@ -21,7 +22,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.stubEnv('CRON_SECRET', 'secret-fictif')
   vi.spyOn(console, 'error').mockImplementation(() => {})
-  doubles.client.mockResolvedValue({})
+  doubles.rpc.mockResolvedValue({ data: true, error: null })
+  doubles.client.mockResolvedValue({ rpc: doubles.rpc })
   doubles.notifications.mockResolvedValue({ echecs: 0 })
   doubles.courriels.mockResolvedValue({ traites: 2, echecs: 0 })
   doubles.purge.mockResolvedValue({ traites: 3, echecs: 0 })
@@ -135,3 +137,26 @@ test('une panne de preparation des liens laisse les autres phases fonctionner', 
   expect(doubles.courriels).toHaveBeenCalledOnce()
   expect(doubles.purge).toHaveBeenCalledOnce()
 })
+
+test('le jeton Supabase dedie peut lancer la maintenance', async () => {
+  vi.stubEnv('CRON_SUPABASE_SECRET', 'second-secret-fictif')
+  const resultat = await GET(
+    new Request('https://example.test/api/maintenance', {
+      headers: { authorization: 'Bearer second-secret-fictif' },
+    }),
+  )
+  expect(resultat.status).toBe(200)
+  expect(doubles.rpc).toHaveBeenCalledWith('confirmer_maintenance')
+})
+test('une phase en echec ne confirme pas une execution reussie', async () => {
+  doubles.purge.mockResolvedValue({ traites: 0, echecs: 1 })
+  expect((await GET(requete())).status).toBe(503)
+  expect(doubles.rpc).not.toHaveBeenCalled()
+})
+test.each([false, null, undefined])(
+  'une confirmation SQL %s refuse un faux succes',
+  async (data) => {
+    doubles.rpc.mockResolvedValue({ data, error: null })
+    expect((await GET(requete())).status).toBe(503)
+  },
+)

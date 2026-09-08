@@ -3,7 +3,7 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { ageMaintenance, verifierCadence } from '../scripts/verifier-cadence.mjs'
 const maintenant = Date.parse('2026-09-08T10:00:00Z')
 const rapport = (date: string) => ({
-  workflow_runs: [{ status: 'completed', conclusion: 'success', run_started_at: date }],
+  derniere_reussite: date,
 })
 afterEach(() => vi.unstubAllGlobals())
 test('une maintenance ancienne, absente ou future ne produit pas un faux vert', () => {
@@ -27,9 +27,11 @@ test('une configuration pouvant sortir de GitHub ne recoit pas le jeton', async 
 test('une erreur HTTP ne devient pas une maintenance reussie', async () => {
   const appel = vi.fn(async () => new Response('{}', { status: 503 }))
   vi.stubGlobal('fetch', appel)
-  await expect(verifierCadence('Lounes-M/Cloison', 'fixture')).rejects.toThrow()
+  await expect(
+    verifierCadence('https://www.cloison.immo/api/maintenance/etat', 'fixture'),
+  ).rejects.toThrow()
   expect(appel).toHaveBeenCalledWith(
-    expect.stringMatching(/^https:\/\/api.github.com\//),
+    'https://www.cloison.immo/api/maintenance/etat',
     expect.objectContaining({ redirect: 'error', signal: expect.any(AbortSignal) }),
   )
 })

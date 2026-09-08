@@ -11,9 +11,13 @@ export async function GET(requete: Request) {
   if (!secret || recu.length !== attendu.length || !timingSafeEqual(recu, attendu))
     return new NextResponse(null, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   try {
-    const db = await clientServeur()
+    const db = await clientServeur(AbortSignal.timeout(10_000))
     const { data, error } = await db.rpc('empreinte_schema')
     if (error || !schemaConforme(data, reference)) throw new Error('Schema non conforme')
+    // Ne lire aucun entete : une requete vide suffit a verifier la frontiere API.
+    const reseau = await db.schema('net').from('http_request_queue').select('id').limit(0)
+    if (reseau.error?.code !== 'PGRST106' || reseau.data !== null)
+      throw new Error('Schema reseau expose ou controle indisponible')
     return NextResponse.json({ conforme: true }, { headers: { 'Cache-Control': 'no-store' } })
   } catch {
     console.error('[schema] controle indisponible ou derive detectee')
