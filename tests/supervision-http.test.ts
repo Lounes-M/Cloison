@@ -4,6 +4,7 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 import { expect, test } from 'vitest'
 import { lireRapportSupervision, contientAlertes } from '@/lib/exploitation/supervision.mjs'
 // @ts-expect-error Programme Node autonome egalement execute par GitHub Actions.
@@ -96,7 +97,7 @@ for (const cas of ['normal', 'alerte', 'invalide', 'reseau', 'http']) {
       writeFileSync(loader, source)
       const execution = spawnSync(
         process.execPath,
-        ['--import', loader, resolve('scripts/executer-supervision.mjs')],
+        ['--import', pathToFileURL(loader).href, resolve('scripts/executer-supervision.mjs')],
         {
           env: { ...process.env, CRON_SECRET: 'fixture-secrete' },
           encoding: 'utf8',

@@ -114,8 +114,12 @@ test('restaure une vraie base PGlite et ouvre un objet avec une cle maitresse fi
   } finally {
     await restauree.close()
   }
-  expect((await stat(contexte.archive)).mode & 0o777).toBe(0o600)
-  expect((await stat(contexte.cible)).mode & 0o777).toBe(0o700)
+  // Windows expose des bits synthetiques ; ils ne prouvent pas les ACL NTFS.
+  // Le test CLI ci-dessous exige donc un refus sur cette plateforme.
+  if (process.platform !== 'win32') {
+    expect((await stat(contexte.archive)).mode & 0o777).toBe(0o600)
+    expect((await stat(contexte.cible)).mode & 0o777).toBe(0o700)
+  }
 })
 
 test('refuse mauvaise cle et archive alteree sans creer la destination', async () => {
@@ -138,9 +142,13 @@ test('refuse ecrasement de sauvegarde, de cible et liens symboliques', async () 
   await writeFile(join(c.cible, 'temoin'), 'ne pas effacer')
   await expect(restaurer(c.archive, c.cible, c.cle)).rejects.toThrow()
   expect(await readFile(join(c.cible, 'temoin'), 'utf8')).toBe('ne pas effacer')
-  await symlink(c.cible, join(c.racine, 'alias'))
+  await symlink(c.cible, join(c.racine, 'alias'), process.platform === 'win32' ? 'junction' : 'dir')
   await expect(restaurer(c.archive, join(c.racine, 'alias/nouvelle'), c.cle)).rejects.toThrow()
-  await symlink(join(c.cible, 'temoin'), join(c.source, 'objets/lien'))
+  if (process.platform === 'win32') {
+    await symlink(c.cible, join(c.source, 'objets/lien'), 'junction')
+  } else {
+    await symlink(join(c.cible, 'temoin'), join(c.source, 'objets/lien'))
+  }
   await expect(sauvegarder(c.source, join(c.racine, 'autre'), c.cle)).rejects.toThrow()
 })
 
@@ -173,8 +181,13 @@ test('la commande lit une cle privee par descripteur sans la journaliser', async
       ['scripts/sauvegarde-locale.mjs', 'creer', c.source, c.archive],
       { stdio: ['ignore', 'pipe', 'pipe', fd], encoding: 'utf8' },
     )
-    expect(resultat.status, resultat.stderr).toBe(0)
-    expect(JSON.parse(resultat.stdout).fichiers).toBe(2)
+    if (process.platform === 'win32') {
+      expect(resultat.status).toBe(1)
+      await expect(stat(c.archive)).rejects.toThrow()
+    } else {
+      expect(resultat.status, resultat.stderr).toBe(0)
+      expect(JSON.parse(resultat.stdout).fichiers).toBe(2)
+    }
     expect(resultat.stdout + resultat.stderr).not.toContain(c.cle.toString('hex'))
     expect(resultat.stdout + resultat.stderr).not.toContain(c.cle.toString('base64'))
   } finally {
