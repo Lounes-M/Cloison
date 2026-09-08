@@ -88,6 +88,8 @@ export function naturesDuProfil(profil: ProfilRessources) {
   return natures.filter((nature) => [...communes, ...propres[profil]].includes(nature.valeur))
 }
 export const documentsDeclares = {
+  profil: (libelle: string) => `Liste adaptée à ta situation : ${libelle.toLowerCase()}.`,
+  changerProfil: 'Changer ma situation',
   nombre: 'Nombre de documents dans ce fichier',
   aide: 'Indique les justificatifs distincts, pas le nombre de pages. Le contenu sera examiné par l’agence.',
   bilan: (nombre: number) =>
@@ -125,7 +127,7 @@ export const engagement = {
   profil: 'Ta situation professionnelle',
   profilInvalide: 'Choisis une situation professionnelle proposée.',
   profilAide:
-    'Elle adapte la liste des justificatifs. Les revenus restent déclarés et seront comparés aux pièces par l’agence.',
+    'Enregistre ta situation pour adapter la liste des justificatifs. Les revenus restent déclarés et seront comparés aux pièces par l’agence.',
   revenuAide:
     'En euros, ce que tu touches au total après impôt à la source. L’agence compare cette déclaration à tes justificatifs de revenus. Vide, le dossier reste en attente.',
   couvre: 'Tu couvres',

@@ -17,6 +17,7 @@ import {
   mention as texteMention,
   natures,
   naturesDuProfil,
+  profilsRessources,
   documentsDeclares,
   type ProfilRessources,
 } from '@/lib/content/garant'
@@ -164,6 +165,14 @@ export default async function PageGarant({
         <h2 className="font-display text-2xl uppercase">{depot.piecesTitre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
         <p className="text-muted mb-6 text-sm">{documentsDeclares.presence}</p>
+        <p className="mb-6 text-sm">
+          {documentsDeclares.profil(profilsRessources.find((p) => p.valeur === profil)!.libelle)}
+          {ouvert ? (
+            <a href="#engagement" className="ml-2 font-bold underline">
+              {documentsDeclares.changerProfil}
+            </a>
+          ) : null}
+        </p>
 
         <ol className="flex flex-col gap-8">
           {visibles.map((nature) => {
@@ -191,7 +200,7 @@ export default async function PageGarant({
                         key={piece.id}
                         className="bg-paper outlined flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3"
                       >
-                        <span className="flex items-center gap-2 text-[14px] font-medium">
+                        <span className="flex flex-wrap items-center gap-2 text-[14px] font-medium">
                           <Icone nom="fichier" className="size-4" />
                           {tailleLisible(piece.taille_octets)}
                           <span>{documentsDeclares.bilan(piece.nombre_documents ?? 1)}</span>
@@ -299,7 +308,7 @@ export default async function PageGarant({
           />
         ) : null}
       </section>
-      <section className="mt-14">
+      <section id="engagement" className="mt-14">
         <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
           {texteEngagement.aide}
