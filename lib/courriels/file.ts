@@ -1,8 +1,8 @@
 import 'server-only'
 import { Resend } from 'resend'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { ouvrir } from '@/lib/coffre/enveloppe'
-import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
+import { ouvrirMaitresse } from '@/lib/coffre/rotation-maitresse'
+
 import { env } from '@/lib/env'
 
 export async function distribuerCourriels(
@@ -24,7 +24,7 @@ export async function distribuerCourriels(
     let referenceFournisseur: string | null = null
     try {
       const contenu = JSON.parse(
-        ouvrir(Buffer.from(message.contenu, 'base64'), cleMaitresse()).toString('utf8'),
+        ouvrirMaitresse(Buffer.from(message.contenu, 'base64')).toString('utf8'),
       )
       // Dix messages maximum par bail : 30 secondes de transport au plus.
       // Le signal traverse le SDK jusqu'a fetch, sans simple course de promesses.

@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { cleMaitresse } from './cle-maitresse'
+import { ouvrirMaitresse } from './rotation-maitresse'
 import { ouvrir } from './enveloppe'
 import { rasteriser } from './rasterisation'
 import type { TypeAccepte } from './type-reel'
@@ -103,7 +103,7 @@ export async function ouvrirPiecePourLAgence(
     // puis la piece par la cle du dossier. Un octet modifie a l'une ou l'autre
     // etape leve, plutot que de rendre des octets qu'on prendrait pour un
     // document.
-    contenu = ouvrir(scelle, ouvrir(scellee, cleMaitresse()))
+    contenu = ouvrir(scelle, ouvrirMaitresse(scellee))
   } catch {
     console.error('[coffre] dechiffrement impossible')
     return { ouverte: false, raison: INDISPONIBLE }

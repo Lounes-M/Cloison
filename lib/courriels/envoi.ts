@@ -3,8 +3,8 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { clientServeur } from '@/lib/acces/serveur'
-import { sceller } from '@/lib/coffre/enveloppe'
-import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
+import { scellerMaitresse } from '@/lib/coffre/rotation-maitresse'
+
 import { distribuerCourriels } from './file'
 
 import { env } from '@/lib/env'
@@ -40,7 +40,7 @@ export async function envoyer(
       contexte?.lien ? 'mettre_lien_en_file' : 'mettre_courriel_en_file',
       {
         identifiant: id,
-        chiffre: sceller(Buffer.from(JSON.stringify(contenu)), cleMaitresse()).toString('base64'),
+        chiffre: scellerMaitresse(Buffer.from(JSON.stringify(contenu))).toString('base64'),
       },
     )
     if (error || (contexte?.lien && data !== true)) return false
