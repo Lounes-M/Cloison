@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: supervision-production
   cancel-in-progress: false
@@ -26,3 +27,8 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: node scripts/verifier-schema-distant.mjs
+      - name: Maintenance recente confirmee
+        if: ${{ !cancelled() }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/verifier-cadence.mjs

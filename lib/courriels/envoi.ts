@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { randomUUID } from 'node:crypto'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { clientServeur } from '@/lib/acces/serveur'
 import { sceller } from '@/lib/coffre/enveloppe'
 import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
@@ -20,12 +21,14 @@ export async function envoyer(
   identifiant?: string,
   repondreA?: string,
   differer = false,
+  contexte?: { db: SupabaseClient; signal?: AbortSignal },
 ): Promise<boolean> {
   const destinataires = Array.isArray(a) ? a.filter(Boolean) : [a]
   if (destinataires.length === 0) return false
   try {
     const id = identifiant ?? randomUUID()
-    const db = await clientServeur()
+    contexte?.signal?.throwIfAborted()
+    const db = contexte?.db ?? (await clientServeur())
     const contenu = {
       from: env.emailExpediteur,
       ...((repondreA ?? env.emailSupport) ? { replyTo: repondreA ?? env.emailSupport } : {}),

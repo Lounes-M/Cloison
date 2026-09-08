@@ -89,22 +89,30 @@ export async function prevenirSiLeStatutAChange(
   }
 }
 
-export async function livrerNotifications(db: SupabaseClient, dossierId?: string) {
+export async function livrerNotifications(
+  db: SupabaseClient,
+  dossierId?: string,
+  signal?: AbortSignal,
+) {
   const { data, error } = await db.rpc('notifications_a_livrer', {
     le_dossier: dossierId ?? null,
   })
   if (error) throw new Error('Notifications indisponibles')
   let echecs = 0
   for (const evenement of data ?? []) {
+    signal?.throwIfAborted()
     let accepte = true
     for (const envoi of courrielsPour(evenement.dossier as Dossier, evenement.contacts ?? [])) {
       for (const adresse of Array.isArray(envoi.a) ? envoi.a : [envoi.a]) {
+        signal?.throwIfAborted()
         const hex = createHash('sha256')
           .update(`${evenement.id}:${envoi.categorie}:${adresse}`)
           .digest('hex')
           .slice(0, 32)
         const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
-        if (!(await envoyer(adresse, envoi.sujet, envoi.texte, id, undefined, true)))
+        if (
+          !(await envoyer(adresse, envoi.sujet, envoi.texte, id, undefined, true, { db, signal }))
+        )
           accepte = false
       }
     }
