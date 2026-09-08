@@ -51,13 +51,18 @@ test('un transport sans reponse est annule puis repris avec la meme cle Resend',
         ? [{ id: '11111111-1111-4111-8111-111111111111', contenu: '', bail: 'bail-fictif' }]
         : nom === 'etat_file_courriels'
           ? 0
-          : null,
+          : nom === 'acquitter_courriel'
+            ? true
+            : null,
     error: null,
   }))
   const db = { rpc } as unknown as SupabaseClient
   expect(await distribuerCourriels(db)).toEqual({ traites: 0, echecs: 1 })
   expect(annule).toBe(true)
-  expect(rpc).toHaveBeenCalledWith('terminer_courriel', expect.objectContaining({ reussi: false }))
+  expect(rpc).toHaveBeenCalledWith(
+    'acquitter_courriel',
+    expect.objectContaining({ reference_fournisseur: null }),
+  )
   expect(await distribuerCourriels(db)).toEqual({ traites: 1, echecs: 0 })
   expect(cles).toEqual([
     'courriel/11111111-1111-4111-8111-111111111111',
