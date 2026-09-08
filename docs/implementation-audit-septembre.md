@@ -10,8 +10,8 @@ dependant de ces elements reste fermee tant que ses conditions ne sont pas reuni
 | --- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | 1   | F01 formulaires lies au dossier affiche ; F07 confirmation des lignes ecrites                                  | PR 64 fusionnee, main 32d7d69 ; 621 tests et build locaux verts |
 | 2   | F02 expiration des acces agence ; F19 dernier administrateur ; F14 debit documentaire                          | F02 livre PR67, 0033 appliquee ; F19 prepare ; F14 ouvert       |
-| 3   | F03 unite du plafond ; F04 centimes ; F05 version des conditions ; F06 controle indicatif de mention           | Integre a PR68, migration 0034 preparee                         |
-| 4   | F08 renouvellement et deconnexion des porteurs                                                                 | Integre a PR68, reprise et deconnexion verifiees                |
+| 3   | F03 unite du plafond ; F04 centimes ; F05 version des conditions ; F06 controle indicatif de mention           | Livre PR68, migration 0034 appliquee                            |
+| 4   | F08 renouvellement et deconnexion des porteurs                                                                 | Livre PR68, reprise et deconnexion verifiees                    |
 | 5   | F09 supervision de cadence ; F10 budgets de maintenance ; F11 et F12 livraison des liens et courriels          | F09/F10 livres PR69 ; livraison des courriels ouverte           |
 | 6   | F13 limites des documents ; F14 processus et quotas                                                            | Flux PDF dans PR68 ; quotas globaux et traitement ouverts       |
 | 7   | F15 chaine contractuelle et adaptateur ; F16 sauvegarde et rotation ; F22 rapprochement des paiements          | A implementer, activation fournisseur distincte                 |
@@ -70,7 +70,19 @@ sur ordinateur, puis la redirection de deconnexion, sont verifies dans Next
 local. La reception des courriels et un gros PDF sur Vercel restent des essais
 fournisseur distincts.
 
-0034 est preparee et non appliquee a ce stade. Sa repetition Supabase sous le
+0034 est appliquee et immuable apres la fusion de PR68, main 6ce4e03. Sa repetition Supabase sous le
 role porteur_lien passe et annule les fixtures. La CI a detecte un droit anon
 implicite sur le declencheur ; il est retire explicitement et le contre-test
 est vert. Les documents de deploiement et empreintes incluent la correction.
+
+PR68 : 677 tests dans 78 suites, controle local et build verts, deux traces
+documentaires executees. CI finale 34214921067 verte. Droits et empreinte
+verifies apres application de 0034. PR70 et PR71 sont remplacees par cette
+livraison commune.
+
+Le lot administrateur ajoute 0035 et ses essais. Aucune agence de production
+sans administrateur au controle prealable. La repetition des droits sous
+authenticated passe et annule les fixtures. CI preparatoire 34215269359 verte,
+y compris sabotage et concurrence sur deux connexions en Read Committed et
+Repeatable Read. La migration attend sa CI finale apres rebase, puis son
+application explicite.
