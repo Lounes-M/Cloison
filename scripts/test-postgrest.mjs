@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url'
 import { Client } from 'pg'
 import { SignJWT } from 'jose'
 import { verifierConcurrenceDepot } from './verifier-concurrence-depot.mjs'
+import { verifierConcurrenceAdministrateurs } from './verifier-concurrence-administrateurs.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -142,6 +143,22 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
     else {
       await verifierPostgrest(db, adresse, secret)
       await verifierConcurrenceDepot(connexion)
+      await db.query(
+        'alter table public.membres_agence disable trigger membre_conserve_administrateur',
+      )
+      try {
+        await assert.rejects(
+          verifierConcurrenceAdministrateurs(connexion),
+          /La seconde retrogradation doit attendre/,
+        )
+        console.log('OK : sabotage de la garde administrateur detecte')
+      } finally {
+        await db.query(
+          'alter table public.membres_agence enable trigger membre_conserve_administrateur',
+        )
+      }
+      await verifierConcurrenceAdministrateurs(connexion)
+      console.log('OK : dernier administrateur preserve sur deux connexions et deux isolations')
     }
   } finally {
     await db.end()
