@@ -436,7 +436,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       clients: process.env.PG_RESTAURATION_CLIENTS,
     })
     console.log(JSON.stringify(resultat))
-  } catch {
+  } catch (erreur) {
+    if (
+      /^Restauration differente : (tables|contraintes|politiques|fonctions|roles|adhesions)$/.test(
+        erreur?.message ?? '',
+      )
+    )
+      console.error(erreur.message)
     console.error(
       'Exercice de restauration refuse ou incomplet. Verifier les clusters jetables et les clients17 ; aucune sortie de dump journalisee.',
     )
