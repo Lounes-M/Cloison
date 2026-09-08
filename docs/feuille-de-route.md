@@ -102,6 +102,10 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 
 ## Regles produit
 
+Les corrections du plafond, des centimes, de la preparation de mention, de la
+deconnexion porteur et du transport PDF sont detaillees dans
+[Montants et documents](exploitation/montants-et-documents.md).
+
 - Le garant ne paie jamais.
 - Le locataire ne voit ni piece ni montant.
 - Le garant retrouve son original ; le filigrane concerne la restitution agence.
@@ -109,3 +113,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - Les acces sont controles cote serveur et en base.
 - Les justificatifs expires sont purges ; la conservation de l'acte signe est distincte.
 - Les acces aux pieces sont journalises nominativement.
+
+Le versionnement des conditions et l'invalidation de la mention sont decrits dans [le runbook dedie](exploitation/conditions-engagement.md). La migration 0034 exige son deploiement explicite avant le code.
+
+Le [renouvellement du lien du garant](exploitation/reprise-garant.md) reste accessible au locataire apres transmission, sans modification du dossier.

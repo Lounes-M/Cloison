@@ -3,6 +3,7 @@
 import { useActionState, useId } from 'react'
 
 import { engagement as texte } from '@/lib/content/garant'
+import { conditionsEngagement } from '@/lib/content/conditions-engagement'
 import { declarerMonEngagement, type EtatEngagement } from '@/lib/garant/action-engagement'
 import { cn } from '@/lib/utils'
 
@@ -31,9 +32,11 @@ export type EngagementAffiche = {
 export function FormulaireEngagement({
   actuel,
   dossierId,
+  version,
 }: {
   actuel: EngagementAffiche
   dossierId: string
+  version: number
 }) {
   const [etat, envoyer, enCours] = useActionState(declarerMonEngagement, ETAT_INITIAL)
   const id = useId()
@@ -41,6 +44,8 @@ export function FormulaireEngagement({
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
+      <input type="hidden" name="versionConditions" value={version} />
+      <p className="text-muted text-[13px] font-medium">{conditionsEngagement.modification}</p>
       {etat.statut === 'enregistre' ? (
         <p
           role="status"

@@ -32,10 +32,12 @@ export function FormulaireMention({
   dossierId,
   actuel,
   solidaire,
+  version,
 }: {
   dossierId: string
   actuel: MentionAffichee | null
   solidaire: boolean
+  version: number
 }) {
   const [etat, envoyer, enCours] = useActionState(apposerMaMention, ETAT_INITIAL)
   const id = useId()
@@ -54,6 +56,7 @@ export function FormulaireMention({
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
+      <input type="hidden" name="versionConditions" value={version} />
       {etat.statut === 'erreur' ? (
         <div
           role="alert"

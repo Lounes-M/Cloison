@@ -124,19 +124,24 @@ export function normaliserLettres(texte: string): string {
 }
 
 /**
- * Les montants en chiffres qu'on lit dans un texte, en euros entiers.
+ * Les montants en chiffres, en euros avec au plus deux decimales.
  *
  * « 12 000 », « 12000 », « 12 000,00 €», « 12.000 » : quatre facons d'ecrire
- * le meme montant. Les centimes sont ignores : la mention porte un plafond, et
- * personne ne cautionne a cinquante centimes pres.
+ * le meme montant. Un jeton numerique mal forme est refuse en entier : jamais
+ * recuperer « 50 » a la fin de « 12000,50 ».
  */
 export function montantsEnChiffres(texte: string): number[] {
   const trouves = new Set<number>()
-  const motif = /(\d{1,3}(?:[  .]\d{3})+|\d+)(?:[,.]00)?\s*(?:€|euros?\b|eur\b)/gi
+  const motif = /[+-]?\d(?:[\d   ]|[.,](?=\d))*\s*(?:€|euros?\b|eur\b)/gi
 
   for (const correspondance of texte.matchAll(motif)) {
-    const entier = Number(correspondance[1]!.replace(/[  .]/g, ''))
-    if (Number.isSafeInteger(entier) && entier > 0 && entier <= 999_999_999) trouves.add(entier)
+    const nombre = correspondance[0].replace(/(?:€|euros?|eur)$/i, '').trim()
+    const parties = /^(\d{1,3}(?:[   .]\d{3})+|\d+)(?:[,.](\d{1,2}))?$/.exec(nombre)
+    if (!parties) continue
+    const cents =
+      Number(parties[1]!.replace(/[   .]/g, '')) * 100 + Number((parties[2] ?? '').padEnd(2, '0'))
+    if (Number.isSafeInteger(cents) && cents > 0 && cents <= 999_999_999 * 100)
+      trouves.add(cents / 100)
   }
 
   return [...trouves]
@@ -161,7 +166,12 @@ const CONTIENT = (texte: string, ...termes: string[]) => {
  */
 export function verifierMention(texte: string, solidaire: boolean): Verdict {
   const manques: Element[] = []
-  const plat = normaliserLettres(texte)
+  // Reperage indicatif, jamais une validation juridique ou semantique complete.
+  // La negation dans la condition de defaillance ne nie pas l'engagement.
+  const plat = normaliserLettres(texte).replace(
+    /\b(?:si|lorsque|quand) (?:le|mon|ce) (?:locataire|debiteur) ne (?:paie|paye|regle) pas\b/g,
+    'defaillance',
+  )
 
   const negation = /\b(?:ne|pas|jamais|refuse)\b/.test(plat)
   if (!plat.includes('caution') || negation) manques.push('caution')
@@ -172,9 +182,21 @@ export function verifierMention(texte: string, solidaire: boolean): Verdict {
   if (!paie || !defaut || negation) manques.push('paiement')
 
   let montantEuros: number | null = null
-  for (const chiffre of montantsEnChiffres(texte)) {
-    const mots = normaliserLettres(nombreEnLettres(chiffre))
-    if (new RegExp(`(?:^|[^a-z])${mots} euros?\\b`).test(plat)) {
+  const chiffres = montantsEnChiffres(texte)
+  for (const chiffre of chiffres.length === 1 ? chiffres : []) {
+    const cents = Math.round(chiffre * 100)
+    const mots = normaliserLettres(nombreEnLettres(Math.floor(cents / 100)))
+    const centimes = cents % 100
+    const montantsEnLettres = new RegExp(
+      `(?:^|[^a-z])${mots} euros?\\b(?: ([a-z]+(?: [a-z]+){0,6}) centimes?\\b)?`,
+      'g',
+    )
+    const concorde = [...plat.matchAll(montantsEnLettres)].some((lecture) =>
+      lecture[1] === undefined
+        ? centimes === 0
+        : lecture[1] === normaliserLettres(nombreEnLettres(centimes)),
+    )
+    if (concorde) {
       montantEuros = chiffre
       break
     }
