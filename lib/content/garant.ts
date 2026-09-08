@@ -10,7 +10,7 @@
 /**
  * Les natures de pieces, dans l'ordre ou on les demande.
  *
- * Miroir exact de la contrainte `type` de la table `pieces` (migration 0003).
+ * Miroir de la contrainte `type` de la table `pieces`, etendue en migration 0043.
  * Un test le verifie : une nature ajoutee ici et absente la-bas ne se verrait
  * qu'a l'execution, sous la forme d'un depot refuse sans explication.
  */
@@ -45,9 +45,61 @@ export const natures = [
     aide: 'Ou attestation employeur. Facultatif si les bulletins suffisent.',
     attendu: 0,
   },
+  {
+    valeur: 'pension_retraite',
+    libelle: 'Droits à la retraite',
+    aide: 'Justificatif d’ouverture des droits établi par l’organisme payeur.',
+    attendu: 1,
+  },
+  {
+    valeur: 'bilan_comptable',
+    libelle: 'Bilans comptables',
+    aide: 'Les deux derniers bilans, séparés ou dans un PDF groupé. Une attestation de ressources peut les remplacer.',
+    attendu: 2,
+  },
+  {
+    valeur: 'attestation_ressources',
+    libelle: 'Attestation de ressources',
+    aide: 'Pour l’année en cours, établie par un comptable. Remplace les deux bilans.',
+    attendu: 0,
+  },
+  {
+    valeur: 'activite_independante',
+    libelle: 'Activité professionnelle',
+    aide: 'Justificatif récent adapté à ton activité : identification INSEE, immatriculation ou carte professionnelle.',
+    attendu: 1,
+  },
 ] as const
 
 export type NatureValeur = (typeof natures)[number]['valeur']
+export const profilsRessources = [
+  { valeur: 'salarie', libelle: 'Salarié' },
+  { valeur: 'retraite', libelle: 'Retraité' },
+  { valeur: 'independant', libelle: 'Indépendant' },
+] as const
+export type ProfilRessources = (typeof profilsRessources)[number]['valeur']
+export function naturesDuProfil(profil: ProfilRessources) {
+  const communes: NatureValeur[] = ['avis_imposition', 'piece_identite', 'justificatif_domicile']
+  const propres: Record<ProfilRessources, NatureValeur[]> = {
+    salarie: ['bulletin_paie', 'contrat_travail'],
+    retraite: ['pension_retraite'],
+    independant: ['bilan_comptable', 'attestation_ressources', 'activite_independante'],
+  }
+  return natures.filter((nature) => [...communes, ...propres[profil]].includes(nature.valeur))
+}
+export const documentsDeclares = {
+  profil: (libelle: string) => `Liste adaptée à ta situation : ${libelle.toLowerCase()}.`,
+  changerProfil: 'Changer ma situation',
+  nombre: 'Nombre de documents dans ce fichier',
+  aide: 'Indique les justificatifs distincts, pas le nombre de pages. Le contenu sera examiné par l’agence.',
+  bilan: (nombre: number) =>
+    `${nombre} document${nombre > 1 ? 's' : ''} déclaré${nombre > 1 ? 's' : ''}`,
+  presence:
+    'Cette liste suit les pièces déclarées. Leur présence ne certifie ni leur contenu ni leur authenticité.',
+  corriger: 'Corriger le nombre déclaré',
+  invalide: 'Indique un nombre de documents adapté à cette pièce.',
+  erreur: 'La déclaration du contenu n’a pas pu être enregistrée.',
+}
 
 export const depot = {
   debit: 'Trop de documents ont été proposés récemment. Réessaie dans un quart d’heure.',
@@ -72,8 +124,12 @@ export const engagement = {
   titre: 'Ce que tu couvres',
   aide: 'Ce que tu déclares ici figurera dans l’acte de cautionnement. Tu peux le corriger tant que le dossier n’est pas parti.',
   revenu: 'Ton revenu net mensuel',
+  profil: 'Ta situation professionnelle',
+  profilInvalide: 'Choisis une situation professionnelle proposée.',
+  profilAide:
+    'Enregistre ta situation pour adapter la liste des justificatifs. Les revenus restent déclarés et seront comparés aux pièces par l’agence.',
   revenuAide:
-    'En euros, ce que tu touches au total après impôt à la source. Tes bulletins en sont la preuve : l’agence les compare. Vide, le dossier reste en attente.',
+    'En euros, ce que tu touches au total après impôt à la source. L’agence compare cette déclaration à tes justificatifs de revenus. Vide, le dossier reste en attente.',
   couvre: 'Tu couvres',
   couvreOptions: [
     { valeur: 'loyer_charges', libelle: 'Le loyer et les charges' },

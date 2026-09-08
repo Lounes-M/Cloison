@@ -215,3 +215,23 @@ reprise par lots et refus de recreer un contenu supprime. Quatorze tests cibles
 passent apres trois, puis quatre echecs volontaires des gardes. Aucun droit
 applicatif supplementaire ni changement de cle en production. La CI complete
 et la verification native du meme moteur restent a confirmer avant fusion.
+
+## Profils documentaires et livraisons precedentes
+
+PR83 : CI main 34245723671 et supervision de production 34246076442 vertes.
+PR84 fusionnee en dea73b5 : dependances actualisees, audit npm sans vulnerabilite
+connue, CI finale 34246043990 et main 34247344745 vertes.
+PR85 fusionnee en 15ef79b : outil administratif de rescellement livre, 844 tests
+locaux avant integration des dependances, 14 tests cibles ensuite, build et
+restauration native passes. CI finale 34247728248 verte ; main suivi separement.
+Aucune cle de production n'a ete changee ni sauvegarde externe prouvee.
+
+0043 prepare les profils salarie, retraite et independant, les nombres explicites
+de justificatifs groupes, leur correction et le recalcul des dossiers ouverts.
+Repetitions transactionnelles Supabase et controles des roles reels passes,
+avec empreintes exactes. Les gardes SQL et les confirmations des actions ont
+chacune produit quatre echecs lors de leur retrait volontaire, puis sont revenues
+au vert. Les tests complets, la CI, l'application SQL et la fusion restent a faire.
+Le rendu SSR des composants est controle sur donnees fictives : cette preuve ne
+remplace pas un parcours interactif authentifie. L'examen humain et les demandes
+de complements restent ouverts dans F21. Voir le runbook des profils.

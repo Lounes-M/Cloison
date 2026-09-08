@@ -2,7 +2,7 @@
 
 import { useActionState, useId } from 'react'
 
-import { engagement as texte } from '@/lib/content/garant'
+import { engagement as texte, profilsRessources, type ProfilRessources } from '@/lib/content/garant'
 import { conditionsEngagement } from '@/lib/content/conditions-engagement'
 import { declarerMonEngagement, type EtatEngagement } from '@/lib/garant/action-engagement'
 import { cn } from '@/lib/utils'
@@ -14,6 +14,7 @@ const champBase =
   'placeholder:text-muted placeholder:font-normal'
 
 export type EngagementAffiche = {
+  profil?: ProfilRessources
   couvre: 'loyer' | 'loyer_charges'
   montant: string
   jusquAu: string
@@ -46,6 +47,27 @@ export function FormulaireEngagement({
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="versionConditions" value={version} />
       <p className="text-muted text-[13px] font-medium">{conditionsEngagement.modification}</p>
+      <div>
+        <label htmlFor={`${id}-profil`} className="mb-2 block text-[14px] font-bold">
+          {texte.profil}
+        </label>
+        <select
+          id={`${id}-profil`}
+          name="profil"
+          defaultValue={actuel?.profil ?? 'salarie'}
+          className={champBase}
+          aria-describedby={`${id}-profil-aide`}
+        >
+          {profilsRessources.map((profil) => (
+            <option key={profil.valeur} value={profil.valeur}>
+              {profil.libelle}
+            </option>
+          ))}
+        </select>
+        <p id={`${id}-profil-aide`} className="text-muted mt-2 text-[13px] font-medium">
+          {texte.profilAide}
+        </p>
+      </div>
       {etat.statut === 'enregistre' ? (
         <p
           role="status"

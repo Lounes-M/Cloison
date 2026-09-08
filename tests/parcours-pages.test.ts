@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
+import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import PageLocataire from '@/app/(porteur)/locataire/page'
 import PageGarant from '@/app/(porteur)/garant/page'
 import PageEspace from '@/app/(agence)/espace/page'
@@ -106,6 +107,27 @@ beforeEach(() => {
 })
 
 const locataire = () => PageLocataire({ searchParams: Promise.resolve({}) })
+
+test.each(['retraite', 'independant'])(
+  'le profil %s propose ses justificatifs sans exiger de bulletin',
+  async (profil) => {
+    reponses.engagements = { data: { profil_ressources: profil }, error: null }
+    const propositions: string[] = []
+    function visiter(noeud: ReactNode) {
+      if (Array.isArray(noeud)) noeud.forEach(visiter)
+      if (isValidElement<{ children?: ReactNode; nature?: string }>(noeud)) {
+        if (noeud.type === FormulaireDepot) propositions.push(noeud.props.nature!)
+        visiter(noeud.props.children)
+      }
+    }
+    visiter(await PageGarant())
+    expect(propositions).not.toContain('bulletin_paie')
+    expect(propositions).toContain(
+      profil === 'retraite' ? 'pension_retraite' : 'activite_independante',
+    )
+    expect(propositions).toContain('piece_identite')
+  },
+)
 
 test('le paiement affiche le prix reserve et transmet exactement cette offre', async () => {
   doublures.capacite.mockResolvedValue({

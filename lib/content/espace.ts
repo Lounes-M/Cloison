@@ -143,6 +143,10 @@ export const natures: Record<string, string> = {
   piece_identite: 'Pièce d’identité',
   justificatif_domicile: 'Justificatif de domicile',
   contrat_travail: 'Contrat de travail',
+  pension_retraite: 'Droits à la retraite',
+  bilan_comptable: 'Bilan comptable',
+  attestation_ressources: 'Attestation de ressources',
+  activite_independante: 'Activité professionnelle',
 }
 
 export const actions: Record<string, string> = {

@@ -133,8 +133,8 @@ describe('ouvrir_dossier_de_demonstration', () => {
     ]) {
       await reserverObjetDEssai(db, id, `${id}/${nature}`)
       await db.query(
-        `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
-         values ('${id}', '${nature}', '${id}/${nature}', 1024, 'application/pdf')`,
+        `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel,nombre_documents)
+         values ('${id}', '${nature}', '${id}/${nature}', 1024, 'application/pdf',${nature === 'bulletin_paie' ? 3 : 1})`,
       )
     }
 

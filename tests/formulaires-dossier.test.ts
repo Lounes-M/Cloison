@@ -36,6 +36,7 @@ import { saisirMonLoyer } from '@/lib/locataire/action-loyer'
 import { designerMonGarant } from '@/lib/locataire/action-garant'
 import { rattacherMonDossier } from '@/lib/locataire/action-continuite'
 import { payerMonDossier } from '@/lib/locataire/action-paiement'
+import { declarerNombreDocuments } from '@/lib/garant/action-documents'
 
 const A = '11111111-1111-4111-8111-111111111111'
 const B = '22222222-2222-4222-8222-222222222222'
@@ -67,6 +68,34 @@ beforeEach(() => {
   h.client.mockImplementation(() => {
     throw new Error('Le client ne doit pas etre construit')
   })
+})
+
+test('la correction du nombre refuse un formulaire issu dun autre dossier', async () => {
+  h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: B, partie: 'garant' } })
+  expect((await declarerNombreDocuments({}, formulaire(A))).erreur).toBeTruthy()
+  expect(h.client).not.toHaveBeenCalled()
+})
+test.each([null, false, 'true'])(
+  'la correction sans acquittement SQL %j reste en erreur',
+  async (data) => {
+    h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: A, partie: 'garant' } })
+    h.client.mockReturnValue({ rpc: vi.fn(async () => ({ data, error: null })) })
+    expect((await declarerNombreDocuments({}, formulaire())).erreur).toBeTruthy()
+    expect(h.notification).not.toHaveBeenCalled()
+  },
+)
+test('le nombre saisi est inscrit avant de notifier le changement de statut', async () => {
+  h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: A, partie: 'garant' } })
+  const rpc = vi.fn(async () => ({ data: true, error: null }))
+  h.client.mockReturnValue({ rpc })
+  const f = formulaire()
+  f.set('nombre_documents', '3')
+  expect(await declarerNombreDocuments({}, f)).toEqual({ enregistre: true })
+  expect(rpc).toHaveBeenCalledExactlyOnceWith('declarer_nombre_documents', {
+    la_piece: A,
+    le_nombre: 3,
+  })
+  expect(h.notification).toHaveBeenCalled()
 })
 
 for (const action of [declarerMonEngagement, apposerMaMention]) {

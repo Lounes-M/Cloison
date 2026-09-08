@@ -162,3 +162,11 @@ PR83 est fusionnee et 0042 appliquee, avec CI finale et droits reels verifies.
 Le rescellement administratif de masse est prepare avec inventaire, comparaison
 atomique et reprise bornee ; sa livraison reste soumise aux controles complets.
 La disponibilite effective des cles de secours demeure une condition externe.
+
+PR84 (dependances) et PR85 (rescellement administratif) sont fusionnees. L'outil
+permet l'inventaire et le traitement borne avec comparaison atomique ; aucune
+rotation reelle ni disponibilite de cle externe n'est declaree prouvee.
+Le lot 0043 prepare les profils documentaires et le comptage explicite des
+justificatifs dans un fichier. Les repetitions SQL sont passees sans application.
+L'examen humain des pieces et les demandes de complement restent a implementer.
+Les preuves de livraison actualisees sont dans le suivi des lots.

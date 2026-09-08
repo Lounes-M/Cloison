@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournal } from '@/lib/content/journal'
+import { documentsDeclares, profilsRessources } from '@/lib/content/garant'
 
 export const metadata: Metadata = {
   title: 'Dossier',
@@ -81,13 +82,13 @@ export default async function PageDossier({
     supabase
       .from('engagements')
       .select(
-        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, ratio, calcule_le',
+        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, ratio, calcule_le, profil_ressources',
       )
       .eq('dossier_id', id)
       .maybeSingle(),
     supabase
       .from('pieces')
-      .select('id, type, taille_octets, depose_le')
+      .select('id, type, taille_octets, depose_le, nombre_documents')
       .eq('dossier_id', id)
       .order('depose_le', { ascending: true }),
     supabase.rpc('journal_du_dossier', {
@@ -233,6 +234,10 @@ export default async function PageDossier({
 
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.piecesTitre}</h2>
+        <p className="text-muted mt-2 text-sm">{documentsDeclares.presence}</p>
+        <p className="mt-2 text-sm font-bold">
+          {profilsRessources.find((p) => p.valeur === (e?.profil_ressources ?? 'salarie'))?.libelle}
+        </p>
         <p className="text-muted mt-2 mb-6 text-[13px] leading-relaxed font-medium">
           {texte.ouvrirAide}
         </p>
@@ -249,6 +254,7 @@ export default async function PageDossier({
                   <Icone nom="fichier" className="size-4" />
                   {natures[String(p.type)] ?? String(p.type)}
                   <span className="text-muted font-medium">
+                    {documentsDeclares.bilan(Number(p.nombre_documents ?? 1))},{' '}
                     {tailleLisible(Number(p.taille_octets))}, {date(p.depose_le)}
                   </span>
                 </span>

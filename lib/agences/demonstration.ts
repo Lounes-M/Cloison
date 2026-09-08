@@ -28,15 +28,15 @@ const PLAFOND_CENTS = 1_200_00
 
 /** Ce que chaque piece de demonstration montre, en clair sur la page. */
 const PIECES: { nature: NatureDePiece; titre: string; lignes: string[] }[] = [
-  {
-    nature: 'bulletin_paie',
-    titre: 'Bulletin de paie',
+  ...[1, 2, 3].map((mois) => ({
+    nature: 'bulletin_paie' as const,
+    titre: `Bulletin de paie ${mois}`,
     lignes: [
-      'Periode : mois precedent',
+      `Periode : mois M-${mois}`,
       'Net a payer : 3 800,00 EUR',
       'Employeur : Societe Exemple',
     ],
-  },
+  })),
   {
     nature: 'avis_imposition',
     titre: 'Avis d’imposition',

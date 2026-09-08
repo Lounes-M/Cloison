@@ -2,7 +2,7 @@
 
 import { useActionState, useId, useRef, useState } from 'react'
 
-import { depot } from '@/lib/content/garant'
+import { depot, documentsDeclares } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
 import { reduireSiPhoto } from './reduire-photo'
 import { cn } from '@/lib/utils'
@@ -49,6 +49,30 @@ export function FormulaireDepot({
     <form action={envoyer} className="flex flex-col gap-2">
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="nature" value={nature} />
+      {['bulletin_paie', 'bilan_comptable'].includes(nature) ? (
+        <div>
+          <label htmlFor={`${idChamp}-nombre`} className="mb-2 block text-sm font-bold">
+            {documentsDeclares.nombre}
+          </label>
+          <select
+            id={`${idChamp}-nombre`}
+            name="nombre_documents"
+            defaultValue="1"
+            disabled={enCours || preparation}
+            aria-describedby={`${idChamp}-nombre-aide`}
+            className="border-ink bg-paper rounded-xl border-2 px-3 py-2"
+          >
+            {[1, 2, ...(nature === 'bulletin_paie' ? [3] : [])].map((nombre) => (
+              <option key={nombre} value={nombre}>
+                {nombre}
+              </option>
+            ))}
+          </select>
+          <p id={`${idChamp}-nombre-aide`} className="text-muted mt-2 text-sm">
+            {documentsDeclares.aide}
+          </p>
+        </div>
+      ) : null}
 
       <label
         htmlFor={idChamp}
