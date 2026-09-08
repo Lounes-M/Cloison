@@ -6,16 +6,16 @@ dependant de ces elements reste fermee tant que ses conditions ne sont pas reuni
 
 ## Ordre de livraison
 
-| Lot | Perimetre                                                                                                      | Etat                                                            |
-| --- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| 1   | F01 formulaires lies au dossier affiche ; F07 confirmation des lignes ecrites                                  | PR 64 fusionnee, main 32d7d69 ; 621 tests et build locaux verts |
-| 2   | F02 expiration des acces agence ; F19 dernier administrateur ; F14 debit documentaire                          | F02 livre PR67, 0033 appliquee ; F19 prepare ; F14 ouvert       |
-| 3   | F03 unite du plafond ; F04 centimes ; F05 version des conditions ; F06 controle indicatif de mention           | Livre PR68, migration 0034 appliquee                            |
-| 4   | F08 renouvellement et deconnexion des porteurs                                                                 | Livre PR68, reprise et deconnexion verifiees                    |
-| 5   | F09 supervision de cadence ; F10 budgets de maintenance ; F11 et F12 livraison des liens et courriels          | F09/F10 livres PR69 ; livraison des courriels ouverte           |
-| 6   | F13 limites des documents ; F14 processus et quotas                                                            | Flux PDF dans PR68 ; quotas globaux et traitement ouverts       |
-| 7   | F15 chaine contractuelle et adaptateur ; F16 sauvegarde et rotation ; F22 rapprochement des paiements          | A implementer, activation fournisseur distincte                 |
-| 8   | F17 pages d'information ; F18 pagination ; F19 gestion des membres ; F20 parcours ; F21 complements et profils | A implementer                                                   |
+| Lot | Perimetre                                                                                                      | Etat                                                                             |
+| --- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 1   | F01 formulaires lies au dossier affiche ; F07 confirmation des lignes ecrites                                  | PR 64 fusionnee, main 32d7d69 ; 621 tests et build locaux verts                  |
+| 2   | F02 expiration des acces agence ; F19 dernier administrateur ; F14 debit documentaire                          | F02 PR67, dernier admin PR72, quotas PR74 livres ; 0033/35/36 appliquees         |
+| 3   | F03 unite du plafond ; F04 centimes ; F05 version des conditions ; F06 controle indicatif de mention           | Livre PR68, migration 0034 appliquee                                             |
+| 4   | F08 renouvellement et deconnexion des porteurs                                                                 | Livre PR68, reprise et deconnexion verifiees                                     |
+| 5   | F09 supervision de cadence ; F10 budgets de maintenance ; F11 et F12 livraison des liens et courriels          | Budgets PR69 et liens durables PR75 livres ; calendrier independant prepare      |
+| 6   | F13 limites des documents ; F14 processus et quotas                                                            | Flux PDF PR68 et quotas PR74 livres ; limite memoire native a renforcer          |
+| 7   | F15 chaine contractuelle et adaptateur ; F16 sauvegarde et rotation ; F22 rapprochement des paiements          | A implementer, activation fournisseur distincte                                  |
+| 8   | F17 pages d'information ; F18 pagination ; F19 gestion des membres ; F20 parcours ; F21 complements et profils | Pagination dossiers PR73 et collaborateurs PR76 livres ; autres parcours ouverts |
 
 Les idees produit du rapport sont des ajouts a concevoir avec les regles d'acces
 et les obligations applicables, pas des fonctions declarees livrees par ce tableau.
@@ -116,3 +116,30 @@ Les pages invalides retournent a la premiere plage ; les recherches sont limitee
 a 120 caracteres. Les droits RLS existants restent applicables. Huit tests de
 regression observes rouges avant correction puis verts. Le journal des acces
 et une pagination par curseur pour les tres gros volumes restent distincts.
+
+## Liens durables et administration livres
+
+PR73 est fusionnee en d31cde0, CI main 34220585204 verte. Les listes ont ete
+controlees sur ordinateur et a 375 px, notamment le retour a la premiere page
+quand le filtre change.
+
+PR75 est fusionnee en e8b8569, CI main 34222790620 verte. 0037 appliquee et
+immuable : l'intention de livraison du lien est creee atomiquement avec son
+jeton, puis chiffree et mise en file avec le meme identifiant. Le renouvellement
+annule la file de l'ancien jeton. Un courriel deja accepte par le fournisseur
+peut encore arriver ; son ancien lien est invalide. L'identifiant fournisseur
+et le rapprochement des livraisons restent distincts.
+
+PR76 est fusionnee en c0abe41. 0038 appliquee et immuable, repetition finale et
+controle des droits et empreintes apres application passes. CI finale 34225730590
+verte, dont restauration PostgreSQL native. Le controle compare les permissions
+effectives, y compris celles des sequences, en normalisant leurs deux ecritures
+equivalentes ; le test refuse toujours un privilege ajoute. CI de main a suivre : 34227009520. La page equipe a ete controlee sur ordinateur et a 375 px avec
+fixtures locales restaurees avant livraison.
+
+0039 prepare une confirmation persistante de maintenance et un calendrier
+Supabase independant. L'absence de creneaux GitHub a ete observee ; les reprises
+manuelles ne suffisent pas a la corriger. L'installation et son execution
+planifiee doivent etre verifiees avant de declarer ce calendrier operationnel.
+Voir [le runbook](exploitation/cron-independant.md), notamment les privileges
+geres par Supabase et le controle de non-exposition du schema net dans l'API.

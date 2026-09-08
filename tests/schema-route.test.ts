@@ -1,7 +1,14 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import reference from '@/lib/exploitation/schema-production.json'
 import { schemaConforme } from '@/lib/exploitation/schema'
-const h = vi.hoisted(() => ({ rpc: vi.fn(), client: vi.fn() }))
+const h = vi.hoisted(() => ({
+  rpc: vi.fn(),
+  client: vi.fn(),
+  schema: vi.fn(),
+  from: vi.fn(),
+  select: vi.fn(),
+  limit: vi.fn(),
+}))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: h.client }))
 import { GET } from '@/app/api/schema/route'
 afterEach(() => {
@@ -9,10 +16,18 @@ afterEach(() => {
   vi.restoreAllMocks()
   h.rpc.mockReset()
   h.client.mockReset()
+  h.schema.mockReset()
+  h.from.mockReset()
+  h.select.mockReset()
+  h.limit.mockReset()
 })
 function config() {
   vi.stubEnv('CRON_SECRET', 'fixture-secret')
-  h.client.mockResolvedValue({ rpc: h.rpc })
+  h.client.mockResolvedValue({ rpc: h.rpc, schema: h.schema })
+  h.schema.mockReturnValue({ from: h.from })
+  h.from.mockReturnValue({ select: h.select })
+  h.select.mockReturnValue({ limit: h.limit })
+  h.limit.mockResolvedValue({ data: null, error: { code: 'PGRST106' } })
   h.rpc.mockResolvedValue({ data: reference, error: null })
 }
 for (const bearer of [undefined, 'Bearer mauvais', 'bearer fixture-secret']) {
@@ -48,7 +63,27 @@ test('un catalogue exact rend seulement le resultat sans empreintes ni cache', a
   expect(await r.json()).toEqual({ conforme: true })
   expect(r.headers.get('cache-control')).toBe('no-store')
   expect(h.rpc).toHaveBeenCalledExactlyOnceWith('empreinte_schema')
+  expect(h.schema).toHaveBeenCalledExactlyOnceWith('net')
+  expect(h.from).toHaveBeenCalledExactlyOnceWith('http_request_queue')
+  expect(h.select).toHaveBeenCalledExactlyOnceWith('id')
+  expect(h.limit).toHaveBeenCalledExactlyOnceWith(0)
 })
+
+test.each([null, { code: '42501' }, { code: 'PGRST205' }])(
+  'un schema reseau expose ou un refus ambigu %j bloque le controle',
+  async (error) => {
+    config()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    h.limit.mockResolvedValue({ data: null, error })
+    const r = await GET(
+      new Request('https://cloison.invalid/api/schema', {
+        headers: { authorization: 'Bearer fixture-secret' },
+      }),
+    )
+    expect(r.status).toBe(503)
+    expect(await r.json()).toEqual({ conforme: false })
+  },
+)
 for (const cas of ['derive', 'erreur', 'exception', 'champ-prive']) {
   test(`le cas ${cas} reste un echec sans journal detaille`, async () => {
     config()

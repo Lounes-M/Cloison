@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto'
+import { secretCorrect } from '@/lib/exploitation/autorisation-cron'
 import { NextResponse } from 'next/server'
 import { clientServeur } from '@/lib/acces/serveur'
 import { livrerNotifications } from '@/lib/courriels/notifications'
@@ -9,10 +9,11 @@ import { purgerCoffres } from '@/lib/exploitation/purge'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET
-  const recu = Buffer.from(request.headers.get('authorization') ?? '')
-  const attendu = Buffer.from(`Bearer ${secret ?? ''}`)
-  if (!secret || recu.length !== attendu.length || !timingSafeEqual(recu, attendu)) {
+  const recu = request.headers.get('authorization')
+  if (
+    !secretCorrect(recu, process.env.CRON_SECRET) &&
+    !secretCorrect(recu, process.env.CRON_SUPABASE_SECRET)
+  ) {
     return new NextResponse(null, { status: 401 })
   }
   let db: Awaited<ReturnType<typeof clientServeur>>
@@ -59,6 +60,16 @@ export async function GET(request: Request) {
     const budget = AbortSignal.timeout(18_000)
     return distribuerCourriels(await clientServeur(budget), undefined, budget)
   })
+  if (!notifications.echecs && !courriels.echecs && !purge.echecs) {
+    try {
+      const confirmation = await clientServeur(AbortSignal.timeout(3_000))
+      const { data, error } = await confirmation.rpc('confirmer_maintenance')
+      if (error || data !== true) throw new Error('Confirmation refusee')
+    } catch {
+      console.error('[maintenance] confirmation indisponible')
+      notifications.echecs++
+    }
+  }
   return NextResponse.json(
     { notifications, courriels, purge },
     { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200 },
