@@ -12,12 +12,12 @@ export const porte = {
   sousTitre:
     'Une adresse e-mail, et tu reçois un lien. Pas de compte, pas de mot de passe : le lien est ta clé.',
   champ: 'Ton adresse e-mail',
-  aide: 'Ton lien y arrive dans la minute. Tu pourras désigner ton garant ensuite.',
+  aide: 'Tu recevras ton lien par e-mail. Vérifie aussi tes indésirables.',
   bouton: 'Ouvrir mon dossier',
   envoi: 'Ouverture…',
   succesTitre: 'Regarde tes e-mails.',
   succesTexte:
-    'Ton dossier est ouvert et ton lien vient de partir. Il est valable sept jours. Garde-le pour retrouver ton dossier.',
+    'Si la demande a pu être traitée, tu recevras un lien valable sept jours. Garde-le pour retrouver ton dossier.',
 } as const
 
 export const espace = {

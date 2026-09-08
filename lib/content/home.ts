@@ -5,11 +5,13 @@
  */
 
 import { commentCaMarche } from './agences'
+import { prixLocataire, prixActe } from './tarifs'
+import { pilote } from './pilote'
 
 export const hero = {
-  eyebrow: 'La caution de A à Z',
+  eyebrow: pilote.statut,
   badges: [
-    { label: 'pas de compte', tone: 'sun', position: 'top-[70px] left-[6%]', tilt: -8, delay: 0 },
+    { label: 'accès par lien', tone: 'sun', position: 'top-[70px] left-[6%]', tilt: -8, delay: 0 },
     {
       label: 'pas de papier',
       tone: 'mint',
@@ -18,14 +20,19 @@ export const hero = {
       delay: 0.8,
     },
     {
-      label: 'pas de relance',
+      label: 'espaces séparés',
       tone: 'sky',
       position: 'top-[100px] right-[5%]',
       tilt: 6,
       delay: 0.4,
     },
   ],
-  liveBadge: { label: 'garant éligible', position: 'top-[240px] right-[8%]', tilt: -5, delay: 1.2 },
+  liveBadge: {
+    label: 'pièces protégées',
+    position: 'top-[240px] right-[8%]',
+    tilt: -5,
+    delay: 1.2,
+  },
   subtitle:
     "Tu crées ton dossier, ton garant dépose ses pièces de son côté, l'agence reçoit un dossier complet. Personne ne voit ce qu'il ne doit pas voir.",
   primaryCta: 'Créer mon dossier',
@@ -67,8 +74,8 @@ export const spaces = [
     step: 1,
     title: 'Le locataire',
     tone: 'mint',
-    body: "Il crée le dossier et invite son garant. Il suit l'avancement : dossier complet, garant éligible. Ni les pièces, ni les montants.",
-    footnote: { left: 'Dossier complet · Garant éligible', live: true },
+    body: "Il crée le dossier et invite son garant. Il suit l'avancement du dossier, sans voir les pièces ni les montants.",
+    footnote: { left: 'Avancement du dossier', live: true },
   },
   {
     id: 'garant',
@@ -83,8 +90,8 @@ export const spaces = [
     step: 3,
     title: "L'agence",
     tone: 'sky',
-    body: 'Elle ouvre un lien : pièces filigranées, ratio de solvabilité calculé, acte de cautionnement pré-rempli, signé électroniquement.',
-    footnote: { left: 'Acte signé', right: 'Ratio vérifié', iconeDroite: 'coche' },
+    body: 'Elle se connecte à son espace : pièces filigranées et ratio calculé à partir du revenu déclaré. Elle examine le dossier avant de décider.',
+    footnote: { left: 'Pièces filigranées', right: 'Ratio calculé', iconeDroite: 'coche' },
   },
 ] as const
 
@@ -102,7 +109,7 @@ export const spaces = [
  */
 export const parcours = {
   eyebrow: 'Comment ça marche',
-  headline: ['Trois étapes,', 'aucune relance.'],
+  headline: ['Trois étapes,', 'chacun son espace.'],
   /** Lu par les lecteurs d'écran à la place du groupe d'onglets. */
   legende: 'Par où commences-tu ?',
   pistes: [
@@ -119,20 +126,21 @@ export const parcours = {
         },
         {
           numero: 2,
-          puce: 'garant éligible',
+          puce: 'dépôt privé',
           titre: 'Ton garant reçoit un lien',
           texte:
             "Il dépose ses pièces de son côté, chez lui. Tu vois où il en est, jamais ce qu'il envoie.",
         },
         {
           numero: 3,
-          puce: 'prêt à signer',
+          puce: 'à examiner',
           titre: "Tu transmets à l'agence",
-          texte: "Dossier complet, garant vérifié, acte prêt à signer. Elle n'a plus qu'à décider.",
+          texte:
+            "L'agence consulte les pièces filigranées et le ratio déclaré. Elle reste responsable de l'examen du dossier.",
         },
       ],
-      cta: { label: 'Créer mon dossier' },
-      note: 'Bientôt ouvert aux locataires, en commençant par les trois villes du pilote.',
+      cta: { label: 'Créer mon dossier', href: '/demarrer' },
+      note: pilote.signature,
     },
     {
       id: 'agence',
@@ -146,22 +154,22 @@ export const parcours = {
 export const product = {
   headline: ['Chacun sa vue.', "Rien d'autre."],
   intro:
-    'Cloison prend la caution de A à Z. Trois espaces cloisonnés, une seule signature au bout.',
-  outro: 'Pas de compte, pas de papier, pas de relance.',
-  outroHighlight: "C'est tout.",
+    'Trois espaces séparés pour préparer le dossier de caution, transmettre les pièces et examiner la demande.',
+  outro: pilote.signature,
+  outroHighlight: 'Un pilote accompagné.',
 } as const
 export const pricing = {
   headline: ['Qui paie', 'quoi ?'],
   plans: [
     {
       audience: 'Le locataire',
-      price: 'Quelques euros',
+      price: prixLocataire,
       detail: 'une fois, pour un dossier valable trois mois',
     },
     {
       audience: "L'agence",
       price: 'Gratuit pour lire',
-      detail: 'payant pour signer et archiver',
+      detail: `${prixActe} par acte signé et archivé, lorsque la signature sera disponible`,
     },
   ],
   goldenRule: {
@@ -174,13 +182,13 @@ export const pricing = {
 
 export const whyNow = {
   eyebrow: 'Pourquoi maintenant',
-  body: 'La caution se signe électroniquement depuis la loi ELAN, les agences ont déjà leur outil de signature, et',
-  emphasis: 'personne n\u2019a encore branché le garant dessus.',
+  body: 'Les pièces du garant circulent encore entre plusieurs personnes et plusieurs outils.',
+  emphasis: 'Le garant a besoin de son propre espace.',
 } as const
 
 export const goToMarket = {
-  eyebrow: 'Par où on commence',
-  body: 'On démarre par les agences, pas par les locataires. Une agence convaincue, c\u2019est cent dossiers par an.',
+  eyebrow: 'Objectifs du pilote',
+  body: 'Nous préparons un pilote avec des agences pour confronter le coffre aux besoins réels de la location.',
   metrics: [
     { value: '3', label: 'villes tendues' },
     { value: '20', label: 'agences pilotes' },

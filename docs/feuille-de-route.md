@@ -1,7 +1,7 @@
 # Feuille de route Cloison
 
 De la landing au premier dossier reel allant jusqu'a un acte signe.
-Version de travail du 6 septembre 2026, apres les PR 43 a 53. Le
+Version de travail du 7 septembre 2026, apres la livraison des PR 43 a 56. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
@@ -21,7 +21,7 @@ avance techniquement sans attendre cette dependance.
 ## Phase 1. Landing et collecte
 
 - [x] **06** Implementer le formulaire agence, ses controles et la persistance. La livraison des courriels se valide en tache 35.
-- [x] **07** Livrer la page /agences.
+- [x] **07** Livrer la page /agences. Lot 57 : presentation du pilote et tarifs explicites, liens de creation fonctionnels, verification des pages publiques sur mobile/ordinateur ; voir la PR pour la livraison effective.
 - [ ] **08** Finaliser et faire valider les mentions legales et la politique de confidentialite. Les textes provisoires ne ferment pas cette tache.
 - [x] **09** Integrer la mesure d'audience retenue. La configuration et les textes applicables restent a revoir avec le cadre juridique.
 - [ ] **10** Verifier les apercus dans LinkedIn et WhatsApp. L'image generee au build seule ne prouve pas le rendu dans ces services.

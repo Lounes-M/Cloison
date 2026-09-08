@@ -6,11 +6,14 @@
  * perd. Même produit, acheteur différent.
  */
 
+import { prixActe } from './tarifs'
+import { pilote } from './pilote'
+
 export const heroAgences = {
-  eyebrow: 'Pour les agences',
+  eyebrow: 'Pilote pour les agences',
   titre: ['La caution vous arrive', 'complète.', 'Ou pas du tout.'],
   sousTitre:
-    "Plus de pièces reçues par cinq canaux différents, plus d'acte mal rempli à refaire. Vous ouvrez un lien : le dossier du garant est vérifié, le ratio est calculé, l'acte est pré-rempli.",
+    'Les pièces du garant sont réunies dans un espace séparé. Vous les consultez filigranées, avec un ratio calculé à partir du revenu déclaré. Vous restez responsable de leur examen.',
   ancreFormulaire: 'Demander une démonstration',
 } as const
 
@@ -23,14 +26,14 @@ export const heroAgences = {
  * tronqué.
  */
 export const apercuDossier = {
-  badge: 'dossier complet',
+  badge: 'exemple fictif',
   url: 'cloison.immo/d/8f2k',
   titre: 'Dossier · Garant M.',
-  etat: 'vérifié',
+  etat: 'à examiner',
   filigrane: 'Filigrané',
   pieces: ['Bulletins de paie ×3', "Avis d'imposition"],
   ratio: { libelle: 'Ratio', valeur: '3,4×' },
-  acte: { libelle: 'Acte de cautionnement', valeur: 'Pré-rempli', action: 'Signer' },
+  acte: { libelle: 'Signature', valeur: 'À venir', action: 'Pilote' },
 } as const
 
 export const douleurs = {
@@ -62,7 +65,7 @@ export const cequonapporte = {
   items: [
     {
       ton: 'sun',
-      titre: 'Des pièces vérifiées',
+      titre: 'Des pièces réunies',
       texte:
         "Le garant dépose lui-même, chez lui, sur son espace. Vous ne recevez rien tant que le dossier n'est pas complet.",
     },
@@ -70,13 +73,12 @@ export const cequonapporte = {
       ton: 'mint',
       titre: 'Un ratio déjà calculé',
       texte:
-        'La solvabilité du garant est établie sur les pièces déposées, pas sur une estimation faite à la volée.',
+        'Le ratio utilise le revenu déclaré par le garant et le loyer du dossier. Il ne remplace pas votre vérification des justificatifs.',
     },
     {
       ton: 'sky',
-      titre: 'Un acte prêt à signer',
-      texte:
-        "Pré-rempli à partir du bail et des pièces, signé électroniquement, archivé. Plus d'impression, plus de rescan.",
+      titre: 'La signature, prochaine étape',
+      texte: pilote.signature,
     },
   ],
   garantie: {
@@ -95,7 +97,7 @@ export const cequonapporte = {
  * texte) ne change donc pas sans regarder l'autre usage.
  */
 export const commentCaMarche = {
-  titre: ['Trois étapes,', 'aucune relance'],
+  titre: ['Trois étapes,', 'chacun son espace'],
   etapes: [
     {
       numero: 1,
@@ -112,9 +114,10 @@ export const commentCaMarche = {
     },
     {
       numero: 3,
-      puce: 'prêt à signer',
+      puce: 'à examiner',
       titre: 'Vous recevez un dossier complet',
-      texte: "Pièces filigranées, ratio calculé, acte pré-rempli. Vous n'avez plus qu'à signer.",
+      texte:
+        'Consultez les pièces filigranées et le ratio déclaré dans votre espace agence, puis prenez votre décision.',
     },
   ],
 } as const
@@ -133,7 +136,7 @@ export const tarifAgence = {
   entete: 'tarif agences',
   lignes: [
     { libelle: 'Consulter un dossier', valeur: 'Gratuit', ton: 'vert' },
-    { libelle: 'Signer et archiver', valeur: 'À l’acte' },
+    { libelle: 'Signature à venir, par acte signé et archivé', valeur: prixActe },
     { libelle: 'Engagement de durée', valeur: 'Aucun' },
   ],
   total: { libelle: 'Le garant', valeur: '0 €' },
@@ -141,7 +144,7 @@ export const tarifAgence = {
 
 export const formulaire = {
   eyebrow: 'Pilote',
-  titre: 'On démarre avec vingt agences.',
+  titre: 'Notre objectif : vingt agences pilotes.',
   sousTitre:
     "Trois villes tendues, six mois, un accompagnement direct. En échange, on veut vos retours sans filtre : c'est ce qui construit le produit.",
   metriques: [

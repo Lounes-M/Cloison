@@ -34,7 +34,7 @@ export default function AgencesPage() {
       {/* HERO : le texte a gauche, ce qu'il decrit a droite */}
       <Section
         className="pt-16 pb-20"
-        innerClassName="grid items-center gap-14 md:grid-cols-[1.1fr_1fr]"
+        innerClassName="grid grid-cols-1 items-center gap-14 md:grid-cols-[1.1fr_1fr]"
       >
         <div>
           <p className="bg-ink text-sun animate-fade-up inline-block rounded-full px-5 py-2 text-[13px] font-bold tracking-[0.08em] uppercase">
