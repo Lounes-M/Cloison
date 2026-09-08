@@ -120,6 +120,12 @@ Le [renouvellement du lien du garant](exploitation/reprise-garant.md) reste acce
 
 Le [dernier administrateur](exploitation/dernier-administrateur.md) est protege par le lot 0035, avec essais concurrents natifs ; application explicite requise.
 
+Le durcissement des webhooks mutualise la lecture bornee des corps Resend et
+Stripe : 64 Kio reels, dix secondes de lecture, annulation du flux et cinq secondes
+pour le marquage SQL du paiement. Deux regressions Stripe observees rouges avant
+correction, puis 21 tests des routes passes. Ce lot ne constitue pas le registre
+comptable ni le rapprochement des paiements, toujours ouverts.
+
 ## Mise a jour du 8 septembre, apres PR78
 
 Les migrations jusqu'a 0040 sont appliquees. Le calendrier independant de maintenance

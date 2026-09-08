@@ -169,3 +169,8 @@ Restent notamment les parcours navigateur automatises, les profils documentaires
 la rotation des cles, le rapprochement des paiements et la chaine contractuelle.
 Les processus documentaires sont deja isoles et limites en temps et tas JavaScript ;
 le plafond de memoire native et la concurrence globale restent des limites ouvertes.
+
+PR79 fusionnee en 24f4311 ; 0041 appliquee et immuable, droits reels et empreinte
+verifies apres application. CI finale 34233061347 verte, 766 tests locaux et build
+avec les deux traces documentaires passes. La pagination des historiques est
+livree ; le controle de main 34234392806 est suivi separement.
