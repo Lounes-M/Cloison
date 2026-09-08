@@ -84,10 +84,9 @@ export default async function PageGarant() {
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
 
-  // La mention se compose quand l'agence a pris le dossier : c'est l'acte qui
-  // vient ensuite, et il n'y a pas d'acte sans decision. Un dossier complet
-  // peut deja la preparer.
-  const mentionAttendue = String(dossier.statut) === 'complet'
+  // La preparation reste possible pendant le depot, des qu'un plafond existe.
+  // Apres transmission les conditions et la mention sont figees par la base.
+  const mentionAttendue = ouvert && engagement && Number(engagement.montant_max_cents) > 0
   const deposees = (pieces ?? []) as Piece[]
 
   const engagementAffiche: EngagementAffiche = engagement
