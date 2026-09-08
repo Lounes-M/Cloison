@@ -235,3 +235,18 @@ au vert. Les tests complets, la CI, l'application SQL et la fusion restent a fai
 Le rendu SSR des composants est controle sur donnees fictives : cette preuve ne
 remplace pas un parcours interactif authentifie. L'examen humain et les demandes
 de complements restent ouverts dans F21. Voir le runbook des profils.
+
+## Rattrapage des sessions reservees (0044 preparee)
+
+Le lot ajoute les references Stripe reservees depuis quinze minutes sans aucun
+webhook au rapprochement en lecture seule, avec dossier non expire, deduplication,
+limite de deux references et espacement des reprises. Une incoherence avec la
+reference ou le tarif reserve, ou avec le dossier de la reservation, conserve
+une anomalie sans crediter le dossier.
+
+26 tests du registre et de cette extension passent. Le retrait volontaire des
+gardes a produit sept echecs, puis les dix tests de l'extension sont revenus au
+vert. Empreintes locale et Supabase calculees : seules les fonctions changent.
+Les repetitions transactionnelles incluent provisoirement 0043, encore non
+appliquee, puis 0044 ; les roles reels passent et tout est annule. La CI complete,
+l'application des deux migrations dans l'ordre et la fusion restent necessaires.
