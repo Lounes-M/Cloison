@@ -7,10 +7,14 @@ const MARQUE = Buffer.from('cloison.enveloppe.v2\0', 'ascii')
 const TAILLE_ID = 16
 const identifiant = (cle: Buffer) =>
   createHash('sha256').update(cle).digest().subarray(0, TAILLE_ID)
+export function enteteCleActive(cle: Buffer): Buffer {
+  if (!Buffer.isBuffer(cle) || cle.length !== 32) throw new Error('Cle active invalide')
+  return Buffer.concat([MARQUE, identifiant(cle)])
+}
 export function scellerAvecTrousseau(contenu: Buffer, trousseau: Trousseau): Buffer {
   const { historique, active } = trousseau
   if (!active) return sceller(contenu, historique)
-  return Buffer.concat([MARQUE, identifiant(active), sceller(contenu, active)])
+  return Buffer.concat([enteteCleActive(active), sceller(contenu, active)])
 }
 export function ouvrirAvecTrousseau(chiffre: Buffer, trousseau: Trousseau): Buffer {
   const { historique, active, lecture } = trousseau
