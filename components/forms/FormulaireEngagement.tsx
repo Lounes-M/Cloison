@@ -28,12 +28,19 @@ export type EngagementAffiche = {
  * preuve, que l'agence verifie. Le montant maximum, lui, est libre : un
  * plafond est un choix du garant, pas une consequence des pieces.
  */
-export function FormulaireEngagement({ actuel }: { actuel: EngagementAffiche }) {
+export function FormulaireEngagement({
+  actuel,
+  dossierId,
+}: {
+  actuel: EngagementAffiche
+  dossierId: string
+}) {
   const [etat, envoyer, enCours] = useActionState(declarerMonEngagement, ETAT_INITIAL)
   const id = useId()
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
+      <input type="hidden" name="dossier" value={dossierId ?? ''} />
       {etat.statut === 'enregistre' ? (
         <p
           role="status"

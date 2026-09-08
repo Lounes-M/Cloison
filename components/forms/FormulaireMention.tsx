@@ -29,9 +29,11 @@ export type MentionAffichee = {
  * serveur le nomme, et c'est tout.
  */
 export function FormulaireMention({
+  dossierId,
   actuel,
   solidaire,
 }: {
+  dossierId: string
   actuel: MentionAffichee | null
   solidaire: boolean
 }) {
@@ -51,6 +53,7 @@ export function FormulaireMention({
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
+      <input type="hidden" name="dossier" value={dossierId ?? ''} />
       {etat.statut === 'erreur' ? (
         <div
           role="alert"

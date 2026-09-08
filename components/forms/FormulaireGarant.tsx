@@ -16,9 +16,11 @@ const ETAT_INITIAL: EtatGarant = { statut: 'inactif' }
  * qui laisserait croire que l'ancien lien vaut encore.
  */
 export function FormulaireGarant({
+  dossierId,
   garantActuel,
   verrouille = false,
 }: {
+  dossierId: string
   garantActuel: string | null
   verrouille?: boolean
 }) {
@@ -29,6 +31,7 @@ export function FormulaireGarant({
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
+      <input type="hidden" name="dossier" value={dossierId ?? ''} />
       {etat.statut === 'envoye' ? (
         <p
           role="status"

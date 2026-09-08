@@ -92,14 +92,16 @@ export default async function PageLocataire({
           {espace.loyerAide}
         </p>
         {ouvert && !dossier.loyer_verrouille ? (
-          <FormulaireLoyer loyerActuel={loyer} />
+          <FormulaireLoyer dossierId={porteur.capacite.dossierId} loyerActuel={loyer} />
         ) : (
           <p className="text-sm">
             Loyer : {loyer} €. Ce montant est figé pour préserver la confidentialité de la
             déclaration du garant.
           </p>
         )}
-        {ouvert && !dossier.agence_id ? <FormulaireContinuite mode="agence" /> : null}
+        {ouvert && !dossier.agence_id ? (
+          <FormulaireContinuite mode="agence" dossierId={porteur.capacite.dossierId} />
+        ) : null}
       </section>
 
       {aRegler || dossier.paye_le ? (
@@ -148,6 +150,7 @@ export default async function PageLocataire({
                 {paiementLocataire.regle}
               </p>
               <form action={payerMonDossier} className="mt-5">
+                <input type="hidden" name="dossier" value={porteur.capacite.dossierId} />
                 <button
                   type="submit"
                   className="press outlined bg-flame shadow-brut rounded-brut text-ink cursor-pointer px-8 py-4 text-[17px] font-bold"
@@ -172,6 +175,7 @@ export default async function PageLocataire({
         ) : ouvert ? (
           <>
             <FormulaireGarant
+              dossierId={porteur.capacite.dossierId}
               garantActuel={garant}
               verrouille={Boolean(dossier.garant_verrouille)}
             />

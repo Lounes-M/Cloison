@@ -8,11 +8,12 @@ import { retirerUnePiece, type EtatRetrait } from '@/lib/garant/action-depot'
 const ETAT_INITIAL: EtatRetrait = { statut: 'inactif' }
 
 /** Retirer une piece deposee. Un bouton, pas de confirmation : la piece se redepose en un geste. */
-export function BoutonRetrait({ pieceId }: { pieceId: string }) {
+export function BoutonRetrait({ pieceId, dossierId }: { pieceId: string; dossierId: string }) {
   const [etat, envoyer, enCours] = useActionState(retirerUnePiece, ETAT_INITIAL)
 
   return (
     <form action={envoyer} className="flex items-center gap-3">
+      <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="piece" value={pieceId} />
       <button
         type="submit"
