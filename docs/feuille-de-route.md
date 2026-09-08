@@ -4,6 +4,11 @@ De la landing au premier dossier reel allant jusqu'a un acte signe.
 Version de travail du 7 septembre 2026, apres la livraison des PR 43 a 56. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
 
+La maintenance des dependances de septembre est detaillee dans
+[son suivi](exploitation/dependances-septembre.md). Le passage a Vitest 5,
+Supabase JS et Resend actualises conserve les controles d'acces existants et
+exige une CI complete avant fusion.
+
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
 Une implementation seule ne termine pas une tache exigeant une livraison ou un
 parcours reel. Aucun total de cases ne mesure la preparation au lancement.
