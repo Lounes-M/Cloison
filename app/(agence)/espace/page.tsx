@@ -10,6 +10,7 @@ import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
+import { collaborateurs } from '@/lib/content/collaborateurs'
 
 export const metadata: Metadata = {
   title: 'Espace agence',
@@ -134,6 +135,15 @@ export default async function PageEspace({
         Connecté en tant que <strong className="text-ink">{email}</strong>
         {role === 'admin' ? ', administrateur' : ''}.
       </p>
+
+      {role === 'admin' ? (
+        <Link
+          href="/espace/collaborateurs"
+          className="mt-3 inline-block text-sm font-semibold underline"
+        >
+          {collaborateurs.titre}
+        </Link>
+      ) : null}
 
       {!verifiee ? (
         <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">

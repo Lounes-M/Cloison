@@ -23,7 +23,9 @@ const ROLES_FIXTURE = [
 ]
 const CATALOGUES = {
   tables: `select n.nspname,c.relname,pg_get_userbyid(c.relowner) as proprietaire,
-    c.relrowsecurity,c.relforcerowsecurity,c.relacl::text as droits from pg_class c
+    c.relrowsecurity,c.relforcerowsecurity,
+    (select jsonb_agg(a::text order by a::text) from unnest(coalesce(c.relacl,
+      acldefault(case when c.relkind='S' then 's' else 'r' end::"char",c.relowner))) a) as droits from pg_class c
     join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','auth','storage')
     and c.relkind in ('r','S','v') order by 1,2`,
   contraintes: `select n.nspname,c.relname,k.conname,pg_get_constraintdef(k.oid) as definition
@@ -146,7 +148,7 @@ function outils(url, conteneur, repertoireClients) {
   }
 }
 
-async function photographier(db) {
+export async function photographier(db) {
   const resultat = {}
   for (const [nom, requete] of Object.entries(CATALOGUES))
     resultat[nom] = (await db.query(requete)).rows
@@ -436,7 +438,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       clients: process.env.PG_RESTAURATION_CLIENTS,
     })
     console.log(JSON.stringify(resultat))
-  } catch {
+  } catch (erreur) {
+    if (
+      /^Restauration differente : (tables|contraintes|politiques|fonctions|roles|adhesions)$/.test(
+        erreur?.message ?? '',
+      )
+    )
+      console.error(erreur.message)
     console.error(
       'Exercice de restauration refuse ou incomplet. Verifier les clusters jetables et les clients17 ; aucune sortie de dump journalisee.',
     )
