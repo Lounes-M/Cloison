@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import Stripe from 'stripe'
+import type * as PaiementStripe from '@/lib/paiement/stripe'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
 const { rpc, serveur, retrouver } = vi.hoisted(() => ({
@@ -8,7 +9,7 @@ const { rpc, serveur, retrouver } = vi.hoisted(() => ({
   retrouver: vi.fn(),
 }))
 vi.mock('@/lib/paiement/stripe', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/paiement/stripe')>()),
+  ...(await importOriginal<typeof PaiementStripe>()),
   retrouverSessionFinanciere: retrouver,
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: serveur }))
