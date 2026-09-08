@@ -164,7 +164,12 @@ export default async function PageEspace({
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
 
-        <form action="/espace" method="get" className="mt-5 flex flex-wrap items-end gap-3">
+        <form
+          key={JSON.stringify([reference, emailRecherche])}
+          action="/espace"
+          method="get"
+          className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-end"
+        >
           <label className="min-w-0 flex-1 text-sm font-semibold">
             {tableau.rechercheReference}
             <input
