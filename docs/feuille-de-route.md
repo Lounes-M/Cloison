@@ -157,3 +157,8 @@ jusqu'a 82 sont fusionnees, avec CI main verte. Le lot 0042 du registre financie
 est prepare et repete sans application ; son etat et ses limites sont detailles
 dans le suivi des lots. Les formats de rotation sont livres, mais le rescellement
 de masse et la disponibilite des cles de secours restent ouverts.
+
+PR83 est fusionnee et 0042 appliquee, avec CI finale et droits reels verifies.
+Le rescellement administratif de masse est prepare avec inventaire, comparaison
+atomique et reprise bornee ; sa livraison reste soumise aux controles complets.
+La disponibilite effective des cles de secours demeure une condition externe.
