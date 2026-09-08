@@ -35,6 +35,12 @@ test('compare les centimes en chiffres et en lettres', () => {
   expect(verifierMention(texte, false)).toEqual({ ok: true, montantEuros: 12000.5 })
   expect(verifierMention(texte.replace('cinquante', 'soixante'), false).ok).toBe(false)
 })
+
+test('un montant entier en chiffres ne masque pas des centimes en lettres', () => {
+  const texte = 'caution payer defaillance douze mille euros et cinquante centimes (12000 euros)'
+  expect(verifierMention(texte, false).ok).toBe(false)
+  expect(verifierMention(texte.replace('cinquante', 'zero'), false).ok).toBe(true)
+})
 test('ne choisit pas arbitrairement un plafond parmi plusieurs montants divergents', () => {
   expect(
     verifierMention(
