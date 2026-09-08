@@ -86,3 +86,12 @@ authenticated passe et annule les fixtures. CI preparatoire 34215269359 verte,
 y compris sabotage et concurrence sur deux connexions en Read Committed et
 Repeatable Read. La migration attend sa CI finale apres rebase, puis son
 application explicite.
+
+## Quotas avant analyse documentaire
+
+0036 preparee, non appliquee : 20 tentatives par dossier, 60 par IP, 300 pour
+l'application par fenetre de quinze minutes. Le refus precede la lecture des
+octets, y compris pour un fichier invalide. Droits et empreinte repetes sur
+Supabase avec rollback, seule la fonction de comptage change. Les processus
+isoles et la concurrence documentaire restent a traiter. Voir
+[le runbook](exploitation/debit-documentaire.md).

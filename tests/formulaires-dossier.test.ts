@@ -7,6 +7,7 @@ const h = vi.hoisted(() => ({
   serveur: vi.fn(),
   document: vi.fn(),
   paiement: vi.fn(),
+  analyse: vi.fn(),
 }))
 vi.mock('@/lib/acces/session', () => ({
   capaciteDepuisCookies: h.session,
@@ -14,6 +15,7 @@ vi.mock('@/lib/acces/session', () => ({
   urlDuLien: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: h.serveur }))
+vi.mock('@/lib/garant/debit-depot', () => ({ autoriserAnalyse: h.analyse }))
 vi.mock('@/lib/coffre/validation-document', () => ({ verifierDocument: h.document }))
 vi.mock('@/lib/courriels/notifications', () => ({
   statutActuel: async () => 'ouvert',
@@ -204,4 +206,17 @@ test.each(
     confirme ? (nom === 'mention' ? 'apposee' : 'enregistre') : 'erreur',
   )
   if (!confirme) expect(h.notification).not.toHaveBeenCalled()
+})
+
+test('un quota refuse empeche meme la lecture des octets du depot', async () => {
+  h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: A, partie: 'garant' } })
+  h.analyse.mockResolvedValue(false)
+  h.client.mockReturnValue({})
+  const f = formulaire()
+  const octets = vi.spyOn(f.get('fichier') as File, 'arrayBuffer')
+  expect((await deposerUnePiece(initial, f)).statut).toBe('erreur')
+  expect(h.analyse).toHaveBeenCalledWith(A)
+  expect(octets).not.toHaveBeenCalled()
+  expect(h.document).not.toHaveBeenCalled()
+  expect(h.client).not.toHaveBeenCalled()
 })
