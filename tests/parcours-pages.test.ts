@@ -99,7 +99,7 @@ test.each(['transmis', 'refuse', 'signe'])(
       jeton: 'fictif',
       capacite: { partie: 'locataire', dossierId: ID },
     })
-    reponses.dossiers.data = {
+    reponses.dossiers!.data = {
       id: ID,
       reference: 'TEST',
       statut,
@@ -120,7 +120,7 @@ test('un dossier termine sans garant ne propose pas une nouvelle designation', a
     jeton: 'fictif',
     capacite: { partie: 'locataire', dossierId: ID },
   })
-  reponses.dossiers.data = {
+  reponses.dossiers!.data = {
     id: ID,
     reference: 'TEST',
     statut: 'transmis',
