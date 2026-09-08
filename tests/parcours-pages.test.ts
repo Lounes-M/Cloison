@@ -13,6 +13,7 @@ const doublures = vi.hoisted(() => ({
   plage: vi.fn(),
   filtre: vi.fn(),
   ordre: vi.fn(),
+  rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/session', () => ({
   capaciteDepuisCookies: doublures.capacite,
@@ -59,7 +60,14 @@ function client() {
       }
       return chaine
     },
-    rpc: vi.fn(async () => ({ data: [], error: null })),
+    rpc: vi.fn(async (nom: string, params: unknown) => {
+      doublures.rpc(nom, params)
+      if (nom === 'journal_du_dossier') {
+        requetes.push('journal_acces')
+        return reponses.journal_acces!
+      }
+      return { data: [], error: null }
+    }),
   }
 }
 
@@ -254,3 +262,41 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     },
   )
 })
+
+function texteVisible(noeud: ReactNode): string {
+  if (typeof noeud === 'string' || typeof noeud === 'number') return String(noeud)
+  if (Array.isArray(noeud)) return noeud.map(texteVisible).join(' ')
+  return isValidElement<{ children?: ReactNode }>(noeud) ? texteVisible(noeud.props.children) : ''
+}
+test.each(['garant', 'agence'])(
+  'le journal %s transmet le curseur exact et cache la ligne sentinelle',
+  async (role) => {
+    const quand = '2026-09-08T12:00:00.123456+00:00',
+      evenement = '00000000-0000-4000-8000-000000000092'
+    const avant = Buffer.from(JSON.stringify([ID, quand, evenement])).toString('base64url')
+    reponses.journal_acces = {
+      data: Array.from({ length: 51 }, (_, i) => ({
+        id: `00000000-0000-4000-8000-${String(i + 1).padStart(12, '0')}`,
+        quand,
+        acteur: 'agence',
+        action: 'dossier_consulte',
+        identite: i === 50 ? 'sentinelle@example.invalid' : `agence${i}@example.invalid`,
+      })),
+      error: null,
+    }
+    const page =
+      role === 'garant'
+        ? await PageGarant({ searchParams: Promise.resolve({ avant }) })
+        : await PageDossier({
+            params: Promise.resolve({ id: ID }),
+            searchParams: Promise.resolve({ avant }),
+          })
+    expect(doublures.rpc).toHaveBeenCalledWith('journal_du_dossier', {
+      le_dossier: ID,
+      avant_quand: quand,
+      avant_id: evenement,
+    })
+    expect(texteVisible(page)).toContain('agence49@example.invalid')
+    expect(texteVisible(page)).not.toContain('sentinelle@example.invalid')
+  },
+)
