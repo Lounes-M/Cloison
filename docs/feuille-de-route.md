@@ -137,6 +137,11 @@ Les parcours navigateur automatises, les profils documentaires, la rotation des
 cles, le rapprochement des paiements et la chaine contractuelle restent ouverts.
 Les preuves actualisees sont dans [le suivi des lots](implementation-audit-septembre.md).
 
+La lecture d'enveloppes versionnees et le trousseau de rotation sont prepares,
+avec activation distincte de la livraison des lecteurs. Le depot et les courriels
+utilisent les memes formats. Le rescellement en masse et la disponibilite des cles
+de secours restent ouverts ; voir [Rotation des cles](exploitation/rotation-cles.md).
+
 Le marquage d'un paiement refuse maintenant les confirmations SQL ambigues :
 seuls true et false sont des resultats interpretes, toute autre valeur demande
 un rejeu HTTP 503. Quatre contre-preuves observees rouges, puis 19 tests du

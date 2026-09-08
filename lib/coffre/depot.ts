@@ -2,8 +2,8 @@ import 'server-only'
 
 import { randomUUID } from 'node:crypto'
 
-import { cleMaitresse } from './cle-maitresse'
-import { ouvrir, nouvelleCle, sceller } from './enveloppe'
+import { ouvrirMaitresse, scellerMaitresse } from './rotation-maitresse'
+import { nouvelleCle, sceller } from './enveloppe'
 import { verifierContenu, type TypeAccepte } from './type-reel'
 
 /**
@@ -82,16 +82,16 @@ export type Retrait = { retiree: true } | { retiree: false; raison: string }
  */
 async function cleDuDossier(base: DepotBase, dossierId: string): Promise<Buffer> {
   const deja = await base.cleScellee(dossierId)
-  if (deja) return ouvrir(deja, cleMaitresse())
+  if (deja) return ouvrirMaitresse(deja)
 
   const candidate = nouvelleCle()
-  const pose = await base.poserCleScellee(dossierId, sceller(candidate, cleMaitresse()))
+  const pose = await base.poserCleScellee(dossierId, scellerMaitresse(candidate))
 
   if (pose === 'posee') return candidate
 
   if (pose === 'deja') {
     const gagnante = await base.cleScellee(dossierId)
-    if (gagnante) return ouvrir(gagnante, cleMaitresse())
+    if (gagnante) return ouvrirMaitresse(gagnante)
   }
 
   throw new Error(`Impossible d'obtenir la cle du dossier ${dossierId}.`)

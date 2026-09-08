@@ -174,3 +174,10 @@ PR79 fusionnee en 24f4311 ; 0041 appliquee et immuable, droits reels et empreint
 verifies apres application. CI finale 34233061347 verte, 766 tests locaux et build
 avec les deux traces documentaires passes. La pagination des historiques est
 livree ; le controle de main 34234392806 est suivi separement.
+
+PR80 fusionnee en 5c00861, CI main 34236563951 verte. Lecture des webhooks de
+paiement bornee en taille et en duree ; 761 tests locaux avant integration des
+historiques, 53 tests cibles apres integration et build passes.
+PR81 fusionnee en a99536d, CI finale 34237414135 verte ; 774 tests locaux et build
+passes. Le webhook demande un rejeu lorsqu'une confirmation SQL est ambigue.
+Le controle de main apres cette derniere fusion reste suivi separement.
