@@ -37,9 +37,20 @@ export async function payerMonDossier(donnees: FormData): Promise<void> {
   // Rien a regler : deja fait, ou dossier d'agence.
   if (dossier.paye_le || dossier.agence_id || dossier.demonstration) redirect('/locataire')
 
+  const version = donnees.get('tarif_version')
+  const montant = donnees.get('montant_cents')
+  if (
+    typeof version !== 'string' ||
+    !/^[a-z0-9-]{1,64}$/.test(version) ||
+    typeof montant !== 'string' ||
+    !/^[1-9][0-9]{0,8}$/.test(montant) ||
+    Number(montant) > 100000000
+  )
+    redirect('/locataire?paiement=indisponible')
   const site = adresseDuSite()
   const url = await creerSessionLocataire({
     dossierId: porteur.capacite.dossierId,
+    tarifAttendu: { version, montant: Number(montant) },
     reference: String(dossier.reference),
     email: String(dossier.email_locataire),
     retourOk: `${site}/locataire?paiement=ok`,

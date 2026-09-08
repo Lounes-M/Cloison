@@ -6,7 +6,7 @@ import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { espace, statuts } from '@/lib/content/locataire'
-import { paiementLocataire } from '@/lib/content/tarifs'
+import { paiementLocataire, tarifs, euros } from '@/lib/content/tarifs'
 import { payerMonDossier } from '@/lib/locataire/action-paiement'
 import { cn } from '@/lib/utils'
 
@@ -66,6 +66,27 @@ export default async function PageLocataire({
   // Ce que le locataire achete, c'est le lien de son garant. Un dossier ouvert
   // par une agence, ou une demonstration, n'attend rien de lui.
   const aRegler = !dossier.paye_le && !dossier.agence_id && !dossier.demonstration
+  let prixDossier: number = tarifs.locataireCents
+  let versionTarif: string = tarifs.versionLocataire
+  if (aRegler) {
+    const { data, error } = await supabase.rpc('mon_tarif_paiement')
+    if (error || !Array.isArray(data) || data.length > 1) throw new Error('Tarif indisponible')
+    if (data.length === 1) {
+      const prix = data[0]
+      if (
+        !prix ||
+        !Number.isSafeInteger(prix.montant_cents) ||
+        prix.montant_cents < 1 ||
+        prix.montant_cents > 100000000 ||
+        prix.devise !== 'eur' ||
+        typeof prix.tarif_version !== 'string' ||
+        !/^[a-z0-9-]{1,64}$/.test(prix.tarif_version)
+      )
+        throw new Error('Tarif indisponible')
+      prixDossier = prix.montant_cents
+      versionTarif = prix.tarif_version
+    }
+  }
   const loyer =
     dossier.loyer_cents == null ? '' : (Number(dossier.loyer_cents) / 100).toLocaleString('fr-FR')
   const expire = new Date(String(dossier.expire_le)).toLocaleDateString('fr-FR', {
@@ -140,7 +161,7 @@ export default async function PageLocataire({
             </p>
           ) : (
             <div className="bg-sky outlined shadow-brut mt-4 rounded-[18px] p-6">
-              <p className="font-display text-3xl">{paiementLocataire.prix}</p>
+              <p className="font-display text-3xl">{euros(prixDossier)}</p>
               <p className="mt-2 text-[15px] leading-relaxed font-medium">
                 {paiementLocataire.texte}
               </p>
@@ -150,12 +171,14 @@ export default async function PageLocataire({
                 {paiementLocataire.regle}
               </p>
               <form action={payerMonDossier} className="mt-5">
+                <input type="hidden" name="tarif_version" value={versionTarif} />
+                <input type="hidden" name="montant_cents" value={prixDossier} />
                 <input type="hidden" name="dossier" value={porteur.capacite.dossierId} />
                 <button
                   type="submit"
                   className="press outlined bg-flame shadow-brut rounded-brut text-ink cursor-pointer px-8 py-4 text-[17px] font-bold"
                 >
-                  {paiementLocataire.bouton}
+                  {paiementLocataire.boutonPour(prixDossier)}
                 </button>
               </form>
             </div>
