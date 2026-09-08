@@ -10,6 +10,9 @@ const doublures = vi.hoisted(() => ({
   capacite: vi.fn(),
   client: vi.fn(),
   contexte: vi.fn(),
+  plage: vi.fn(),
+  filtre: vi.fn(),
+  ordre: vi.fn(),
 }))
 vi.mock('@/lib/acces/session', () => ({
   capaciteDepuisCookies: doublures.capacite,
@@ -37,7 +40,18 @@ function client() {
       const chaine = {
         select: () => chaine,
         eq: () => chaine,
-        order: () => chaine,
+        order: (...args: unknown[]) => {
+          doublures.ordre(...args)
+          return chaine
+        },
+        range: (...args: unknown[]) => {
+          doublures.plage(...args)
+          return chaine
+        },
+        ilike: (...args: unknown[]) => {
+          doublures.filtre(...args)
+          return chaine
+        },
         limit: () => chaine,
         maybeSingle: () => chaine,
         then: (resolve: (reponse: Reponse) => unknown) =>
@@ -184,4 +198,59 @@ describe('le routage des pages reste ferme', () => {
     await expect(PageGarant()).rejects.toThrow('redirection:/lien-invalide')
     await expect(dossier()).rejects.toThrow('introuvable')
   })
+})
+
+function elements(noeud: ReactNode): { type: unknown; props: Record<string, unknown> }[] {
+  if (Array.isArray(noeud)) return noeud.flatMap(elements)
+  if (!isValidElement<{ children?: ReactNode }>(noeud)) return []
+  return [{ type: noeud.type, props: noeud.props }, ...elements(noeud.props.children)]
+}
+
+describe('la liste des dossiers reste bornee et navigable', () => {
+  test('51 resultats ne rendent que 50 dossiers et annoncent la suite', async () => {
+    reponses.dossiers!.data = Array.from({ length: 51 }, (_, i) => ({
+      id: `dossier-${i}`,
+      reference: `REF-${i}`,
+      email_locataire: 'essai@example.invalid',
+      statut: 'ouvert',
+      cree_le: '2026-09-01',
+      engagements: null,
+    }))
+    const arbre = elements(await PageEspace())
+    const liens = arbre.map((e) => e.props.href).filter(Boolean)
+    expect(liens).toContain('/espace/dossiers/dossier-49')
+    expect(liens).not.toContain('/espace/dossiers/dossier-50')
+    expect(liens).toContain('/espace?page=2')
+    expect(doublures.plage).toHaveBeenCalledWith(0, 50)
+    expect(doublures.ordre).toHaveBeenCalledWith('id', { ascending: false })
+  })
+
+  test('la page suivante conserve les filtres litteraux et permet de revenir', async () => {
+    reponses.dossiers!.data = []
+    const arbre = elements(
+      await PageEspace({
+        searchParams: Promise.resolve({
+          page: '3',
+          reference: ' AB_10% ',
+          email: 'test+un@example.invalid',
+        }),
+      }),
+    )
+    expect(doublures.plage).toHaveBeenCalledWith(100, 150)
+    expect(doublures.filtre).toHaveBeenCalledWith('reference', '%AB\\_10\\%%')
+    expect(doublures.filtre).toHaveBeenCalledWith('email_locataire', '%test+un@example.invalid%')
+    expect(arbre.map((e) => e.props.href)).toContain(
+      '/espace?page=2&reference=AB_10%25&email=test%2Bun%40example.invalid',
+    )
+    expect(arbre.filter((e) => e.type === 'form').some((e) => e.props.method === 'get')).toBe(true)
+  })
+
+  test.each(['0', '-1', '2.5', '1e2', '999999999999999999999', ['2', '3']])(
+    'page invalide %s : retour a une plage sure',
+    async (page) => {
+      reponses.dossiers!.data = []
+      await PageEspace({ searchParams: Promise.resolve({ page }) })
+      expect(doublures.plage).toHaveBeenCalledWith(0, 50)
+    },
+  )
 })

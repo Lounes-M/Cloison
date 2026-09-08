@@ -7,6 +7,16 @@
  */
 
 export const tableau = {
+  rechercheReference: 'Référence du dossier',
+  rechercheEmail: 'E-mail du locataire',
+  rechercher: 'Rechercher',
+  effacer: 'Effacer les filtres',
+  aucunResultat:
+    'Aucun dossier sur cette page. Modifiez les filtres ou revenez à la page précédente.',
+  pagination: 'Pages des dossiers',
+  precedente: 'Page précédente',
+  suivante: 'Page suivante',
+  page: (numero: number) => `Page ${numero}`,
   dossiers: 'Vos dossiers',
   aucun: 'Aucun dossier pour l’instant. Ouvrez-en un ci-dessous : le locataire reçoit son lien.',
   colonnes: {

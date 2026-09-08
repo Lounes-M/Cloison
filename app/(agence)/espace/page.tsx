@@ -48,7 +48,11 @@ function ratioDe(ligne: Ligne): string | null {
  * elle est idempotente et rend l'agence deja rattachee. Cela evite un etat
  * « compte cree mais pas rattache » qu'il faudrait rattraper autrement.
  */
-export default async function PageEspace() {
+export default async function PageEspace({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+} = {}) {
   const contexte = await contexteAgence()
   if (contexte.etat === 'anonyme') redirect('/connexion')
 
@@ -93,12 +97,33 @@ export default async function PageEspace() {
   const { agence, role, supabase, email } = contexte
   const verifiee = agence.statut === 'verifiee'
 
-  const { data, error } = await supabase
+  const recherche = (await searchParams) ?? {}
+  const numero =
+    typeof recherche.page === 'string' && /^[1-9]\d{0,3}$/.test(recherche.page)
+      ? Number(recherche.page)
+      : 1
+  const champ = (valeur: unknown) => (typeof valeur === 'string' ? valeur.trim().slice(0, 120) : '')
+  const reference = champ(recherche.reference)
+  const emailRecherche = champ(recherche.email)
+  const motif = (valeur: string) => `%${valeur.replace(/[\\%_]/g, '\\$&')}%`
+  const lienPage = (page: number) => {
+    const params = new URLSearchParams({ page: String(page) })
+    if (reference) params.set('reference', reference)
+    if (emailRecherche) params.set('email', emailRecherche)
+    return `/espace?${params.toString()}` as const
+  }
+  let requete = supabase
     .from('dossiers')
     .select('id, reference, email_locataire, statut, cree_le, demonstration, engagements(ratio)')
     .order('cree_le', { ascending: false })
+    .order('id', { ascending: false })
+  if (reference) requete = requete.ilike('reference', motif(reference))
+  if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
+  const { data, error } = await requete.range((numero - 1) * 50, (numero - 1) * 50 + 50)
   if (error) throw new Error('Chargement du dossier indisponible.')
-  const lignes = (data ?? []) as Ligne[]
+  const resultats = (data ?? []) as Ligne[]
+  const suivante = resultats.length > 50 && numero < 9999
+  const lignes = resultats.slice(0, 50)
 
   const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
 
@@ -139,8 +164,39 @@ export default async function PageEspace() {
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
 
+        <form action="/espace" method="get" className="mt-5 flex flex-wrap items-end gap-3">
+          <label className="min-w-0 flex-1 text-sm font-semibold">
+            {tableau.rechercheReference}
+            <input
+              name="reference"
+              defaultValue={reference}
+              maxLength={120}
+              className="outlined mt-2 w-full rounded-lg px-3 py-2"
+            />
+          </label>
+          <label className="min-w-0 flex-1 text-sm font-semibold">
+            {tableau.rechercheEmail}
+            <input
+              name="email"
+              defaultValue={emailRecherche}
+              maxLength={120}
+              className="outlined mt-2 w-full rounded-lg px-3 py-2"
+            />
+          </label>
+          <button type="submit" className="outlined bg-sky rounded-lg px-4 py-2 font-bold">
+            {tableau.rechercher}
+          </button>
+          {reference || emailRecherche ? (
+            <Link href="/espace" className="px-2 py-2 text-sm underline">
+              {tableau.effacer}
+            </Link>
+          ) : null}
+        </form>
+
         {lignes.length === 0 ? (
-          <p className="text-muted mt-4 text-[15px] font-medium">{tableau.aucun}</p>
+          <p className="text-muted mt-4 text-[15px] font-medium">
+            {numero > 1 || reference || emailRecherche ? tableau.aucunResultat : tableau.aucun}
+          </p>
         ) : (
           <div className="outlined mt-6 overflow-x-auto rounded-[14px]">
             <table className="w-full text-left text-[14px]">
@@ -199,6 +255,22 @@ export default async function PageEspace() {
             </table>
           </div>
         )}
+        <nav
+          aria-label={tableau.pagination}
+          className="mt-5 flex flex-wrap items-center gap-4 text-sm font-semibold"
+        >
+          {numero > 1 ? (
+            <Link href={lienPage(numero - 1)} className="underline">
+              {tableau.precedente}
+            </Link>
+          ) : null}
+          <span>{tableau.page(numero)}</span>
+          {suivante ? (
+            <Link href={lienPage(numero + 1)} className="underline">
+              {tableau.suivante}
+            </Link>
+          ) : null}
+        </nav>
       </section>
 
       <section className="mt-12 grid gap-10 md:grid-cols-2">

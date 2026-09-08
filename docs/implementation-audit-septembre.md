@@ -84,14 +84,35 @@ Le lot administrateur ajoute 0035 et ses essais. Aucune agence de production
 sans administrateur au controle prealable. La repetition des droits sous
 authenticated passe et annule les fixtures. CI preparatoire 34215269359 verte,
 y compris sabotage et concurrence sur deux connexions en Read Committed et
-Repeatable Read. La migration attend sa CI finale apres rebase, puis son
-application explicite.
+Repeatable Read. Application et CI finale confirmees dans la section suivante.
 
 ## Quotas avant analyse documentaire
 
-0036 preparee, non appliquee : 20 tentatives par dossier, 60 par IP, 300 pour
+0036 appliquee et immuable, PR74 fusionnee, main 1f16589 : 20 tentatives par dossier, 60 par IP, 300 pour
 l'application par fenetre de quinze minutes. Le refus precede la lecture des
 octets, y compris pour un fichier invalide. Droits et empreinte repetes sur
 Supabase avec rollback, seule la fonction de comptage change. Les processus
 isoles et la concurrence documentaire restent a traiter. Voir
 [le runbook](exploitation/debit-documentaire.md).
+
+## Verification en production et navigation
+
+0035 est appliquee et immuable. PR72 fusionnee, main 982f7cc, CI finale
+34216310131 verte. Repetition transactionnelle, droits authenticated et empreinte
+verifies apres application. Ne pas rejouer le lot. Le controle suivant de main
+est 34217258887.
+
+Le PDF volumineux est maintenant verifie sur Vercel : source synthetique de
+771038 octets, sortie filigranee de 11684637 octets, deux pages lisibles par
+pdf-lib, HTTP 200 pour le compte fictif de la bonne agence et 401 sans session.
+Une trace nominative est presente, Cache-Control no-store et aucune longueur
+imposee. La session AAL2 est une fixture signee, pas un nouvel essai du parcours
+MFA. Comptes, agence, dossier et objets Storage fictifs supprimes apres l'essai.
+
+La liste agence charge au maximum 51 lignes et en affiche 50. La ligne suivante
+sert uniquement a proposer la page suivante. Ordre stable par date puis id,
+recherche litterale par reference et e-mail, filtres conserves dans les liens.
+Les pages invalides retournent a la premiere plage ; les recherches sont limitees
+a 120 caracteres. Les droits RLS existants restent applicables. Huit tests de
+regression observes rouges avant correction puis verts. Le journal des acces
+et une pagination par curseur pour les tres gros volumes restent distincts.
