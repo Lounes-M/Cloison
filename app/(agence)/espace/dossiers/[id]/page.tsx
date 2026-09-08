@@ -8,6 +8,9 @@ import { contexteAgence } from '@/lib/agences/contexte'
 import { acteurs, actions, dossier as texte, natures, statuts, tableau } from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
+import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
+import { NavigationJournal } from '@/components/ui/NavigationJournal'
+import { journal as texteJournal } from '@/lib/content/journal'
 
 export const metadata: Metadata = {
   title: 'Dossier',
@@ -28,6 +31,7 @@ function euros(cents: unknown): string {
 
 function date(valeur: unknown, heure = false): string {
   return new Date(String(valeur)).toLocaleString('fr-FR', {
+    timeZone: 'Europe/Paris',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -46,13 +50,20 @@ function date(valeur: unknown, heure = false): string {
  * donc l'echec de l'inscription n'empeche pas la page : la regle stricte est
  * reservee a ce qui dechiffre.
  */
-export default async function PageDossier({ params }: { params: Promise<{ id: string }> }) {
+export default async function PageDossier({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams?: Promise<Record<string, string | string[] | undefined>>
+}) {
   const { id } = await params
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound()
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') redirect('/connexion')
   const { supabase, agence } = contexte
+  const curseur = lireCurseurJournal((await searchParams)?.avant, id)
 
   const [
     { data: d, error: erreurDossier },
@@ -79,12 +90,11 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
       .select('id, type, taille_octets, depose_le')
       .eq('dossier_id', id)
       .order('depose_le', { ascending: true }),
-    supabase
-      .from('journal_acces')
-      .select('action, acteur, quand, piece_id')
-      .eq('dossier_id', id)
-      .order('quand', { ascending: false })
-      .limit(30),
+    supabase.rpc('journal_du_dossier', {
+      le_dossier: id,
+      avant_quand: curseur?.quand ?? null,
+      avant_id: curseur?.id ?? null,
+    }),
   ])
 
   if (erreurDossier || erreurEngagement || erreurPieces || erreurJournal) {
@@ -93,6 +103,7 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
 
   // La RLS a decide : un dossier d'une autre agence n'existe pas pour celle-ci.
   if (!d) notFound()
+  const historique = pageJournal(journal, id)
 
   const { error: inscription } = await supabase.rpc('journaliser', {
     le_dossier: id,
@@ -275,26 +286,31 @@ export default async function PageDossier({ params }: { params: Promise<{ id: st
         </div>
       </section>
 
-      <section className="mt-12">
+      <section id="journal" className="mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.journalTitre}</h2>
-        {!journal || journal.length === 0 ? (
+        {historique.lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">{texte.journalAucun}</p>
         ) : (
           <ol className="mt-4 flex flex-col gap-1 text-[14px]">
-            {journal.map((j, i) => (
+            {historique.lignes.map((j) => (
               <li
-                key={i}
+                key={j.id}
                 className="border-ink/20 flex flex-wrap justify-between gap-3 border-b py-2"
               >
-                <span className="font-medium">
-                  <strong>{acteurs[String(j.acteur)] ?? String(j.acteur)}</strong>{' '}
-                  {actions[String(j.action)] ?? String(j.action)}
+                <span className="max-w-full min-w-0 font-medium break-words">
+                  <strong>{j.identite ?? acteurs[j.acteur] ?? texteJournal.inconnu}</strong>{' '}
+                  {actions[j.action] ?? texteJournal.acces}
                 </span>
                 <span className="text-muted font-medium">{date(j.quand, true)}</span>
               </li>
             ))}
           </ol>
         )}
+        <NavigationJournal
+          chemin={`/espace/dossiers/${id}`}
+          suivant={historique.suivant}
+          ancien={curseur !== null}
+        />
       </section>
 
       <p className="text-muted mt-10 text-[13px] font-medium">

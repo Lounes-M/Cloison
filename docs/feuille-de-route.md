@@ -125,3 +125,14 @@ Stripe : 64 Kio reels, dix secondes de lecture, annulation du flux et cinq secon
 pour le marquage SQL du paiement. Deux regressions Stripe observees rouges avant
 correction, puis 21 tests des routes passes. Ce lot ne constitue pas le registre
 comptable ni le rapprochement des paiements, toujours ouverts.
+
+## Mise a jour du 8 septembre, apres PR78
+
+Les migrations jusqu'a 0040 sont appliquees. Le calendrier independant de maintenance
+fonctionne et deux executions planifiees ont ete verifiees. Le suivi des courriels
+est livre, avec activation Resend externe encore ouverte. Les listes de dossiers
+et la gestion des collaborateurs sont livrees. La pagination des historiques est
+preparee dans 0041, avec repetition SQL reussie, avant application et fusion.
+Les parcours navigateur automatises, les profils documentaires, la rotation des
+cles, le rapprochement des paiements et la chaine contractuelle restent ouverts.
+Les preuves actualisees sont dans [le suivi des lots](implementation-audit-septembre.md).
