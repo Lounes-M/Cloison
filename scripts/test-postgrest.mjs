@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url'
 import { Client } from 'pg'
 import { SignJWT } from 'jose'
 import { verifierConcurrenceDepot } from './verifier-concurrence-depot.mjs'
+import { verifierConcurrencePaiements } from './verifier-concurrence-paiements.mjs'
 import { verifierConcurrenceAdministrateurs } from './verifier-concurrence-administrateurs.mjs'
 
 export async function preparerBase(db) {
@@ -159,6 +160,8 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       }
       await verifierConcurrenceAdministrateurs(connexion)
       console.log('OK : dernier administrateur preserve sur deux connexions et deux isolations')
+      await verifierConcurrencePaiements(connexion)
+      console.log('OK : credit financier unique et sabotage verifies sur deux connexions')
     }
   } finally {
     await db.end()

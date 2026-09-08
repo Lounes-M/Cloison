@@ -9,6 +9,7 @@
 export const tarifs = {
   /** Le locataire, une fois, pour un dossier valable trois mois. */
   locataireCents: 900,
+  versionLocataire: 'locataire-2026-09-04',
 
   /** L'agence, par acte signe et archive. Consulter reste gratuit. */
   acteCents: 2900,
@@ -16,7 +17,7 @@ export const tarifs = {
   /** Le garant. Il n'y a pas de montant parce qu'il n'y en aura jamais. */
 } as const
 
-const euros = (centimes: number) =>
+export const euros = (centimes: number) =>
   new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'EUR',
@@ -35,6 +36,7 @@ export const paiementLocataire = {
     'Le paiement n’est pas remboursé si le dossier expire sans décision de l’agence : tu achètes trois mois de coffre, pas un résultat.',
   attente: 'Le lien de ton garant partira une fois le dossier réglé.',
   bouton: `Régler ${prixLocataire}`,
+  boutonPour: (montant: number) => `Régler ${euros(montant)}`,
   envoi: 'Redirection…',
   regle_le: (date: string) => `Dossier réglé le ${date}.`,
   indisponible: 'Le paiement n’est pas disponible pour l’instant. Réessaie dans un moment.',

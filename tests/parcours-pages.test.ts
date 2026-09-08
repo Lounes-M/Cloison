@@ -66,6 +66,7 @@ function client() {
         requetes.push('journal_acces')
         return reponses.journal_acces!
       }
+      if (nom === 'mon_tarif_paiement' && reponses.tarif) return reponses.tarif
       return { data: [], error: null }
     }),
   }
@@ -105,6 +106,43 @@ beforeEach(() => {
 })
 
 const locataire = () => PageLocataire({ searchParams: Promise.resolve({}) })
+
+test('le paiement affiche le prix reserve et transmet exactement cette offre', async () => {
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  reponses.tarif = {
+    data: [{ montant_cents: 800, devise: 'eur', tarif_version: 'ancien' }],
+    error: null,
+  }
+  const champs: Record<string, unknown> = {}
+  const textes: string[] = []
+  function visiter(noeud: ReactNode) {
+    if (typeof noeud === 'string') textes.push(noeud)
+    if (Array.isArray(noeud)) noeud.forEach(visiter)
+    if (isValidElement<{ children?: ReactNode; name?: string; value?: unknown }>(noeud)) {
+      if (noeud.type === 'input' && noeud.props.name) champs[noeud.props.name] = noeud.props.value
+      visiter(noeud.props.children)
+    }
+  }
+  visiter(await locataire())
+  expect(champs).toMatchObject({ tarif_version: 'ancien', montant_cents: 800 })
+  expect(textes.join(' ').replace(/\s/g, ' ')).toContain('8 €')
+  expect(textes.join(' ').replace(/\s/g, ' ')).not.toContain('9 €')
+})
+
+test('un tarif reserve illisible ne propose pas un prix de remplacement', async () => {
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  reponses.tarif = {
+    data: [{ montant_cents: 800, devise: 'usd', tarif_version: 'ancien' }],
+    error: null,
+  }
+  await expect(locataire()).rejects.toThrow('Tarif indisponible')
+})
 const dossier = () => PageDossier({ params: Promise.resolve({ id: ID }) })
 
 function formulaireGarant(noeud: ReactNode): Record<string, unknown> | undefined {

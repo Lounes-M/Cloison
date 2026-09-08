@@ -181,3 +181,23 @@ historiques, 53 tests cibles apres integration et build passes.
 PR81 fusionnee en a99536d, CI finale 34237414135 verte ; 774 tests locaux et build
 passes. Le webhook demande un rejeu lorsqu'une confirmation SQL est ambigue.
 Le controle de main apres cette derniere fusion reste suivi separement.
+
+## Registre financier et etat au 8 septembre, 17 h 20
+
+Les CI main de PR79 (34234392806), PR81 (34238766497) et PR82 (34240180884)
+sont vertes. PR82 est fusionnee en 6537946 : formats de rotation livres, 776 tests
+locaux et build passes, sans modification des cles de production.
+
+Le lot 0042 prepare un registre minimal, des versions tarifaires immuables, le
+suivi des remboursements et litiges et un rapprochement fournisseur en lecture
+seule. Le formulaire affiche le tarif reserve et le compare avant Checkout.
+102 tests cibles passent ; les repetitions Supabase sont annulees et verifient
+les roles reels et empreintes. Les retraits volontaires des gardes ont produit
+5, puis 6, puis 9 echecs attendus. Les controles complets, la concurrence native,
+l'application SQL et la fusion restent a effectuer. 0042 n'est pas encore appliquee.
+Voir [le registre des paiements](exploitation/registre-paiements.md).
+
+Le rattrapage automatique vise les references historiques et celles des suivis
+recus ; il ne parcourt pas encore toutes les reservations Checkout sans aucun
+webhook. Cette extension, la resolution tracee des anomalies et la facturation
+agence restent ouvertes. Les integrations externes ne sont pas declarees activees.
