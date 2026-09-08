@@ -106,3 +106,5 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - Les acces sont controles cote serveur et en base.
 - Les justificatifs expires sont purges ; la conservation de l'acte signe est distincte.
 - Les acces aux pieces sont journalises nominativement.
+
+Le versionnement des conditions et l'invalidation de la mention sont decrits dans [le runbook dedie](exploitation/conditions-engagement.md). La migration 0034 exige son deploiement explicite avant le code.

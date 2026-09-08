@@ -8,6 +8,8 @@ import { revalidatePath } from 'next/cache'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { analyserEngagement } from '@/lib/garant/validation'
+import { versionConditions } from '@/lib/garant/version-conditions'
+import { conditionsEngagement } from '@/lib/content/conditions-engagement'
 
 /**
  * Ce que le garant couvre.
@@ -51,6 +53,8 @@ export async function declarerMonEngagement(
     }
   }
 
+  const version = versionConditions(donnees)
+  if (version === null) return { statut: 'erreur', message: conditionsEngagement.perimees }
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { dossierId } = porteur.capacite
   const colonnes = {
@@ -66,16 +70,23 @@ export async function declarerMonEngagement(
   try {
     const { data: existant, error: erreurLecture } = await supabase
       .from('engagements')
-      .select('dossier_id')
+      .select('dossier_id, version_conditions')
       .eq('dossier_id', dossierId)
       .maybeSingle()
 
     if (erreurLecture) throw new Error('Lecture indisponible')
+    if (Number(existant?.version_conditions ?? 0) !== version) {
+      return { statut: 'erreur', message: conditionsEngagement.perimees }
+    }
 
     const avant = await statutActuel(supabase, dossierId)
 
     const ecriture = existant
-      ? supabase.from('engagements').update(colonnes).eq('dossier_id', dossierId)
+      ? supabase
+          .from('engagements')
+          .update(colonnes)
+          .eq('dossier_id', dossierId)
+          .eq('version_conditions', version)
       : supabase.from('engagements').insert({ dossier_id: dossierId, ...colonnes })
 
     const { data: enregistre, error } = await ecriture.select('dossier_id').maybeSingle()
