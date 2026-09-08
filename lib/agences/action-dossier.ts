@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
-import { ouvrirDossierAvecLien, urlDuLien } from '@/lib/acces/session'
-import { envoyerLienLocataire } from '@/lib/courriels/liens'
+import { ouvrirDossierAvecLien } from '@/lib/acces/session'
+import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 import { contexteAgence } from './contexte'
 
@@ -73,18 +73,7 @@ export async function ouvrirUnDossier(
       }
     }
 
-    const envoye = await envoyerLienLocataire({
-      a: courriel,
-      url: urlDuLien(ouvert.jeton),
-      reference: ouvert.reference,
-    })
-    if (!envoye) {
-      return {
-        statut: 'erreur',
-        message: "Le dossier est ouvert mais le lien n'est pas parti. Verifiez l'adresse.",
-        valeur: saisie,
-      }
-    }
+    await reprendreLivraisonLiens(ouvert.dossierId)
   } catch {
     console.error('[agence] ouverture impossible')
     return {

@@ -1,6 +1,8 @@
 import 'server-only'
 
 import { envoyer } from './envoi'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { liens } from '@/lib/content/liens'
 
 /**
  * Les courriels qui portent un lien.
@@ -19,10 +21,22 @@ import { envoyer } from './envoi'
  */
 
 /** Ce que le courriel montre du dossier : sa reference, rien d'autre. */
-type Envoi = { a: string; url: string; reference: string }
+type Livraison = { db: SupabaseClient; id: string; signal?: AbortSignal; differer: boolean }
+type Envoi = { a: string; url: string; reference: string; expireLe?: Date; livraison?: Livraison }
+function validite(date?: Date) {
+  return date
+    ? liens.fin(date.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }))
+    : liens.validite
+}
 
 /** Le premier lien du locataire, juste apres l'ouverture. */
-export function envoyerLienLocataire({ a, url, reference }: Envoi): Promise<boolean> {
+export function envoyerLienLocataire({
+  a,
+  url,
+  reference,
+  expireLe,
+  livraison,
+}: Envoi): Promise<boolean> {
   return envoyer(
     a,
     `Ton dossier Cloison est ouvert (${reference})`,
@@ -32,13 +46,17 @@ export function envoyerLienLocataire({ a, url, reference }: Envoi): Promise<bool
       'Voici ton lien pour y revenir, désigner ton garant et suivre l’avancement :',
       url,
       '',
-      'Il est valable sept jours et une seule fois. Si tu le perds, tu pourras en',
-      'demander un nouveau depuis la même page.',
+      validite(expireLe),
+      liens.retrouver,
       '',
       `Référence du dossier : ${reference}`,
       '',
       'Cloison',
     ].join('\n'),
+    livraison?.id,
+    undefined,
+    livraison?.differer ?? false,
+    livraison ? { db: livraison.db, signal: livraison.signal, lien: true } : undefined,
   )
 }
 
@@ -53,6 +71,8 @@ export function envoyerLienGarant({
   url,
   reference,
   demandePar,
+  expireLe,
+  livraison,
 }: Envoi & { demandePar: string }): Promise<boolean> {
   return envoyer(
     a,
@@ -65,11 +85,15 @@ export function envoyerLienGarant({
       'que le dossier avance.',
       url,
       '',
-      'Il est valable sept jours et une seule fois.',
+      validite(expireLe),
       '',
       `Référence du dossier : ${reference}`,
       '',
       'Cloison',
     ].join('\n'),
+    livraison?.id,
+    undefined,
+    livraison?.differer ?? false,
+    livraison ? { db: livraison.db, signal: livraison.signal, lien: true } : undefined,
   )
 }

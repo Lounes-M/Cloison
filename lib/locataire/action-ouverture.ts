@@ -5,8 +5,8 @@ import { z } from 'zod'
 
 import { consommerDebit } from '@/lib/acces/debit'
 import { clientServeur } from '@/lib/acces/serveur'
-import { ouvrirDossierAvecLien, urlDuLien } from '@/lib/acces/session'
-import { envoyerLienLocataire } from '@/lib/courriels/liens'
+import { ouvrirDossierAvecLien } from '@/lib/acces/session'
+import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 
 /**
  * La porte principale du produit : une adresse, un dossier, un lien.
@@ -79,23 +79,7 @@ export async function ouvrirMonDossier(
       }
     }
 
-    // Le dossier existe et le jeton est emis. Si le courriel ne part pas, la
-    // personne n'a aucun moyen d'y revenir : on le lui dit, plutot que de
-    // pretendre. Elle reessaiera, et la limite de debit borne le nombre de
-    // dossiers orphelins que cela peut produire.
-    const envoye = await envoyerLienLocataire({
-      a: courriel,
-      url: urlDuLien(ouvert.jeton),
-      reference: ouvert.reference,
-    })
-
-    if (!envoye) {
-      return {
-        statut: 'erreur',
-        message: "Le lien n'a pas pu etre envoye. Verifie l'adresse et reessaie.",
-        valeur: saisie,
-      }
-    }
+    await reprendreLivraisonLiens(ouvert.dossierId)
   } catch {
     console.error('[porte] ouverture impossible')
     return {

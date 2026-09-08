@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { clientServeur } from '@/lib/acces/serveur'
 import { livrerNotifications } from '@/lib/courriels/notifications'
+import { livrerLiens } from '@/lib/courriels/livraison-liens'
 import { distribuerCourriels } from '@/lib/courriels/file'
 import { purgerCoffres } from '@/lib/exploitation/purge'
 
@@ -34,8 +35,17 @@ export async function GET(request: Request) {
   // une panne de courriel ne doit jamais empecher la destruction des donnees.
   const purge = await executerLot('purge', () => purgerCoffres(db, budgetPurge))
   let notifications = { echecs: 1 }
+  let echecsLiens = 1
   try {
-    const budget = AbortSignal.timeout(15_000)
+    const budget = AbortSignal.timeout(5_000)
+    echecsLiens = compteur(
+      (await livrerLiens(await clientServeur(budget), undefined, budget)).echecs,
+    )
+  } catch {
+    console.error('[maintenance] liens indisponibles')
+  }
+  try {
+    const budget = AbortSignal.timeout(10_000)
     notifications = {
       echecs: compteur(
         (await livrerNotifications(await clientServeur(budget), undefined, budget)).echecs,
@@ -44,6 +54,7 @@ export async function GET(request: Request) {
   } catch {
     console.error('[maintenance] notifications indisponibles')
   }
+  notifications.echecs += echecsLiens
   const courriels = await executerLot('courriels', async () => {
     const budget = AbortSignal.timeout(18_000)
     return distribuerCourriels(await clientServeur(budget), undefined, budget)

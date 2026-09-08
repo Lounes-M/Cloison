@@ -6,9 +6,11 @@ const doubles = vi.hoisted(() => ({
   notifications: vi.fn(),
   courriels: vi.fn(),
   purge: vi.fn(),
+  liens: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
 vi.mock('@/lib/courriels/notifications', () => ({ livrerNotifications: doubles.notifications }))
+vi.mock('@/lib/courriels/livraison-liens', () => ({ livrerLiens: doubles.liens }))
 vi.mock('@/lib/courriels/file', () => ({ distribuerCourriels: doubles.courriels }))
 vi.mock('@/lib/exploitation/purge', () => ({ purgerCoffres: doubles.purge }))
 const requete = () =>
@@ -23,6 +25,7 @@ beforeEach(() => {
   doubles.notifications.mockResolvedValue({ echecs: 0 })
   doubles.courriels.mockResolvedValue({ traites: 2, echecs: 0 })
   doubles.purge.mockResolvedValue({ traites: 3, echecs: 0 })
+  doubles.liens.mockResolvedValue({ echecs: 0 })
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -64,7 +67,7 @@ test('un budget de purge epuise laisse un budget neuf aux notifications et courr
   expect(bilan.purge.echecs).toBe(1)
   expect(bilan.notifications.echecs).toBe(0)
   expect(bilan.courriels).toEqual({ traites: 1, echecs: 0 })
-  expect(controleurs).toHaveLength(3)
+  expect(controleurs).toHaveLength(4)
 })
 
 for (const phase of ['notifications', 'courriels', 'purge'] as const) {
@@ -121,4 +124,14 @@ test('une connexion impossible rend un bilan controle sans lancer les phases', a
   expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toMatch(
     /ADRESSE_PRIVEE|secret-fictif/,
   )
+})
+
+test('une panne de preparation des liens laisse les autres phases fonctionner', async () => {
+  doubles.liens.mockRejectedValue(new Error('ADRESSE_PRIVEE'))
+  const resultat = await GET(requete())
+  expect(resultat.status).toBe(503)
+  expect((await resultat.json()).notifications.echecs).toBe(1)
+  expect(doubles.notifications).toHaveBeenCalledOnce()
+  expect(doubles.courriels).toHaveBeenCalledOnce()
+  expect(doubles.purge).toHaveBeenCalledOnce()
 })

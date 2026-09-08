@@ -32,7 +32,7 @@ export const tableau = {
   nouveauChamp: 'Adresse e-mail du locataire',
   nouveauBouton: 'Envoyer le lien',
   nouveauEnvoi: 'Envoi…',
-  nouveauSucces: (email: string) => `Dossier ouvert. Le lien est parti à ${email}.`,
+  nouveauSucces: (email: string) => `Dossier ouvert. L’envoi du lien à ${email} est programmé.`,
   nonVerifieeTitre: 'Espace non vérifié',
   nonVerifieeTexte:
     'Vous avez accès au produit entier sur un dossier de démonstration. L’ouverture d’un dossier pour un vrai locataire attend la vérification de votre SIREN et de votre carte professionnelle.',

@@ -6,9 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
 import { consommerDebit } from '@/lib/acces/debit'
-import { capaciteDepuisCookies, clientPorteurDeLien, urlDuLien } from '@/lib/acces/session'
-import { signerJeton } from '@/lib/acces/jeton'
-import { envoyerLienLocataire } from '@/lib/courriels/liens'
+import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
+import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { continuite } from '@/lib/content/continuite'
 export type EtatContinuite = { message?: string }
 export async function retrouverMonDossier(
@@ -38,8 +37,7 @@ export async function retrouverMonDossier(
     })
     const d = Array.isArray(data) ? data[0] : null
     if (!error && d) {
-      const jeton = await signerJeton(d.dossier_id, 'locataire', d.jti, new Date(d.expire_le))
-      await envoyerLienLocataire({ a: email.data, url: urlDuLien(jeton), reference: d.reference })
+      await reprendreLivraisonLiens(d.dossier_id)
     }
   } catch {
     console.error('[continuite] recuperation indisponible')

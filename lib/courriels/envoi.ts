@@ -21,7 +21,7 @@ export async function envoyer(
   identifiant?: string,
   repondreA?: string,
   differer = false,
-  contexte?: { db: SupabaseClient; signal?: AbortSignal },
+  contexte?: { db: SupabaseClient; signal?: AbortSignal; lien?: boolean },
 ): Promise<boolean> {
   const destinataires = Array.isArray(a) ? a.filter(Boolean) : [a]
   if (destinataires.length === 0) return false
@@ -36,13 +36,16 @@ export async function envoyer(
       subject: sujet,
       text: texte,
     }
-    const { error } = await db.rpc('mettre_courriel_en_file', {
-      identifiant: id,
-      chiffre: sceller(Buffer.from(JSON.stringify(contenu)), cleMaitresse()).toString('base64'),
-    })
-    if (error) return false
+    const { data, error } = await db.rpc(
+      contexte?.lien ? 'mettre_lien_en_file' : 'mettre_courriel_en_file',
+      {
+        identifiant: id,
+        chiffre: sceller(Buffer.from(JSON.stringify(contenu)), cleMaitresse()).toString('base64'),
+      },
+    )
+    if (error || (contexte?.lien && data !== true)) return false
     try {
-      if (!differer) await distribuerCourriels(db, id)
+      if (!differer) await distribuerCourriels(db, id, contexte?.signal)
     } catch {
       console.error('[courriel] reprise necessaire')
     }
