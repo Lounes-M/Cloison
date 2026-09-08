@@ -18,7 +18,7 @@ Les règles qui traversent les trois contrats, et que le dépôt tient par des t
 
 **Ce qu'il obtient.** Un dossier de garantie, valable trois mois à compter de l'ouverture, dans
 lequel son garant dépose ses pièces sans qu'il les voie, et dont il suit l'avancement par un
-statut. Un lien d'accès, valable sept jours et une seule fois, renouvelable depuis son dossier.
+statut. Un lien d'accès, reutilisable sept jours au maximum, dans la limite de validite du dossier et sauf revocation, renouvelable depuis son dossier.
 
 **Ce qu'il paie.** 9 € TTC, une fois, au moment de désigner son garant, par carte via Stripe.
 **Le paiement n'est pas remboursé** si le dossier expire sans décision de l'agence : il achète
@@ -39,7 +39,7 @@ garantit ni son acceptation ni un logement.
 
 ## 2. Le garant
 
-**Ce qu'il obtient.** Un lien, valable sept jours et une seule fois, pour déposer ses pièces dans
+**Ce qu'il obtient.** Un lien, reutilisable sept jours au maximum, dans la limite de validite du dossier et sauf revocation, pour déposer ses pièces dans
 un coffre où le locataire ne voit rien, et voir qui les a consultées. Ses pièces sont chiffrées
 avant d'arriver chez l'hébergeur, servies à l'agence uniquement rasterisées et filigranées au nom
 de la personne qui les ouvre, et détruites à l'échéance du dossier.

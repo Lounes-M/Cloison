@@ -28,14 +28,14 @@ export const espace = {
   garantTitre: 'Ton garant',
   garantAucun:
     'Tu n’as pas encore désigné de garant. C’est lui qui dépose les pièces, de son côté.',
-  garantDesigne: (email: string) => `Lien envoyé à ${email}. Il dépose ses pièces de son côté.`,
+  garantDesigne: (email: string) => `Garant désigné : ${email}. Il dépose ses pièces de son côté.`,
   garantChamp: 'Son adresse e-mail',
   garantAide:
     'Il reçoit un lien pour déposer ses pièces. Tu ne verras jamais ce qu’il dépose, seulement que le dossier avance.',
   garantBouton: 'Envoyer le lien à mon garant',
   garantRenvoyer: 'Renvoyer le lien',
   garantEnvoi: 'Envoi…',
-  garantSucces: 'Lien envoyé. Ton garant a sept jours pour déposer.',
+  garantSucces: 'L’envoi du lien est programmé. Sa validité reste limitée à celle du dossier.',
   expire: (date: string) => `Ce dossier expire le ${date}.`,
   loyerTitre: 'Le loyer',
   loyerAide:

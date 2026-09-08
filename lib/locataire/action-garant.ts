@@ -12,6 +12,7 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { capaciteDepuisCookies, clientPorteurDeLien, urlDuLien } from '@/lib/acces/session'
 import { signerJeton } from '@/lib/acces/jeton'
 import { envoyerLienGarant } from '@/lib/courriels/liens'
+import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 
 /**
  * Le locataire designe son garant, et c'est tout ce qu'il ecrit.
@@ -128,22 +129,26 @@ export async function designerMonGarant(
         valeur: saisie,
       }
     }
-    const lien = {
-      jeton: await signerJeton(dossierId, 'garant', emis.jti, new Date(emis.expire_le)),
-    }
+    if (!dossier.demonstration) {
+      await reprendreLivraisonLiens(dossierId)
+    } else {
+      const lien = {
+        jeton: await signerJeton(dossierId, 'garant', emis.jti, new Date(emis.expire_le)),
+      }
 
-    const envoye = await envoyerLienGarant({
-      a: courriel,
-      url: urlDuLien(lien.jeton),
-      reference: String(dossier.reference),
-      demandePar: String(dossier.email_locataire),
-    })
+      const envoye = await envoyerLienGarant({
+        a: courriel,
+        url: urlDuLien(lien.jeton),
+        reference: String(dossier.reference),
+        demandePar: String(dossier.email_locataire),
+      })
 
-    if (!envoye) {
-      return {
-        statut: 'erreur',
-        message: "Le lien n'a pas pu etre envoye. Verifie l'adresse et reessaie.",
-        valeur: saisie,
+      if (!envoye) {
+        return {
+          statut: 'erreur',
+          message: "Le lien n'a pas pu etre envoye. Verifie l'adresse et reessaie.",
+          valeur: saisie,
+        }
       }
     }
   } catch {
