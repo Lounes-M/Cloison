@@ -143,3 +143,29 @@ manuelles ne suffisent pas a la corriger. L'installation et son execution
 planifiee doivent etre verifiees avant de declarer ce calendrier operationnel.
 Voir [le runbook](exploitation/cron-independant.md), notamment les privileges
 geres par Supabase et le controle de non-exposition du schema net dans l'API.
+
+## Etat actualise apres PR78
+
+PR76 : CI main 34227009520 verte. PR77 fusionnee en e3b135e, CI main
+34228341663 verte ; 0039 appliquee et immuable. Le calendrier Supabase est actif
+chaque quinze minutes. Les executions planifiees de 15 h et 15 h 15 ont obtenu
+HTTP 200 et avance la confirmation en base. La supervision 34229427337 passe.
+Les privileges internes geres par Supabase restent documentes dans le runbook ;
+le schema net est refuse par PostgREST et cette frontiere est supervisee.
+
+PR78 fusionnee en a6adc2a, CI main 34231177094 verte ; 0040 appliquee et immuable.
+757 tests locaux et build passes. Les courriels conservent leur reference
+fournisseur et acceptent des evenements signes, idempotents et ordonnes sans
+conserver leur contenu. Le webhook Resend externe et son secret restent a
+configurer ; aucune reception reelle n'est declaree verifiee.
+
+0041 prepare la pagination des historiques agence et garant, par 50 acces, sans
+perdre les dates identiques ni decaler les pages lors d'un nouvel acces. Les
+adresses devenues personnelles sont masquees dans les deux fonctions de lecture.
+Repetition transactionnelle Supabase et cinq contre-preuves passees ; application
+et fusion restent a effectuer. Voir [le runbook](exploitation/pagination-journal.md).
+
+Restent notamment les parcours navigateur automatises, les profils documentaires,
+la rotation des cles, le rapprochement des paiements et la chaine contractuelle.
+Les processus documentaires sont deja isoles et limites en temps et tas JavaScript ;
+le plafond de memoire native et la concurrence globale restent des limites ouvertes.

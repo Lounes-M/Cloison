@@ -17,6 +17,9 @@ import {
   natures,
 } from '@/lib/content/garant'
 import { tailleLisible } from '@/lib/garant/validation'
+import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
+import { NavigationJournal } from '@/components/ui/NavigationJournal'
+import { journal as texteJournal } from '@/lib/content/journal'
 
 export const metadata: Metadata = {
   title: 'Ton dépôt',
@@ -43,13 +46,16 @@ type Piece = { id: string; type: string; taille_octets: number; depose_le: strin
  * a partir de ses propres pieces. On ne l'affiche pas parce qu'un chiffre sans
  * le seuil qui va avec inquiete sans renseigner.
  */
-export default async function PageGarant() {
+export default async function PageGarant({
+  searchParams,
+}: { searchParams?: Promise<Record<string, string | string[] | undefined>> } = {}) {
   const porteur = await capaciteDepuisCookies()
   if (!porteur) redirect('/lien-invalide')
   if (porteur.capacite.partie !== 'garant') redirect('/locataire')
 
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { dossierId } = porteur.capacite
+  const curseur = lireCurseurJournal((await searchParams)?.avant, dossierId)
 
   const [
     { data: dossier, error: erreurDossier },
@@ -74,13 +80,18 @@ export default async function PageGarant() {
       .select('id, type, taille_octets, depose_le')
       .eq('dossier_id', dossierId)
       .order('depose_le', { ascending: true }),
-    supabase.rpc('mon_journal_acces'),
+    supabase.rpc('journal_du_dossier', {
+      le_dossier: dossierId,
+      avant_quand: curseur?.quand ?? null,
+      avant_id: curseur?.id ?? null,
+    }),
   ])
 
   if (erreurDossier || erreurEngagement || erreurPieces) {
     throw new Error('Chargement du dossier indisponible.')
   }
   if (!dossier) redirect('/lien-invalide')
+  const historique = pageJournal(erreurJournal ? null : journal, dossierId)
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
 
@@ -217,16 +228,14 @@ export default async function PageGarant() {
         </section>
       ) : null}
 
-      <section className="mt-14">
-        <h2 className="font-display text-2xl uppercase">Historique des accès</h2>
-        <p className="text-muted mt-2 text-sm">
-          Les 100 événements les plus récents de ton dossier.
-        </p>
+      <section id="journal" className="mt-14">
+        <h2 className="font-display text-2xl uppercase">{texteJournal.titre}</h2>
+        <p className="text-muted mt-2 text-sm">{texteJournal.aide}</p>
         {erreurJournal ? (
-          <p role="alert">L’historique est momentanément indisponible.</p>
+          <p role="alert">{texteJournal.indisponible}</p>
         ) : (
           <ol className="mt-4 space-y-3">
-            {(journal ?? []).map(
+            {historique.lignes.map(
               (entree: {
                 id: string
                 action: string
@@ -234,36 +243,27 @@ export default async function PageGarant() {
                 identite: string | null
                 quand: string
               }) => (
-                <li key={entree.id} className="border-ink border-t pt-3 text-sm">
+                <li key={entree.id} className="border-ink border-t pt-3 text-sm break-words">
                   <time dateTime={entree.quand}>
                     {new Date(entree.quand).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
                   </time>
                   {' : '}
-                  {(
-                    {
-                      dossier_consulte: 'Dossier consulté',
-                      piece_deposee: 'Pièce déposée',
-                      piece_retiree: 'Pièce retirée',
-                      piece_ouverte: 'Pièce ouverte',
-                      dossier_transmis: 'Dossier transmis',
-                    } as Record<string, string>
-                  )[entree.action] ?? 'Accès'}
-                  {' par '}
-                  {entree.identite ??
-                    (
-                      {
-                        agence: 'l’agence',
-                        garant: 'le garant',
-                        locataire: 'le locataire',
-                      } as Record<string, string>
-                    )[entree.acteur]}
-                  .
+                  {texteJournal.actions[entree.action] ?? texteJournal.acces}
+                  {texteJournal.par}
+                  {entree.identite ?? texteJournal.acteurs[entree.acteur] ?? texteJournal.inconnu}.
                 </li>
               ),
             )}
-            {!journal?.length ? <li>Aucun accès enregistré.</li> : null}
+            {!historique.lignes.length ? <li>{texteJournal.aucun}</li> : null}
           </ol>
         )}
+        {!erreurJournal ? (
+          <NavigationJournal
+            chemin="/garant"
+            suivant={historique.suivant}
+            ancien={curseur !== null}
+          />
+        ) : null}
       </section>
       <section className="mt-14">
         <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>
