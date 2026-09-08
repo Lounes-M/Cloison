@@ -2,6 +2,11 @@
 do $fixture$
 declare d uuid:=gen_random_uuid(); j uuid:=gen_random_uuid();
 begin
+  if has_function_privilege('anon','public.versionner_conditions()','execute')
+    or has_function_privilege('authenticated','public.versionner_conditions()','execute')
+    or has_function_privilege('porteur_lien','public.versionner_conditions()','execute') then
+    raise exception 'Fonction de declencheur directement accessible';
+  end if;
   insert into public.dossiers(id,email_locataire) values(d,'conditions@example.invalid');
   insert into public.jetons_actifs(dossier_id,partie,jti,expire_le)
     values(d,'garant',j,now()+interval '1 day');

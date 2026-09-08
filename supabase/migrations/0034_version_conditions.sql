@@ -20,7 +20,8 @@ begin
   return new;
 end;
 $$;
-revoke all on function public.versionner_conditions() from public;
+revoke all on function public.versionner_conditions()
+  from public, anon, authenticated, porteur_lien, serveur, depot_piece;
 
 create trigger engagement_conditions_versionnees
   before insert or update on public.engagements

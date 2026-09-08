@@ -4,6 +4,7 @@ import { baseDEssai } from './base'
 test('les droits Supabase par defaut ne rouvrent pas les fonctions internes', async () => {
   const db = await baseDEssai()
   const interdites = [
+    'versionner_conditions()',
     'retrouver_lien_locataire(text,text)',
     'purger_les_dossiers_expires()',
     'pieces_suffisantes(uuid)',
