@@ -1,12 +1,23 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { creerSessionLocataire } from '@/lib/paiement/stripe'
+import {
+  creerSessionLocataire,
+  lireSessionPourRapprochement,
+  retrouverSessionFinanciere,
+} from '@/lib/paiement/stripe'
 
-const doubles = vi.hoisted(() => ({ client: vi.fn(), creer: vi.fn(), retrouver: vi.fn() }))
+const doubles = vi.hoisted(() => ({
+  client: vi.fn(),
+  creer: vi.fn(),
+  retrouver: vi.fn(),
+  lister: vi.fn(),
+}))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
 vi.mock('@/lib/env', () => ({ env: { stripeSecretKey: 'sk_test_fixture_non_secret' } }))
 vi.mock('stripe', () => ({
   default: class {
-    checkout = { sessions: { create: doubles.creer, retrieve: doubles.retrouver } }
+    checkout = {
+      sessions: { create: doubles.creer, retrieve: doubles.retrouver, list: doubles.lister },
+    }
   },
 }))
 
@@ -20,7 +31,15 @@ const OPTIONS = {
   retourOk: 'https://example.invalid/locataire?paiement=ok',
   retourAnnule: 'https://example.invalid/locataire?paiement=annule',
 }
-type Ligne = { dossier_id: string; tentative: string; session_ref: string | null; cree_le: string }
+type Ligne = {
+  tarif_version: string
+  montant_cents: number
+  devise: string
+  dossier_id: string
+  tentative: string
+  session_ref: string | null
+  cree_le: string
+}
 type Session = { id: string; url: string; status: 'open' | 'complete' | 'expired' }
 let ligne: Ligne
 let sessions: Map<string, Session>
@@ -86,6 +105,9 @@ beforeEach(() => {
   vi.setSystemTime(MAINTENANT)
   vi.spyOn(console, 'error').mockImplementation(() => {})
   ligne = {
+    tarif_version: 'locataire-2026-09-04',
+    montant_cents: 900,
+    devise: 'eur',
     dossier_id: DOSSIER,
     tentative: TENTATIVE,
     session_ref: null,
@@ -211,4 +233,66 @@ test('une inscription qui ne touche aucune ligne ne rend pas une URL obsolete', 
   expect(await creerSessionLocataire(OPTIONS)).toBeNull()
   expect(ligne.session_ref).toBeNull()
   expect(sessions.size).toBe(1)
+})
+
+test('une reprise utilise le tarif reserve et le transmet a Stripe', async () => {
+  ligne.montant_cents = 800
+  ligne.tarif_version = 'locataire-ancien'
+  expect(await creerSessionLocataire(OPTIONS)).not.toBeNull()
+  expect(doubles.creer).toHaveBeenCalledWith(
+    expect.objectContaining({
+      metadata: expect.objectContaining({ tarif_version: 'locataire-ancien' }),
+      line_items: [
+        expect.objectContaining({ price_data: expect.objectContaining({ unit_amount: 800 }) }),
+      ],
+    }),
+    expect.anything(),
+  )
+})
+
+test('la lecture fournisseur refuse un autre dossier dans client_reference_id', async () => {
+  doubles.retrouver.mockResolvedValueOnce({
+    id: 'cs_fixture',
+    mode: 'payment',
+    payment_status: 'paid',
+    payment_intent: 'pi_fixture',
+    amount_total: 900,
+    currency: 'eur',
+    metadata: { dossier_id: DOSSIER },
+    client_reference_id: '66666666-6666-4666-8666-666666666666',
+  })
+  await expect(lireSessionPourRapprochement('cs_fixture')).rejects.toThrow('incoherente')
+})
+test('une session sans metadonnee Cloison nest pas rattachee au registre', async () => {
+  doubles.lister.mockResolvedValueOnce({
+    data: [{ id: 'cs_autre', metadata: {}, payment_intent: 'pi_fixture' }],
+    has_more: false,
+  })
+  expect(await retrouverSessionFinanciere('pi_fixture')).toBeNull()
+  expect(doubles.lister).toHaveBeenCalledWith({ payment_intent: 'pi_fixture', limit: 2 })
+})
+test('une reference fournisseur differente ne peut pas etre rattachee', async () => {
+  doubles.lister.mockResolvedValueOnce({
+    data: [
+      {
+        id: 'cs_fixture',
+        mode: 'payment',
+        metadata: { dossier_id: DOSSIER },
+        payment_intent: 'pi_autre',
+      },
+    ],
+    has_more: false,
+  })
+  await expect(retrouverSessionFinanciere('pi_fixture')).rejects.toThrow('incoherente')
+})
+
+test('un devis affiche different du tarif reserve refuse de creer Checkout', async () => {
+  expect(
+    await creerSessionLocataire({
+      ...OPTIONS,
+      tarifAttendu: { version: 'locataire-2026-09-04', montant: 800 },
+    }),
+  ).toBeNull()
+  expect(doubles.creer).not.toHaveBeenCalled()
+  expect(doubles.retrouver).not.toHaveBeenCalled()
 })

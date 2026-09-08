@@ -1,56 +1,55 @@
 import { NextResponse, type NextRequest } from 'next/server'
-
 import { lireCorpsWebhook } from '@/lib/http/corps-webhook'
 import { clientServeur } from '@/lib/acces/serveur'
-import { lireEvenement, paiementConfirme } from '@/lib/paiement/stripe'
-import { reponseAuMarquage } from '@/lib/paiement/webhook'
-
-/**
- * Ce que Stripe nous dit, et ce qu'on en fait.
- *
- * Deux barrieres, dans cet ordre. La signature de Stripe, verifiee sur le corps
- * brut : sans elle, n'importe quel `POST` marquerait un dossier regle. Puis le
- * role `serveur`, que seule notre signature de jeton fait exister, et qui n'a
- * qu'une fonction ouverte pour cela : `marquer_dossier_paye`.
- *
- * Stripe rejoue un evenement tant qu'il ne recoit pas 200. On repond 200 des
- * qu'on a compris, meme pour un evenement qui ne nous concerne pas ; on repond
- * 503 seulement quand on veut qu'il revienne, c'est-a-dire quand l'echec est
- * le notre et passager. Le partage est dans `lib/paiement/webhook.ts`.
- */
+import { lireEvenement, retrouverSessionFinanciere } from '@/lib/paiement/stripe'
+import { extraireEvenementFinancier } from '@/lib/paiement/evenement-financier'
 export const runtime = 'nodejs'
-export const maxDuration = 20
+export const maxDuration = 25
 
+/** La signature precede tout enregistrement. Le registre et le marquage sont atomiques. */
 export async function POST(requete: NextRequest) {
   try {
     const corps = await lireCorpsWebhook(requete)
     if (corps === null) return NextResponse.json({ recu: false }, { status: 413 })
     const evenement = lireEvenement(corps, requete.headers.get('stripe-signature'))
     if (!evenement) return new NextResponse('signature refusee', { status: 400 })
-
-    const paiement = paiementConfirme(evenement)
-    if (!paiement) return NextResponse.json({ recu: true })
-
-    const supabase = await clientServeur(
-      AbortSignal.any([requete.signal, AbortSignal.timeout(5000)]),
-    )
-    const resultat = await supabase.rpc('marquer_dossier_paye', {
-      le_dossier: paiement.dossierId,
-      la_reference: paiement.reference,
-    })
-
-    const reponse = reponseAuMarquage(resultat)
-    if (resultat.error) {
-      // Les details SQL peuvent contenir des valeurs privees du paiement.
-      console.error(
-        reponse.statut === 200 ? '[paiement] marquage refuse' : '[paiement] marquage a rejouer',
-      )
+    let financier
+    try {
+      financier = extraireEvenementFinancier(evenement)
+    } catch {
+      return NextResponse.json({ recu: false }, { status: 400 })
     }
-
-    return NextResponse.json(reponse.corps, { status: reponse.statut })
+    if (!financier) return NextResponse.json({ recu: true })
+    if (financier.rpc === 'enregistrer_suivi_paiement') {
+      const session = await retrouverSessionFinanciere(
+        String(financier.parametres.reference_paiement),
+      )
+      if (!session) return NextResponse.json({ recu: true })
+      Object.assign(financier.parametres, session)
+    }
+    const db = await clientServeur(AbortSignal.any([requete.signal, AbortSignal.timeout(5000)]))
+    const { data, error } = await db.rpc(financier.rpc, financier.parametres)
+    if (error) throw new Error('Registre indisponible')
+    if (financier.rpc === 'enregistrer_suivi_paiement') {
+      if (typeof data !== 'boolean') throw new Error('Suivi non confirme')
+      return NextResponse.json(data ? { recu: true } : { recu: true, anomalie: true })
+    }
+    if (
+      !data ||
+      typeof data !== 'object' ||
+      Array.isArray(data) ||
+      Object.keys(data).length !== 2 ||
+      typeof data.marque !== 'boolean' ||
+      typeof data.anomalie !== 'boolean'
+    )
+      throw new Error('Paiement non confirme')
+    if (data.anomalie) console.error('[paiement] registre a examiner')
+    return NextResponse.json({
+      recu: true,
+      marque: data.marque,
+      ...(data.anomalie ? { anomalie: true } : {}),
+    })
   } catch {
-    // Une exception de transport ou de configuration doit rester rejouable,
-    // sans laisser le framework journaliser une erreur potentiellement privee.
     console.error('[paiement] webhook a rejouer')
     return NextResponse.json({ recu: false }, { status: 503 })
   }
