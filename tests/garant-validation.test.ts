@@ -6,9 +6,22 @@ import {
   analyserEngagement,
   montantEnCents,
   natureDepuis,
+  nombreDocumentsDepuis,
   tailleLisible,
 } from '@/lib/garant/validation'
 import { baseDEssai, devenir, redevenirProprietaire, refus } from './base'
+
+test('le nombre de justificatifs est explicite et borne selon leur nature', () => {
+  expect(nombreDocumentsDepuis('bulletin_paie', '3')).toBe(3)
+  expect(nombreDocumentsDepuis('bilan_comptable', '2')).toBe(2)
+  for (const nombre of ['0', '4', '1.5', '03', '40', ''])
+    expect(nombreDocumentsDepuis('bulletin_paie', nombre)).toBeNull()
+  expect(nombreDocumentsDepuis('piece_identite', '3')).toBeNull()
+  expect(nombreDocumentsDepuis('bilan_comptable', '3')).toBeNull()
+})
+test('un profil inconnu est refuse avant toute ecriture', () => {
+  expect(analyserEngagement({ couvre: 'loyer', profil: 'inconnu' }).ok).toBe(false)
+})
 
 /**
  * Ce que le garant peut soumettre.

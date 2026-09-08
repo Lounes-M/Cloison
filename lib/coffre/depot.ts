@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { randomUUID } from 'node:crypto'
+import type { NatureValeur } from '@/lib/content/garant'
 
 import { ouvrirMaitresse, scellerMaitresse } from './rotation-maitresse'
 import { nouvelleCle, sceller } from './enveloppe'
@@ -20,14 +21,10 @@ import { verifierContenu, type TypeAccepte } from './type-reel'
  */
 
 /** La nature du document pour l'agence, distincte du type de ses octets. */
-export type NatureDePiece =
-  | 'bulletin_paie'
-  | 'avis_imposition'
-  | 'piece_identite'
-  | 'justificatif_domicile'
-  | 'contrat_travail'
+export type NatureDePiece = NatureValeur
 
 export type PieceAInscrire = {
+  nombreDocuments?: number
   dossierId: string
   nature: NatureDePiece
   chemin: string
@@ -112,6 +109,7 @@ export async function deposer(
   dossierId: string,
   nature: NatureDePiece,
   contenu: Buffer,
+  nombreDocuments = 1,
 ): Promise<Resultat> {
   const verdict = verifierContenu(contenu)
   if (!verdict.accepte) return { depose: false, raison: verdict.raison }
@@ -129,6 +127,7 @@ export async function deposer(
   }
 
   const pieceId = await base.inscrirePiece({
+    ...(nombreDocuments !== 1 ? { nombreDocuments } : {}),
     dossierId,
     nature,
     chemin,

@@ -12,9 +12,9 @@ import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { deposer, retirerPiece, type NatureDePiece } from '@/lib/coffre/depot'
 import { baseSupabase } from '@/lib/coffre/depot-supabase'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
-import { TAILLE_MAX_DEPOT, natureDepuis } from '@/lib/garant/validation'
+import { TAILLE_MAX_DEPOT, natureDepuis, nombreDocumentsDepuis } from '@/lib/garant/validation'
 import { autoriserAnalyse } from '@/lib/garant/debit-depot'
-import { depot as contenuDepot } from '@/lib/content/garant'
+import { depot as contenuDepot, documentsDeclares } from '@/lib/content/garant'
 
 /**
  * Le depot d'une piece par le garant, et son retrait.
@@ -45,6 +45,8 @@ export async function deposerUnePiece(
 ): Promise<EtatDepot> {
   const nature = natureDepuis(donnees.get('nature'))
   if (!nature) return { statut: 'erreur', message: 'Nature de piece inconnue.' }
+  const nombre = nombreDocumentsDepuis(nature, donnees.get('nombre_documents'))
+  if (nombre === null) return { statut: 'erreur', message: documentsDeclares.invalide, nature }
 
   const fichier = donnees.get('fichier')
   if (!(fichier instanceof File) || fichier.size === 0) {
@@ -93,6 +95,7 @@ export async function deposerUnePiece(
       porteur.capacite.dossierId,
       nature as NatureDePiece,
       contenu,
+      nombre,
     )
 
     if (!resultat.depose) return { statut: 'erreur', message: resultat.raison, nature }

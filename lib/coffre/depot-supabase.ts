@@ -155,6 +155,7 @@ export function baseSupabase(
           chemin: piece.chemin,
           taille_octets: piece.tailleOctets,
           type_reel: piece.typeReel,
+          nombre_documents: piece.nombreDocuments ?? 1,
         })
         .select('id')
         .single()

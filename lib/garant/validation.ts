@@ -1,4 +1,10 @@
-import { natures, type NatureValeur } from '@/lib/content/garant'
+import {
+  natures,
+  profilsRessources,
+  engagement as texteEngagement,
+  type ProfilRessources,
+  type NatureValeur,
+} from '@/lib/content/garant'
 
 /**
  * Ce que le garant peut soumettre, et sous quelle forme.
@@ -30,7 +36,16 @@ export function natureDepuis(valeur: unknown): NatureValeur | null {
     : null
 }
 
+export function nombreDocumentsDepuis(nature: NatureValeur, valeur: unknown): number | null {
+  const texte = valeur == null ? '1' : valeur
+  const maximum = nature === 'bulletin_paie' ? 3 : nature === 'bilan_comptable' ? 2 : 1
+  return typeof texte === 'string' && /^[1-3]$/.test(texte) && Number(texte) <= maximum
+    ? Number(texte)
+    : null
+}
+
 export type Engagement = {
+  profilRessources?: ProfilRessources
   couvre: 'loyer' | 'loyer_charges'
   montantMaxCents: number | null
   jusquAu: string | null
@@ -82,6 +97,9 @@ export function analyserEngagement(
   champs: Record<string, string | undefined>,
   aujourdHui: Date = new Date(),
 ): AnalyseEngagement {
+  const profil = champs.profil
+  if (profil !== undefined && !profilsRessources.some((p) => p.valeur === profil))
+    return { ok: false, message: texteEngagement.profilInvalide }
   const couvre = champs.couvre
   if (couvre !== 'loyer' && couvre !== 'loyer_charges') {
     return { ok: false, message: 'Indique ce que tu couvres.' }
@@ -105,6 +123,7 @@ export function analyserEngagement(
   return {
     ok: true,
     engagement: {
+      ...(profil ? { profilRessources: profil as ProfilRessources } : {}),
       couvre,
       montantMaxCents,
       jusquAu,

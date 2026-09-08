@@ -34,7 +34,7 @@ export async function declarerMonEngagement(
   donnees: FormData,
 ): Promise<EtatEngagement> {
   const champs: Record<string, string | undefined> = {}
-  for (const nom of ['couvre', 'montant', 'jusquAu', 'solidaire', 'revenu']) {
+  for (const nom of ['couvre', 'montant', 'jusquAu', 'solidaire', 'revenu', 'profil']) {
     const valeur = donnees.get(nom)
     champs[nom] = typeof valeur === 'string' ? valeur : undefined
   }
@@ -58,6 +58,9 @@ export async function declarerMonEngagement(
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { dossierId } = porteur.capacite
   const colonnes = {
+    ...(analyse.engagement.profilRessources
+      ? { profil_ressources: analyse.engagement.profilRessources }
+      : {}),
     couvre: analyse.engagement.couvre,
     montant_max_cents: analyse.engagement.montantMaxCents,
     jusqu_au: analyse.engagement.jusquAu,

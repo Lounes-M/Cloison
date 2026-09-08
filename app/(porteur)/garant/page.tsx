@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { BoutonRetrait } from '@/components/forms/BoutonRetrait'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
+import { FormulaireNombreDocuments } from '@/components/forms/FormulaireNombreDocuments'
 import {
   FormulaireEngagement,
   type EngagementAffiche,
@@ -15,6 +16,9 @@ import {
   engagement as texteEngagement,
   mention as texteMention,
   natures,
+  naturesDuProfil,
+  documentsDeclares,
+  type ProfilRessources,
 } from '@/lib/content/garant'
 import { tailleLisible } from '@/lib/garant/validation'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
@@ -29,7 +33,13 @@ export const metadata: Metadata = {
 /** Tant que le dossier est la, le garant depose et corrige. Apres, il regarde. */
 const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'])
 
-type Piece = { id: string; type: string; taille_octets: number; depose_le: string }
+type Piece = {
+  id: string
+  type: string
+  taille_octets: number
+  depose_le: string
+  nombre_documents?: number
+}
 
 /**
  * L'espace du garant : ce qu'il couvre, et ses pieces.
@@ -71,13 +81,13 @@ export default async function PageGarant({
     supabase
       .from('engagements')
       .select(
-        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, nom, prenom, adresse, mention, mention_saisie_le, version_conditions',
+        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, nom, prenom, adresse, mention, mention_saisie_le, version_conditions, profil_ressources',
       )
       .eq('dossier_id', dossierId)
       .maybeSingle(),
     supabase
       .from('pieces')
-      .select('id, type, taille_octets, depose_le')
+      .select('id, type, taille_octets, depose_le, nombre_documents')
       .eq('dossier_id', dossierId)
       .order('depose_le', { ascending: true }),
     supabase.rpc('journal_du_dossier', {
@@ -99,9 +109,21 @@ export default async function PageGarant({
   // Apres transmission les conditions et la mention sont figees par la base.
   const mentionAttendue = ouvert && engagement && Number(engagement.montant_max_cents) > 0
   const deposees = (pieces ?? []) as Piece[]
+  const profil: ProfilRessources =
+    engagement?.profil_ressources === 'retraite'
+      ? 'retraite'
+      : engagement?.profil_ressources === 'independant'
+        ? 'independant'
+        : 'salarie'
+  const attendues = naturesDuProfil(profil)
+  const visibles = natures.filter(
+    (n) =>
+      attendues.some((a) => a.valeur === n.valeur) || deposees.some((p) => p.type === n.valeur),
+  )
 
   const engagementAffiche: EngagementAffiche = engagement
     ? {
+        profil,
         couvre: engagement.couvre as 'loyer' | 'loyer_charges',
         montant:
           engagement.montant_max_cents == null
@@ -141,11 +163,14 @@ export default async function PageGarant({
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">{depot.piecesTitre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
+        <p className="text-muted mb-6 text-sm">{documentsDeclares.presence}</p>
 
         <ol className="flex flex-col gap-8">
-          {natures.map((nature) => {
+          {visibles.map((nature) => {
             const siennes = deposees.filter((p) => p.type === nature.valeur)
-            const complete = nature.attendu > 0 && siennes.length > 0
+            const complete =
+              nature.attendu > 0 &&
+              siennes.reduce((s, p) => s + (p.nombre_documents ?? 1), 0) >= nature.attendu
 
             return (
               <li key={nature.valeur} className="border-ink border-t-2 pt-6">
@@ -169,6 +194,7 @@ export default async function PageGarant({
                         <span className="flex items-center gap-2 text-[14px] font-medium">
                           <Icone nom="fichier" className="size-4" />
                           {tailleLisible(piece.taille_octets)}
+                          <span>{documentsDeclares.bilan(piece.nombre_documents ?? 1)}</span>
                           <span className="text-muted">
                             {depot.deposeLe(
                               new Date(piece.depose_le).toLocaleDateString('fr-FR', {
@@ -182,6 +208,14 @@ export default async function PageGarant({
                           {depot.original}
                         </a>
                         {ouvert ? <BoutonRetrait dossierId={dossierId} pieceId={piece.id} /> : null}
+                        {ouvert && ['bulletin_paie', 'bilan_comptable'].includes(piece.type) ? (
+                          <FormulaireNombreDocuments
+                            dossierId={dossierId}
+                            pieceId={piece.id}
+                            actuel={piece.nombre_documents ?? 1}
+                            maximum={piece.type === 'bulletin_paie' ? 3 : 2}
+                          />
+                        ) : null}
                       </li>
                     ))}
                   </ul>

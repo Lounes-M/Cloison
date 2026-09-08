@@ -41,8 +41,8 @@ describe('recalcul du dossier', () => {
     for (const nature of NATURES) {
       await reserverObjetDEssai(db, dossier, `${dossier}/${nature}`)
       await db.query(
-        `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel)
-         values ($1, $2, $3, 1024, 'application/pdf')`,
+        `insert into public.pieces (dossier_id, type, chemin, taille_octets, type_reel, nombre_documents)
+         values ($1, $2, $3, 1024, 'application/pdf', case when $2='bulletin_paie' then 3 else 1 end)`,
         [dossier, nature, `${dossier}/${nature}`],
       )
     }
