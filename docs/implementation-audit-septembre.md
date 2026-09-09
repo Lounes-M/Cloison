@@ -235,3 +235,11 @@ au vert. Les tests complets, la CI, l'application SQL et la fusion restent a fai
 Le rendu SSR des composants est controle sur donnees fictives : cette preuve ne
 remplace pas un parcours interactif authentifie. L'examen humain et les demandes
 de complements restent ouverts dans F21. Voir le runbook des profils.
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.

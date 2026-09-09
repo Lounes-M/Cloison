@@ -170,3 +170,11 @@ Le lot 0043 prepare les profils documentaires et le comptage explicite des
 justificatifs dans un fichier. Les repetitions SQL sont passees sans application.
 L'examen humain des pieces et les demandes de complement restent a implementer.
 Les preuves de livraison actualisees sont dans le suivi des lots.
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.
