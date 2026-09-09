@@ -1,5 +1,30 @@
 # Implementation de l'audit du 8 septembre 2026
 
+## Diagnostic administratif des paiements prepare le 9 septembre
+
+Le lot ajoute une extraction privee par session Checkout : reservation, registre,
+evenements, observations, references PaymentIntent anterieures et tarifs. La
+transaction est en lecture seule avec instantane stable. Les roles applicatifs
+ne gagnent aucun acces ; aucune migration n'est ajoutee. Le fichier prive ne peut
+pas ecraser une destination existante et son empreinte permet de verifier une copie.
+
+17 tests cibles passent. Quinze contre-preuves ont ete observees rouges, dont la
+lecture seule, les limites, les projections confidentielles, le refus d'ecrasement,
+TLS et une livraison concurrente sous PostgreSQL natif. La compilation et ses deux
+traces documentaires passent. Le controle global final passe : 928 tests dans
+107 suites, types, lint, format, typographie et variables publiques. Ce resultat
+local ne remplace pas une CI de livraison.
+
+Ce diagnostic ne constitue pas une resolution : aucun remboursement, acquittement,
+nouvel acces HTTP ou appel Stripe n'est effectue. Le suivi durable des decisions,
+les corrections ciblees et la facturation agence restent ouverts. La procedure est
+dans [le runbook](exploitation/diagnostic-paiement.md).
+
+Le socle distant reste main 7b51df4 avec 0043 appliquee. Les PR87 a PR91 sont encore
+ouvertes ; 0044 et 0045 ne sont pas appliquees. GitHub Actions refuse le demarrage
+des jobs pour facturation lors du dernier controle. Aucune fusion ne doit etre
+deduite des controles locaux.
+
 Lounes autorise les corrections, PR, fusions et livraisons. Universign, le modele
 contractuel et les validations non techniques restent de son cote. Une fonction
 dependant de ces elements reste fermee tant que ses conditions ne sont pas reunies.

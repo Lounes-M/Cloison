@@ -190,3 +190,8 @@ profil, nombre de documents, falsification du dossier et proposition de compleme
 Les controles SQL confirment les mutations sur deux largeurs. Les parcours agence,
 upload Storage et fournisseurs reels restent ouverts ; voir le runbook des
 [parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md).
+
+Un diagnostic financier administratif par session est prepare : instantane en
+lecture seule, rapport prive avec empreinte et refus des extractions excessives.
+Il n'effectue aucun mouvement de fonds ni acquittement ; le suivi durable des
+decisions reste ouvert. Voir [la procedure](exploitation/diagnostic-paiement.md).

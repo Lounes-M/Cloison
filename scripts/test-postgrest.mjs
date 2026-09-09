@@ -7,6 +7,7 @@ import { SignJWT } from 'jose'
 import { verifierConcurrenceDepot } from './verifier-concurrence-depot.mjs'
 import { verifierConcurrencePaiements } from './verifier-concurrence-paiements.mjs'
 import { verifierConcurrenceAdministrateurs } from './verifier-concurrence-administrateurs.mjs'
+import { verifierDiagnosticPaiement } from './verifier-diagnostic-paiement.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -171,6 +172,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       console.log('OK : complements, examen et refus locataire verifies sur PostgreSQL natif')
       await verifierConcurrencePaiements(connexion)
       console.log('OK : credit financier unique et sabotage verifies sur deux connexions')
+      await verifierDiagnosticPaiement(db, connexion)
     }
   } finally {
     await db.end()
