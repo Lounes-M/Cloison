@@ -199,3 +199,10 @@ versionnees, droits reels verifies. 601 tests dans 69 suites. Supervision
 La cadence cron GitHub est indicative ; plusieurs heures entre executions observees.
 Le lot suivant aligne la presentation publique sur le pilote : ne pas presenter
 la signature comme ouverte ni le ratio declare comme une verification des pieces.
+
+Etat verifie au 9 septembre : origin/main 7b51df4 (PR86), migration 0043 appliquee,
+empreinte distante conforme et schema net non expose. Voir la section courante
+de docs/audit-suivi.md et docs/implementation-audit-septembre.md. PR87 reprise
+sur ce main ; 0044 non appliquee. GitHub Actions est bloque avant les jobs pour
+facturation : ne pas fusionner sans CI finale verte.
+Le calendrier Supabase continue, confirmation applicative recente verifiee.

@@ -250,3 +250,28 @@ vert. Empreintes locale et Supabase calculees : seules les fonctions changent.
 Les repetitions transactionnelles incluent provisoirement 0043, encore non
 appliquee, puis 0044 ; les roles reels passent et tout est annule. La CI complete,
 l'application des deux migrations dans l'ordre et la fusion restent necessaires.
+
+## Reprise depuis GitHub au 9 septembre 2026
+
+La reference distante est main 7b51df4, PR86 fusionnee. La migration 0043 est
+appliquee : son empreinte exacte est retrouvee au debut de la repetition de 0044.
+Ne pas rejouer 0043. La PR87 est reprise sur ce main, avec resolution des trois
+conflits de documentation et de references de schema. Les empreintes apres 0044
+sont conservees seulement apres verification transactionnelle de leur valeur.
+
+La repetition de 0044 seule, puis celle avec les fixtures des roles reels, passe
+avec ROLLBACK. Aucun appel Stripe, paiement, courriel ni changement SQL persistant.
+0044 reste non appliquee. Les controles locaux de la revision reconciliee sont
+suivis dans la PR87 avant toute livraison.
+
+Les jobs GitHub de maintenance et supervision echouent avant toute etape depuis
+le blocage de facturation du compte : l'annotation signale un paiement echoue ou
+un plafond de depenses a augmenter. Aucune modification de facturation effectuee.
+Ce n'est pas une execution applicative en erreur et cela ne valide pas la CI.
+La fusion et l'application du lot attendent une CI verte sur la revision finale.
+
+Le calendrier Supabase independant reste actif toutes les quinze minutes.
+Les executions de 06 h 45, 07 h, 07 h 15 et 07 h 30 UTC du 9 septembre sont
+reussies. La confirmation applicative en base date de 07 h 30 min 04 s UTC,
+controlee a 07 h 40 UTC, donc recente. L'execution SQL du calendrier seule n'aurait
+pas suffi a cette preuve. La reception humaine des alertes reste distincte.
