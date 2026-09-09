@@ -170,3 +170,8 @@ Le lot 0043 prepare les profils documentaires et le comptage explicite des
 justificatifs dans un fichier. Les repetitions SQL sont passees sans application.
 L'examen humain des pieces et les demandes de complement restent a implementer.
 Les preuves de livraison actualisees sont dans le suivi des lots.
+
+Le controle du devis d'une session Stripe ouverte est prepare independamment de
+la PR87 : reference, dossier et tarif sont compares avant reprise. Huit refus
+vus rouges avant correction, 38 tests cibles verts ; livraison soumise a la CI.
+Voir [Reprise de session ouverte](exploitation/reprise-session-ouverte.md).

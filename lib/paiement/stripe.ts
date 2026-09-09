@@ -76,7 +76,23 @@ export async function creerSessionLocataire(options: {
     let tentative = String(etat.tentative)
     if (etat.session_ref) {
       const ancienne = await api.checkout.sessions.retrieve(etat.session_ref)
-      if (ancienne.status === 'open') return ancienne.url
+      if (ancienne.status === 'open') {
+        // Une reference conservee ne suffit pas : le paiement propose doit
+        // encore correspondre au dossier et au devis reserve en base.
+        if (
+          ancienne.id !== etat.session_ref ||
+          ancienne.mode !== 'payment' ||
+          ancienne.payment_status !== 'unpaid' ||
+          ancienne.metadata?.dossier_id?.toLowerCase() !== options.dossierId.toLowerCase() ||
+          (ancienne.client_reference_id != null &&
+            ancienne.client_reference_id.toLowerCase() !== options.dossierId.toLowerCase()) ||
+          ancienne.amount_total !== etat.montant_cents ||
+          ancienne.currency !== etat.devise ||
+          (ancienne.metadata?.tarif_version ?? 'locataire-2026-09-04') !== etat.tarif_version
+        )
+          return null
+        return ancienne.url
+      }
       if (ancienne.status !== 'expired') return null
       // Seule une session definitivement expiree peut etre remplacee.
       tentative = randomUUID()

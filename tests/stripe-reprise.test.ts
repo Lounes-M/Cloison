@@ -126,6 +126,7 @@ beforeEach(() => {
           id: `cs_fixture_${sessions.size + 1}`,
           url: `https://checkout.example.invalid/${sessions.size + 1}`,
           status: 'open',
+          ...contexteSession(),
         }
         sessions.set(options.idempotencyKey, session)
       }
@@ -295,4 +296,59 @@ test('un devis affiche different du tarif reserve refuse de creer Checkout', asy
   ).toBeNull()
   expect(doubles.creer).not.toHaveBeenCalled()
   expect(doubles.retrouver).not.toHaveBeenCalled()
+})
+
+function contexteSession() {
+  return {
+    mode: 'payment',
+    payment_status: 'unpaid',
+    client_reference_id: DOSSIER,
+    metadata: { dossier_id: DOSSIER, tarif_version: ligne.tarif_version },
+    amount_total: ligne.montant_cents,
+    currency: ligne.devise,
+  }
+}
+
+for (const [nom, changement] of [
+  ['une autre reference', { id: 'cs_autre' }],
+  [
+    'un autre dossier',
+    { metadata: { dossier_id: TENTATIVE, tarif_version: 'locataire-2026-09-04' } },
+  ],
+  ['un client contradictoire', { client_reference_id: TENTATIVE }],
+  ['un montant different', { amount_total: 1000 }],
+  ['une autre devise', { currency: 'usd' }],
+  ['une autre version', { metadata: { dossier_id: DOSSIER, tarif_version: 'locataire-autre' } }],
+  ['un abonnement', { mode: 'subscription' }],
+  ['un paiement deja regle', { payment_status: 'paid' }],
+] as const) {
+  test(`une session ouverte avec ${nom} ne peut pas etre reproposee`, async () => {
+    await creerSessionLocataire(OPTIONS)
+    doubles.creer.mockClear()
+    doubles.retrouver.mockResolvedValueOnce({
+      ...contexteSession(),
+      id: 'cs_fixture_1',
+      status: 'open',
+      url: 'https://checkout.example.invalid/1',
+      ...changement,
+    })
+    expect(await creerSessionLocataire(OPTIONS)).toBeNull()
+    expect(doubles.creer).not.toHaveBeenCalled()
+    expect(ligne.session_ref).toBe('cs_fixture_1')
+    expect(ligne.tentative).toBe(TENTATIVE)
+  })
+}
+
+test('une session ouverte historique conserve son tarif reserve sans metadonnee de version', async () => {
+  ligne.montant_cents = 800
+  await creerSessionLocataire(OPTIONS)
+  doubles.retrouver.mockResolvedValueOnce({
+    ...contexteSession(),
+    id: 'cs_fixture_1',
+    status: 'open',
+    url: 'https://checkout.example.invalid/1',
+    metadata: { dossier_id: DOSSIER },
+  })
+  expect(await creerSessionLocataire(OPTIONS)).toBe('https://checkout.example.invalid/1')
+  expect(doubles.creer).toHaveBeenCalledOnce()
 })

@@ -235,3 +235,12 @@ au vert. Les tests complets, la CI, l'application SQL et la fusion restent a fai
 Le rendu SSR des composants est controle sur donnees fictives : cette preuve ne
 remplace pas un parcours interactif authentifie. L'examen humain et les demandes
 de complements restent ouverts dans F21. Voir le runbook des profils.
+
+## Verification du devis lors de la reprise Stripe, 9 septembre 2026
+
+Lot independant prepare depuis main 7b51df4, sans migration. La reprise d'une
+session ouverte refuse maintenant les incoherences de dossier et de tarif avant
+de rendre son URL. Huit contre-preuves observees rouges avant correction, puis
+38 tests cibles passes. La reprise historique reste possible avec son montant
+reserve. Aucun paiement reel ni livraison en production n'est affirme par ces tests.
+Voir [les controles et limites](exploitation/reprise-session-ouverte.md).
