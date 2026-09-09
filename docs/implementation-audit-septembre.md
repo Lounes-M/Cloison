@@ -295,3 +295,13 @@ Validation locale finale du lot : npm run check passe avec 911 tests dans 105
 suites. Build, integration PostgreSQL/PostgREST et restauration native passent.
 Les lots exacts 0044 puis 0045 et les droits ont ete repetes puis annules sur
 Supabase. Application SQL, CI finale et fusion restent distinctes et en attente.
+
+## Parcours navigateur automatises des porteurs
+
+Le harnais local inclut maintenant Chromium, les formulaires de profil et de
+nombre de documents, une falsification effectivement envoyee puis refusee,
+et la proposition d'un remplacement. Les resultats sont controles en PostgreSQL
+sur mobile et ordinateur. Le locataire reste exclu du depot du garant.
+Le job CI natif installe le navigateur et active ces essais ; sa livraison
+reste soumise a une CI verte. Auth fournisseur, upload Storage et parcours
+agence complets restent distincts. Voir [les preuves et limites](exploitation/parcours-navigateur-locaux.md).

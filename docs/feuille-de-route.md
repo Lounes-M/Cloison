@@ -184,3 +184,9 @@ garant et leur examen par l'agence. La notification est durable et le locataire
 ne lit aucun detail documentaire. La livraison depend de 0044 puis d'une CI verte ;
 aucun lot n'est declare applique sur la seule repetition annulee.
 Voir [le parcours et ses limites](exploitation/complements-documentaires.md).
+
+Les interactions navigateur des porteurs sont automatisees dans le harnais local :
+profil, nombre de documents, falsification du dossier et proposition de complement.
+Les controles SQL confirment les mutations sur deux largeurs. Les parcours agence,
+upload Storage et fournisseurs reels restent ouverts ; voir le runbook des
+[parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md).
