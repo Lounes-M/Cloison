@@ -160,6 +160,15 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       }
       await verifierConcurrenceAdministrateurs(connexion)
       console.log('OK : dernier administrateur preserve sur deux connexions et deux isolations')
+      await db.query('begin')
+      try {
+        await db.query(
+          readFileSync(resolve('supabase/essais/complements-documentaires.sql'), 'utf8'),
+        )
+      } finally {
+        await db.query('rollback')
+      }
+      console.log('OK : complements, examen et refus locataire verifies sur PostgreSQL natif')
       await verifierConcurrencePaiements(connexion)
       console.log('OK : credit financier unique et sabotage verifies sur deux connexions')
     }

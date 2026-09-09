@@ -154,6 +154,10 @@ export const actions: Record<string, string> = {
   piece_deposee: 'a déposé une pièce',
   piece_retiree: 'a retiré une pièce',
   piece_ouverte: 'a ouvert une pièce',
+  complement_demande: 'Remplacement demande',
+  complement_fourni: 'Remplacement fourni',
+  complement_valide: 'Remplacement valide',
+  complement_refuse: 'Nouvelle correction demandee',
   dossier_transmis: 'a pris le dossier',
 }
 

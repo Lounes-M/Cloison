@@ -32,6 +32,11 @@ export const locataire: Record<string, { sujet: string; texte: string }> = {
 }
 
 export const garant: Record<string, { sujet: string; texte: string }> = {
+  complement_demande: {
+    sujet: 'Ton agence demande une correction',
+    texte:
+      'Une correction est attendue dans ton depot Cloison. Consulte la demande depuis ton lien habituel, depose le nouveau fichier puis propose-le a ton agence. Le motif reste dans ton espace prive.',
+  },
   transmis: {
     sujet: 'L’agence a pris le dossier',
     texte:
@@ -45,6 +50,11 @@ export const garant: Record<string, { sujet: string; texte: string }> = {
 }
 
 export const agence: Record<string, { sujet: (reference: string) => string; texte: string }> = {
+  complement_fourni: {
+    sujet: (reference) => `Dossier ${reference} : remplacement a examiner`,
+    texte:
+      'Le garant a propose un remplacement. Consultez-le dans votre espace avant de le valider ou de demander une nouvelle correction.',
+  },
   complet: {
     sujet: (reference) => `Dossier ${reference} complet`,
     texte:

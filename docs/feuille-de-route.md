@@ -178,3 +178,9 @@ Reference distante : main 7b51df4 (PR86). La PR87 est reprise sur ce socle ;
 bloque le demarrage des workflows et doit etre retablie avant une nouvelle CI de
 livraison. Le calendrier Supabase confirme encore la maintenance independamment.
 Voir la derniere section du suivi d'implementation et la PR87 pour les preuves.
+
+Le lot 0045 prepare les demandes de complements tracees, leur fourniture par le
+garant et leur examen par l'agence. La notification est durable et le locataire
+ne lit aucun detail documentaire. La livraison depend de 0044 puis d'une CI verte ;
+aucun lot n'est declare applique sur la seule repetition annulee.
+Voir [le parcours et ses limites](exploitation/complements-documentaires.md).

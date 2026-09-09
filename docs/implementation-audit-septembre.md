@@ -275,3 +275,23 @@ Les executions de 06 h 45, 07 h, 07 h 15 et 07 h 30 UTC du 9 septembre sont
 reussies. La confirmation applicative en base date de 07 h 30 min 04 s UTC,
 controlee a 07 h 40 UTC, donc recente. L'execution SQL du calendrier seule n'aurait
 pas suffi a cette preuve. La reception humaine des alertes reste distincte.
+
+## Demandes de complements, lot 0045
+
+Parcours agence et garant prepare : demande avec motif borne, reouverture explicite,
+depot d'un remplacement, examen agence et nouvelle correction. Les pieces ecartees
+ne comptent plus et le retrait d'un remplacement invalide son examen. Le locataire
+ne lit aucune demande. Les notifications generiques sont durables et distinctes
+par destinataire ; leur reception reelle n'est pas prouvee par les doubles.
+
+Depend de 0044, encore non appliquee. Repetition Supabase annulee et controles de
+roles reels passes, huit sabotages SQL/actions observes rouges puis restaures.
+Les composants sont inspectes en 390 et 1280 pixels sur fixtures ; parcours
+navigateur authentifie complet distinct. Ce lot ne termine pas l'approbation de
+chaque piece initiale ni la chaine contractuelle. Voir le runbook
+[Complements documentaires](exploitation/complements-documentaires.md).
+
+Validation locale finale du lot : npm run check passe avec 911 tests dans 105
+suites. Build, integration PostgreSQL/PostgREST et restauration native passent.
+Les lots exacts 0044 puis 0045 et les droits ont ete repetes puis annules sur
+Supabase. Application SQL, CI finale et fusion restent distinctes et en attente.

@@ -156,3 +156,12 @@ describe('contacts_agence_du_dossier', () => {
     expect(await contacts(libre)).toEqual([])
   })
 })
+
+test('les complements ne notifient pas le locataire et ne divulguent aucun motif', () => {
+  for (const statut of ['complement_demande', 'complement_fourni']) {
+    const envois = courrielsPour({ ...DOSSIER, statut }, ['agence@example.invalid'])
+    expect(envois).toHaveLength(1)
+    expect(envois[0]!.categorie).toBe(statut === 'complement_demande' ? 'garant' : 'agence')
+    expect(envois[0]!.texte).not.toMatch(/illisible|incorrect|bulletin|revenu/)
+  }
+})

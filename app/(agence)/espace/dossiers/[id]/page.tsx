@@ -1,3 +1,6 @@
+import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
+import { Complements } from '@/components/dossiers/Complements'
+import { type Complement } from '@/lib/content/complements'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
@@ -71,6 +74,7 @@ export default async function PageDossier({
     { data: e, error: erreurEngagement },
     { data: pieces, error: erreurPieces },
     { data: journal, error: erreurJournal },
+    { data: demandes, error: erreurComplements },
   ] = await Promise.all([
     supabase
       .from('dossiers')
@@ -96,9 +100,14 @@ export default async function PageDossier({
       avant_quand: curseur?.quand ?? null,
       avant_id: curseur?.id ?? null,
     }),
+    supabase
+      .from('complements_documentaires')
+      .select('id,nature,motif,etat,piece_initiale,piece_fournie,cree_le,attendu_depuis')
+      .eq('dossier_id', id)
+      .order('cree_le', { ascending: true }),
   ])
 
-  if (erreurDossier || erreurEngagement || erreurPieces || erreurJournal) {
+  if (erreurComplements || erreurDossier || erreurEngagement || erreurPieces || erreurJournal) {
     throw new Error('Chargement du dossier indisponible.')
   }
 
@@ -155,6 +164,15 @@ export default async function PageDossier({
         </p>
       ) : null}
 
+      <Complements
+        dossierId={id}
+        demandes={(demandes ?? []) as Complement[]}
+        pieces={pieces ?? []}
+        agence={true}
+        modifiable={['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
+          String(d.statut),
+        )}
+      />
       <dl className="mt-8 grid gap-4 text-[14px] md:grid-cols-3">
         <div className="outlined bg-paper rounded-xl p-4">
           <dt className="text-muted text-[11px] font-bold tracking-wide uppercase">
@@ -266,6 +284,11 @@ export default async function PageDossier({
                 >
                   {texte.ouvrir}
                 </a>
+                {['depot_en_cours', 'complet', 'garant_insuffisant', 'transmis'].includes(
+                  String(d.statut),
+                ) && !demandes?.some((c) => c.piece_initiale === p.id) ? (
+                  <FormulaireComplement dossierId={id} cible={String(p.id)} operation="demander" />
+                ) : null}
               </li>
             ))}
           </ul>
