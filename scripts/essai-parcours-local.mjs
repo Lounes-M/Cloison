@@ -366,7 +366,7 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     return {
       nature:
         process.env.CLOISON_TEST_NAVIGATEUR === '1'
-          ? 'Chromium, Next et PostgREST locaux ; sans Checkout distant, Supabase Auth ou Storage reels'
+          ? 'Chromium, Firefox, WebKit, Next et PostgREST locaux ; sans Checkout distant, Supabase Auth ou Storage reels'
           : 'HTTP Next et PostgREST reels, webhook Stripe signe localement ; sans Checkout distant, navigateur, Supabase Auth ou Storage',
       preuves,
     }

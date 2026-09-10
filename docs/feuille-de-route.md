@@ -239,3 +239,9 @@ les lectures de clefs publiques. Aucun parcours de signature n'est active.
 Les acces developpeur sont en attente ; registre durable, rattachement local,
 reconciliation, acte et preuve archives restent a implementer. Voir
 [les preuves et limites](exploitation/universign-authentification.md).
+
+Le harnais navigateur est etendu a Chromium, Firefox et WebKit, a 390 et
+1280 pixels. Les passages exigent une mutation fraiche, le parcours clavier
+et le refus apres expiration SQL. F20 reste ouvert pour les fournisseurs,
+les ecrans agence complets et l'audit d'accessibilite. Voir
+[le harnais navigateur](exploitation/parcours-navigateur-locaux.md).

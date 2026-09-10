@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-import { chromium } from 'playwright'
+import { chromium, firefox, webkit } from 'playwright'
+import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 
 /** Seulement le build et les fixtures du harnais local, jamais une session utilisateur. */
 export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId, autreId }) {
@@ -10,9 +11,26 @@ export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId,
     ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(db.connection.stream.remoteAddress),
     'Connexion PostgreSQL locale obligatoire',
   )
-  const navigateur = await chromium.launch({
-    ...(process.env.CLOISON_CHROME_LOCAL === '1' ? { channel: 'chrome' } : {}),
-  })
+  const relais = await ouvrirRelaisLocal(site)
+  try {
+    for (const moteur of [chromium, firefox, webkit]) {
+      await verifierMoteur({
+        moteur,
+        site: relais.site,
+        origine: new URL(relais.site),
+        cookies,
+        db,
+        dossierId,
+        autreId,
+      })
+    }
+  } finally {
+    await relais.fermer()
+  }
+}
+
+async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, autreId }) {
+  const navigateur = await moteur.launch()
   async function attendre(lire, attendu) {
     for (let i = 0; i < 50; i++) {
       if ((await lire()) === attendu) return
@@ -27,9 +45,15 @@ export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId,
     const piece = (await db.query('select id from pieces where dossier_id=$1 limit 1', [dossierId]))
       .rows[0].id
     for (const largeur of [390, 1280]) {
+      // Chaque passage doit produire une mutation, meme apres un autre moteur.
+      await db.query("update engagements set profil_ressources='salarie' where dossier_id=$1", [
+        dossierId,
+      ])
+      await db.query('update pieces set nombre_documents=1 where id=$1', [piece])
       const contexte = await navigateur.newContext({
         viewport: { width: largeur, height: 900 },
         serviceWorkers: 'block',
+        ignoreHTTPSErrors: true,
       })
       try {
         await contexte.route('**/*', (route) =>
@@ -54,12 +78,22 @@ export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId,
             page.waitForResponse(
               (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/garant',
             ),
-            form.getByRole('button').click(),
+            form.getByRole('button').press('Enter'),
           ])
           assert.equal(reponse.status(), 200, 'Action navigateur refusee au transport')
           return reponse
         }
         await page.goto(`${site}/garant`)
+        const profil = page.getByLabel('Ta situation professionnelle')
+        let atteint = false
+        for (let i = 0; i < 60; i++) {
+          await page.keyboard.press('Tab')
+          if (await profil.evaluate((element) => element === document.activeElement)) {
+            atteint = true
+            break
+          }
+        }
+        assert(atteint, 'Profil accessible au clavier')
         await page.getByLabel('Ta situation professionnelle').selectOption('retraite')
         const engagement = page
           .locator('form')
@@ -154,13 +188,16 @@ export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId,
         await db.query('delete from complements_documentaires where id=$1', [demande])
         await db.query('delete from pieces where id=$1', [nouveau])
         console.log(
-          `OK : navigateur ${largeur}px, profil, quantite, formulaire falsifie et complement confirmes en SQL`,
+          `OK : ${moteur.name()} ${largeur}px, clavier, profil, quantite, formulaire falsifie et complement confirmes en SQL`,
         )
       } finally {
         await contexte.close()
       }
     }
-    const contexte = await navigateur.newContext()
+    const contexte = await navigateur.newContext({
+      ignoreHTTPSErrors: true,
+      serviceWorkers: 'block',
+    })
     try {
       await contexte.route('**/*', (route) =>
         new URL(route.request().url()).origin === origine.origin ? route.continue() : route.abort(),
@@ -180,7 +217,27 @@ export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId,
       assert.equal(new URL(page.url()).pathname, '/locataire')
       assert(!(await page.content()).includes('CONFIDENTIELPARCOURS'))
       assert.equal(await page.locator('input[name="operation"]').count(), 0)
-      console.log('OK : navigateur locataire redirige, sans identite ni formulaire documentaire')
+      const avantLien = (
+        await db.query(
+          "select emis_le,expire_le from jetons_actifs where dossier_id=$1 and partie='locataire'",
+          [dossierId],
+        )
+      ).rows[0]
+      await db.query(
+        "update jetons_actifs set emis_le=now()-interval '2 minutes',expire_le=now()-interval '1 minute' where dossier_id=$1 and partie='locataire'",
+        [dossierId],
+      )
+      try {
+        await page.reload()
+        assert.equal(new URL(page.url()).pathname, '/lien-invalide', 'Session expiree refusee')
+        assert(!(await page.content()).includes('PARCOURS1234'))
+      } finally {
+        await db.query(
+          "update jetons_actifs set emis_le=$2,expire_le=$3 where dossier_id=$1 and partie='locataire'",
+          [dossierId, avantLien.emis_le, avantLien.expire_le],
+        )
+      }
+      console.log(`OK : ${moteur.name()} locataire cloisonne et session expiree refusee`)
     } finally {
       await contexte.close()
     }
