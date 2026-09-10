@@ -33,6 +33,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Memoire native des decodeurs Linux
+        run: npx vitest run tests/memoire-processus.test.ts
+
       - name: Typecheck
         run: npm run typecheck
 

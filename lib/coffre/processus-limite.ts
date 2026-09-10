@@ -7,7 +7,14 @@ const CONCURRENCE_MAX = 2
 export async function executerProcessus(
   script: string,
   entree: Buffer,
-  { delai = 15_000, sortieMax = 30 * 1024 * 1024 } = {},
+  {
+    delai = 15_000,
+    sortieMax = 30 * 1024 * 1024,
+  }: {
+    delai?: number
+    sortieMax?: number
+    memoireMax?: number
+  } = {},
 ): Promise<Buffer> {
   if (entree.length > 30 * 1024 * 1024) throw new Error('Entree trop volumineuse')
   if (actifs >= CONCURRENCE_MAX) throw new Error('Traitement occupe, reessaie dans un instant')
