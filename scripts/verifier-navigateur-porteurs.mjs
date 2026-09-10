@@ -70,9 +70,6 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
         }
         await page.goto(`${site}/garant`)
         const profil = page.getByLabel('Ta situation professionnelle')
-        await profil.evaluate((element) => {
-          element.tabIndex = -1
-        })
         let atteint = false
         for (let i = 0; i < 60; i++) {
           await page.keyboard.press('Tab')
@@ -202,6 +199,10 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
       assert.equal(new URL(page.url()).pathname, '/locataire')
       assert(!(await page.content()).includes('CONFIDENTIELPARCOURS'))
       assert.equal(await page.locator('input[name="operation"]').count(), 0)
+      const fige = await page.content()
+      await page.route('**/locataire', (route) =>
+        route.fulfill({ status: 200, contentType: 'text/html', body: fige }),
+      )
       await db.query(
         "update jetons_actifs set expire_le=now()-interval '1 minute' where dossier_id=$1 and partie='locataire'",
         [dossierId],
