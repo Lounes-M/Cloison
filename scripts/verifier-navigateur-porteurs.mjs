@@ -57,8 +57,36 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
           },
         ])
         const page = await contexte.newPage()
+        page.on('pageerror', (erreur) =>
+          console.log('Fixture JS', moteur.name(), erreur.message.slice(0, 500)),
+        )
+        page.on('console', (message) => {
+          if (message.type() === 'error')
+            console.log('Fixture console', moteur.name(), message.text().slice(0, 500))
+        })
+        page.on('request', (requete) => {
+          if (requete.method() === 'POST')
+            console.log('Fixture POST', moteur.name(), new URL(requete.url()).pathname)
+        })
+        page.on('requestfailed', (requete) =>
+          console.log(
+            'Fixture reseau',
+            moteur.name(),
+            new URL(requete.url()).pathname,
+            requete.failure()?.errorText,
+          ),
+        )
         page.setDefaultTimeout(10000)
         async function soumettre(form) {
+          console.log(
+            'Fixture formulaire',
+            moteur.name(),
+            await form.evaluate((f) => ({
+              valide: f.checkValidity(),
+              actif: document.activeElement.tagName,
+              bouton: f.querySelector('button').disabled,
+            })),
+          )
           const [reponse] = await Promise.all([
             page.waitForResponse(
               (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/garant',
