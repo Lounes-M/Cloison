@@ -341,3 +341,12 @@ exacte verifies apres application. 0044 devient immuable. La CI de main
 GitHub Actions execute de nouveau ses jobs depuis le passage du depot en public.
 Le lot 0045 est conserve apres integration de main ; ses empreintes restent
 celles de ce lot, a controler par une nouvelle repetition transactionnelle.
+
+## Verification du devis lors de la reprise Stripe, 9 septembre 2026
+
+Lot independant prepare depuis main 7b51df4, sans migration. La reprise d'une
+session ouverte refuse maintenant les incoherences de dossier et de tarif avant
+de rendre son URL. Huit contre-preuves observees rouges avant correction, puis
+38 tests cibles passes. La reprise historique reste possible avec son montant
+reserve. Aucun paiement reel ni livraison en production n'est affirme par ces tests.
+Voir [les controles et limites](exploitation/reprise-session-ouverte.md).

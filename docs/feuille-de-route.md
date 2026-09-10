@@ -198,3 +198,8 @@ decisions reste ouvert. Voir [la procedure](exploitation/diagnostic-paiement.md)
 
 PR87 est fusionnee et 0044 appliquee avec empreinte et droits reels verifies.
 Le lot 0045 reste a livrer apres repetition et CI verte de sa revision finale.
+
+Le controle du devis d'une session Stripe ouverte est prepare independamment de
+la PR87 : reference, dossier et tarif sont compares avant reprise. Huit refus
+vus rouges avant correction, 38 tests cibles verts ; livraison soumise a la CI.
+Voir [Reprise de session ouverte](exploitation/reprise-session-ouverte.md).
