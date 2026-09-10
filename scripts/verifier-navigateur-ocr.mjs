@@ -2,10 +2,11 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
 import { spawn } from 'node:child_process'
-import { createHmac } from 'node:crypto'
+import { createHmac, randomUUID } from 'node:crypto'
 import { chromium, firefox, webkit } from 'playwright'
 import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
+import { parcourirExamen } from './parcours-examen-navigateur.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
 const id = '11111111-1111-4111-8111-111111111111',
@@ -23,6 +24,8 @@ const user = {
   factors: [],
 }
 let clesConnecteurs = []
+let examensDocumentaires = [],
+  examenConflit = false
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
@@ -62,7 +65,25 @@ const api = createServer(async (req, res) => {
     ]
   else if (path.endsWith('/rpc/journaliser')) valeur = id
   else if (path.endsWith('/rpc/reserver_lecture_ocr')) valeur = false
-  else if (path.endsWith('/connecteurs_agence')) valeur = clesConnecteurs
+  else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
+  else if (path.endsWith('/rpc/enregistrer_examen_documentaire')) {
+    assert.equal(entree.le_dossier, id)
+    assert.equal(entree.la_piece, id)
+    if (examenConflit || entree.revision_attendue !== (examensDocumentaires[0]?.revision ?? null))
+      valeur = null
+    else {
+      valeur = randomUUID()
+      examensDocumentaires = [
+        {
+          piece_id: id,
+          revision: valeur,
+          etat: entree.le_statut,
+          cree_le: new Date().toISOString(),
+          acteur: user.email,
+        },
+      ]
+    }
+  } else if (path.endsWith('/connecteurs_agence')) valeur = clesConnecteurs
   else if (path.endsWith('/rpc/creer_connecteur')) {
     assert.match(entree.l_empreinte, /^[a-f0-9]{64}$/)
     clesConnecteurs.push({
@@ -144,6 +165,8 @@ try {
     try {
       for (const largeur of [390, 1280]) {
         clesConnecteurs = []
+        examensDocumentaires = []
+        examenConflit = false
         const contexte = await navigateur.newContext({
           viewport: { width: largeur, height: 900 },
           ignoreHTTPSErrors: true,
@@ -225,6 +248,9 @@ try {
             `OK : OCR ${moteur.name()} ${largeur}, accord, clavier, texte inerte, effacement et panne`,
           )
           await parcourirConnecteur(page, relais.site, moteur, largeur)
+          await parcourirExamen(page, relais.site, id, moteur, largeur, (v) => {
+            examenConflit = v
+          })
         } finally {
           await contexte.close()
         }
