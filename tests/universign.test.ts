@@ -74,7 +74,7 @@ test.each([
       'https://api.alpha.universign.com/v1/webhooks/jwks.json',
       expect.objectContaining({ method: 'GET', redirect: 'manual', cache: 'no-store' }),
     )
-    expect(new Headers(reseau.mock.calls[0][1].headers).has('authorization')).toBe(false)
+    expect(new Headers(reseau.mock.calls[0]?.[1].headers).has('authorization')).toBe(false)
   },
 )
 
