@@ -425,3 +425,12 @@ Les deux largeurs, les actions clavier et le refus apres expiration sont
 verifies par moteur. Les mutations exigent des fixtures reinitialisees.
 Aucune migration ou integration fournisseur nouvelle. La PR consigne les
 contre-preuves et les controles finaux ; F20 reste partiel.
+
+## Journal administratif des paiements, 10 septembre 2026
+
+Migration additive 0046 et lanceur prive : decisions a insertion seule, rapport
+verifie par empreinte, rejeux identiques acceptes et contradictions refusees.
+Le diagnostic relit cet historique, y compris apres suppression du dossier.
+Repetition Supabase annulee, roles reels et empreintes avant/apres verifies.
+Application et CI finales sont consignees dans la PR. F22 reste ouvert pour
+les corrections financieres automatiques et la facturation agence.

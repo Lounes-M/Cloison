@@ -245,3 +245,9 @@ Le harnais navigateur est etendu a Chromium, Firefox et WebKit, a 390 et
 et le refus apres expiration SQL. F20 reste ouvert pour les fournisseurs,
 les ecrans agence complets et l'audit d'accessibilite. Voir
 [le harnais navigateur](exploitation/parcours-navigateur-locaux.md).
+
+Le journal administratif 0046 conserve les decisions de support et l'empreinte
+du diagnostic examine, avec rejeu controle et historique prive. Une decision
+ne corrige ni n'acquitte automatiquement une anomalie financiere. La resolution
+et la facturation agence restent ouvertes. Voir
+[le journal des decisions](exploitation/decisions-paiements.md).

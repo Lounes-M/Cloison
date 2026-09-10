@@ -8,6 +8,7 @@ import { verifierConcurrenceDepot } from './verifier-concurrence-depot.mjs'
 import { verifierConcurrencePaiements } from './verifier-concurrence-paiements.mjs'
 import { verifierConcurrenceAdministrateurs } from './verifier-concurrence-administrateurs.mjs'
 import { verifierDiagnosticPaiement } from './verifier-diagnostic-paiement.mjs'
+import { verifierDecisionsPaiements } from './verifier-decisions-paiements.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -173,6 +174,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierConcurrencePaiements(connexion)
       console.log('OK : credit financier unique et sabotage verifies sur deux connexions')
       await verifierDiagnosticPaiement(db, connexion)
+      await verifierDecisionsPaiements(db, connexion)
     }
   } finally {
     await db.end()
