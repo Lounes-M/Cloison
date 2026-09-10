@@ -295,3 +295,14 @@ Validation locale finale du lot : npm run check passe avec 911 tests dans 105
 suites. Build, integration PostgreSQL/PostgREST et restauration native passent.
 Les lots exacts 0044 puis 0045 et les droits ont ete repetes puis annules sur
 Supabase. Application SQL, CI finale et fusion restent distinctes et en attente.
+
+## Livraison du 10 septembre
+
+PR87 fusionnee en 6a16848 apres reussite de la CI finale 34325610070 sur
+047484f. 0044 appliquee apres repetition annulee ; roles reels et empreinte
+exacte verifies apres application. 0044 devient immuable. La CI de main
+34455907869 est suivie avant la livraison suivante.
+
+GitHub Actions execute de nouveau ses jobs depuis le passage du depot en public.
+Le lot 0045 est conserve apres integration de main ; ses empreintes restent
+celles de ce lot, a controler par une nouvelle repetition transactionnelle.

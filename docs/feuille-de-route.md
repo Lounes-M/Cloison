@@ -184,3 +184,6 @@ garant et leur examen par l'agence. La notification est durable et le locataire
 ne lit aucun detail documentaire. La livraison depend de 0044 puis d'une CI verte ;
 aucun lot n'est declare applique sur la seule repetition annulee.
 Voir [le parcours et ses limites](exploitation/complements-documentaires.md).
+
+PR87 est fusionnee et 0044 appliquee avec empreinte et droits reels verifies.
+Le lot 0045 reste a livrer apres repetition et CI verte de sa revision finale.
