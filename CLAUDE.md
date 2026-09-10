@@ -53,7 +53,7 @@ version d'origine vit dans un artefact Claude :
 
 ## La pile, et les décisions qui la portent
 
-Les six ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les relie.
+Les ADR de `docs/adr/` sont la référence ; `docs/architecture.md` les relie.
 
 - **Next.js 16 App Router**, routes typées (`npx next typegen` après une route nouvelle), groupes
   `(marketing)`, `(agence)`, `(porteur)`. Actions serveur avec `useActionState`. Corps de requête
@@ -204,11 +204,12 @@ La cadence cron GitHub est indicative ; plusieurs heures entre executions observ
 Le lot suivant aligne la presentation publique sur le pilote : ne pas presenter
 la signature comme ouverte ni le ratio declare comme une verification des pieces.
 
-Derniere livraison confirmee au 10 septembre : main 0b56b28 (PR99), 1004 tests
-Linux et parcours Chromium, Firefox et WebKit. Les migrations 0044 et 0045 sont
-appliquees et immuables. Le depot est public, les controles GitHub sont actifs,
-la CI main et la supervision passent. Les anciennes mentions de blocage de
-facturation de ce fichier sont historiques. La migration 0046 est preparee dans
-le lot du journal administratif ; consulter sa PR pour son application effective.
+Derniere livraison confirmee au 10 septembre : main 7dc41cd (PR101), 1069 tests
+Linux et parcours Chromium, Firefox et WebKit. Les migrations jusqu'a 0047 sont
+appliquees et immuables. L'OCR OpenRouter est livre, facultatif et desactive par
+defaut ; aucun essai avec document reel ou compte fournisseur n'est demontre.
+Le depot est public, les controles GitHub sont actifs, la CI main et la supervision
+passent. Les anciennes mentions de blocage de facturation sont historiques.
+Le lot connecteurs prepare 0048 ; sa PR precise l'application effective.
 Universign : Lounes attend les acces developpeur. Le socle d'authentification
 est livre, mais aucune signature ou facturation agence n'est activee.

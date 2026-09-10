@@ -1,0 +1,43 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cloison : suivi des dossiers",
+    "version": "1.0.0",
+    "description": "Lecture serveur a serveur des seules references et des etats simplifies. Cle privee creee par un administrateur d'agence, valable 90 jours et revocable. Aucun justificatif, revenu, e-mail, lien de coffre ou texte OCR. Chaque synchronisation relit toutes les pages : cette version fournit une photographie courante, pas un flux de changements. Un dossier absent peut avoir expire ou quitte le perimetre ; son absence ne certifie pas son effacement."
+  },
+  "servers": [{ "url": "/" }],
+  "security": [{ "cleConnecteur": [] }],
+  "paths": {
+    "/api/connecteurs/v1/dossiers": {
+      "get": {
+        "operationId": "listerStatutsDossiers",
+        "summary": "Lire au plus cinquante dossiers de l'agence",
+        "parameters": [{ "name": "apres", "in": "query", "required": false, "description": "Valeur suite de la page precedente, encodee comme parametre URL. Omettre pour commencer une nouvelle synchronisation.", "schema": { "type": "string", "minLength": 8, "maxLength": 32 } }],
+        "responses": {
+          "200": {
+            "description": "Photographie courante, sans cache. Les changements entre deux pages sont possibles ; ne pas interpreter ce parcours comme une transaction globale.",
+            "content": { "application/json": { "schema": {
+              "type": "object", "additionalProperties": false, "required": ["version", "dossiers", "suite"],
+              "properties": {
+                "version": { "const": 1 },
+                "dossiers": { "type": "array", "maxItems": 50, "items": {
+                  "type": "object", "additionalProperties": false, "required": ["reference", "etat"],
+                  "properties": {
+                    "reference": { "type": "string", "minLength": 8, "maxLength": 32 },
+                    "etat": { "type": "string", "enum": ["a_completer", "pret", "en_cours", "signe", "clos"], "description": "Etat de parcours, sans score ni conclusion financiere. pret signifie presence declaree du dossier, pas certification des pieces." }
+                  }
+                } },
+                "suite": { "type": ["string", "null"], "minLength": 8, "maxLength": 32 }
+              }
+            } } }
+          },
+          "400": { "description": "Parametres invalides ou repetes." },
+          "401": { "description": "Cle absente, invalide, expiree, revoquee ou hors perimetre autorise." },
+          "429": { "description": "Soixante lectures par minute atteintes. Attendre Retry-After avant une nouvelle tentative.", "headers": { "Retry-After": { "schema": { "type": "integer", "const": 60 } } } },
+          "503": { "description": "Indisponible. Ne pas modifier les donnees locales sur la base d'une erreur." }
+        }
+      }
+    }
+  },
+  "components": { "securitySchemes": { "cleConnecteur": { "type": "http", "scheme": "bearer", "description": "Cle cloison_read_ fournie par l'administrateur. La conserver dans un gestionnaire de secrets, jamais dans une URL, un navigateur public ou un journal." } } }
+}

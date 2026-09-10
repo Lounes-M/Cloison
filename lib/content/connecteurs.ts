@@ -1,0 +1,26 @@
+export const connecteurs = {
+  titre: 'Connexions aux logiciels',
+  aide: 'Créez un accès de lecture pour votre logiciel ou votre outil d’automatisation. Il recevra uniquement les références et les états simplifiés des dossiers de votre agence.',
+  limites:
+    'Cinq accès actifs maximum, valables 90 jours. Chaque accès autorise 60 lectures par minute. Révoquez les accès inutilisés.',
+  nom: 'Nom du logiciel ou de la connexion',
+  creer: 'Créer un accès',
+  revoquer: 'Révoquer cet accès',
+  confirmation: 'Je confirme cette opération sur les accès de mon agence.',
+  attente: 'Enregistrement…',
+  echec: 'Opération impossible. Vérifiez votre session, les informations et les limites d’accès.',
+  succes: 'Accès révoqué.',
+  cle: 'Clé privée, affichée une seule fois',
+  conserver:
+    'Copiez cette clé dans le gestionnaire de secrets de votre logiciel. Elle ne sera plus affichée après fermeture ou masquage de la page.',
+  fermer: 'Masquer la clé',
+  actif: 'Actif',
+  expire: 'Expiré',
+  revoque: 'Révoqué',
+  expiration: 'Expiration',
+  utilisation: 'Dernière utilisation',
+  jamais: 'Jamais',
+  aucun: 'Aucun accès créé.',
+  documentation: 'Documentation OpenAPI',
+  retour: 'Retour aux dossiers',
+}

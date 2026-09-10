@@ -267,3 +267,9 @@ delegue ce choix technique ; aucun acces partenaire ou connecteur reel n'est
 encore active. La validation humaine documentaire, l'affectation des dossiers,
 les notifications configurables et les extensions multi-etablissements restent
 des lots distincts a implementer et verifier, pas des fonctionnalites livrees ici.
+
+La PR101 est fusionnee sur main 7dc41cd ; 0047 appliquee, CI main et supervision
+vertes, 1069 tests Linux. Le lot suivant prepare l'API v1 de statuts et la gestion
+des cles administrateur avec 0048. Il ne livre pas d'adaptateur editeur ni de
+synchronisation partenaire active. Voir [le guide](exploitation/connecteurs-statuts.md)
+et ADR 0008 ; sa PR consigne les validations et le deploiement effectifs.
