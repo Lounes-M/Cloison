@@ -228,3 +228,8 @@ Le scanner obligatoire porte sur l'historique complet du candidat. Les anciennes
 PR externes sont reservees a l'audit manuel elargi pour ne pas permettre a une
 PR independante de bloquer les livraisons. Une contre-preuve avec des cles
 fictives confirme l'isolation et la detection d'un secret retire du candidat.
+
+La surveillance memoire des decodeurs Linux est preparee en PR97 : RSS par
+processus, budget cumule et refus en cas de panne de mesure. Les limites du tas
+V8 sont ainsi completees, sans revendiquer une sandbox ou une limite OS stricte.
+Voir [la surveillance documentaire](exploitation/memoire-documentaire.md).

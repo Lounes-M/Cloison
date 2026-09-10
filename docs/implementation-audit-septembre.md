@@ -399,3 +399,12 @@ externe (1), candidat ayant ajoute puis retire une fausse cle refuse (1).
 Aucun canari ni secret reel ajoute au depot Cloison. Aucun changement applicatif
 ou SQL. Le controle complet local du commit precedent passe sur Windows avec
 938 tests et trois cas POSIX non applicables ; la CI Linux passe ses 941 tests.
+
+## Surveillance memoire documentaire, 10 septembre
+
+La PR97 ajoute un seuil RSS individuel et un budget cumule des decodeurs Linux,
+observes par le parent, avec interruption et refus en cas de panne de mesure.
+Les deux allocations natives sont vues rouges sur CI Linux avant correction ;
+cinq autres gardes sont vues rouges localement puis restaurees. Aucune migration.
+Le plafond systeme dur et le budget de toutes les instances restent ouverts.
+Voir [les preuves et limites](exploitation/memoire-documentaire.md).
