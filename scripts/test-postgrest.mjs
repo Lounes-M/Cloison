@@ -12,6 +12,7 @@ import { verifierDiagnosticPaiement } from './verifier-diagnostic-paiement.mjs'
 import { verifierDecisionsPaiements } from './verifier-decisions-paiements.mjs'
 import { verifierConcurrenceOcr } from './verifier-concurrence-ocr.mjs'
 import { verifierConcurrenceConnecteurs } from './verifier-concurrence-connecteurs.mjs'
+import { verifierConcurrenceExamen } from './verifier-concurrence-examen.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -180,6 +181,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierDecisionsPaiements(db, connexion)
       await verifierConcurrenceOcr(db, connexion)
       await verifierConcurrenceConnecteurs(db, connexion)
+      await verifierConcurrenceExamen(db, connexion)
       const ocr = spawnSync(process.execPath, ['scripts/verifier-navigateur-ocr.mjs'], {
         stdio: 'inherit',
         timeout: 120000,

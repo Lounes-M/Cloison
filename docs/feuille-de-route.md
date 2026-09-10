@@ -273,3 +273,9 @@ vertes, 1069 tests Linux. Le lot suivant prepare l'API v1 de statuts et la gesti
 des cles administrateur avec 0048. Il ne livre pas d'adaptateur editeur ni de
 synchronisation partenaire active. Voir [le guide](exploitation/connecteurs-statuts.md)
 et ADR 0008 ; sa PR consigne les validations et le deploiement effectifs.
+
+La PR102 est fusionnee en c0ceb89, 0048 appliquee et droits reels verifies. CI de
+PR verte avec 1113 tests Linux et six parcours connecteur. Le lot suivant prepare
+l'examen humain par fichier, avec historique prive, revision et controle des
+remplacements dans 0049. Voir [le guide](exploitation/examen-documentaire.md) et
+ADR 0009. L'appreciation ne certifie pas l'authenticite et ne decide pas du dossier.

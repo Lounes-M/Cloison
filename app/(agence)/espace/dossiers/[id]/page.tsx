@@ -1,5 +1,7 @@
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
+import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
+import { examen as texteExamen, type ExamenDocumentaire } from '@/lib/content/examen'
 import { configurationOcr } from '@/lib/ocr/openrouter'
 import { Complements } from '@/components/dossiers/Complements'
 import { type Complement } from '@/lib/content/complements'
@@ -77,6 +79,7 @@ export default async function PageDossier({
     { data: pieces, error: erreurPieces },
     { data: journal, error: erreurJournal },
     { data: demandes, error: erreurComplements },
+    { data: examens, error: erreurExamens },
   ] = await Promise.all([
     supabase
       .from('dossiers')
@@ -107,9 +110,17 @@ export default async function PageDossier({
       .select('id,nature,motif,etat,piece_initiale,piece_fournie,cree_le,attendu_depuis')
       .eq('dossier_id', id)
       .order('cree_le', { ascending: true }),
+    supabase.rpc('examens_du_dossier', { le_dossier: id }),
   ])
 
-  if (erreurComplements || erreurDossier || erreurEngagement || erreurPieces || erreurJournal) {
+  if (
+    erreurExamens ||
+    erreurComplements ||
+    erreurDossier ||
+    erreurEngagement ||
+    erreurPieces ||
+    erreurJournal
+  ) {
     throw new Error('Chargement du dossier indisponible.')
   }
 
@@ -255,6 +266,7 @@ export default async function PageDossier({
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.piecesTitre}</h2>
         <p className="text-muted mt-2 text-sm">{documentsDeclares.presence}</p>
+        <p className="mt-2 text-sm">{texteExamen.aide}</p>
         <p className="mt-2 text-sm font-bold">
           {profilsRessources.find((p) => p.valeur === (e?.profil_ressources ?? 'salarie'))?.libelle}
         </p>
@@ -287,6 +299,21 @@ export default async function PageDossier({
                   {texte.ouvrir}
                 </a>
                 {configurationOcr() ? <LectureOcr pieceId={String(p.id)} /> : null}
+                <ExamenPiece
+                  dossierId={id}
+                  pieceId={String(p.id)}
+                  precedent={(examens as ExamenDocumentaire[] | null)?.find(
+                    (e) => e.piece_id === p.id,
+                  )}
+                  obsolete={demandes?.some((c) => c.piece_initiale === p.id) ?? false}
+                  modifiable={[
+                    'ouvert',
+                    'depot_en_cours',
+                    'complet',
+                    'garant_insuffisant',
+                    'transmis',
+                  ].includes(String(d.statut))}
+                />
                 {['depot_en_cours', 'complet', 'garant_insuffisant', 'transmis'].includes(
                   String(d.statut),
                 ) && !demandes?.some((c) => c.piece_initiale === p.id) ? (
