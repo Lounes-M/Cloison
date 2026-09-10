@@ -190,6 +190,17 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
       }
       noter(`${partie} : lien verifie par SQL, cookie HttpOnly et rendu Next du seul dossier`)
     }
+    if (process.env.CLOISON_TEST_NAVIGATEUR === '1') {
+      const { verifierNavigateurPorteurs } = await import('./verifier-navigateur-porteurs.mjs')
+      await verifierNavigateurPorteurs({
+        site,
+        cookies,
+        db,
+        dossierId: dossier.id,
+        autreId: autre.id,
+      })
+      noter('Interactions navigateur locales confirmees dans PostgreSQL')
+    }
     const croise = await requeter('/garant', cookies.locataire)
     assert.equal(croise.status, 307)
     assert.equal(new URL(croise.headers.get('location'), site).pathname, '/locataire')
@@ -354,7 +365,9 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     assert(appels.some((a) => a.chemin === '/dossiers' && a.statut === 200))
     return {
       nature:
-        'HTTP Next et PostgREST reels, webhook Stripe signe localement ; sans Checkout distant, navigateur, Supabase Auth ou Storage',
+        process.env.CLOISON_TEST_NAVIGATEUR === '1'
+          ? 'Chromium, Next et PostgREST locaux ; sans Checkout distant, Supabase Auth ou Storage reels'
+          : 'HTTP Next et PostgREST reels, webhook Stripe signe localement ; sans Checkout distant, navigateur, Supabase Auth ou Storage',
       preuves,
     }
   } finally {

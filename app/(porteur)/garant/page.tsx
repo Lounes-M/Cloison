@@ -1,3 +1,5 @@
+import { Complements } from '@/components/dossiers/Complements'
+import { type Complement } from '@/lib/content/complements'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -73,6 +75,7 @@ export default async function PageGarant({
     { data: engagement, error: erreurEngagement },
     { data: pieces, error: erreurPieces },
     { data: journal, error: erreurJournal },
+    { data: demandes, error: erreurComplements },
   ] = await Promise.all([
     supabase
       .from('dossiers')
@@ -96,9 +99,14 @@ export default async function PageGarant({
       avant_quand: curseur?.quand ?? null,
       avant_id: curseur?.id ?? null,
     }),
+    supabase
+      .from('complements_documentaires')
+      .select('id,nature,motif,etat,piece_initiale,piece_fournie,cree_le,attendu_depuis')
+      .eq('dossier_id', dossierId)
+      .order('cree_le', { ascending: true }),
   ])
 
-  if (erreurDossier || erreurEngagement || erreurPieces) {
+  if (erreurComplements || erreurDossier || erreurEngagement || erreurPieces) {
     throw new Error('Chargement du dossier indisponible.')
   }
   if (!dossier) redirect('/lien-invalide')
@@ -161,6 +169,13 @@ export default async function PageGarant({
         </div>
       ) : null}
 
+      <Complements
+        dossierId={dossierId}
+        demandes={(demandes ?? []) as Complement[]}
+        pieces={deposees}
+        agence={false}
+        modifiable={ouvert}
+      />
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">{depot.piecesTitre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>

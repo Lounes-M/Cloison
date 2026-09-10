@@ -1,5 +1,30 @@
 # Implementation de l'audit du 8 septembre 2026
 
+## Diagnostic administratif des paiements prepare le 9 septembre
+
+Le lot ajoute une extraction privee par session Checkout : reservation, registre,
+evenements, observations, references PaymentIntent anterieures et tarifs. La
+transaction est en lecture seule avec instantane stable. Les roles applicatifs
+ne gagnent aucun acces ; aucune migration n'est ajoutee. Le fichier prive ne peut
+pas ecraser une destination existante et son empreinte permet de verifier une copie.
+
+17 tests cibles passent. Quinze contre-preuves ont ete observees rouges, dont la
+lecture seule, les limites, les projections confidentielles, le refus d'ecrasement,
+TLS et une livraison concurrente sous PostgreSQL natif. La compilation et ses deux
+traces documentaires passent. Le controle global final passe : 928 tests dans
+107 suites, types, lint, format, typographie et variables publiques. Ce resultat
+local ne remplace pas une CI de livraison.
+
+Ce diagnostic ne constitue pas une resolution : aucun remboursement, acquittement,
+nouvel acces HTTP ou appel Stripe n'est effectue. Le suivi durable des decisions,
+les corrections ciblees et la facturation agence restent ouverts. La procedure est
+dans [le runbook](exploitation/diagnostic-paiement.md).
+
+Le socle distant reste main 7b51df4 avec 0043 appliquee. Les PR87 a PR91 sont encore
+ouvertes ; 0044 et 0045 ne sont pas appliquees. GitHub Actions refuse le demarrage
+des jobs pour facturation lors du dernier controle. Aucune fusion ne doit etre
+deduite des controles locaux.
+
 Lounes autorise les corrections, PR, fusions et livraisons. Universign, le modele
 contractuel et les validations non techniques restent de son cote. Une fonction
 dependant de ces elements reste fermee tant que ses conditions ne sont pas reunies.
@@ -275,3 +300,75 @@ Les executions de 06 h 45, 07 h, 07 h 15 et 07 h 30 UTC du 9 septembre sont
 reussies. La confirmation applicative en base date de 07 h 30 min 04 s UTC,
 controlee a 07 h 40 UTC, donc recente. L'execution SQL du calendrier seule n'aurait
 pas suffi a cette preuve. La reception humaine des alertes reste distincte.
+
+## Demandes de complements, lot 0045
+
+Parcours agence et garant prepare : demande avec motif borne, reouverture explicite,
+depot d'un remplacement, examen agence et nouvelle correction. Les pieces ecartees
+ne comptent plus et le retrait d'un remplacement invalide son examen. Le locataire
+ne lit aucune demande. Les notifications generiques sont durables et distinctes
+par destinataire ; leur reception reelle n'est pas prouvee par les doubles.
+
+Depend de 0044, encore non appliquee. Repetition Supabase annulee et controles de
+roles reels passes, huit sabotages SQL/actions observes rouges puis restaures.
+Les composants sont inspectes en 390 et 1280 pixels sur fixtures ; parcours
+navigateur authentifie complet distinct. Ce lot ne termine pas l'approbation de
+chaque piece initiale ni la chaine contractuelle. Voir le runbook
+[Complements documentaires](exploitation/complements-documentaires.md).
+
+Validation locale finale du lot : npm run check passe avec 911 tests dans 105
+suites. Build, integration PostgreSQL/PostgREST et restauration native passent.
+Les lots exacts 0044 puis 0045 et les droits ont ete repetes puis annules sur
+Supabase. Application SQL, CI finale et fusion restent distinctes et en attente.
+
+## Parcours navigateur automatises des porteurs
+
+Le harnais local inclut maintenant Chromium, les formulaires de profil et de
+nombre de documents, une falsification effectivement envoyee puis refusee,
+et la proposition d'un remplacement. Les resultats sont controles en PostgreSQL
+sur mobile et ordinateur. Le locataire reste exclu du depot du garant.
+Le job CI natif installe le navigateur et active ces essais ; sa livraison
+reste soumise a une CI verte. Auth fournisseur, upload Storage et parcours
+agence complets restent distincts. Voir [les preuves et limites](exploitation/parcours-navigateur-locaux.md).
+
+## Livraison du 10 septembre
+
+PR87 fusionnee en 6a16848 apres reussite de la CI finale 34325610070 sur
+047484f. 0044 appliquee apres repetition annulee ; roles reels et empreinte
+exacte verifies apres application. 0044 devient immuable. La CI de main
+34455907869 est suivie avant la livraison suivante.
+
+GitHub Actions execute de nouveau ses jobs depuis le passage du depot en public.
+Le lot 0045 est conserve apres integration de main ; ses empreintes restent
+celles de ce lot, a controler par une nouvelle repetition transactionnelle.
+
+## Verification du devis lors de la reprise Stripe, 9 septembre 2026
+
+Lot independant prepare depuis main 7b51df4, sans migration. La reprise d'une
+session ouverte refuse maintenant les incoherences de dossier et de tarif avant
+de rendre son URL. Huit contre-preuves observees rouges avant correction, puis
+38 tests cibles passes. La reprise historique reste possible avec son montant
+reserve. Aucun paiement reel ni livraison en production n'est affirme par ces tests.
+Voir [les controles et limites](exploitation/reprise-session-ouverte.md).
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.
+
+## Integration de livraison publique, 10 septembre
+
+Les CI finales relancees des PR87 a PR92 passent depuis le changement de
+visibilite. PR87 est fusionnee et 0044 appliquee. Les lots des PR88 a PR93 sont
+reunis dans une PR d'integration pour verifier leur combinaison exacte avant
+main : reprise Stripe, refus des webhooks, complements, Chromium, diagnostic
+prive et protections du depot public. Les PR sources restent ouvertes jusqu'a
+la livraison commune. 0045 est repetee sur le schema 0044 actuel, avec roles et
+empreinte exacte verifies sous ROLLBACK ; elle reste a appliquer apres CI finale.
+
+L'audit public ne detecte aucun secret dans les 233 commits examines, les PR et
+commentaires, et les trois derniers journaux reussis selectionnes. Les mesures
+et limites sont detaillees dans [le controle public](exploitation/depot-public.md).

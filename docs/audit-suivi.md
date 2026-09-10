@@ -26,6 +26,13 @@ actif ; la confirmation applicative de maintenance du 9 septembre a 07:30 UTC
 etait recente lors du controle de 07:40 UTC. La reception humaine des alertes
 et le retablissement de GitHub Actions restent necessaires.
 
+Les PR87 a PR91 restent ouvertes lors de la reprise suivante, main toujours
+7b51df4. Les complements documentaires (0045) et les parcours navigateur sont
+prepares, pas livres. Un diagnostic administratif des paiements est ajoute sans
+migration : il produit un instantane prive mais ne resout aucune anomalie.
+Les preuves actualisees figurent dans le suivi d'implementation ; les validations
+fournisseur, le suivi durable des decisions et la facturation restent ouverts.
+
 ## Historique au 7 septembre 2026, apres PR56
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :

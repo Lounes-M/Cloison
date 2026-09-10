@@ -178,3 +178,42 @@ Reference distante : main 7b51df4 (PR86). La PR87 est reprise sur ce socle ;
 bloque le demarrage des workflows et doit etre retablie avant une nouvelle CI de
 livraison. Le calendrier Supabase confirme encore la maintenance independamment.
 Voir la derniere section du suivi d'implementation et la PR87 pour les preuves.
+
+Le lot 0045 prepare les demandes de complements tracees, leur fourniture par le
+garant et leur examen par l'agence. La notification est durable et le locataire
+ne lit aucun detail documentaire. La livraison depend de 0044 puis d'une CI verte ;
+aucun lot n'est declare applique sur la seule repetition annulee.
+Voir [le parcours et ses limites](exploitation/complements-documentaires.md).
+
+Les interactions navigateur des porteurs sont automatisees dans le harnais local :
+profil, nombre de documents, falsification du dossier et proposition de complement.
+Les controles SQL confirment les mutations sur deux largeurs. Les parcours agence,
+upload Storage et fournisseurs reels restent ouverts ; voir le runbook des
+[parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md).
+
+Un diagnostic financier administratif par session est prepare : instantane en
+lecture seule, rapport prive avec empreinte et refus des extractions excessives.
+Il n'effectue aucun mouvement de fonds ni acquittement ; le suivi durable des
+decisions reste ouvert. Voir [la procedure](exploitation/diagnostic-paiement.md).
+
+PR87 est fusionnee et 0044 appliquee avec empreinte et droits reels verifies.
+Le lot 0045 reste a livrer apres repetition et CI verte de sa revision finale.
+
+Le controle du devis d'une session Stripe ouverte est prepare independamment de
+la PR87 : reference, dossier et tarif sont compares avant reprise. Huit refus
+vus rouges avant correction, 38 tests cibles verts ; livraison soumise a la CI.
+Voir [Reprise de session ouverte](exploitation/reprise-session-ouverte.md).
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.
+
+Les lots des PR88 a PR93 sont reunis pour une livraison commune validee sur
+une seule revision finale. La migration 0044 est appliquee, 0045 repetee mais
+encore non appliquee. La CI de la combinaison reste requise avant livraison.
+Le depot public dispose du scan de secrets, de la protection des pushs et du
+signalement prive ; le workflow d'historique est inclus dans cette integration.

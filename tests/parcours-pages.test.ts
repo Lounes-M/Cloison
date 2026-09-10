@@ -91,6 +91,7 @@ beforeEach(() => {
     engagements: { data: null, error: null },
     pieces: { data: [], error: null },
     journal_acces: { data: [], error: null },
+    complements_documentaires: { data: [], error: null },
   }
   doublures.capacite.mockResolvedValue({
     jeton: 'jeton-fictif',
@@ -218,7 +219,7 @@ test('un dossier termine sans garant ne propose pas une nouvelle designation', a
 describe('les pages ne confondent pas une panne avec une absence', () => {
   for (const [nom, page, tables] of [
     ['locataire', locataire, ['dossiers']],
-    ['garant', PageGarant, ['dossiers', 'engagements', 'pieces']],
+    ['garant', PageGarant, ['dossiers', 'engagements', 'pieces', 'complements_documentaires']],
     ['agence', PageEspace, ['dossiers']],
     ['dossier agence', dossier, ['dossiers', 'engagements', 'pieces', 'journal_acces']],
   ] as const) {

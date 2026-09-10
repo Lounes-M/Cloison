@@ -1,7 +1,11 @@
 import 'server-only'
 /** Taille reelle bornee, meme sans Content-Length ; aucun corps dans les erreurs. */
 export async function lireCorpsWebhook(requete: Request): Promise<string | null> {
-  if (Number(requete.headers.get('content-length')) > 65536) return null
+  if (Number(requete.headers.get('content-length')) > 65536) {
+    // Le refus ne depend pas du nettoyage d'un flux fourni par le client.
+    void requete.body?.cancel().catch(() => {})
+    return null
+  }
   if (!requete.body) return ''
   const lecteur = requete.body.getReader(),
     signal = AbortSignal.any([requete.signal, AbortSignal.timeout(10000)])
@@ -19,7 +23,7 @@ export async function lireCorpsWebhook(requete: Request): Promise<string | null>
       if (done) break
       taille += value.byteLength
       if (taille > 65536) {
-        await lecteur.cancel()
+        annuler()
         return null
       }
       blocs.push(value)
