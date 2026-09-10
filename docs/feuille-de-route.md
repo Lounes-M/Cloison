@@ -178,3 +178,20 @@ Reference distante : main 7b51df4 (PR86). La PR87 est reprise sur ce socle ;
 bloque le demarrage des workflows et doit etre retablie avant une nouvelle CI de
 livraison. Le calendrier Supabase confirme encore la maintenance independamment.
 Voir la derniere section du suivi d'implementation et la PR87 pour les preuves.
+
+Le lot 0045 prepare les demandes de complements tracees, leur fourniture par le
+garant et leur examen par l'agence. La notification est durable et le locataire
+ne lit aucun detail documentaire. La livraison depend de 0044 puis d'une CI verte ;
+aucun lot n'est declare applique sur la seule repetition annulee.
+Voir [le parcours et ses limites](exploitation/complements-documentaires.md).
+
+Les interactions navigateur des porteurs sont automatisees dans le harnais local :
+profil, nombre de documents, falsification du dossier et proposition de complement.
+Les controles SQL confirment les mutations sur deux largeurs. Les parcours agence,
+upload Storage et fournisseurs reels restent ouverts ; voir le runbook des
+[parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md).
+
+Un diagnostic financier administratif par session est prepare : instantane en
+lecture seule, rapport prive avec empreinte et refus des extractions excessives.
+Il n'effectue aucun mouvement de fonds ni acquittement ; le suivi durable des
+decisions reste ouvert. Voir [la procedure](exploitation/diagnostic-paiement.md).

@@ -62,7 +62,7 @@ jobs:
   postgrest:
     name: PostgreSQL et PostgREST HTTP
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     services:
       postgres:
         image: postgres:17.6
@@ -97,8 +97,11 @@ jobs:
             postgrest/postgrest:v16.2
       - name: Build pour les parcours HTTP authentifies
         run: npm run build
+      - name: Installer Chromium pour les parcours locaux
+        run: npx playwright install --with-deps chromium
       - name: Parcours porteurs via Next et PostgREST reels
         env:
+          CLOISON_TEST_NAVIGATEUR: '1'
           PGTEST_URL: postgres://postgres:cloison-test-only@127.0.0.1:5432/cloison_audit_test
           POSTGREST_TEST_URL: http://127.0.0.1:3001
           POSTGREST_TEST_SECRET: local-isolated-postgrest-tests-32-characters-only
