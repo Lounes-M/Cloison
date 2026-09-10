@@ -200,9 +200,11 @@ La cadence cron GitHub est indicative ; plusieurs heures entre executions observ
 Le lot suivant aligne la presentation publique sur le pilote : ne pas presenter
 la signature comme ouverte ni le ratio declare comme une verification des pieces.
 
-Etat verifie au 9 septembre : origin/main 7b51df4 (PR86), migration 0043 appliquee,
-empreinte distante conforme et schema net non expose. Voir la section courante
-de docs/audit-suivi.md et docs/implementation-audit-septembre.md. PR87 reprise
-sur ce main ; 0044 non appliquee. GitHub Actions est bloque avant les jobs pour
-facturation : ne pas fusionner sans CI finale verte.
-Le calendrier Supabase continue, confirmation applicative recente verifiee.
+Derniere livraison confirmee au 10 septembre : main 0b56b28 (PR99), 1004 tests
+Linux et parcours Chromium, Firefox et WebKit. Les migrations 0044 et 0045 sont
+appliquees et immuables. Le depot est public, les controles GitHub sont actifs,
+la CI main et la supervision passent. Les anciennes mentions de blocage de
+facturation de ce fichier sont historiques. La migration 0046 est preparee dans
+le lot du journal administratif ; consulter sa PR pour son application effective.
+Universign : Lounes attend les acces developpeur. Le socle d'authentification
+est livre, mais aucune signature ou facturation agence n'est activee.

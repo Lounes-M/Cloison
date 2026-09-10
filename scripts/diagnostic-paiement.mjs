@@ -29,7 +29,16 @@ export async function diagnostiquerPaiement(db, reference) {
       await lire(`select id,nature,reference_objet,reference_paiement,reference_session,source_dossier,
       montant_cents,devise,tarif_version,etat,survenu_le,recu_le,anomalie
       from public.evenements_paiements where reference_session=$1 or reference_objet=$1 order by survenu_le,id`)
-    if (!reservation.length && !registre.length && !observations.length && !directs.length)
+    const decisions =
+      await lire(`select operation,operateur,decision,rapport_sha256,rapport_observe_le,compte_base,inscrit_le
+      from public.decisions_paiements where reference_session=$1 order by inscrit_le,operation`)
+    if (
+      !reservation.length &&
+      !registre.length &&
+      !observations.length &&
+      !directs.length &&
+      !decisions.length
+    )
       throw new Error('Session inconnue')
     const intentions = [
       ...new Set(
@@ -76,6 +85,7 @@ export async function diagnostiquerPaiement(db, reference) {
       sessions_associees,
       tentatives,
       tarifs,
+      decisions,
     }
   } finally {
     await db.query('rollback')

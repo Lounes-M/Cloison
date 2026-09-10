@@ -9,6 +9,7 @@ export type DiagnosticPaiement = {
   sessions_associees: Record<string, unknown>[]
   tentatives: Record<string, unknown>[]
   tarifs: Record<string, unknown>[]
+  decisions: Record<string, unknown>[]
 }
 export function diagnostiquerPaiement(
   db: { query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }> },
