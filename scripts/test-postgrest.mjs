@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -9,6 +10,7 @@ import { verifierConcurrencePaiements } from './verifier-concurrence-paiements.m
 import { verifierConcurrenceAdministrateurs } from './verifier-concurrence-administrateurs.mjs'
 import { verifierDiagnosticPaiement } from './verifier-diagnostic-paiement.mjs'
 import { verifierDecisionsPaiements } from './verifier-decisions-paiements.mjs'
+import { verifierConcurrenceOcr } from './verifier-concurrence-ocr.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -175,6 +177,12 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       console.log('OK : credit financier unique et sabotage verifies sur deux connexions')
       await verifierDiagnosticPaiement(db, connexion)
       await verifierDecisionsPaiements(db, connexion)
+      await verifierConcurrenceOcr(db, connexion)
+      const ocr = spawnSync(process.execPath, ['scripts/verifier-navigateur-ocr.mjs'], {
+        stdio: 'inherit',
+        timeout: 120000,
+      })
+      assert.equal(ocr.status, 0, 'Parcours navigateur OCR refuse')
     }
   } finally {
     await db.end()

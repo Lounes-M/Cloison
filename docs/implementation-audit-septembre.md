@@ -434,3 +434,15 @@ Le diagnostic relit cet historique, y compris apres suppression du dossier.
 Repetition Supabase annulee, roles reels et empreintes avant/apres verifies.
 Application et CI finales sont consignees dans la PR. F22 reste ouvert pour
 les corrections financieres automatiques et la facturation agence.
+
+## OCR facultatif via OpenRouter, 10 septembre
+
+Transcription temporaire par page, sur demande explicite d'une agence AAL2.
+Copie rasterisee et filigranee, quota SQL et journal avant l'appel externe,
+nouveau controle d'acces avant retour, sortie structuree et texte inerte.
+22 sabotages produisent 28 echecs d'assertion, puis 38 tests cibles repassent.
+0047 est repetee sous ROLLBACK avec roles reels et empreintes exactes : seules
+fonctions et contraintes changent. L'application effective figure dans la PR.
+Les essais navigateur ont revele le debordement du titre avec un email long ;
+son retour a la ligne est corrige. Aucun appel IA reel ni qualite fournisseur
+n'est revendique avant configuration d'une cle et essais sur documents fictifs.

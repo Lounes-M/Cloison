@@ -13,6 +13,10 @@ version d'origine vit dans un artefact Claude :
 
 ## Comment travailler avec Lounes
 
+- Depuis le 10 septembre, toute IA applicative passe par OpenRouter. La cle
+  OPENROUTER_API_KEY est un secret serveur Vercel. OCR facultatif : ADR 0007,
+  activation explicite, aucune decision autonome sur un dossier.
+
 - **En français, en le tutoyant.** Le produit tutoie le locataire et le garant, vouvoie l'agence.
 - **Tout passe par une PR**, jamais de commit direct sur `main` : Vercel la déploie à chaque
   push. Branche, PR avec le gabarit du dépôt rempli, CI verte, puis **fusionner soi-même** en

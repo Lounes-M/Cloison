@@ -1,4 +1,6 @@
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
+import { LectureOcr } from '@/components/dossiers/LectureOcr'
+import { configurationOcr } from '@/lib/ocr/openrouter'
 import { Complements } from '@/components/dossiers/Complements'
 import { type Complement } from '@/lib/content/complements'
 import type { Metadata } from 'next'
@@ -140,11 +142,11 @@ export default async function PageDossier({
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="max-w-full min-w-0">
           <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
             {texte.reference} {String(d.reference)}
           </p>
-          <h1 className="font-display mt-1 text-3xl uppercase md:text-4xl">
+          <h1 className="font-display mt-1 text-3xl break-all uppercase md:text-4xl">
             {String(d.email_locataire)}
           </h1>
         </div>
@@ -284,6 +286,7 @@ export default async function PageDossier({
                 >
                   {texte.ouvrir}
                 </a>
+                {configurationOcr() ? <LectureOcr pieceId={String(p.id)} /> : null}
                 {['depot_en_cours', 'complet', 'garant_insuffisant', 'transmis'].includes(
                   String(d.statut),
                 ) && !demandes?.some((c) => c.piece_initiale === p.id) ? (

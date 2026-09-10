@@ -154,6 +154,7 @@ export const actions: Record<string, string> = {
   piece_deposee: 'a déposé une pièce',
   piece_retiree: 'a retiré une pièce',
   piece_ouverte: 'a ouvert une pièce',
+  ocr_demande: 'a demandé une transcription par IA',
   complement_demande: 'Remplacement demande',
   complement_fourni: 'Remplacement fourni',
   complement_valide: 'Remplacement valide',

@@ -3,6 +3,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { baseOuvertureSupabase } from '@/lib/coffre/ouverture-supabase'
 import { filigranePour, ouvrirPiecePourLAgence } from '@/lib/coffre/ouverture'
 import { contexteAgence } from '@/lib/agences/contexte'
+import { lirePieceParOcr } from '@/lib/ocr/lecture-agence'
+
+export async function POST(requete: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  return lirePieceParOcr(requete, (await params).id)
+}
 
 /**
  * Une piece, telle que l'agence la recoit.

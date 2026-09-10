@@ -251,3 +251,19 @@ du diagnostic examine, avec rejeu controle et historique prive. Une decision
 ne corrige ni n'acquitte automatiquement une anomalie financiere. La resolution
 et la facturation agence restent ouvertes. Voir
 [le journal des decisions](exploitation/decisions-paiements.md).
+
+## Nouvelles fonctionnalites demandees, 10 septembre
+
+Lounes demande les ajouts produit de l'audit, dont l'OCR, avec OpenRouter pour
+l'IA. Le lot OCR prepare 0047, une transcription temporaire sur action explicite
+de l'agence et des quotas partages. Aucun score ou changement de revenu/decision.
+Les roles et empreintes sont repetes sur Supabase sous ROLLBACK ; la PR precise
+l'application effective et les controles finaux. Voir
+[l'aide a la lecture](exploitation/ocr-openrouter.md) et ADR 0007.
+
+Les connecteurs seront fondes sur un contrat limite aux references et statuts,
+avec acces revocables par agence, puis adaptes aux API des editeurs. Lounes a
+delegue ce choix technique ; aucun acces partenaire ou connecteur reel n'est
+encore active. La validation humaine documentaire, l'affectation des dossiers,
+les notifications configurables et les extensions multi-etablissements restent
+des lots distincts a implementer et verifier, pas des fonctionnalites livrees ici.
