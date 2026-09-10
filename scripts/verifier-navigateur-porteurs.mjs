@@ -199,10 +199,6 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
       assert.equal(new URL(page.url()).pathname, '/locataire')
       assert(!(await page.content()).includes('CONFIDENTIELPARCOURS'))
       assert.equal(await page.locator('input[name="operation"]').count(), 0)
-      const fige = await page.content()
-      await page.route('**/locataire', (route) =>
-        route.fulfill({ status: 200, contentType: 'text/html', body: fige }),
-      )
       const avantLien = (
         await db.query(
           "select emis_le,expire_le from jetons_actifs where dossier_id=$1 and partie='locataire'",

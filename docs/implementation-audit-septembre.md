@@ -417,3 +417,11 @@ Les acces developpeur restent en attente, comme confirme par Lounes.
 Ce lot ne clot pas F15 : aucun acte signe, registre anti-rejeu, rattachement
 metier ou paiement agence n'est active. Voir
 [le perimetre exact](exploitation/universign-authentification.md).
+
+## Parcours sur trois moteurs, 10 septembre 2026
+
+Extension du harnais PostgreSQL et Next a Firefox et WebKit en plus de Chromium.
+Les deux largeurs, les actions clavier et le refus apres expiration sont
+verifies par moteur. Les mutations exigent des fixtures reinitialisees.
+Aucune migration ou integration fournisseur nouvelle. La PR consigne les
+contre-preuves et les controles finaux ; F20 reste partiel.
