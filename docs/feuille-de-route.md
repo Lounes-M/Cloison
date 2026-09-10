@@ -212,8 +212,14 @@ observees rouges avant correction. Aucune migration ni appel fournisseur.
 Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
 independante, soumise aux controles complets et a une CI verte.
 
-Les lots des PR88 a PR93 sont reunis pour une livraison commune validee sur
-une seule revision finale. La migration 0044 est appliquee, 0045 repetee mais
-encore non appliquee. La CI de la combinaison reste requise avant livraison.
+Les lots des PR88 a PR93 sont livres ensemble par la PR94, apres CI verte
+de leur combinaison (940 tests, 107 suites, Chromium et PostgreSQL natif).
+Les migrations 0044 et 0045 sont appliquees et verifiees avec les roles reels
+et leurs empreintes exactes. Elles sont immuables et ne doivent pas etre rejouees.
 Le depot public dispose du scan de secrets, de la protection des pushs et du
 signalement prive ; le workflow d'historique est inclus dans cette integration.
+
+La validation locale Windows a revele trois tests de diagnostic financier
+supposant des droits POSIX. Ces cas restent executes en CI Linux ; le test
+commun verifie le refus d'ecriture sans uid POSIX, y compris pour un fichier
+existant. Le diagnostic reste volontairement indisponible sur cette plateforme.

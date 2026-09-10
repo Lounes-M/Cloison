@@ -114,34 +114,40 @@ test('une session inconnue ou un historique excessif ne produit pas de rapport p
     transaction_read_only: 'off',
   })
 })
-test('le rapport prive a une empreinte verifiable et necrase aucun fichier', async () => {
-  const chemin = join(dossierPrive, 'rapport.json')
-  const r = await diagnostiquerPaiement(db, 'cs_fictif')
-  await ecrireDiagnostic(chemin, r)
-  const rapport = JSON.parse(await readFile(chemin, 'utf8'))
-  expect(rapport.sha256).toBe(createHash('sha256').update(rapport.contenu).digest('hex'))
-  expect(JSON.parse(rapport.contenu).reference_session).toBe('cs_fictif')
-  expect((await stat(chemin)).mode & 0o777).toBe(0o600)
-  await expect(ecrireDiagnostic(chemin, { modifie: true })).rejects.toThrow()
-  expect(JSON.parse(await readFile(chemin, 'utf8'))).toEqual(rapport)
-})
-test('une destination publique ou un lien ne recoit pas de donnees financieres', async () => {
-  const publicDir = await mkdtemp(join(tmpdir(), 'cloison-public-'))
-  try {
-    await chmod(publicDir, 0o755)
-    await expect(ecrireDiagnostic(join(publicDir, 'rapport'), {})).rejects.toThrow(
-      'Repertoire prive',
-    )
-    const cible = join(dossierPrive, 'cible')
-    const lien = join(dossierPrive, 'lien')
-    await writeFile(cible, 'intact')
-    await symlink(cible, lien)
-    await expect(ecrireDiagnostic(lien, {})).rejects.toThrow()
-    expect(await readFile(cible, 'utf8')).toBe('intact')
-  } finally {
-    await rm(publicDir, { recursive: true, force: true })
-  }
-})
+test.skipIf(!process.getuid)(
+  'le rapport prive a une empreinte verifiable et necrase aucun fichier',
+  async () => {
+    const chemin = join(dossierPrive, 'rapport.json')
+    const r = await diagnostiquerPaiement(db, 'cs_fictif')
+    await ecrireDiagnostic(chemin, r)
+    const rapport = JSON.parse(await readFile(chemin, 'utf8'))
+    expect(rapport.sha256).toBe(createHash('sha256').update(rapport.contenu).digest('hex'))
+    expect(JSON.parse(rapport.contenu).reference_session).toBe('cs_fictif')
+    expect((await stat(chemin)).mode & 0o777).toBe(0o600)
+    await expect(ecrireDiagnostic(chemin, { modifie: true })).rejects.toThrow()
+    expect(JSON.parse(await readFile(chemin, 'utf8'))).toEqual(rapport)
+  },
+)
+test.skipIf(!process.getuid)(
+  'une destination publique ou un lien ne recoit pas de donnees financieres',
+  async () => {
+    const publicDir = await mkdtemp(join(tmpdir(), 'cloison-public-'))
+    try {
+      await chmod(publicDir, 0o755)
+      await expect(ecrireDiagnostic(join(publicDir, 'rapport'), {})).rejects.toThrow(
+        'Repertoire prive',
+      )
+      const cible = join(dossierPrive, 'cible')
+      const lien = join(dossierPrive, 'lien')
+      await writeFile(cible, 'intact')
+      await symlink(cible, lien)
+      await expect(ecrireDiagnostic(lien, {})).rejects.toThrow()
+      expect(await readFile(cible, 'utf8')).toBe('intact')
+    } finally {
+      await rm(publicDir, { recursive: true, force: true })
+    }
+  },
+)
 test.each(['?sslmode=disable', '?sslmode=no-verify', '#fragment'])(
   'les options TLS injectees %s sont refusees',
   (suffixe) => {
@@ -171,10 +177,26 @@ test('le lanceur ne revele jamais une configuration invalide', () => {
   expect(r.stderr).not.toMatch(/SECRET|CONFIDENTIEL/)
   expect(r.stderr).toContain('Diagnostic indisponible')
 })
-test('un rapport trop gros ne cree pas de fichier', async () => {
+test.skipIf(!process.getuid)('un rapport trop gros ne cree pas de fichier', async () => {
   const chemin = join(dossierPrive, 'excessif')
   await expect(ecrireDiagnostic(chemin, 'x'.repeat(4 * 1024 * 1024))).rejects.toThrow(
     'Rapport trop volumineux',
   )
   await expect(stat(chemin)).rejects.toThrow()
+})
+
+test('sans uid POSIX aucun rapport ne peut etre ecrit ou remplace', async () => {
+  const nouveau = join(dossierPrive, 'sans-uid-nouveau')
+  const existant = join(dossierPrive, 'sans-uid-existant')
+  await writeFile(existant, 'intact')
+  vi.stubGlobal('process', { ...process, getuid: undefined })
+  try {
+    for (const chemin of [nouveau, existant]) {
+      await expect(ecrireDiagnostic(chemin, {})).rejects.toThrow('Repertoire prive obligatoire')
+    }
+  } finally {
+    vi.unstubAllGlobals()
+  }
+  await expect(stat(nouveau)).rejects.toThrow()
+  expect(await readFile(existant, 'utf8')).toBe('intact')
 })
