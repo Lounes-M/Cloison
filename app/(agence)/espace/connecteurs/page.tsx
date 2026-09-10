@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { contexteAgence } from '@/lib/agences/contexte'
+import { listerConnecteurs } from '@/lib/connecteurs/liste'
 import { connecteurs as t } from '@/lib/content/connecteurs'
 import { FormulaireConnecteur } from '@/components/forms/FormulaireConnecteur'
 export const metadata: Metadata = {
@@ -12,15 +13,7 @@ export default async function PageConnecteurs() {
   const c = await contexteAgence()
   if (c.etat !== 'rattache') redirect('/connexion')
   if (c.role !== 'admin') notFound()
-  const { data, error } = await c.supabase
-    .from('connecteurs_agence')
-    .select('id,nom,cree_le,expire_le,revoque_le,utilise_le')
-    .order('revoque_le', { ascending: false, nullsFirst: true })
-    .order('expire_le', { ascending: false })
-    .order('id')
-    .limit(100)
-  if (error || !data) throw new Error('Liste des connecteurs indisponible')
-  const maintenant = Date.now()
+  const data = await listerConnecteurs(c)
   const date = (v: string) => new Date(v).toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })
   return (
     <div className="w-full max-w-3xl">
@@ -36,7 +29,7 @@ export default async function PageConnecteurs() {
       <FormulaireConnecteur agence={c.agence.id} />
       <ul className="mt-8 grid gap-4">
         {data.map((k) => {
-          const active = !k.revoque_le && Date.parse(k.expire_le) > maintenant
+          const active = k.active
           return (
             <li key={k.id} className="outlined min-w-0 rounded-xl p-4 break-words">
               <h2 className="font-bold">{k.nom}</h2>
