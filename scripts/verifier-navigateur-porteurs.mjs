@@ -203,8 +203,14 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
       await page.route('**/locataire', (route) =>
         route.fulfill({ status: 200, contentType: 'text/html', body: fige }),
       )
+      const avantLien = (
+        await db.query(
+          "select emis_le,expire_le from jetons_actifs where dossier_id=$1 and partie='locataire'",
+          [dossierId],
+        )
+      ).rows[0]
       await db.query(
-        "update jetons_actifs set expire_le=now()-interval '1 minute' where dossier_id=$1 and partie='locataire'",
+        "update jetons_actifs set emis_le=now()-interval '2 minutes',expire_le=now()-interval '1 minute' where dossier_id=$1 and partie='locataire'",
         [dossierId],
       )
       try {
@@ -213,8 +219,8 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
         assert(!(await page.content()).includes('PARCOURS1234'))
       } finally {
         await db.query(
-          "update jetons_actifs set expire_le=now()+interval '1 hour' where dossier_id=$1 and partie='locataire'",
-          [dossierId],
+          "update jetons_actifs set emis_le=$2,expire_le=$3 where dossier_id=$1 and partie='locataire'",
+          [dossierId, avantLien.emis_le, avantLien.expire_le],
         )
       }
       console.log(`OK : ${moteur.name()} locataire cloisonne et session expiree refusee`)
