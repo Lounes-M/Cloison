@@ -1,3 +1,6 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { RepereParcours } from '@/components/layout/RepereParcours'
+import { interfaceEspace } from '@/lib/content/interface'
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import type { Metadata } from 'next'
 
@@ -20,17 +23,22 @@ export const metadata: Metadata = {
  */
 export default function PageDemarrer() {
   return (
-    <Section className="py-16 md:py-24" innerClassName="max-w-[520px]">
-      <h1 className="font-display text-3xl uppercase md:text-5xl">{porte.titre}</h1>
-      <p className="text-muted mt-4 mb-10 text-[16px] leading-relaxed font-medium">
-        {porte.sousTitre}
-      </p>
-
-      <p className="border-ink bg-sun mb-8 rounded-xl border-2 p-4 text-sm leading-relaxed">
-        {pilote.avantOuverture}
-      </p>
-      <FormulaireOuverture />
-      <FormulaireContinuite mode="retrouver" />
+    <Section className="espace-shell bg-cream py-12 md:py-20" innerClassName="max-w-[1040px]">
+      <div className="grid items-start gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+        <div className="min-w-0">
+          <EnteteEspace titre={porte.titre} etiquette={interfaceEspace.ouverture}>
+            <p>{porte.sousTitre}</p>
+          </EnteteEspace>
+          <div className="panneau-espace">
+            <p className="border-ink bg-sun mb-8 rounded-xl border-2 p-4 text-sm leading-relaxed">
+              {pilote.avantOuverture}
+            </p>
+            <FormulaireOuverture />
+            <FormulaireContinuite mode="retrouver" />
+          </div>
+        </div>
+        <RepereParcours />
+      </div>
     </Section>
   )
 }

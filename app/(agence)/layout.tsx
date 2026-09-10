@@ -4,17 +4,15 @@ import { seDeconnecter } from '@/lib/agences/action-securite'
 import { securite } from '@/lib/content/securite'
 import { connection } from 'next/server'
 
-import { Logo } from '@/components/brand/Logo'
+import { CadreEspace } from '@/components/layout/CadreEspace'
 import { support } from '@/lib/content/espace'
 import { env } from '@/lib/env'
 
 /**
  * L'espace agence.
  *
- * Volontairement depouille, et c'est la raison d'etre du groupe de routes : un
- * collaborateur qui consulte un dossier n'a que faire d'un menu « Tarifs » et
- * d'un bouton « Demarrer ». Le layout marketing le disait deja en creux quand
- * il a ete separe du layout racine ; voici l'autre moitie.
+ * L'identite de la home accompagne les outils : creme, cobalt et contours francs.
+ * La navigation reste centree sur le travail et ne remplace aucun controle d'acces.
  *
  * Le logo ramene au site public ; la deconnexion reste accessible depuis chaque
  * ecran agence, y compris apres le second facteur et une exclusion.
@@ -34,35 +32,30 @@ export default async function LayoutAgence({ children }: { children: React.React
     .some(({ name, value }) => Boolean(value) && estCookieSessionAgence(name))
 
   return (
-    <div className="bg-paper flex min-h-dvh flex-col">
-      <header className="border-ink flex flex-wrap items-center justify-between gap-4 border-b-2 px-6 py-5 md:px-10">
-        {/* `Logo` est deja un lien vers l'accueil : l'envelopper en produirait
-            deux imbriques, ce qui est invalide et illisible au clavier. */}
-        <Logo className="text-2xl" />
-        {afficherSortie ? (
+    <CadreEspace
+      agence
+      navigation={afficherSortie}
+      sortie={
+        afficherSortie ? (
           <form action={seDeconnecter}>
-            <button className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold underline underline-offset-4">
+            <button type="submit" className="lien-espace">
               {securite.deconnexion}
             </button>
           </form>
-        ) : null}
-      </header>
-
-      <main className="flex flex-1 items-center justify-center px-6 py-16 md:px-10">
-        {children}
-      </main>
-
-      {/* Le canal de support, promis dans l'embarquement : il n'apparait
-          qu'une fois l'adresse fixee. Afficher une adresse qui ne repond a
-          personne serait pire que ne rien afficher. */}
-      {adresseDeSupport ? (
-        <footer className="border-ink border-t-2 px-6 py-5 md:px-10">
-          <p className="text-muted mx-auto max-w-[880px] text-[13px] leading-relaxed font-medium">
-            <strong className="text-ink">{support.titre}</strong> {support.texte(adresseDeSupport)}{' '}
-            {support.limite}
-          </p>
-        </footer>
-      ) : null}
-    </div>
+        ) : null
+      }
+      footer={
+        adresseDeSupport ? (
+          <footer className="border-ink border-t-2 px-6 py-5 md:px-10">
+            <p className="text-muted mx-auto max-w-[880px] text-[13px] leading-relaxed font-medium">
+              <strong className="text-ink">{support.titre}</strong>{' '}
+              {support.texte(adresseDeSupport)} {support.limite}
+            </p>
+          </footer>
+        ) : null
+      }
+    >
+      {children}
+    </CadreEspace>
   )
 }

@@ -41,7 +41,7 @@ export function FormulaireExamen({
       </label>
       <button
         disabled={attente}
-        className="outlined bg-sky rounded-lg px-4 py-2 font-bold disabled:opacity-50"
+        className="press shadow-brut-xs outlined bg-cobalt text-paper cursor-pointer rounded-lg px-4 py-2 font-bold disabled:translate-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         {attente ? t.attente : t.enregistrer}
       </button>

@@ -148,7 +148,7 @@ export default async function PageGarant({
     : null
 
   return (
-    <div className="w-full max-w-[640px]">
+    <div className="page-espace w-full max-w-[640px]">
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
         {depot.reference} {String(dossier.reference)}
       </p>
@@ -176,7 +176,7 @@ export default async function PageGarant({
         agence={false}
         modifiable={ouvert}
       />
-      <section className="mt-12">
+      <section className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{depot.piecesTitre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
         <p className="text-muted mb-6 text-sm">{documentsDeclares.presence}</p>
@@ -261,7 +261,7 @@ export default async function PageGarant({
       </section>
 
       {mentionAttendue ? (
-        <section className="mt-14">
+        <section className="panneau-espace mt-14">
           <h2 className="font-display text-2xl uppercase">{texteMention.titre}</h2>
           <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
           <FormulaireMention
@@ -286,7 +286,7 @@ export default async function PageGarant({
         </section>
       ) : null}
 
-      <section id="journal" className="mt-14">
+      <section id="journal" className="panneau-espace mt-14">
         <h2 className="font-display text-2xl uppercase">{texteJournal.titre}</h2>
         <p className="text-muted mt-2 text-sm">{texteJournal.aide}</p>
         {erreurJournal ? (
@@ -323,7 +323,7 @@ export default async function PageGarant({
           />
         ) : null}
       </section>
-      <section id="engagement" className="mt-14">
+      <section id="engagement" className="panneau-espace mt-14">
         <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
           {texteEngagement.aide}

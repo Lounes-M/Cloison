@@ -1,19 +1,14 @@
 import { connection } from 'next/server'
 
-import { Logo } from '@/components/brand/Logo'
+import { CadreEspace } from '@/components/layout/CadreEspace'
 import { quitterMonDossier } from '@/lib/acces/action-porteur'
 import { sessionPorteur } from '@/lib/content/session-porteur'
 
 /**
  * L'espace des porteurs de lien : le locataire et le garant.
  *
- * Aussi depouille que l'espace agence, et pour la meme raison : quelqu'un qui
- * suit son dossier ou depose ses pieces n'a que faire d'un menu « Tarifs ».
- *
- * Un groupe distinct de `(agence)` bien que le chrome soit le meme aujourd'hui.
- * Ce sont deux populations qui ne partagent ni session, ni role Postgres, ni
- * avenir : le jour ou l'un des deux espaces a besoin d'une navigation, l'autre
- * ne doit pas l'heriter par accident.
+ * Une identite partagee avec l'agence, sans partager sa navigation ni sa session.
+ * Le cadre ne decide jamais du role : chaque page conserve ses controles serveur.
  */
 export default async function LayoutPorteur({ children }: { children: React.ReactNode }) {
   // Rendu a chaque requete, jamais prerendu : la Content-Security-Policy de
@@ -23,20 +18,16 @@ export default async function LayoutPorteur({ children }: { children: React.Reac
   await connection()
 
   return (
-    <div className="bg-paper flex min-h-dvh flex-col">
-      <header className="border-ink flex flex-wrap items-center justify-between gap-4 border-b-2 px-6 py-5 md:px-10">
-        <Logo className="text-2xl" />
+    <CadreEspace
+      sortie={
         <form action={quitterMonDossier}>
-          <button
-            type="submit"
-            className="cursor-pointer text-sm font-bold underline underline-offset-4"
-          >
+          <button type="submit" className="lien-espace">
             {sessionPorteur.quitter}
           </button>
         </form>
-      </header>
-
-      <main className="flex flex-1 justify-center px-6 py-12 md:px-10 md:py-16">{children}</main>
-    </div>
+      }
+    >
+      {children}
+    </CadreEspace>
   )
 }

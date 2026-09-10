@@ -145,7 +145,7 @@ export default async function PageDossier({
   const peutRefuser = ['complet', 'garant_insuffisant', 'transmis'].includes(String(d.statut))
 
   return (
-    <div className="w-full max-w-[880px] self-start">
+    <div className="page-espace w-full max-w-[880px] self-start">
       <Link
         href="/espace"
         className="text-muted hover:text-cobalt text-[13px] font-bold underline-offset-2 hover:underline"
@@ -238,7 +238,7 @@ export default async function PageDossier({
         </div>
       </dl>
 
-      <section className="mt-12">
+      <section className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.engagementTitre}</h2>
         {e ? (
           <dl className="mt-4 grid gap-x-8 gap-y-2 text-[14px] md:grid-cols-2">
@@ -276,7 +276,7 @@ export default async function PageDossier({
         )}
       </section>
 
-      <section className="mt-12">
+      <section className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.piecesTitre}</h2>
         <p className="text-muted mt-2 text-sm">{documentsDeclares.presence}</p>
         <p className="mt-2 text-sm">{texteExamen.aide}</p>
@@ -338,7 +338,7 @@ export default async function PageDossier({
         )}
       </section>
 
-      <section className="mt-12">
+      <section className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.actionsTitre}</h2>
         <div className="mt-6">
           {d.statut === 'transmis' || d.statut === 'signe' ? (
@@ -358,7 +358,7 @@ export default async function PageDossier({
         </div>
       </section>
 
-      <section id="journal" className="mt-12">
+      <section id="journal" className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{texte.journalTitre}</h2>
         {historique.lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">{texte.journalAucun}</p>

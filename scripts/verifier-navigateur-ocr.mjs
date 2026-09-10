@@ -8,6 +8,7 @@ import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
 import { parcourirExamen } from './parcours-examen-navigateur.mjs'
 import { parcourirResponsable } from './parcours-responsable-navigateur.mjs'
+import { parcourirInterface } from './parcours-interface-navigateur.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
 const id = '11111111-1111-4111-8111-111111111111',
@@ -48,6 +49,7 @@ const api = createServer(async (req, res) => {
       { id, nom: 'Agence fictive', domaine: 'example.invalid', statut: 'verifiee', seuil_ratio: 3 },
     ]
   else if (path.endsWith('/membres_agence')) valeur = [{ role: roleCourant }]
+  else if (path.endsWith('/rpc/jeton_est_actif')) valeur = true
   else if (path.endsWith('/dossiers'))
     valeur = [
       {
@@ -143,6 +145,8 @@ const api = createServer(async (req, res) => {
       '/rest/v1/engagements',
       '/rest/v1/complements_documentaires',
       '/rest/v1/rpc/journal_du_dossier',
+      '/rest/v1/rpc/journal_de_mon_agence',
+      '/rest/v1/rpc/mon_tarif_paiement',
     ].includes(path)
   ) {
     res.writeHead(404).end('{}')
@@ -317,6 +321,8 @@ try {
               roleCourant = v
             },
           })
+          roleCourant = 'admin'
+          await parcourirInterface(page, relais.site, id, moteur, largeur, session)
         } finally {
           await contexte.close()
         }

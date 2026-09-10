@@ -1,3 +1,5 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { interfaceEspace } from '@/lib/content/interface'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
@@ -16,22 +18,28 @@ export default async function PageConnecteurs() {
   const data = await listerConnecteurs(c)
   const date = (v: string) => new Date(v).toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })
   return (
-    <div className="w-full max-w-3xl">
-      <Link href="/espace" className="underline">
+    <div className="page-espace w-full max-w-[960px]">
+      <Link href="/espace" className="lien-espace mb-6">
         {t.retour}
       </Link>
-      <h1 className="font-display mt-4 text-3xl uppercase">{t.titre}</h1>
-      <p className="mt-4">{t.aide}</p>
-      <p className="mt-2 text-sm">{t.limites}</p>
-      <a href="/connecteurs-openapi.json" className="mt-3 inline-block underline">
-        {t.documentation}
-      </a>
-      <FormulaireConnecteur agence={c.agence.id} />
+      <EnteteEspace titre={t.titre} etiquette={interfaceEspace.connecteurs}>
+        <p>{t.aide}</p>
+        <p className="mt-2 text-sm">{t.limites}</p>
+        <a href="/connecteurs-openapi.json" className="lien-espace mt-5">
+          {t.documentation}
+        </a>
+      </EnteteEspace>
+      <div className="panneau-espace">
+        <FormulaireConnecteur agence={c.agence.id} />
+      </div>
       <ul className="mt-8 grid gap-4">
         {data.map((k) => {
           const active = k.active
           return (
-            <li key={k.id} className="outlined min-w-0 rounded-xl p-4 break-words">
+            <li
+              key={k.id}
+              className="outlined bg-paper shadow-brut-sm rounded-brut min-w-0 p-5 break-words"
+            >
               <h2 className="font-bold">{k.nom}</h2>
               <p>{k.revoque_le ? t.revoque : active ? t.actif : t.expire}</p>
               <p className="text-sm">
