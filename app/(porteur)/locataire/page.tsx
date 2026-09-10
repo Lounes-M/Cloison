@@ -96,7 +96,7 @@ export default async function PageLocataire({
   })
 
   return (
-    <div className="w-full max-w-[560px]">
+    <div className="page-espace w-full max-w-[560px]">
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
         {espace.reference} {String(dossier.reference)}
       </p>
@@ -107,7 +107,7 @@ export default async function PageLocataire({
         <p className="mt-2 text-[15px] leading-relaxed font-medium">{statut.explication}</p>
       </div>
 
-      <section className="mt-10">
+      <section className="panneau-espace mt-10">
         <h2 className="font-display text-xl uppercase">{espace.loyerTitre}</h2>
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {espace.loyerAide}
@@ -126,7 +126,7 @@ export default async function PageLocataire({
       </section>
 
       {aRegler || dossier.paye_le ? (
-        <section className="mt-10">
+        <section className="panneau-espace mt-10">
           <h2 className="font-display text-xl uppercase">{paiementLocataire.titre}</h2>
           {paiement === 'ok' && !dossier.paye_le ? (
             <p className="bg-sun outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
@@ -186,7 +186,7 @@ export default async function PageLocataire({
         </section>
       ) : null}
 
-      <section className="mt-10">
+      <section className="panneau-espace mt-10">
         <h2 className="font-display text-xl uppercase">{espace.garantTitre}</h2>
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {garant ? espace.garantDesigne(garant) : espace.garantAucun}

@@ -61,7 +61,7 @@ export function FormulaireCollaborateur({
       <button
         type="submit"
         disabled={enCours}
-        className="outlined bg-sky rounded-lg px-4 py-2 font-bold disabled:opacity-60"
+        className="press shadow-brut-xs outlined bg-sky cursor-pointer rounded-lg px-4 py-2 font-bold disabled:translate-none disabled:cursor-not-allowed disabled:opacity-60"
       >
         {enCours ? textes.attente : textes.appliquer}
       </button>

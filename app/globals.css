@@ -144,7 +144,7 @@
     box-shadow 0.15s ease,
     translate 0.15s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     box-shadow: var(--shadow-brut-pressed);
     translate: 4px 4px;
   }
@@ -307,12 +307,122 @@
 }
 
 /* Personne ne doit subir les animations. */
+@layer components {
+  /* Surfaces communes aux outils, avec les memes tokens que la home. */
+  .panneau-espace {
+    min-width: 0;
+    padding: clamp(1.15rem, 3vw, 2rem);
+    border: 2px solid var(--color-ink);
+    border-radius: var(--radius-brut-lg);
+    background: var(--color-paper);
+    box-shadow: var(--shadow-brut-sm);
+  }
+
+  .panneau-espace > h2 {
+    border-bottom: 3px solid var(--color-sun);
+    padding-bottom: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .lien-espace {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 10px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-brut-xs);
+    cursor: pointer;
+    transition:
+      translate 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .lien-espace:hover:not(:disabled) {
+    translate: 2px 2px;
+    box-shadow: var(--shadow-brut-pressed);
+    background: var(--color-sun);
+  }
+
+  .entete-espace {
+    animation: fade-up 0.45s both;
+  }
+
+  .page-espace > h1 {
+    color: var(--color-cobalt);
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+  }
+
+  .espace-content > * {
+    min-width: 0;
+  }
+
+  .espace-shell
+    :where(
+      input:not([type='hidden']):not([type='checkbox']):not([type='radio']),
+      select,
+      textarea
+    ) {
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    background-color: var(--color-paper);
+    font-size: 1rem;
+  }
+
+  .espace-shell :where(input[type='checkbox'], input[type='radio']) {
+    flex-shrink: 0;
+    accent-color: var(--color-cobalt);
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 0.15rem;
+  }
+
+  .espace-shell :where(button) {
+    min-height: 44px;
+  }
+  .espace-shell input[type='file']::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.65rem 0.8rem;
+    border: 0;
+    border-right: 2px solid var(--color-ink);
+    background: var(--color-sun);
+    color: var(--color-ink);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .espace-shell :where(summary) {
+    padding-block: 0.5rem;
+  }
+  .espace-shell :where(p, label, dd) {
+    overflow-wrap: anywhere;
+  }
+  .espace-shell :where(button:disabled) {
+    translate: none;
+    cursor: not-allowed;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Aucune apparition progressive : le contenu est la, point. */
   .reveal {
     opacity: 1;
     transform: rotate(var(--reveal-tilt, 0deg));
     animation: none;
+  }
+  .entete-espace {
+    animation: none;
+  }
+  .press:hover,
+  .lien-espace:hover:not(:disabled) {
+    translate: none;
   }
 
   *,

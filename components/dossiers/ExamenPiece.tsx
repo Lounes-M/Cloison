@@ -16,7 +16,7 @@ export function ExamenPiece({
 }) {
   if (obsolete) return <p className="w-full text-sm">{t.obsolete}</p>
   return (
-    <details className="w-full min-w-0 border-t pt-3">
+    <details className="outlined bg-sky/20 w-full min-w-0 rounded-xl p-4">
       <summary className="cursor-pointer font-semibold">
         {t.titre} : {t.etats[precedent?.etat ?? 'a_examiner']}
       </summary>

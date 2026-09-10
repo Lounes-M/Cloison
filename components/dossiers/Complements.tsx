@@ -16,7 +16,7 @@ export function Complements({
 }) {
   if (!demandes.length) return null
   return (
-    <section className="mt-10">
+    <section className="panneau-espace mt-10">
       <h2 className="font-display text-2xl uppercase">{t.titre}</h2>
       <p className="text-muted mt-2 text-sm">{agence ? t.aideAgence : t.aideGarant}</p>
       <ul className="mt-4 space-y-4">
@@ -34,14 +34,14 @@ export function Complements({
               libelle: `${natures[p.type] ?? p.type} · ${new Date(p.depose_le).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`,
             }))
           return (
-            <li key={d.id} className="outlined bg-paper rounded-xl p-4 text-sm">
+            <li key={d.id} className="outlined bg-sun/20 rounded-xl p-4 text-sm">
               <p className="font-bold">
                 {natures[d.nature] ?? d.nature} : {t.motifs[d.motif]}
               </p>
               <p className="mt-1">{t.etats[d.etat]}</p>
               {d.piece_fournie && pieces.some((p) => p.id === d.piece_fournie) ? (
                 <a
-                  className="mt-2 inline-block font-bold underline"
+                  className="lien-espace mt-3"
                   href={
                     agence
                       ? `/espace/pieces/${d.piece_fournie}`

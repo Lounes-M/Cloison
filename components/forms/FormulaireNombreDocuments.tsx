@@ -35,7 +35,7 @@ export function FormulaireNombreDocuments({
           </option>
         ))}
       </select>
-      <button disabled={enCours} className="font-bold underline disabled:opacity-50">
+      <button disabled={enCours} className="lien-espace disabled:opacity-50">
         {documentsDeclares.corriger}
       </button>
       {etat.erreur ? (

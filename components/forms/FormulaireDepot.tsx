@@ -101,7 +101,7 @@ export function FormulaireDepot({
       <button
         type="submit"
         disabled={enCours || preparation}
-        className="outlined bg-cobalt rounded-xl px-4 py-3 font-bold text-white disabled:opacity-70"
+        className="press shadow-brut-xs outlined bg-cobalt cursor-pointer rounded-xl px-4 py-3 font-bold text-white disabled:translate-none disabled:cursor-not-allowed disabled:opacity-70"
       >
         {preparation
           ? 'Préparation de la photo…'

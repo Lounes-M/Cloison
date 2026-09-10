@@ -1,3 +1,6 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { RepereParcours } from '@/components/layout/RepereParcours'
+import { interfaceEspace } from '@/lib/content/interface'
 import type { Metadata } from 'next'
 
 import { FormulaireConnexion } from '@/components/forms/FormulaireConnexion'
@@ -18,13 +21,16 @@ export default async function PageConnexion({
   const { echec } = await searchParams
 
   return (
-    <div className="w-full max-w-[440px]">
-      <h1 className="font-display text-3xl uppercase md:text-4xl">Ton espace agence</h1>
-      <p className="text-muted mt-3 mb-8 text-[15px] leading-relaxed font-medium">
-        Pas de mot de passe. On t&apos;envoie un lien, tu cliques, tu es dedans.
-      </p>
-
-      <FormulaireConnexion lienExpire={echec === 'lien'} />
+    <div className="grid w-full max-w-[1040px] items-start gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
+      <div className="min-w-0">
+        <EnteteEspace titre={interfaceEspace.connexionTitre} etiquette={interfaceEspace.connexion}>
+          <p>{interfaceEspace.connexionTexte}</p>
+        </EnteteEspace>
+        <div className="panneau-espace">
+          <FormulaireConnexion lienExpire={echec === 'lien'} />
+        </div>
+      </div>
+      <RepereParcours />
     </div>
   )
 }

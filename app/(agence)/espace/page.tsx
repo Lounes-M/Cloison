@@ -67,7 +67,7 @@ export default async function PageEspace({
 
     if (rattachement.etat === 'nom-requis') {
       return (
-        <div className="w-full max-w-[440px]">
+        <div className="page-espace w-full max-w-[440px]">
           <h1 className="font-display text-3xl uppercase md:text-4xl">Encore une chose</h1>
           <p className="text-muted mt-3 mb-8 text-[15px] leading-relaxed font-medium">
             Ton adresse est vérifiée. Il ne manque que le nom sous lequel ton agence apparaîtra.
@@ -79,7 +79,7 @@ export default async function PageEspace({
 
     if (rattachement.etat === 'refus') {
       return (
-        <div className="w-full max-w-[440px] text-center">
+        <div className="page-espace w-full max-w-[440px] text-center">
           <h1 className="font-display text-3xl uppercase">Pas cette adresse</h1>
           <p className="mt-4 text-[15px] leading-relaxed font-medium">{rattachement.message}</p>
           <p className="text-muted mt-4 text-[14px] font-medium">
@@ -91,7 +91,7 @@ export default async function PageEspace({
     }
 
     return (
-      <div className="w-full max-w-[440px] text-center">
+      <div className="page-espace w-full max-w-[440px] text-center">
         <h1 className="font-display text-3xl uppercase">Ça n&apos;a pas marché</h1>
         <p className="text-muted mt-4 text-[15px] font-medium">
           Réessaie dans un instant. Si ça persiste, écris-nous.
@@ -155,7 +155,7 @@ export default async function PageEspace({
   const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
 
   return (
-    <div className="w-full max-w-[880px] self-start">
+    <div className="page-espace w-full max-w-[880px] self-start">
       <h1 className="font-display text-3xl uppercase md:text-4xl">{agence.nom}</h1>
       <p className="text-muted mt-2 text-[14px] font-medium">
         Connecté en tant que <strong className="text-ink">{email}</strong>
@@ -163,18 +163,12 @@ export default async function PageEspace({
       </p>
 
       {role === 'admin' ? (
-        <Link
-          href="/espace/connecteurs"
-          className="mt-3 mr-4 inline-block text-sm font-semibold underline"
-        >
+        <Link href="/espace/connecteurs" className="lien-espace mt-5 mr-3">
           {connecteurs.titre}
         </Link>
       ) : null}
       {role === 'admin' ? (
-        <Link
-          href="/espace/collaborateurs"
-          className="mt-3 inline-block text-sm font-semibold underline"
-        >
+        <Link href="/espace/collaborateurs" className="lien-espace mt-5">
           {collaborateurs.titre}
         </Link>
       ) : null}
@@ -205,7 +199,7 @@ export default async function PageEspace({
         </div>
       ) : null}
 
-      <section className="mt-12">
+      <section className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
 
         <form
@@ -261,7 +255,10 @@ export default async function PageEspace({
               ))}
             </select>
           </label>
-          <button type="submit" className="outlined bg-sky rounded-lg px-4 py-2 font-bold">
+          <button
+            type="submit"
+            className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold"
+          >
             {tableau.rechercher}
           </button>
           {reference || emailRecherche || etatRecherche || attribution !== 'tous' ? (
@@ -280,7 +277,7 @@ export default async function PageEspace({
         ) : (
           <div className="outlined mt-6 overflow-x-auto rounded-[14px]">
             <table className="w-full text-left text-[14px]">
-              <thead className="bg-paper border-ink border-b-2 text-[12px] font-bold tracking-wide uppercase">
+              <thead className="bg-sky border-ink border-b-2 text-[12px] font-bold tracking-wide uppercase">
                 <tr>
                   <th className="px-4 py-3">{tableau.colonnes.reference}</th>
                   <th className="px-4 py-3">{tableau.colonnes.locataire}</th>
@@ -360,7 +357,7 @@ export default async function PageEspace({
         </nav>
       </section>
 
-      <section className="mt-12 grid gap-10 md:grid-cols-2">
+      <section className="panneau-espace mt-12 grid gap-10 md:grid-cols-2">
         <div>
           <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>
           <div className="mt-6">

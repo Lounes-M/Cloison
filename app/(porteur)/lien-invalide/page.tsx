@@ -19,7 +19,7 @@ export const metadata: Metadata = {
  */
 export default function PageLienInvalide() {
   return (
-    <div className="w-full max-w-[480px] self-center text-center">
+    <div className="panneau-espace w-full max-w-[540px] self-start text-center">
       <h1 className="font-display text-3xl uppercase md:text-4xl">{lienInvalide.titre}</h1>
       <p className="mt-4 text-[15px] leading-relaxed font-medium">{lienInvalide.texte}</p>
       <p className="text-muted mt-6 text-[14px] font-medium">{lienInvalide.locataire}</p>

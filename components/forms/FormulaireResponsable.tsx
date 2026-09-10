@@ -53,7 +53,7 @@ export function FormulaireResponsable({
       </label>
       <button
         disabled={attente}
-        className="outlined bg-sky rounded-lg px-4 py-2 font-bold disabled:opacity-50"
+        className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold disabled:opacity-50"
       >
         {attente ? t.attente : admin ? t.enregistrer : moi ? t.liberer : t.prendre}
       </button>

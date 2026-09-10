@@ -1,4 +1,4 @@
-import { createElement, isValidElement, type ReactNode } from 'react'
+import { createElement, isValidElement, type ReactNode, type ComponentProps } from 'react'
 import { beforeEach, expect, test, vi } from 'vitest'
 const { cookies } = vi.hoisted(() => ({ cookies: vi.fn() }))
 vi.mock('next/server', () => ({ connection: async () => {} }))
@@ -8,10 +8,15 @@ vi.mock('@/lib/env', () => ({
   env: { emailSupport: null, supabaseUrl: 'https://fixture.supabase.co' },
 }))
 import LayoutAgence from '@/app/(agence)/layout'
+import { CadreEspace } from '@/components/layout/CadreEspace'
 import { seDeconnecter } from '@/lib/agences/action-securite'
 function formulaires(node: ReactNode): Array<{ action?: unknown }> {
   if (Array.isArray(node)) return node.flatMap(formulaires)
   if (!isValidElement<{ children?: ReactNode; action?: unknown }>(node)) return []
+  // Executer le composant reel : lire simplement la prop sortie ferait passer
+  // le test meme si le cadre oubliait de la rendre dans sa navigation.
+  if (node.type === CadreEspace)
+    return formulaires(CadreEspace(node.props as ComponentProps<typeof CadreEspace>))
   return [...(node.type === 'form' ? [node.props] : []), ...formulaires(node.props.children)]
 }
 beforeEach(() => vi.resetAllMocks())

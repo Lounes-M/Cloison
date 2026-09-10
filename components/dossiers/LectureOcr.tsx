@@ -52,7 +52,7 @@ export function LectureOcr({ pieceId }: { pieceId: string }) {
   }
   return (
     <details
-      className="w-full"
+      className="outlined bg-cream w-full rounded-xl p-4"
       onToggle={(e) => {
         if (!e.currentTarget.open) {
           requete.current?.abort()
@@ -76,7 +76,7 @@ export function LectureOcr({ pieceId }: { pieceId: string }) {
         type="button"
         disabled={!accord || attente}
         onClick={lire}
-        className="outlined mt-3 rounded-lg px-3 py-2 font-bold disabled:opacity-50"
+        className="bg-cobalt text-paper press shadow-brut-xs outlined mt-3 cursor-pointer rounded-lg px-3 py-2 font-bold disabled:translate-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         {attente ? ocr.attente : ocr.lancer}
       </button>

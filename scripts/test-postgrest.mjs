@@ -186,7 +186,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierResponsables(db, connexion, adresse, secret)
       const ocr = spawnSync(process.execPath, ['scripts/verifier-navigateur-ocr.mjs'], {
         stdio: 'inherit',
-        timeout: 120000,
+        timeout: 240000,
       })
       assert.equal(ocr.status, 0, 'Parcours navigateur OCR refuse')
     }

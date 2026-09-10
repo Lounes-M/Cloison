@@ -61,7 +61,7 @@ export function FormulaireComplement({
           </select>
         </>
       ) : null}
-      <button disabled={enCours} className="font-bold underline disabled:opacity-50">
+      <button disabled={enCours} className="lien-espace disabled:opacity-50">
         {enCours ? t.attente : t[operation]}
       </button>
       {etat.statut === 'erreur' ? (

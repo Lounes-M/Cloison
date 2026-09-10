@@ -1,3 +1,5 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { interfaceEspace } from '@/lib/content/interface'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
@@ -40,16 +42,20 @@ export default async function PageCollaborateurs({
   const membres = (data ?? []) as Membre[]
   const traces = (journal ?? []) as Trace[]
   return (
-    <div className="w-full max-w-[880px] self-start">
-      <Link href="/espace" className="text-sm underline">
+    <div className="page-espace w-full max-w-[960px] self-start">
+      <Link href="/espace" className="lien-espace mb-6">
         {textes.retour}
       </Link>
-      <h1 className="font-display mt-4 text-3xl uppercase">{textes.titre}</h1>
-      <p className="mt-3 text-sm">{textes.aide}</p>
-      <p className="mt-2 text-sm">{textes.readmission}</p>
+      <EnteteEspace titre={textes.titre} etiquette={interfaceEspace.equipe}>
+        <p>{textes.aide}</p>
+        <p className="mt-2 text-sm">{textes.readmission}</p>
+      </EnteteEspace>
       <ul className="mt-8 grid gap-4 sm:grid-cols-2">
         {membres.slice(0, 50).map((m) => (
-          <li key={`${m.utilisateur_id}:${m.etat}`} className="outlined min-w-0 rounded-xl p-4">
+          <li
+            key={`${m.utilisateur_id}:${m.etat}`}
+            className="outlined bg-paper shadow-brut-sm rounded-brut min-w-0 p-5"
+          >
             <h2 className="font-bold break-words">{m.email ?? textes.adresseMasquee}</h2>
             <p className="mt-1 text-sm">{textes.roles[m.etat]}</p>
             <FormulaireCollaborateur
@@ -65,7 +71,7 @@ export default async function PageCollaborateurs({
       {!membres.length ? <p className="mt-4">{textes.aucun}</p> : null}
       <nav aria-label={textes.pagination} className="mt-5 flex flex-wrap gap-4 text-sm">
         {numero > 1 ? (
-          <Link href={`/espace/collaborateurs?page=${numero - 1}`} className="underline">
+          <Link href={`/espace/collaborateurs?page=${numero - 1}`} className="lien-espace mb-6">
             {textes.precedente}
           </Link>
         ) : null}

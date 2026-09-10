@@ -1,8 +1,14 @@
 # Feuille de route Cloison
 
 De la landing au premier dossier reel allant jusqu'a un acte signe.
-Version de travail du 7 septembre 2026, apres la livraison des PR 43 a 56. Le
+Version actualisee au 10 septembre 2026, apres PR104. Le
 [suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
+
+Les responsables et filtres agence sont livres, 0050 appliquee apres repetition
+et verification des droits. Une harmonisation des espaces avec la home est
+preparee sur ce socle : dix pages, composants partages, boutons, couleurs,
+animations et controles navigateur sur trois moteurs. Voir le
+[guide de l'interface](exploitation/interface-espaces.md) et la PR de livraison.
 
 La maintenance des dependances de septembre est detaillee dans
 [son suivi](exploitation/dependances-septembre.md). Le passage a Vitest 5,
