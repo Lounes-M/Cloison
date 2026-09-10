@@ -5,7 +5,31 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 9 septembre 2026, apres PR86
+## Etat courant au 10 septembre 2026, apres PR104
+
+Reprise verifiee depuis GitHub, apres le travail sur l'autre ordinateur : PR94 a
+PR103 deja fusionnees, puis PR104 finalisee sur ce poste. Main c786704 integre
+l'examen humain et les responsables de dossiers. Les migrations jusqu'a 0050
+sont appliquees et immuables. Pour 0050, nouvelle repetition annulee, precondition
+exacte, application puis empreinte finale et droits reels reverifies.
+
+La CI fonctionne a nouveau ; les mentions de facturation ci-dessous sont
+historiques. La CI finale de PR104 est verte (34509088228), ainsi que le controle
+de secrets. La verification de main et de chaque nouvelle PR reste distincte.
+
+| Sujet            | Etat actuel                                                                     | Limite restante                                                                          |
+| ---------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Paiements        | Registre, rapprochement, diagnostic et decisions administratives livres         | Corrections financieres automatiques et facturation agence ouvertes                      |
+| Documents        | Complements, examen humain versionne, OCR facultatif et surveillance RSS livres | OCR desactive par defaut, authenticite non certifiee, plafond systeme dur ouvert         |
+| Equipe et outils | Collaborateurs, responsables, filtres et connecteurs de statuts livres          | Aucun partenaire reel connecte, pas d'historique des reaffectations                      |
+| Interface        | Harmonisation globale preparee sur ce dernier main                              | Validation finale et livraison dans sa PR ; pas un audit WCAG exhaustif                  |
+| Signature        | Authentification des notifications Universign preparee                          | Acces developpeur, modele valide, acte, archivage et facturation de bout en bout ouverts |
+
+La [direction artistique des espaces](exploitation/interface-espaces.md) decrit
+les composants communs et le protocole de verification. Aucune nouvelle note
+globale n'est attribuee sans audit exhaustif des parcours et de la production.
+
+## Historique au 9 septembre 2026, apres PR86
 
 Reference GitHub verifiee : main 7b51df4. Les livraisons PR57 a PR86 sont
 consignees dans [le suivi de septembre](implementation-audit-septembre.md),

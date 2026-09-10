@@ -388,6 +388,16 @@
   .espace-shell :where(button) {
     min-height: 44px;
   }
+  .espace-shell input[type='file']::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.65rem 0.8rem;
+    border: 0;
+    border-right: 2px solid var(--color-ink);
+    background: var(--color-sun);
+    color: var(--color-ink);
+    font-weight: 700;
+    cursor: pointer;
+  }
   .espace-shell :where(summary) {
     padding-block: 0.5rem;
   }

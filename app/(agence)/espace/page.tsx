@@ -255,7 +255,10 @@ export default async function PageEspace({
               ))}
             </select>
           </label>
-          <button type="submit" className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold">
+          <button
+            type="submit"
+            className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold"
+          >
             {tableau.rechercher}
           </button>
           {reference || emailRecherche || etatRecherche || attribution !== 'tous' ? (

@@ -48,7 +48,7 @@ export async function ResponsableDossier({
   )
     choix.unshift({ id: courant.responsable_id, email: courant.responsable_email })
   return (
-    <section id="responsable" className="outlined bg-paper mt-6 min-w-0 rounded-xl p-4">
+    <section id="responsable" className="panneau-espace bg-sky/20 mt-8">
       <h2 className="font-display text-xl uppercase">{t.titre}</h2>
       <p className="mt-2 font-semibold break-all">
         {courant.responsable_id ? (courant.responsable_email ?? t.indisponible) : t.aucun}
@@ -68,7 +68,7 @@ export async function ResponsableDossier({
           {page > 1 ? (
             <Link
               href={`/espace/dossiers/${dossierId}?equipe=${page - 1}#responsable`}
-              className="underline"
+              className="lien-espace"
             >
               {t.precedent}
             </Link>
@@ -76,7 +76,7 @@ export async function ResponsableDossier({
           {membres.length > 50 && page < 9999 ? (
             <Link
               href={`/espace/dossiers/${dossierId}?equipe=${page + 1}#responsable`}
-              className="underline"
+              className="lien-espace"
             >
               {t.suivant}
             </Link>

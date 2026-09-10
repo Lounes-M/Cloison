@@ -1,5 +1,24 @@
 # Implementation de l'audit du 8 septembre 2026
 
+## Reprise depuis GitHub et interface, 10 septembre
+
+La reprise part de 7b186b7 (PR103), puis finalise PR104 sur c786704. Les outils
+realises sur l'autre ordinateur sont conserves : OCR, connecteurs, examen humain,
+decisions financieres, responsables et filtres. Le lot 0050 est applique apres
+repetition annulee et CI finale verte ; son empreinte et ses droits sont reverifies.
+
+Le cadre agence et porteur reprend la palette de la home, les contours et les
+ombres, avec navigation adaptee. Connexion, MFA, ouverture, suivi, depot,
+collaborateurs, connecteurs et dossier sont harmonises. Les nouveaux controles
+documentaires et d'affectation utilisent les memes boutons et cartes.
+Le harnais navigateur exerce trois moteurs, le clavier et le mouvement reduit ;
+la PR consigne les resultats finaux et la livraison. Aucune migration supplementaire
+pour le design, aucune autorisation metier modifiee.
+
+La signature reste conditionnee aux acces developpeur Universign et au modele
+valide. L'harmonisation ne transforme aucune aide OCR ou appreciation humaine en
+certification et n'active aucun paiement agence.
+
 ## Diagnostic administratif des paiements prepare le 9 septembre
 
 Le lot ajoute une extraction privee par session Checkout : reservation, registre,

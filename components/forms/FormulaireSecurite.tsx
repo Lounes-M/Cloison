@@ -42,7 +42,7 @@ export function FormulaireSecurite({ initial }: { initial: EtatSecurite }) {
             disabled={pending}
             name="operation"
             value="verifier"
-            className="bg-ink text-paper rounded-lg p-3 font-bold"
+            className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg p-3 font-bold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {securite.verifier}
           </button>
@@ -52,7 +52,7 @@ export function FormulaireSecurite({ initial }: { initial: EtatSecurite }) {
           disabled={pending}
           name="operation"
           value="configurer"
-          className="bg-ink text-paper rounded-lg p-3 font-bold"
+          className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg p-3 font-bold disabled:cursor-not-allowed disabled:opacity-50"
         >
           {securite.activer}
         </button>

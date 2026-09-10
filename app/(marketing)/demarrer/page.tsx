@@ -19,7 +19,7 @@ export const metadata: Metadata = {
  *
  * Dans le groupe marketing, avec son en-tete et son pied de page : la personne
  * arrive depuis la page d'accueil et n'a pas encore quitte le site public. Le
- * depouillement commence apres, une fois le lien clique.
+ * rappel des trois roles accompagne le formulaire avant l acces au dossier.
  */
 export default function PageDemarrer() {
   return (

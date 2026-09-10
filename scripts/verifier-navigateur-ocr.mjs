@@ -220,7 +220,7 @@ try {
   for (const moteur of [chromium, firefox, webkit]) {
     const navigateur = await moteur.launch()
     try {
-      for (const largeur of [390, 1280]) {
+      for (const largeur of moteur.name() === 'chromium' ? [320, 390, 1280] : [390, 1280]) {
         clesConnecteurs = []
         examensDocumentaires = []
         examenConflit = false
