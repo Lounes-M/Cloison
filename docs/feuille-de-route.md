@@ -223,3 +223,8 @@ La validation locale Windows a revele trois tests de diagnostic financier
 supposant des droits POSIX. Ces cas restent executes en CI Linux ; le test
 commun verifie le refus d'ecriture sans uid POSIX, y compris pour un fichier
 existant. Le diagnostic reste volontairement indisponible sur cette plateforme.
+
+Le scanner obligatoire porte sur l'historique complet du candidat. Les anciennes
+PR externes sont reservees a l'audit manuel elargi pour ne pas permettre a une
+PR independante de bloquer les livraisons. Une contre-preuve avec des cles
+fictives confirme l'isolation et la detection d'un secret retire du candidat.

@@ -384,3 +384,18 @@ et limites sont detaillees dans [le controle public](exploitation/depot-public.m
 Le refus sans uid a ete vu rouge en court-circuitant temporairement sa garde
 (EXIT=1), puis vert apres restauration : 13 tests passes, trois cas POSIX
 non applicables sur Windows. La CI Linux conserve ces trois cas.
+
+## Controle de secrets et PR externes, 10 septembre 2026
+
+Le controle obligatoire de secrets analyse l'historique complet du candidat,
+sans recuperer les PR externes independantes. L'audit de toutes les anciennes
+PR reste disponible par lancement manuel explicite du workflow Secrets.
+Cela evite qu'un tiers bloque toutes les livraisons par une fausse cle dans
+une PR sans lien avec le code a livrer. Un secret retire du candidat reste detecte.
+
+Contre-preuve Gitleaks dans un depot fictif hors projet, puis detruit : candidat
+sans secret accepte (0), audit de toutes les branches refusant la fausse cle
+externe (1), candidat ayant ajoute puis retire une fausse cle refuse (1).
+Aucun canari ni secret reel ajoute au depot Cloison. Aucun changement applicatif
+ou SQL. Le controle complet local du commit precedent passe sur Windows avec
+938 tests et trois cas POSIX non applicables ; la CI Linux passe ses 941 tests.
