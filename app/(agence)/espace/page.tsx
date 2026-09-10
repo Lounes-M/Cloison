@@ -11,6 +11,7 @@ import { contexteAgence } from '@/lib/agences/contexte'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
 import { collaborateurs } from '@/lib/content/collaborateurs'
+import { connecteurs } from '@/lib/content/connecteurs'
 
 export const metadata: Metadata = {
   title: 'Espace agence',
@@ -136,6 +137,14 @@ export default async function PageEspace({
         {role === 'admin' ? ', administrateur' : ''}.
       </p>
 
+      {role === 'admin' ? (
+        <Link
+          href="/espace/connecteurs"
+          className="mt-3 mr-4 inline-block text-sm font-semibold underline"
+        >
+          {connecteurs.titre}
+        </Link>
+      ) : null}
       {role === 'admin' ? (
         <Link
           href="/espace/collaborateurs"

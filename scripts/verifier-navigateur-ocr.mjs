@@ -5,6 +5,7 @@ import { spawn } from 'node:child_process'
 import { createHmac } from 'node:crypto'
 import { chromium, firefox, webkit } from 'playwright'
 import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
+import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
 const id = '11111111-1111-4111-8111-111111111111',
@@ -21,8 +22,11 @@ const user = {
   user_metadata: {},
   factors: [],
 }
+let clesConnecteurs = []
 const api = createServer(async (req, res) => {
-  for await (const bloc of req) void bloc
+  const blocs = []
+  for await (const bloc of req) blocs.push(bloc)
+  const entree = blocs.length ? JSON.parse(Buffer.concat(blocs).toString('utf8')) : {}
   res.setHeader('Content-Type', 'application/json')
   const path = new URL(req.url, 'http://127.0.0.1').pathname
   let valeur = []
@@ -58,7 +62,23 @@ const api = createServer(async (req, res) => {
     ]
   else if (path.endsWith('/rpc/journaliser')) valeur = id
   else if (path.endsWith('/rpc/reserver_lecture_ocr')) valeur = false
-  else if (
+  else if (path.endsWith('/connecteurs_agence')) valeur = clesConnecteurs
+  else if (path.endsWith('/rpc/creer_connecteur')) {
+    assert.match(entree.l_empreinte, /^[a-f0-9]{64}$/)
+    clesConnecteurs.push({
+      id,
+      nom: entree.le_nom,
+      cree_le: new Date().toISOString(),
+      expire_le: new Date(Date.now() + 86400000).toISOString(),
+      revoque_le: null,
+      utilise_le: null,
+    })
+    valeur = id
+  } else if (path.endsWith('/rpc/revoquer_connecteur')) {
+    assert.equal(entree.le_connecteur, id)
+    clesConnecteurs = clesConnecteurs.map((c) => ({ ...c, revoque_le: new Date().toISOString() }))
+    valeur = true
+  } else if (
     ![
       '/rest/v1/engagements',
       '/rest/v1/complements_documentaires',
@@ -95,13 +115,17 @@ const next = spawn(
       OCR_ACTIVE: 'true',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',
     },
-    stdio: 'ignore',
+    stdio: ['ignore', 'pipe', 'pipe'],
   },
 )
+// Drainer les flux sans conserver les avertissements SDK ni les donnees de test.
+next.stdout.on('data', () => {})
+next.stderr.on('data', () => {})
 let relais
 try {
   let pret = false
-  for (let i = 0; i < 100; i++) {
+  const demarrageAvant = Date.now() + 30000
+  for (let i = 0; i < 300 && Date.now() < demarrageAvant; i++) {
     try {
       if ((await fetch(site, { signal: AbortSignal.timeout(500) })).ok) {
         pret = true
@@ -119,6 +143,7 @@ try {
     const navigateur = await moteur.launch()
     try {
       for (const largeur of [390, 1280]) {
+        clesConnecteurs = []
         const contexte = await navigateur.newContext({
           viewport: { width: largeur, height: 900 },
           ignoreHTTPSErrors: true,
@@ -199,6 +224,7 @@ try {
           console.log(
             `OK : OCR ${moteur.name()} ${largeur}, accord, clavier, texte inerte, effacement et panne`,
           )
+          await parcourirConnecteur(page, relais.site, moteur, largeur)
         } finally {
           await contexte.close()
         }

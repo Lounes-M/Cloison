@@ -6,6 +6,7 @@ import { SignJWT } from 'jose'
 import Stripe from 'stripe'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { verifierHttpConnecteurs } from './verifier-http-connecteurs.mjs'
 
 // Aucun service externe ni identifiant reel : ce harnais traverse le build
 // Next puis un vrai PostgREST adosse aux migrations de la base locale jetable.
@@ -363,6 +364,7 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
     noter('rejeu du webhook : reference, date de paiement et echeance SQL strictement inchangees')
     assert(appels.some((a) => a.chemin === '/rpc/jeton_est_actif' && a.statut === 200))
     assert(appels.some((a) => a.chemin === '/dossiers' && a.statut === 200))
+    await verifierHttpConnecteurs(db, site)
     return {
       nature:
         process.env.CLOISON_TEST_NAVIGATEUR === '1'
