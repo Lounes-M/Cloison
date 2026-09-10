@@ -233,3 +233,9 @@ La surveillance memoire des decodeurs Linux est preparee en PR97 : RSS par
 processus, budget cumule et refus en cas de panne de mesure. Les limites du tas
 V8 sont ainsi completees, sans revendiquer une sandbox ou une limite OS stricte.
 Voir [la surveillance documentaire](exploitation/memoire-documentaire.md).
+
+Le socle d'authentification Universign verifie les notifications PS256 et borne
+les lectures de clefs publiques. Aucun parcours de signature n'est active.
+Les acces developpeur sont en attente ; registre durable, rattachement local,
+reconciliation, acte et preuve archives restent a implementer. Voir
+[les preuves et limites](exploitation/universign-authentification.md).
