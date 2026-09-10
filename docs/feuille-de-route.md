@@ -203,3 +203,11 @@ Le controle du devis d'une session Stripe ouverte est prepare independamment de
 la PR87 : reference, dossier et tarif sont compares avant reprise. Huit refus
 vus rouges avant correction, 38 tests cibles verts ; livraison soumise a la CI.
 Voir [Reprise de session ouverte](exploitation/reprise-session-ouverte.md).
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.

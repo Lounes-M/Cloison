@@ -350,3 +350,11 @@ de rendre son URL. Huit contre-preuves observees rouges avant correction, puis
 38 tests cibles passes. La reprise historique reste possible avec son montant
 reserve. Aucun paiement reel ni livraison en production n'est affirme par ces tests.
 Voir [les controles et limites](exploitation/reprise-session-ouverte.md).
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.
