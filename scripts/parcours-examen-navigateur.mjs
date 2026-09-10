@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { resolve } from 'node:path'
 
 export async function parcourirExamen(page, site, id, moteur, largeur, conflit) {
   await page.goto(`${site}/espace/dossiers/${id}`)
@@ -49,6 +50,14 @@ export async function parcourirExamen(page, site, id, moteur, largeur, conflit) 
     0,
     'Examen conserve dans le navigateur',
   )
+  if (process.env.CLOISON_CAPTURE_EXAMEN_DIR)
+    await page.screenshot({
+      path: resolve(
+        process.env.CLOISON_CAPTURE_EXAMEN_DIR,
+        `examen-${moteur.name()}-${largeur}.png`,
+      ),
+      fullPage: true,
+    })
   console.log(
     `OK : examen ${moteur.name()} ${largeur}, confirmation, clavier, persistance et conflit`,
   )

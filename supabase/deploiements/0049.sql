@@ -28,7 +28,7 @@ declare derniere uuid; resultat uuid;
 begin
  if le_statut is null or le_statut not in ('examine','a_revoir','a_examiner') then return null;end if;
  perform 1 from public.dossiers where id=le_dossier and agence_id=public.agence_courante()
- and expire_le>clock_timestamp() and statut in ('ouvert','depot_en_cours','complet','garant_insuffisant','transmis') for update;
+ and statut in ('ouvert','depot_en_cours','complet','garant_insuffisant','transmis') for update;
  if not found then return null;end if;
  perform 1 from public.pieces p where p.id=la_piece and p.dossier_id=le_dossier
  and not exists(select 1 from public.complements_documentaires c where c.dossier_id=le_dossier and p.id=any(c.pieces_ecartees)) for update;
@@ -37,7 +37,8 @@ begin
  if derniere is distinct from revision_attendue then return null;end if;
  if (select count(*) from public.examens_documentaires where piece_id=la_piece and cree_le>clock_timestamp()-interval '1 day')>=20 then return null;end if;
  insert into public.examens_documentaires(dossier_id,piece_id,etat,acteur_id)
- values(le_dossier,la_piece,le_statut,auth.uid()) returning revision into resultat;
+ select le_dossier,la_piece,le_statut,auth.uid() from public.dossiers d
+ where d.id=le_dossier and d.expire_le>clock_timestamp() returning revision into resultat;
  return resultat;
 end;$$;
 
@@ -58,5 +59,5 @@ revoke all on function public.enregistrer_examen_documentaire(uuid,uuid,text,uui
  from public,anon,authenticated,porteur_lien,serveur,depot_piece,service_role;
 grant execute on function public.enregistrer_examen_documentaire(uuid,uuid,text,uuid),public.examens_du_dossier(uuid) to authenticated;
 
-do $controle$ begin if public.empreinte_schema() <> '{"version":1,"empreintes":{"roles":"cbf8d0c121b9acdc52e9296b48d68997b5bab79fcf8cd6a0f7c9c89218d4bb9a","bucket":"df5651bc40713202bd865db07e8d6b9046377b65ccea7611c273e6782d99753b","schema":"1882b23bb08a24644785aaa9be96482bd0651cfe68eef70370021fc878850bef","tables":"390080db311f105bc601740e73eb48a76a5f19f537cf1430770725569f699973","indexes":"5b0b7bf3c1f0758593b255fe3df680c027d1710c2f249be081b4279b9abf3622","colonnes":"04d88966b46d9e90dab30be76920a1b87edfd4baa33cf35dbd4696a1cb3f6964","stockage":"c40beef08b4b6b283f5736362f2144d3d248dbebf1b130576cc11dd9b3fd772c","adhesions":"1124721a05747b8418dfcb343f00bf1abdb602fd1c0ed965ad8bae8da8c6de13","fonctions":"c2fa909ab078725739768cfb5b50a68c64eb2e8d09f847725acc1b3f657974c1","politiques":"b5642a4bd27302251a14fc7174b557ca7f416d7f49b96cc470567bbf85b08b99","contraintes":"397253087a16439265214f3cbfbafe0fe20fd463edc27b73338ef11907e28639","declencheurs":"9ede6a6dd675e8185855e2136283a161e76e88995bcbf1c0d83f29aafaa88350"}}'::jsonb then raise exception 'Schema inattendu : interrompre et examiner';end if;end $controle$;
+do $controle$ begin if public.empreinte_schema() <> '{"version":1,"empreintes":{"roles":"cbf8d0c121b9acdc52e9296b48d68997b5bab79fcf8cd6a0f7c9c89218d4bb9a","bucket":"df5651bc40713202bd865db07e8d6b9046377b65ccea7611c273e6782d99753b","schema":"1882b23bb08a24644785aaa9be96482bd0651cfe68eef70370021fc878850bef","tables":"390080db311f105bc601740e73eb48a76a5f19f537cf1430770725569f699973","indexes":"5b0b7bf3c1f0758593b255fe3df680c027d1710c2f249be081b4279b9abf3622","colonnes":"04d88966b46d9e90dab30be76920a1b87edfd4baa33cf35dbd4696a1cb3f6964","stockage":"c40beef08b4b6b283f5736362f2144d3d248dbebf1b130576cc11dd9b3fd772c","adhesions":"1124721a05747b8418dfcb343f00bf1abdb602fd1c0ed965ad8bae8da8c6de13","fonctions":"ccf38f13a07965e85baa03638de24f0bcf5e387513ee174ee4f0cca2cdca27f8","politiques":"b5642a4bd27302251a14fc7174b557ca7f416d7f49b96cc470567bbf85b08b99","contraintes":"397253087a16439265214f3cbfbafe0fe20fd463edc27b73338ef11907e28639","declencheurs":"9ede6a6dd675e8185855e2136283a161e76e88995bcbf1c0d83f29aafaa88350"}}'::jsonb then raise exception 'Schema inattendu : interrompre et examiner';end if;end $controle$;
 commit;

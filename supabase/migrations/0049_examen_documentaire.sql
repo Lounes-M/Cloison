@@ -24,7 +24,7 @@ declare derniere uuid; resultat uuid;
 begin
  if le_statut is null or le_statut not in ('examine','a_revoir','a_examiner') then return null;end if;
  perform 1 from public.dossiers where id=le_dossier and agence_id=public.agence_courante()
- and expire_le>clock_timestamp() and statut in ('ouvert','depot_en_cours','complet','garant_insuffisant','transmis') for update;
+ and statut in ('ouvert','depot_en_cours','complet','garant_insuffisant','transmis') for update;
  if not found then return null;end if;
  perform 1 from public.pieces p where p.id=la_piece and p.dossier_id=le_dossier
  and not exists(select 1 from public.complements_documentaires c where c.dossier_id=le_dossier and p.id=any(c.pieces_ecartees)) for update;
@@ -33,7 +33,8 @@ begin
  if derniere is distinct from revision_attendue then return null;end if;
  if (select count(*) from public.examens_documentaires where piece_id=la_piece and cree_le>clock_timestamp()-interval '1 day')>=20 then return null;end if;
  insert into public.examens_documentaires(dossier_id,piece_id,etat,acteur_id)
- values(le_dossier,la_piece,le_statut,auth.uid()) returning revision into resultat;
+ select le_dossier,la_piece,le_statut,auth.uid() from public.dossiers d
+ where d.id=le_dossier and d.expire_le>clock_timestamp() returning revision into resultat;
  return resultat;
 end;$$;
 

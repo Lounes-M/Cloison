@@ -68,5 +68,87 @@ export async function verifierConcurrenceExamen(db, connexion) {
     await db.query(definition)
   }
   assert.equal((await deuxExamens()).length, 1, 'Revision examen non restauree')
+  await verifierExpirationPendantAttente(db, connexion, fixture, definition)
   console.log('OK : examen humain, roles reels, conflit concurrent, contre-preuve et restauration')
+}
+
+async function verifierExpirationPendantAttente(db, connexion, fixture, definition) {
+  const garde = 'where d.id=le_dossier and d.expire_le>clock_timestamp() returning revision'
+  assert(definition.includes(garde))
+  async function course() {
+    await db.query('begin')
+    await db.query(fixture.split('set local role authenticated;')[0])
+    const {
+      rows: [f],
+    } = await db.query(
+      "select current_setting('cloison.examen_dossier') dossier,current_setting('cloison.examen_piece') piece,current_setting('cloison.examen_membre') membre",
+    )
+    await db.query(
+      "update dossiers set expire_le=clock_timestamp()+interval '3 seconds' where id=$1",
+      [f.dossier],
+    )
+    await db.query('commit')
+    const client = new Client({ connectionString: connexion })
+    let resultat
+    try {
+      await client.connect()
+      await db.query('begin')
+      await db.query('select id from dossiers where id=$1 for update', [f.dossier])
+      await client.query('set role authenticated')
+      await client.query("select set_config('request.jwt.claims',$1,false)", [
+        JSON.stringify({ role: 'authenticated', sub: f.membre, aal: 'aal2' }),
+      ])
+      resultat = client
+        .query('select enregistrer_examen_documentaire($1,$2,$3,null) id', [
+          f.dossier,
+          f.piece,
+          'examine',
+        ])
+        .then(
+          (r) => ({ id: r.rows[0].id }),
+          () => ({ erreur: true }),
+        )
+      let bloque = false
+      for (let i = 0; i < 100; i++) {
+        const {
+          rows: [r],
+        } = await db.query('select $1::integer=any(pg_blocking_pids($2::integer)) bloque', [
+          db.processID,
+          client.processID,
+        ])
+        if (r.bloque) {
+          bloque = true
+          break
+        }
+        await new Promise((r) => setTimeout(r, 10))
+      }
+      assert(bloque, 'Examen non bloque avant expiration')
+      await db.query(
+        'select pg_sleep(greatest(0,extract(epoch from (expire_le-clock_timestamp())))+0.05) from dossiers where id=$1',
+        [f.dossier],
+      )
+      await db.query('commit')
+      const r = await resultat
+      assert(!r.erreur, 'Examen apres attente en erreur')
+      return r.id
+    } finally {
+      await db.query('rollback')
+      if (resultat) await resultat
+      await client.end()
+    }
+  }
+  assert.equal(await course(), null, 'Examen accepte apres expiration pendant attente')
+  try {
+    await db.query(definition.replace(garde, 'where d.id=le_dossier returning revision'))
+    const sabote = await course()
+    assert(sabote, 'Contre-preuve expiration non reproduite')
+    assert.throws(
+      () => assert.equal(sabote, null, 'Examen accepte apres expiration pendant attente'),
+      { code: 'ERR_ASSERTION' },
+    )
+  } finally {
+    await db.query(definition)
+  }
+  assert.equal(await course(), null, 'Controle expiration non restaure')
+  console.log('OK : examen refuse apres expiration pendant attente, contre-preuve et restauration')
 }
