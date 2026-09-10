@@ -12,6 +12,10 @@ import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { connecteurs } from '@/lib/content/connecteurs'
+import {
+  responsables as texteResponsables,
+  type ResponsableDossier,
+} from '@/lib/content/responsables'
 
 export const metadata: Metadata = {
   title: 'Espace agence',
@@ -107,25 +111,46 @@ export default async function PageEspace({
   const champ = (valeur: unknown) => (typeof valeur === 'string' ? valeur.trim().slice(0, 120) : '')
   const reference = champ(recherche.reference)
   const emailRecherche = champ(recherche.email)
+  const etatRecherche = Object.hasOwn(statuts, champ(recherche.statut))
+    ? champ(recherche.statut)
+    : ''
+  const attribution =
+    recherche.responsable === 'mes' ? 'mes' : recherche.responsable === 'sans' ? 'sans' : 'tous'
   const motif = (valeur: string) => `%${valeur.replace(/[\\%_]/g, '\\$&')}%`
   const lienPage = (page: number) => {
     const params = new URLSearchParams({ page: String(page) })
     if (reference) params.set('reference', reference)
     if (emailRecherche) params.set('email', emailRecherche)
+    if (etatRecherche) params.set('statut', etatRecherche)
+    if (attribution !== 'tous') params.set('responsable', attribution)
     return `/espace?${params.toString()}` as const
   }
   let requete = supabase
     .from('dossiers')
-    .select('id, reference, email_locataire, statut, cree_le, demonstration, engagements(ratio)')
+    .select(
+      'id, reference, email_locataire, statut, cree_le, demonstration, engagements(ratio), affecte:affectations_dossiers()',
+    )
     .order('cree_le', { ascending: false })
     .order('id', { ascending: false })
   if (reference) requete = requete.ilike('reference', motif(reference))
   if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
+  if (etatRecherche) requete = requete.eq('statut', etatRecherche)
+  if (attribution === 'mes')
+    requete = requete.eq('affecte.membre_id', contexte.utilisateurId).not('affecte', 'is', null)
+  if (attribution === 'sans')
+    requete = requete.not('affecte.membre_id', 'is', null).is('affecte', null)
   const { data, error } = await requete.range((numero - 1) * 50, (numero - 1) * 50 + 50)
   if (error) throw new Error('Chargement du dossier indisponible.')
   const resultats = (data ?? []) as Ligne[]
   const suivante = resultats.length > 50 && numero < 9999
   const lignes = resultats.slice(0, 50)
+  const affectations = lignes.length
+    ? await supabase.rpc('responsables_des_dossiers', { les_dossiers: lignes.map((l) => l.id) })
+    : { data: [], error: null }
+  if (affectations.error) throw new Error('Chargement des responsables indisponible')
+  const responsables = new Map(
+    ((affectations.data ?? []) as ResponsableDossier[]).map((r) => [r.dossier_id, r]),
+  )
 
   const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
 
@@ -184,7 +209,7 @@ export default async function PageEspace({
         <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
 
         <form
-          key={JSON.stringify([reference, emailRecherche])}
+          key={JSON.stringify([reference, emailRecherche, etatRecherche, attribution])}
           action="/espace"
           method="get"
           className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-end"
@@ -207,10 +232,39 @@ export default async function PageEspace({
               className="outlined mt-2 w-full rounded-lg px-3 py-2"
             />
           </label>
+          <label className="min-w-0 text-sm font-semibold">
+            {texteResponsables.statut}
+            <select
+              name="statut"
+              defaultValue={etatRecherche}
+              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+            >
+              <option value="">{texteResponsables.tousStatuts}</option>
+              {Object.entries(statuts).map(([v, s]) => (
+                <option key={v} value={v}>
+                  {s.libelle}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="min-w-0 text-sm font-semibold">
+            {texteResponsables.filtre}
+            <select
+              name="responsable"
+              defaultValue={attribution}
+              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+            >
+              {Object.entries(texteResponsables.filtres).map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
           <button type="submit" className="outlined bg-sky rounded-lg px-4 py-2 font-bold">
             {tableau.rechercher}
           </button>
-          {reference || emailRecherche ? (
+          {reference || emailRecherche || etatRecherche || attribution !== 'tous' ? (
             <Link href="/espace" className="px-2 py-2 text-sm underline">
               {tableau.effacer}
             </Link>
@@ -219,7 +273,9 @@ export default async function PageEspace({
 
         {lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">
-            {numero > 1 || reference || emailRecherche ? tableau.aucunResultat : tableau.aucun}
+            {numero > 1 || reference || emailRecherche || etatRecherche || attribution !== 'tous'
+              ? tableau.aucunResultat
+              : tableau.aucun}
           </p>
         ) : (
           <div className="outlined mt-6 overflow-x-auto rounded-[14px]">
@@ -229,6 +285,7 @@ export default async function PageEspace({
                   <th className="px-4 py-3">{tableau.colonnes.reference}</th>
                   <th className="px-4 py-3">{tableau.colonnes.locataire}</th>
                   <th className="px-4 py-3">{tableau.colonnes.statut}</th>
+                  <th className="px-4 py-3">{texteResponsables.titre}</th>
                   <th className="px-4 py-3">{tableau.colonnes.ratio}</th>
                   <th className="px-4 py-3">{tableau.colonnes.ouvert}</th>
                 </tr>
@@ -264,6 +321,12 @@ export default async function PageEspace({
                         >
                           {statut.libelle}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm break-all">
+                        {responsables.get(ligne.id)?.responsable_id
+                          ? (responsables.get(ligne.id)?.responsable_email ??
+                            texteResponsables.indisponible)
+                          : texteResponsables.aucun}
                       </td>
                       <td className="px-4 py-3 font-medium">{ratio ? `${ratio}×` : '·'}</td>
                       <td className="text-muted px-4 py-3 font-medium">

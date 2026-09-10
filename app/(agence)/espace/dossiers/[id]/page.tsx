@@ -1,6 +1,7 @@
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
 import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
+import { ResponsableDossier } from '@/components/dossiers/ResponsableDossier'
 import { examen as texteExamen, type ExamenDocumentaire } from '@/lib/content/examen'
 import { configurationOcr } from '@/lib/ocr/openrouter'
 import { Complements } from '@/components/dossiers/Complements'
@@ -185,6 +186,18 @@ export default async function PageDossier({
         modifiable={['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
           String(d.statut),
         )}
+      />
+      <ResponsableDossier
+        dossierId={id}
+        contexte={contexte}
+        pageEquipe={(await searchParams)?.equipe}
+        modifiable={[
+          'ouvert',
+          'depot_en_cours',
+          'complet',
+          'garant_insuffisant',
+          'transmis',
+        ].includes(String(d.statut))}
       />
       <dl className="mt-8 grid gap-4 text-[14px] md:grid-cols-3">
         <div className="outlined bg-paper rounded-xl p-4">

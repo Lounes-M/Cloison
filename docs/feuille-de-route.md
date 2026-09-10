@@ -279,3 +279,10 @@ PR verte avec 1113 tests Linux et six parcours connecteur. Le lot suivant prepar
 l'examen humain par fichier, avec historique prive, revision et controle des
 remplacements dans 0049. Voir [le guide](exploitation/examen-documentaire.md) et
 ADR 0009. L'appreciation ne certifie pas l'authenticite et ne decide pas du dossier.
+
+La PR103 est fusionnee en 7b186b7, 0049 appliquee et droits reels verifies.
+CI main 34505756072 et supervision 34506073940 vertes, 1142 tests Linux.
+Le lot suivant prepare les responsables de dossiers, les vues Mes dossiers et
+Sans responsable et le filtre par etat, avec 0050. Voir
+[le guide](exploitation/responsables-dossiers.md) et ADR 0010. L'affectation
+organise le suivi sans modifier les droits de consultation ni le statut.
