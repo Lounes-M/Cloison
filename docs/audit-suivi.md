@@ -5,7 +5,28 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 7 septembre 2026, apres PR 56
+## Etat courant au 9 septembre 2026, apres PR86
+
+Reference GitHub verifiee : main 7b51df4. Les livraisons PR57 a PR86 sont
+consignees dans [le suivi de septembre](implementation-audit-septembre.md),
+qui couvre les limites documentaires, liens durables, equipe, historiques,
+calendrier independant, courriels, registre financier et outils de rotation.
+Les anciens nombres de tests et versions des sections suivantes sont historiques.
+
+0043 est appliquee : l'empreinte de production correspond exactement a main.
+Le role anonyme ne lit pas cette empreinte ; le serveur la lit, et le schema net
+reste exclu de PostgREST (PGRST106). 0044 reste uniquement repetee avec annulation.
+La PR87 est reprise sur main apres resolution de ses conflits ; la preuve locale
+et l'etat de sa nouvelle CI sont conserves dans cette PR.
+
+GitHub Actions refuse de demarrer les jobs en raison de la facturation du compte
+(paiement echoue ou plafond de depenses selon l'annotation). Aucune etape
+applicative n'est executee dans ces jobs rouges. Le calendrier Supabase reste
+actif ; la confirmation applicative de maintenance du 9 septembre a 07:30 UTC
+etait recente lors du controle de 07:40 UTC. La reception humaine des alertes
+et le retablissement de GitHub Actions restent necessaires.
+
+## Historique au 7 septembre 2026, apres PR56
 
 Cette section est le point d'entree. Les sections suivantes conservent la chronologie :
 les constats du 5 septembre ne decrivent pas necessairement la production actuelle.

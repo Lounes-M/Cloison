@@ -170,3 +170,11 @@ Le lot 0043 prepare les profils documentaires et le comptage explicite des
 justificatifs dans un fichier. Les repetitions SQL sont passees sans application.
 L'examen humain des pieces et les demandes de complement restent a implementer.
 Les preuves de livraison actualisees sont dans le suivi des lots.
+
+## Reprise du 9 septembre
+
+Reference distante : main 7b51df4 (PR86). La PR87 est reprise sur ce socle ;
+0043 est appliquee, 0044 uniquement repetee avec annulation. La facturation GitHub
+bloque le demarrage des workflows et doit etre retablie avant une nouvelle CI de
+livraison. Le calendrier Supabase confirme encore la maintenance independamment.
+Voir la derniere section du suivi d'implementation et la PR87 pour les preuves.
