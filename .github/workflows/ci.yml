@@ -107,8 +107,8 @@ jobs:
             postgrest/postgrest:v16.2
       - name: Build pour les parcours HTTP authentifies
         run: npm run build
-      - name: Installer Chromium pour les parcours locaux
-        run: npx playwright install --with-deps chromium
+      - name: Installer Chromium, Firefox et WebKit pour les parcours locaux
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Parcours porteurs via Next et PostgREST reels
         env:
           CLOISON_TEST_NAVIGATEUR: '1'
