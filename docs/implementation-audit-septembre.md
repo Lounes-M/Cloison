@@ -408,3 +408,12 @@ Les deux allocations natives sont vues rouges sur CI Linux avant correction ;
 cinq autres gardes sont vues rouges localement puis restaurees. Aucune migration.
 Le plafond systeme dur et le budget de toutes les instances restent ouverts.
 Voir [les preuves et limites](exploitation/memoire-documentaire.md).
+
+## Socle Universign, 10 septembre 2026
+
+Verification cryptographique des notifications de cycle de vie, sans route
+HTTP ni modification SQL. 36 tests passent apres 13 sabotages detectes.
+Les acces developpeur restent en attente, comme confirme par Lounes.
+Ce lot ne clot pas F15 : aucun acte signe, registre anti-rejeu, rattachement
+metier ou paiement agence n'est active. Voir
+[le perimetre exact](exploitation/universign-authentification.md).
