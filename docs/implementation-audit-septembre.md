@@ -362,13 +362,25 @@ independante, soumise aux controles complets et a une CI verte.
 ## Integration de livraison publique, 10 septembre
 
 Les CI finales relancees des PR87 a PR92 passent depuis le changement de
-visibilite. PR87 est fusionnee et 0044 appliquee. Les lots des PR88 a PR93 sont
-reunis dans une PR d'integration pour verifier leur combinaison exacte avant
-main : reprise Stripe, refus des webhooks, complements, Chromium, diagnostic
-prive et protections du depot public. Les PR sources restent ouvertes jusqu'a
-la livraison commune. 0045 est repetee sur le schema 0044 actuel, avec roles et
-empreinte exacte verifies sous ROLLBACK ; elle reste a appliquer apres CI finale.
+visibilite. PR87 est fusionnee et 0044 appliquee. La PR94 livre ensemble les
+lots des PR88 a PR93 sur main a4a0cdf : reprise Stripe, refus des webhooks,
+complements, Chromium, diagnostic prive et protections du depot public.
+La CI finale 34456788330 passe avec 940 tests dans 107 suites, les parcours
+Chromium, PostgreSQL natif et la restauration. Apres repetition sous ROLLBACK,
+0045 est appliquee puis ses roles et son empreinte exacte verifies. Ne plus
+modifier ni rejouer 0044 ou 0045. Le deploiement Production 6368114098 reussit ;
+la supervision 34458099693 confirme le schema et la maintenance recente.
+
+La verification locale Windows de cette combinaison compte 937 tests verts
+et trois echecs de tests POSIX (dont la creation de lien interdite par Windows).
+Les tests de fichier prive sont reserves aux plateformes avec uid POSIX ; un
+test commun verifie le refus sans uid, sans creation ni ecrasement de fichier.
+Le code de production ne change pas et ne pretend pas verifier les ACL NTFS.
 
 L'audit public ne detecte aucun secret dans les 233 commits examines, les PR et
 commentaires, et les trois derniers journaux reussis selectionnes. Les mesures
 et limites sont detaillees dans [le controle public](exploitation/depot-public.md).
+
+Le refus sans uid a ete vu rouge en court-circuitant temporairement sa garde
+(EXIT=1), puis vert apres restauration : 13 tests passes, trois cas POSIX
+non applicables sur Windows. La CI Linux conserve ces trois cas.
