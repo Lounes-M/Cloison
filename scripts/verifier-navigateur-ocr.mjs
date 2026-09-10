@@ -278,7 +278,7 @@ try {
           const bouton = page.getByRole('button', { name: 'Extraire le texte', exact: true })
           assert(await bouton.isDisabled(), 'Accord OCR absent')
           assert.equal(demandes, 0)
-          await page.getByRole('checkbox').check()
+          await page.getByRole('checkbox', { name: 'Envoyer cette copie à', exact: false }).check()
           await bouton.focus()
           await page.keyboard.press('Enter')
           await page.getByText('Texte OCR fictif', { exact: false }).waitFor()

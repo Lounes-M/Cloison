@@ -22,7 +22,7 @@ export async function verifierResponsables(db, connexion, adresse, secret) {
     const {
       rows: [f],
     } = await db.query(
-      "select current_setting('cloison.responsable_agence') agence,current_setting('cloison.responsable_dossier') dossier,current_setting('cloison.responsable_admin') admin,current_setting('cloison.responsable_premier') premier,current_setting('cloison.responsable_second') second",
+      "select current_setting('cloison.responsable_agence') agence,current_setting('cloison.responsable_dossier') dossier,current_setting('cloison.responsable_admin') admin,current_setting('cloison.responsable_premier') premier,current_setting('cloison.responsable_second') deuxieme",
     )
     await db.query('commit')
     return f
@@ -57,7 +57,7 @@ export async function verifierResponsables(db, connexion, adresse, secret) {
             return (
               await c.query('select affecter_dossier($1,$2,null) id', [
                 f.dossier,
-                i ? f.second : f.premier,
+                i ? f.deuxieme : f.premier,
               ])
             ).rows[0].id
           }),
@@ -162,7 +162,7 @@ export async function verifierResponsables(db, connexion, adresse, secret) {
     if (i === 0)
       await db.query('insert into affectations_dossiers(dossier_id,membre_id) values($1,$2)', [
         id,
-        filtre.second,
+        filtre.deuxieme,
       ])
     if (i === 1)
       await db.query('insert into affectations_dossiers(dossier_id,membre_id) values($1,null)', [
