@@ -195,3 +195,6 @@ Un diagnostic financier administratif par session est prepare : instantane en
 lecture seule, rapport prive avec empreinte et refus des extractions excessives.
 Il n'effectue aucun mouvement de fonds ni acquittement ; le suivi durable des
 decisions reste ouvert. Voir [la procedure](exploitation/diagnostic-paiement.md).
+
+PR87 est fusionnee et 0044 appliquee avec empreinte et droits reels verifies.
+Le lot 0045 reste a livrer apres repetition et CI verte de sa revision finale.

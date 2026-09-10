@@ -330,3 +330,14 @@ sur mobile et ordinateur. Le locataire reste exclu du depot du garant.
 Le job CI natif installe le navigateur et active ces essais ; sa livraison
 reste soumise a une CI verte. Auth fournisseur, upload Storage et parcours
 agence complets restent distincts. Voir [les preuves et limites](exploitation/parcours-navigateur-locaux.md).
+
+## Livraison du 10 septembre
+
+PR87 fusionnee en 6a16848 apres reussite de la CI finale 34325610070 sur
+047484f. 0044 appliquee apres repetition annulee ; roles reels et empreinte
+exacte verifies apres application. 0044 devient immuable. La CI de main
+34455907869 est suivie avant la livraison suivante.
+
+GitHub Actions execute de nouveau ses jobs depuis le passage du depot en public.
+Le lot 0045 est conserve apres integration de main ; ses empreintes restent
+celles de ce lot, a controler par une nouvelle repetition transactionnelle.
