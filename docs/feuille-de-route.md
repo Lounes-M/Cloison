@@ -211,3 +211,9 @@ une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
 observees rouges avant correction. Aucune migration ni appel fournisseur.
 Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
 independante, soumise aux controles complets et a une CI verte.
+
+Les lots des PR88 a PR93 sont reunis pour une livraison commune validee sur
+une seule revision finale. La migration 0044 est appliquee, 0045 repetee mais
+encore non appliquee. La CI de la combinaison reste requise avant livraison.
+Le depot public dispose du scan de secrets, de la protection des pushs et du
+signalement prive ; le workflow d'historique est inclus dans cette integration.

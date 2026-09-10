@@ -358,3 +358,17 @@ une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
 observees rouges avant correction. Aucune migration ni appel fournisseur.
 Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
 independante, soumise aux controles complets et a une CI verte.
+
+## Integration de livraison publique, 10 septembre
+
+Les CI finales relancees des PR87 a PR92 passent depuis le changement de
+visibilite. PR87 est fusionnee et 0044 appliquee. Les lots des PR88 a PR93 sont
+reunis dans une PR d'integration pour verifier leur combinaison exacte avant
+main : reprise Stripe, refus des webhooks, complements, Chromium, diagnostic
+prive et protections du depot public. Les PR sources restent ouvertes jusqu'a
+la livraison commune. 0045 est repetee sur le schema 0044 actuel, avec roles et
+empreinte exacte verifies sous ROLLBACK ; elle reste a appliquer apres CI finale.
+
+L'audit public ne detecte aucun secret dans les 233 commits examines, les PR et
+commentaires, et les trois derniers journaux reussis selectionnes. Les mesures
+et limites sont detaillees dans [le controle public](exploitation/depot-public.md).
