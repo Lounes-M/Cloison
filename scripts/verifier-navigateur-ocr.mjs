@@ -1,0 +1,219 @@
+import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
+import { once } from 'node:events'
+import { spawn } from 'node:child_process'
+import { createHmac } from 'node:crypto'
+import { chromium, firefox, webkit } from 'playwright'
+import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
+
+// Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
+const id = '11111111-1111-4111-8111-111111111111',
+  maintenant = Math.floor(Date.now() / 1000)
+const encoder = (v) => Buffer.from(JSON.stringify(v)).toString('base64url')
+const corps = `${encoder({ alg: 'HS256' })}.${encoder({ sub: id, role: 'authenticated', aal: 'aal2', iat: maintenant, exp: maintenant + 3600 })}`
+const jeton = `${corps}.${createHmac('sha256', 'fixture-sans-valeur').update(corps).digest('base64url')}`
+const user = {
+  id,
+  email: 'essai@example.invalid',
+  aud: 'authenticated',
+  role: 'authenticated',
+  app_metadata: {},
+  user_metadata: {},
+  factors: [],
+}
+const api = createServer(async (req, res) => {
+  for await (const bloc of req) void bloc
+  res.setHeader('Content-Type', 'application/json')
+  const path = new URL(req.url, 'http://127.0.0.1').pathname
+  let valeur = []
+  if (path === '/auth/v1/user') valeur = user
+  else if (path.endsWith('/rpc/rejoindre_ou_creer_agence')) valeur = id
+  else if (path.endsWith('/agences'))
+    valeur = [
+      { id, nom: 'Agence fictive', domaine: 'example.invalid', statut: 'verifiee', seuil_ratio: 3 },
+    ]
+  else if (path.endsWith('/membres_agence')) valeur = [{ role: 'admin' }]
+  else if (path.endsWith('/dossiers'))
+    valeur = [
+      {
+        id,
+        reference: 'OCRFICTIF',
+        statut: 'complet',
+        email_locataire: 'locataire@example.invalid',
+        email_garant: 'garant@example.invalid',
+        loyer_cents: 100000,
+        cree_le: new Date().toISOString(),
+        expire_le: new Date(Date.now() + 86400000).toISOString(),
+      },
+    ]
+  else if (path.endsWith('/pieces'))
+    valeur = [
+      {
+        id,
+        type: 'bulletin_paie',
+        taille_octets: 100,
+        nombre_documents: 1,
+        depose_le: new Date().toISOString(),
+      },
+    ]
+  else if (path.endsWith('/rpc/journaliser')) valeur = id
+  else if (path.endsWith('/rpc/reserver_lecture_ocr')) valeur = false
+  else if (
+    ![
+      '/rest/v1/engagements',
+      '/rest/v1/complements_documentaires',
+      '/rest/v1/rpc/journal_du_dossier',
+    ].includes(path)
+  ) {
+    res.writeHead(404).end('{}')
+    return
+  }
+  if (req.headers.accept?.includes('vnd.pgrst.object') && Array.isArray(valeur))
+    valeur = valeur[0] ?? null
+  res.end(JSON.stringify(valeur))
+})
+api.listen(0, '127.0.0.1')
+await once(api, 'listening')
+const reservation = createServer()
+reservation.listen(0, '127.0.0.1')
+await once(reservation, 'listening')
+const port = reservation.address().port
+await new Promise((r) => reservation.close(r))
+const site = `http://127.0.0.1:${port}`
+const next = spawn(
+  process.execPath,
+  ['node_modules/next/dist/bin/next', 'start', '--hostname', '127.0.0.1', '--port', String(port)],
+  {
+    env: {
+      PATH: process.env.PATH,
+      NODE_ENV: 'production',
+      NEXT_TELEMETRY_DISABLED: '1',
+      NEXT_PUBLIC_SITE_URL: site,
+      SUPABASE_URL: `http://127.0.0.1:${api.address().port}`,
+      SUPABASE_PUBLISHABLE_KEY: 'fixture',
+      SUPABASE_JWT_SECRET: 'fixture',
+      OCR_ACTIVE: 'true',
+      OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',
+    },
+    stdio: 'ignore',
+  },
+)
+let relais
+try {
+  let pret = false
+  for (let i = 0; i < 100; i++) {
+    try {
+      if ((await fetch(site, { signal: AbortSignal.timeout(500) })).ok) {
+        pret = true
+        break
+      }
+    } catch {
+      /* demarrage */
+    }
+    if (next.exitCode !== null) break
+    await new Promise((r) => setTimeout(r, 100))
+  }
+  assert(pret, 'Build OCR indisponible')
+  relais = await ouvrirRelaisLocal(site)
+  for (const moteur of [chromium, firefox, webkit]) {
+    const navigateur = await moteur.launch()
+    try {
+      for (const largeur of [390, 1280]) {
+        const contexte = await navigateur.newContext({
+          viewport: { width: largeur, height: 900 },
+          ignoreHTTPSErrors: true,
+          serviceWorkers: 'block',
+        })
+        try {
+          let demandes = 0,
+            panne = false
+          await contexte.route('**/*', (route) =>
+            new URL(route.request().url()).origin === new URL(relais.site).origin
+              ? route.continue()
+              : route.abort(),
+          )
+          await contexte.route(`**/espace/pieces/${id}`, (route) => {
+            assert.equal(route.request().method(), 'POST')
+            demandes++
+            assert.equal(route.request().headers()['x-cloison-ocr'], 'lecture-explicite')
+            return route.fulfill({
+              status: panne ? 503 : 200,
+              contentType: 'application/json',
+              body: JSON.stringify({
+                pages: [
+                  { page: 1, texte: 'Texte OCR fictif <script>window.ocrInjecte=true</script>' },
+                ],
+                modele: 'fictif/modele',
+                empreinte: 'a'.repeat(64),
+                observeLe: new Date().toISOString(),
+              }),
+            })
+          })
+          const session = {
+            access_token: jeton,
+            refresh_token: 'fictif',
+            expires_in: 3600,
+            expires_at: maintenant + 3600,
+            token_type: 'bearer',
+            user,
+          }
+          await contexte.addCookies([
+            {
+              name: 'sb-127-auth-token',
+              value: `base64-${encoder(session)}`,
+              url: relais.site,
+              httpOnly: true,
+              sameSite: 'Lax',
+            },
+          ])
+          const page = await contexte.newPage()
+          page.setDefaultTimeout(10000)
+          await page.goto(`${relais.site}/espace/dossiers/${id}`)
+          await page.getByText('Aide à la lecture', { exact: true }).click()
+          const bouton = page.getByRole('button', { name: 'Extraire le texte', exact: true })
+          assert(await bouton.isDisabled(), 'Accord OCR absent')
+          assert.equal(demandes, 0)
+          await page.getByRole('checkbox').check()
+          await bouton.focus()
+          await page.keyboard.press('Enter')
+          await page.getByText('Texte OCR fictif', { exact: false }).waitFor()
+          assert.equal(demandes, 1)
+          assert.equal(await page.evaluate(() => window.ocrInjecte), undefined, 'HTML OCR execute')
+          assert(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+            'Debordement OCR mobile',
+          )
+          assert.equal(
+            await page.evaluate(() => localStorage.length),
+            0,
+            'OCR conserve en stockage local',
+          )
+          await page.getByRole('button', { name: 'Effacer la transcription' }).click()
+          assert.equal(await page.getByText('Texte OCR fictif', { exact: false }).count(), 0)
+          panne = true
+          await bouton.click()
+          await page.getByText('Lecture indisponible :', { exact: false }).waitFor()
+          await page.getByText('Aide à la lecture', { exact: true }).click()
+          await page.getByText('Aide à la lecture', { exact: true }).click()
+          assert(await bouton.isDisabled(), 'Accord conserve apres fermeture')
+          console.log(
+            `OK : OCR ${moteur.name()} ${largeur}, accord, clavier, texte inerte, effacement et panne`,
+          )
+        } finally {
+          await contexte.close()
+        }
+      }
+    } finally {
+      await navigateur.close()
+    }
+  }
+} finally {
+  await relais?.fermer()
+  if (next.exitCode === null) {
+    const termine = once(next, 'exit')
+    next.kill()
+    await termine.catch(() => {})
+  }
+  api.closeAllConnections()
+  await new Promise((r) => api.close(r))
+}
