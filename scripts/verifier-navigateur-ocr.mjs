@@ -7,6 +7,7 @@ import { chromium, firefox, webkit } from 'playwright'
 import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
 import { parcourirExamen } from './parcours-examen-navigateur.mjs'
+import { parcourirResponsable } from './parcours-responsable-navigateur.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
 const id = '11111111-1111-4111-8111-111111111111',
@@ -26,12 +27,19 @@ const user = {
 let clesConnecteurs = []
 let examensDocumentaires = [],
   examenConflit = false
+const collegue = '22222222-2222-4222-8222-222222222222'
+let filtreDossiers = new URLSearchParams()
+let responsable = null,
+  revisionResponsable = null,
+  conflitResponsable = false,
+  roleCourant = 'admin'
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
   const entree = blocs.length ? JSON.parse(Buffer.concat(blocs).toString('utf8')) : {}
   res.setHeader('Content-Type', 'application/json')
-  const path = new URL(req.url, 'http://127.0.0.1').pathname
+  const url = new URL(req.url, 'http://127.0.0.1'),
+    path = url.pathname
   let valeur = []
   if (path === '/auth/v1/user') valeur = user
   else if (path.endsWith('/rpc/rejoindre_ou_creer_agence')) valeur = id
@@ -39,7 +47,7 @@ const api = createServer(async (req, res) => {
     valeur = [
       { id, nom: 'Agence fictive', domaine: 'example.invalid', statut: 'verifiee', seuil_ratio: 3 },
     ]
-  else if (path.endsWith('/membres_agence')) valeur = [{ role: 'admin' }]
+  else if (path.endsWith('/membres_agence')) valeur = [{ role: roleCourant }]
   else if (path.endsWith('/dossiers'))
     valeur = [
       {
@@ -65,7 +73,38 @@ const api = createServer(async (req, res) => {
     ]
   else if (path.endsWith('/rpc/journaliser')) valeur = id
   else if (path.endsWith('/rpc/reserver_lecture_ocr')) valeur = false
-  else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
+  else if (path.endsWith('/rpc/responsables_des_dossiers'))
+    valeur = [
+      {
+        dossier_id: id,
+        revision: revisionResponsable,
+        responsable_id: responsable,
+        responsable_email:
+          responsable === id ? user.email : responsable ? 'collegue@example.invalid' : null,
+        modifie_le: revisionResponsable ? new Date().toISOString() : null,
+      },
+    ]
+  else if (path.endsWith('/rpc/collaborateurs_agence')) {
+    assert.equal(roleCourant, 'admin')
+    valeur = [
+      { utilisateur_id: id, email: user.email, etat: 'admin', admissible: true },
+      {
+        utilisateur_id: collegue,
+        email: 'collegue@example.invalid',
+        etat: 'membre',
+        admissible: true,
+      },
+    ]
+  } else if (path.endsWith('/rpc/affecter_dossier')) {
+    assert.equal(entree.le_dossier, id)
+    assert([null, id, collegue].includes(entree.le_membre))
+    if (conflitResponsable || entree.revision_attendue !== revisionResponsable) valeur = null
+    else {
+      responsable = entree.le_membre
+      revisionResponsable = randomUUID()
+      valeur = revisionResponsable
+    }
+  } else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
   else if (path.endsWith('/rpc/enregistrer_examen_documentaire')) {
     assert.equal(entree.le_dossier, id)
     assert.equal(entree.la_piece, id)
@@ -108,6 +147,20 @@ const api = createServer(async (req, res) => {
   ) {
     res.writeHead(404).end('{}')
     return
+  }
+  if (path.endsWith('/dossiers')) {
+    filtreDossiers = url.searchParams
+    if (url.searchParams.get('affecte') === 'not.is.null') {
+      assert.equal(url.searchParams.get('affecte.membre_id'), `eq.${id}`)
+      if (responsable !== id) valeur = []
+    }
+    if (url.searchParams.get('affecte') === 'is.null') {
+      assert.equal(url.searchParams.get('affecte.membre_id'), 'not.is.null')
+      if (responsable !== null) valeur = []
+    }
+    if (url.searchParams.has('statut')) {
+      assert.equal(url.searchParams.get('statut'), 'eq.complet')
+    }
   }
   if (req.headers.accept?.includes('vnd.pgrst.object') && Array.isArray(valeur))
     valeur = valeur[0] ?? null
@@ -167,6 +220,10 @@ try {
         clesConnecteurs = []
         examensDocumentaires = []
         examenConflit = false
+        responsable = null
+        revisionResponsable = null
+        conflitResponsable = false
+        roleCourant = 'admin'
         const contexte = await navigateur.newContext({
           viewport: { width: largeur, height: 900 },
           ignoreHTTPSErrors: true,
@@ -250,6 +307,15 @@ try {
           await parcourirConnecteur(page, relais.site, moteur, largeur)
           await parcourirExamen(page, relais.site, id, moteur, largeur, (v) => {
             examenConflit = v
+          })
+          await parcourirResponsable(page, relais.site, id, collegue, moteur, largeur, {
+            filtre: () => filtreDossiers,
+            conflit: (v) => {
+              conflitResponsable = v
+            },
+            role: (v) => {
+              roleCourant = v
+            },
           })
         } finally {
           await contexte.close()

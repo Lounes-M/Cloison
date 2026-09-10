@@ -42,6 +42,8 @@ function client() {
       const chaine = {
         select: () => chaine,
         eq: () => chaine,
+        not: () => chaine,
+        is: () => chaine,
         order: (...args: unknown[]) => {
           doublures.ordre(...args)
           return chaine
@@ -313,6 +315,20 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     )
     expect(arbre.filter((e) => e.type === 'form').some((e) => e.props.method === 'get')).toBe(true)
   })
+  test.each(['mes', 'sans'])(
+    'la pagination conserve le responsable %s et le statut',
+    async (responsable) => {
+      reponses.dossiers!.data = []
+      const arbre = elements(
+        await PageEspace({
+          searchParams: Promise.resolve({ page: '2', statut: 'complet', responsable }),
+        }),
+      )
+      expect(arbre.map((e) => e.props.href)).toContain(
+        `/espace?page=1&statut=complet&responsable=${responsable}`,
+      )
+    },
+  )
 
   test.each(['0', '-1', '2.5', '1e2', '999999999999999999999', ['2', '3']])(
     'page invalide %s : retour a une plage sure',

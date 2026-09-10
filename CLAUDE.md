@@ -204,14 +204,15 @@ La cadence cron GitHub est indicative ; plusieurs heures entre executions observ
 Le lot suivant aligne la presentation publique sur le pilote : ne pas presenter
 la signature comme ouverte ni le ratio declare comme une verification des pieces.
 
-Derniere livraison confirmee au 10 septembre : main c0ceb89 (PR102), 1113 tests
-Linux et parcours Chromium, Firefox et WebKit. Les migrations jusqu'a 0048 sont
+Derniere livraison confirmee au 10 septembre : main 7b186b7 (PR103), 1142 tests
+Linux et parcours Chromium, Firefox et WebKit. Les migrations jusqu'a 0049 sont
 appliquees et immuables. L'OCR OpenRouter est livre, facultatif et desactive par
 defaut ; aucun essai avec document reel ou compte fournisseur n'est demontre.
 Le depot est public, les controles GitHub sont actifs, la CI main et la supervision
 passent. Les anciennes mentions de blocage de facturation sont historiques.
 Les connecteurs de statuts sont livres, avec cles administrateur revocables et
-contrat OpenAPI ; aucun compte partenaire n'est connecte. Le lot d'examen humain
-prepare 0049 ; sa PR precise l'application effective.
+contrat OpenAPI ; aucun compte partenaire n'est connecte. L'examen humain est
+livre avec revisions et historique prive. Le lot des responsables prepare 0050 ;
+sa PR precise l'application effective. Voir ADR 0010 et le guide d'exploitation.
 Universign : Lounes attend les acces developpeur. Le socle d'authentification
 est livre, mais aucune signature ou facturation agence n'est activee.
