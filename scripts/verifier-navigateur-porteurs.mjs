@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { chromium, firefox, webkit } from 'playwright'
+import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 
 /** Seulement le build et les fixtures du harnais local, jamais une session utilisateur. */
 export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId, autreId }) {
@@ -10,8 +11,21 @@ export async function verifierNavigateurPorteurs({ site, cookies, db, dossierId,
     ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(db.connection.stream.remoteAddress),
     'Connexion PostgreSQL locale obligatoire',
   )
-  for (const moteur of [chromium, firefox, webkit]) {
-    await verifierMoteur({ moteur, site, origine, cookies, db, dossierId, autreId })
+  const relais = await ouvrirRelaisLocal(site)
+  try {
+    for (const moteur of [chromium, firefox, webkit]) {
+      await verifierMoteur({
+        moteur,
+        site: relais.site,
+        origine: new URL(relais.site),
+        cookies,
+        db,
+        dossierId,
+        autreId,
+      })
+    }
+  } finally {
+    await relais.fermer()
   }
 }
 
@@ -39,6 +53,7 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
       const contexte = await navigateur.newContext({
         viewport: { width: largeur, height: 900 },
         serviceWorkers: 'block',
+        ignoreHTTPSErrors: true,
       })
       try {
         await contexte.route('**/*', (route) =>
@@ -207,7 +222,10 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
         await contexte.close()
       }
     }
-    const contexte = await navigateur.newContext()
+    const contexte = await navigateur.newContext({
+      ignoreHTTPSErrors: true,
+      serviceWorkers: 'block',
+    })
     try {
       await contexte.route('**/*', (route) =>
         new URL(route.request().url()).origin === origine.origin ? route.continue() : route.abort(),
