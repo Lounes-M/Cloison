@@ -40,7 +40,7 @@ export default async function PageApplicationSecours() {
         <p className="mb-6">{t.precaution}</p>
         {!c ? (
           <p role="alert">{t.erreur}</p>
-        ) : c.verifies.length >= 2 ? (
+        ) : c.verifies.length >= 2 && !c.attente ? (
           <p role="status">{t.disponible}</p>
         ) : (
           <FormulaireApplicationSecours facteur={c.attente?.id} />

@@ -43,7 +43,7 @@ test('une disparition confirmee ou un zombie ne simule pas une panne de mesure',
 
 test('un processus vivant sans mesure disponible est refuse sans fuite', async () => {
   const tuer = vi.spyOn(process, 'kill').mockReturnValue(true)
-  for (const code of ['ENOENT', 'EACCES']) {
+  for (const code of ['ENOENT', 'ESRCH', 'EACCES']) {
     lire.mockRejectedValueOnce(Object.assign(new Error('chemin-prive'), { code }))
     await expect(lireMemoireProcessus(123)).rejects.toThrow(/^Mesure memoire indisponible$/)
   }
@@ -68,4 +68,14 @@ test('le processus vivant toujours non mesurable reste refuse apres une seule re
   vi.spyOn(process, 'kill').mockReturnValue(true)
   await expect(lireMemoireProcessus(123)).rejects.toThrow('Mesure memoire indisponible')
   expect(lire).toHaveBeenCalledTimes(2)
+})
+
+test('ESRCH apres ouverture de proc est une disparition seulement si elle est confirmee', async () => {
+  lire.mockRejectedValue(Object.assign(new Error('chemin-prive'), { code: 'ESRCH' }))
+  const tuer = vi.spyOn(process, 'kill').mockImplementation(() => {
+    throw Object.assign(new Error(), { code: 'ESRCH' })
+  })
+  expect(await lireMemoireProcessus(123)).toBeNull()
+  tuer.mockReturnValue(true)
+  await expect(lireMemoireProcessus(123)).rejects.toThrow('Mesure memoire indisponible')
 })

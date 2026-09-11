@@ -11,8 +11,8 @@ export async function lireMemoireProcessus(pid: number): Promise<number | null> 
     try {
       statut = await readFile(`/proc/${pid}/status`, 'utf8')
     } catch (erreur) {
-      if ((erreur as NodeJS.ErrnoException).code !== 'ENOENT')
-        throw new Error('Mesure memoire indisponible')
+      const code = (erreur as NodeJS.ErrnoException).code
+      if (code !== 'ENOENT' && code !== 'ESRCH') throw new Error('Mesure memoire indisponible')
       try {
         process.kill(pid, 0)
       } catch (absence) {

@@ -79,6 +79,30 @@ export async function parcourirApplicationSecours(page, site, moteur, largeur, f
       .waitFor()
     assert.equal(fixture.facteurs().length, 2, 'Le test ne supprime aucun facteur')
     assert.equal(fixture.facteurs().filter((f) => f.status === 'verified').length, 2)
+    const secondaire = { ...fixture.facteurs()[1], friendly_name: 'Secondaire historique' }
+    fixture.preparer([
+      principal,
+      secondaire,
+      {
+        id: '33333333-3333-4333-8333-333333333333',
+        factor_type: 'totp',
+        status: 'unverified',
+        friendly_name: 'Cloison secours',
+      },
+    ])
+    await page.reload()
+    await page
+      .getByRole('button', { name: 'Annuler cette préparation et recommencer', exact: true })
+      .click()
+    await page
+      .getByRole('status')
+      .filter({ hasText: 'Au moins deux applications sont vérifiées.' })
+      .waitFor()
+    assert.deepEqual(
+      fixture.facteurs(),
+      [principal, secondaire],
+      'La preparation heritee est retiree, les deux applications sont conservees',
+    )
     console.log(
       `OK : application secours ${moteur.name()} ${largeur}, preparation, rechargement, annulation, erreur et confirmation`,
     )
