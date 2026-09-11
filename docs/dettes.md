@@ -30,6 +30,12 @@ l'outillage figé sur une ligne qui ne recevra plus de correctifs.
 **Signal de sortie** : `eslint-config-next` publie une version compatible ESLint 10. Alors : lever la
 pause dans `.github/dependabot.yml` et laisser passer la montée.
 
+**Réexamen du 11 septembre 2026** : ESLint 10.10.0, installé séparément et exécuté
+contre la configuration du dépôt, reproduit encore cette erreur. Les dernières
+versions publiées de eslint-config-next (16.3.4) et eslint-plugin-react (7.37.5)
+sont celles installées. La déclaration de pair ESLint >=9 ne suffit pas à prouver
+la compatibilité d'exécution. Aucun contournement de règle n'est ajouté.
+
 ### TypeScript reste en 6.x
 
 **Constaté le** 1er septembre 2026, sur la PR Dependabot #4.
@@ -45,6 +51,11 @@ Sans conséquence immédiate (TypeScript 6 est parfaitement fonctionnel) mais l'
 
 **Signal de sortie** : `typescript-eslint` prend en charge TS 7. Alors : lever la pause dans
 `.github/dependabot.yml`.
+
+**Réexamen du 11 septembre 2026** : TypeScript 7.0.2 est publié, mais la dernière
+version de @typescript-eslint/typescript-estree (8.70.0) déclare toujours la plage
+
+> =4.8.4 <6.1.0. Le report est maintenu sans forcer les pairs.
 
 > Les deux majeures sont mises en pause dans `.github/dependabot.yml`. Sans cela, Dependabot rouvre
 > les mêmes PR chaque lundi et le bruit finit par masquer les mises à jour qui comptent.
