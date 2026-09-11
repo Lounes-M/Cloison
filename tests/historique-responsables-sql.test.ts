@@ -37,6 +37,16 @@ beforeEach(async () => {
       [agence, u],
     )
   }
+  // Une date ne fournit pas un ordre d'insertion. Dates egales et UUID
+  // decroissants rendent cette hypothese fausse a chaque execution.
+  // Ces defaults de fixture disparaissent avec le ROLLBACK du test.
+  await db.exec(`
+    create temporary sequence historique_ids;
+    alter table historique_responsables alter column quand
+      set default '2026-01-01T00:00:00Z'::timestamptz;
+    alter table historique_responsables alter column id
+      set default (lpad((10000-nextval('pg_temp.historique_ids'))::text,32,'0')::uuid);
+  `)
   await devenir(db, 'authenticated', admin)
 })
 afterEach(async () => {
@@ -121,7 +131,9 @@ test('un auteur technique hors agence n expose pas son identifiant dans le suivi
     dossier,
   ])
   await devenir(db, 'authenticated', admin)
-  expect((await lire())[0]!.auteur).toBeNull()
+  const rows = await lire()
+  expect(rows).toHaveLength(2)
+  expect(rows.find((r) => r.suivant === second)?.auteur).toBeNull()
 })
 test.each(['non-confirme', 'autre-domaine'])(
   'une adresse devenue %s n est plus restituee',
@@ -174,11 +186,14 @@ test('les changements effectifs sont traces, pas les rejeux ni les conflits', as
   const b = await affecter(second, a)
   await affecter(null, b)
   const rows = await lire()
-  expect(rows.map((r) => [r.precedent, r.suivant])).toEqual([
-    [second, null],
-    [premier, second],
-    [null, premier],
-  ])
+  expect(rows).toHaveLength(3)
+  expect(rows.map((r) => [r.precedent, r.suivant])).toEqual(
+    expect.arrayContaining([
+      [second, null],
+      [premier, second],
+      [null, premier],
+    ]),
+  )
 })
 test.each(['anon', 'porteur_lien', 'serveur', 'depot_piece', 'service_role'])(
   'le role %s ne lit pas le suivi equipe',
@@ -215,18 +230,25 @@ test('une exclusion libere le dossier sans conserver l adresse de l ancien membr
   await devenir(db, 'authenticated', admin)
   const rows = await lire()
   expect(rows).toHaveLength(2)
-  expect(rows[0]).toEqual(
-    expect.objectContaining({ precedent: premier, suivant: null, precedent_email: null }),
+  expect(rows).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ precedent: premier, suivant: null, precedent_email: null }),
+      expect.objectContaining({ precedent: null, suivant: premier, suivant_email: null }),
+    ]),
   )
-  expect(rows[1]).toEqual(expect.objectContaining({ suivant: premier, suivant_email: null }))
 })
 test('la suppression Auth n est pas bloquee par l historique immuable', async () => {
   await affecter()
   await redevenirProprietaire(db)
   await db.query('delete from auth.users where id=$1', [premier])
   await devenir(db, 'authenticated', admin)
-  expect((await lire())[0]).toEqual(
-    expect.objectContaining({ precedent: premier, suivant: null, precedent_email: null }),
+  const rows = await lire()
+  expect(rows).toHaveLength(2)
+  expect(rows).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ precedent: premier, suivant: null, precedent_email: null }),
+      expect.objectContaining({ precedent: null, suivant: premier, suivant_email: null }),
+    ]),
   )
 })
 test.each(['update', 'delete'])(
@@ -266,11 +288,33 @@ test('la suppression du dossier emporte son historique', async () => {
   await db.query('delete from dossiers where id=$1', [dossier])
   expect((await db.query('select * from historique_responsables')).rows).toEqual([])
 })
-test('une page bornee conserve les changements a la frontiere du curseur', async () => {
+test('les dates priment sur les UUID dans l ordre de lecture', async () => {
+  await redevenirProprietaire(db)
+  const ids = [
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000003',
+  ]
+  for (const [i, date] of [
+    '2026-01-03T00:00:00Z',
+    '2026-01-02T00:00:00Z',
+    '2026-01-01T00:00:00Z',
+  ].entries()) {
+    await db.query(
+      'insert into historique_responsables(id,dossier_id,revision,suivant,quand) values($1,$2,$3,$4,$5)',
+      [ids[i], dossier, randomUUID(), premier, date],
+    )
+  }
+  await devenir(db, 'authenticated', admin)
+  expect((await lire()).map((r) => r.id)).toEqual(ids)
+})
+
+test('une page bornee conserve tous les changements de meme date a la frontiere du curseur', async () => {
   let r = await affecter()
   for (let i = 0; i < 54; i++) r = await affecter(i % 2 === 0 ? second : premier, r)
   const a = await lire()
   expect(a).toHaveLength(51)
+  expect(new Set(a.map((r) => r.quand)).size).toBe(1)
   const borne = a[49]!
   const b = (
     await db.query<{ id: string }>('select * from historique_responsables_du_dossier($1,$2,$3)', [
@@ -281,6 +325,12 @@ test('une page bornee conserve les changements a la frontiere du curseur', async
   ).rows
   expect(b).toHaveLength(5)
   expect(b.some((l) => a.slice(0, 50).some((x) => x.id === l.id))).toBe(false)
+  expect([...a.slice(0, 50), ...b].map((l) => l.id)).toEqual(
+    Array.from(
+      { length: 55 },
+      (_, i) => `00000000-0000-0000-0000-${String(9999 - i).padStart(12, '0')}`,
+    ),
+  )
 })
 test.each(['anon', 'authenticated', 'porteur_lien', 'depot_piece', 'service_role'])(
   'le role %s ne declenche pas la purge',

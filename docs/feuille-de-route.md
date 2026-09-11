@@ -341,3 +341,9 @@ Le choix MFA permet d utiliser un facteur secondaire deja verifie et conserve
 le choix apres un code refuse. Les pannes de lecture des facteurs ferment la
 configuration. Voir [le guide](exploitation/choix-facteur-mfa.md) ; ajout de
 facteur de secours et perte de tous les facteurs restent distincts.
+
+La verification de main apres PR114 a revele une hypothese de test invalide :
+des affectations rapides peuvent partager la meme date. Les essais d'historique
+imposent maintenant cette egalite, verifient chaque changement independamment
+de sa position et controlent separement le tri et la pagination. Aucun changement
+du schema deploye ; les defaults des fixtures sont annules par ROLLBACK.
