@@ -27,3 +27,5 @@
 - [Suivi des demandes de droits](exploitation/suivi-demandes-droits.md) et [registre des traitements](rgpd/registre-des-traitements.md).
 
 Les guides datés et comptes rendus historiques décrivent leur révision de référence. Une preuve ancienne ne remplace pas la vérification de la version déployée. Les textes juridiques du dépôt nécessitent leur validation avant usage contractuel.
+
+- [Réutilisation volontaire des pièces](exploitation/reutilisation-pieces.md)

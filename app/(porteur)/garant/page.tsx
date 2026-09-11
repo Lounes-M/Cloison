@@ -1,3 +1,4 @@
+import { FormulaireReutilisation } from '@/components/forms/FormulaireReutilisation'
 import { Complements } from '@/components/dossiers/Complements'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { type Complement } from '@/lib/content/complements'
@@ -259,6 +260,7 @@ export default async function PageGarant({
             )
           })}
         </ol>
+        {ouvert ? <FormulaireReutilisation dossierId={dossierId} /> : null}
       </section>
 
       {mentionAttendue ? (

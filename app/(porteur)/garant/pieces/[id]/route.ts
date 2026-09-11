@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { SEAU, inscrireAuJournal, lireCleScellee } from '@/lib/coffre/depot-supabase'
-import { ouvrir } from '@/lib/coffre/enveloppe'
-import { cleMaitresse } from '@/lib/coffre/cle-maitresse'
+import { lireOriginalGarant } from '@/lib/garant/original'
 
 export const runtime = 'nodejs'
 
@@ -13,29 +11,18 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!porteur || porteur.capacite.partie !== 'garant')
     return new NextResponse(null, { status: 404 })
   const db = clientPorteurDeLien(porteur.jeton)
-  const { data: piece, error } = await db
-    .from('pieces')
-    .select('dossier_id,chemin,type_reel')
-    .eq('id', id)
-    .eq('dossier_id', porteur.capacite.dossierId)
-    .maybeSingle()
-  if (error || !piece) return new NextResponse(null, { status: 404 })
-  if (!(await inscrireAuJournal(db, piece.dossier_id, 'piece_ouverte', id)))
-    return new NextResponse(null, { status: 503 })
   try {
-    const cle = await lireCleScellee(db, piece.dossier_id)
-    const { data, error: storage } = await db.storage.from(SEAU).download(piece.chemin)
-    if (!cle || !data || storage) return new NextResponse(null, { status: 404 })
-    const contenu = ouvrir(Buffer.from(await data.arrayBuffer()), ouvrir(cle, cleMaitresse()))
+    const original = await lireOriginalGarant(db, porteur.capacite, id)
+    if (!original) return new NextResponse(null, { status: 404 })
     const extension =
-      piece.type_reel === 'application/pdf'
+      original.typeReel === 'application/pdf'
         ? 'pdf'
-        : piece.type_reel === 'image/png'
+        : original.typeReel === 'image/png'
           ? 'png'
           : 'jpg'
-    return new NextResponse(new Uint8Array(contenu), {
+    return new NextResponse(new Uint8Array(original.contenu), {
       headers: {
-        'Content-Type': piece.type_reel,
+        'Content-Type': original.typeReel,
         'Content-Disposition': `attachment; filename="original.${extension}"`,
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
