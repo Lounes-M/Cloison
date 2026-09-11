@@ -339,11 +339,15 @@ consigne les regressions, la CI et le deploiement du correctif.
 
 Le choix MFA permet d utiliser un facteur secondaire deja verifie et conserve
 le choix apres un code refuse. Les pannes de lecture des facteurs ferment la
-configuration. Voir [le guide](exploitation/choix-facteur-mfa.md) ; ajout de
-facteur de secours et perte de tous les facteurs restent distincts.
+configuration. Voir [le guide](exploitation/choix-facteur-mfa.md).
 
 La verification de main apres PR114 a revele une hypothese de test invalide :
 des affectations rapides peuvent partager la meme date. Les essais d'historique
 imposent maintenant cette egalite, verifient chaque changement independamment
 de sa position et controlent separement le tri et la pagination. Aucun changement
 du schema deploye ; les defaults des fixtures sont annules par ROLLBACK.
+
+Le lot suivant ajoute une application de secours depuis une session AAL2,
+avec confirmation du code et reprise des preparations interrompues. Voir le
+[guide](exploitation/application-secours.md) et la PR pour les validations.
+La perte de tous les facteurs et leur suppression restent distinctes.

@@ -13,6 +13,7 @@ import { parcourirPreferences } from './parcours-preferences-navigateur.mjs'
 import { parcourirRappels } from './parcours-rappels-navigateur.mjs'
 import { parcourirInterface } from './parcours-interface-navigateur.mjs'
 import { parcourirChoixMfa } from './parcours-choix-mfa.mjs'
+import { parcourirApplicationSecours } from './parcours-application-secours.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
 const id = '11111111-1111-4111-8111-111111111111',
@@ -55,7 +56,32 @@ const api = createServer(async (req, res) => {
     path = url.pathname
   let valeur = []
   if (path === '/auth/v1/user') valeur = user
-  else if (/^\/auth\/v1\/factors\/[^/]+\/challenge$/.test(path)) {
+  else if (path === '/auth/v1/factors' && req.method === 'POST') {
+    assert.equal(entree.factor_type, 'totp')
+    assert.equal(entree.friendly_name, 'Cloison secours')
+    const facteur = {
+      id: randomUUID(),
+      factor_type: 'totp',
+      status: 'unverified',
+      friendly_name: entree.friendly_name,
+    }
+    user.factors.push(facteur)
+    valeur = {
+      id: facteur.id,
+      type: 'totp',
+      totp: {
+        secret: 'CLE_FICTIVE_SECOURS',
+        qr_code:
+          '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><rect width="240" height="240" fill="white"/><text x="20" y="120">QR fictif de test</text></svg>',
+        uri: 'otpauth://totp/fixture',
+      },
+    }
+  } else if (/^\/auth\/v1\/factors\/[^/]+$/.test(path) && req.method === 'DELETE') {
+    const facteur = user.factors.find((f) => f.id === path.split('/')[4])
+    assert.equal(facteur?.status, 'unverified', 'Aucun facteur verifie ne doit etre supprime')
+    user.factors = user.factors.filter((f) => f !== facteur)
+    valeur = { id: facteur.id }
+  } else if (/^\/auth\/v1\/factors\/[^/]+\/challenge$/.test(path)) {
     demandesMfa.push(path.split('/')[4])
     valeur = { id, type: 'totp', expires_at: maintenant + 300 }
   } else if (/^\/auth\/v1\/factors\/[^/]+\/verify$/.test(path)) {
@@ -67,6 +93,8 @@ const api = createServer(async (req, res) => {
         .end(JSON.stringify({ error_code: 'mfa_verification_failed', msg: 'Code fictif refuse' }))
       return
     }
+    const confirme = user.factors.find((f) => f.id === path.split('/')[4])
+    if (confirme) confirme.status = 'verified'
     valeur = {
       access_token: jeton,
       refresh_token: 'fictif',
@@ -454,6 +482,16 @@ try {
             accepter: () => {
               erreurMfa = false
             },
+          })
+          await parcourirApplicationSecours(page, relais.site, moteur, largeur, {
+            preparer: (facteurs) => {
+              user.factors = facteurs
+              erreurMfa = true
+            },
+            accepter: () => {
+              erreurMfa = false
+            },
+            facteurs: () => user.factors,
           })
         } finally {
           await contexte.close()
