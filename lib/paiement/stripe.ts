@@ -1,4 +1,5 @@
 import 'server-only'
+import { estUuidCanonique } from '@/lib/validation/uuid'
 import { randomUUID } from 'node:crypto'
 import { clientServeur } from '@/lib/acces/serveur'
 
@@ -203,7 +204,7 @@ export function paiementConfirme(evenement: Stripe.Event): PaiementConfirme | nu
     return null
 
   const dossierId = session.metadata?.dossier_id ?? session.client_reference_id
-  if (!dossierId || !/^[0-9a-f-]{36}$/.test(dossierId)) return null
+  if (!estUuidCanonique(dossierId)) return null
 
   return { dossierId, reference: session.id }
 }

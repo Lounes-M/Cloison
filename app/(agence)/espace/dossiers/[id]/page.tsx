@@ -1,4 +1,5 @@
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
+import { estUuidCanonique } from '@/lib/validation/uuid'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
 import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
@@ -69,7 +70,7 @@ export default async function PageDossier({
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { id } = await params
-  if (!/^[0-9a-f-]{36}$/.test(id)) notFound()
+  if (!estUuidCanonique(id)) notFound()
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') redirect('/connexion')

@@ -1,4 +1,5 @@
 'use server'
+import { estUuidCanonique } from '@/lib/validation/uuid'
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -89,8 +90,6 @@ export async function ouvrirUnDossier(
 
 export type EtatDecision = { statut: 'inactif' } | { statut: 'erreur'; message: string }
 
-const UUID = /^[0-9a-f-]{36}$/
-
 /**
  * Prendre un dossier : le figer pour decider dessus.
  *
@@ -100,7 +99,7 @@ const UUID = /^[0-9a-f-]{36}$/
  */
 export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Promise<EtatDecision> {
   const id = String(donnees.get('dossier') ?? '')
-  if (!UUID.test(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
+  if (!estUuidCanonique(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
@@ -136,7 +135,7 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
 export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Promise<EtatDecision> {
   const id = String(donnees.get('dossier') ?? '')
-  if (!UUID.test(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
+  if (!estUuidCanonique(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
