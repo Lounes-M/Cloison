@@ -17,12 +17,12 @@
  *    rien qu'un tiers ait saisi.
  *
  * 2. L'applicatif, agence et porteurs de lien, est rendu a chaque requete. Le
- *    middleware y tire un nonce, et seuls les scripts qui le portent, ou que
+ *    proxy y tire un nonce, et seuls les scripts qui le portent, ou que
  *    ceux-ci chargent (`'strict-dynamic'`), s'executent. Un script injecte
  *    dans la page ne porte pas le nonce : il ne s'execute pas.
  *
- * Ce module n'importe rien : il sert au middleware, qui tourne dans le runtime
- * Edge, et a `next.config.ts`, qui est lu au build.
+ * Ce module n'importe rien : il sert au proxy, qui tourne dans le runtime
+ * Node.js, et a `next.config.ts`, qui est lu au build.
  */
 
 /**
@@ -30,9 +30,9 @@
  * routes : `(agence)` et `(porteur)` n'apparaissent pas dans l'URL.
  *
  * Cette liste doit rester le miroir exact de deux choses : le `matcher` du
- * middleware, que Next exige litteral, et les dossiers de `app/(agence)` et
+ * proxy, que Next exige litteral, et les dossiers de `app/(agence)` et
  * `app/(porteur)`. Un test compare les trois. Un segment ecrit ici et absent
- * du middleware recevrait la politique du site public, sans nonce, et ses
+ * du proxy recevrait la politique du site public, sans nonce, et ses
  * scripts s'executeraient quand meme : c'est la derive silencieuse a
  * empecher.
  */
@@ -124,8 +124,7 @@ export function politiqueAvecNonce(
 /**
  * Un nonce neuf, seize octets tires au hasard, en base64.
  *
- * Web Crypto plutot que `node:crypto` : le middleware tourne dans le runtime
- * Edge, ou ce dernier n'existe pas.
+ * Web Crypto garde le generateur utilisable dans le proxy Node.js comme au build.
  */
 export function nouveauNonce(): string {
   const octets = crypto.getRandomValues(new Uint8Array(16))

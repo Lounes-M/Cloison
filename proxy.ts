@@ -31,7 +31,7 @@ import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
  *   Fabriquer une reponse neuve apres coup perdrait les cookies rafraichis, et
  *   la session serait renouvelee sans que personne ne le sache.
  */
-export async function middleware(requete: NextRequest) {
+export async function proxy(requete: NextRequest) {
   const nonce = nouveauNonce()
   const politique = politiqueAvecNonce(nonce)
 

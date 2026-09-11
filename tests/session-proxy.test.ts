@@ -8,7 +8,9 @@ vi.mock('@/lib/env', () => ({
     supabasePublishableKey: 'fixture-publique',
   },
 }))
-import { middleware } from '../middleware'
+import { proxy } from '../proxy'
+import { config } from '../proxy'
+import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server'
 
 const UTILISATEUR = '11111111-1111-4111-8111-111111111111'
 const COOKIE = 'sb-auth-auth-token'
@@ -61,7 +63,7 @@ for (const chemin of ['/espace/dossiers', '/connexion/securite']) {
         return new Response(JSON.stringify(utilisateur), { status: 200 })
       }),
     )
-    const reponse = await middleware(
+    const reponse = await proxy(
       new NextRequest(`https://cloison.example.invalid${chemin}`, {
         headers: { Cookie: cookiePour(ancienne) },
       }),
@@ -84,10 +86,41 @@ for (const chemin of ['/espace/dossiers', '/connexion/securite']) {
 test('le parcours garant ne renouvelle pas une session agence incidente', async () => {
   const fetchFictif = vi.fn()
   vi.stubGlobal('fetch', fetchFictif)
-  await middleware(
+  await proxy(
     new NextRequest('https://cloison.example.invalid/garant', {
       headers: { Cookie: cookiePour(session(1, 'ancien-fictif')) },
     }),
   )
   expect(fetchFictif).not.toHaveBeenCalled()
+})
+
+test.each([
+  '/espace',
+  '/espace/dossiers/abc',
+  '/connexion/securite',
+  '/locataire',
+  '/garant',
+  '/lien/abc',
+  '/lien-invalide',
+])('Next applique le proxy a %s', (url) => {
+  expect(unstable_doesMiddlewareMatch({ config, nextConfig: {}, url })).toBe(true)
+})
+test.each([
+  '/',
+  '/demarrer',
+  '/espace-public',
+  '/api/paiement/webhook',
+  '/_next/static/app.js',
+  '/favicon.ico',
+])('Next exclut %s du proxy applicatif', (url) => {
+  expect(unstable_doesMiddlewareMatch({ config, nextConfig: {}, url })).toBe(false)
+})
+test('chaque requete porte un nonce neuf identique dans le rendu et la reponse', async () => {
+  const a = await proxy(new NextRequest('https://cloison.example.invalid/garant'))
+  const b = await proxy(new NextRequest('https://cloison.example.invalid/garant'))
+  const politique = a.headers.get('content-security-policy')
+  expect(politique).toMatch(/'nonce-[A-Za-z0-9+/]{22}=='/)
+  expect(a.headers.get('x-middleware-request-content-security-policy')).toBe(politique)
+  expect(politique).not.toBe(b.headers.get('content-security-policy'))
+  expect(politique?.match(/script-src ([^;]+)/)?.[1]).not.toContain("'unsafe-inline'")
 })

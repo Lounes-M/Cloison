@@ -19,7 +19,7 @@ import { env } from '@/lib/env'
  */
 export default async function LayoutAgence({ children }: { children: React.ReactNode }) {
   // Rendu a chaque requete, jamais prerendu : la Content-Security-Policy de
-  // l'applicatif porte un nonce que le middleware tire par requete, et une
+  // l'applicatif porte un nonce que le proxy tire par requete, et une
   // page prerendue au build ne pourrait pas le porter. Ses scripts seraient
   // alors refuses par le navigateur, sans bruit.
   await connection()

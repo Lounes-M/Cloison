@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function NotFound() {
   // Rendue a chaque requete, jamais prerendue. Une adresse inconnue sous
   // l'applicatif (`/espace/nulle-part`) arrive ici sous la politique de
-  // securite du middleware, avec un nonce par requete : une page prerendue au
+  // securite du proxy, avec un nonce par requete : une page prerendue au
   // build ne le porterait pas, et le navigateur refuserait ses scripts.
   await connection()
 

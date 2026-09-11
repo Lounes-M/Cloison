@@ -66,7 +66,7 @@ function fichiers(repertoire: string): string[] {
 test('les journaux applicatifs ne recoivent aucune donnee dynamique', () => {
   const racine = process.cwd()
   const chemins = ['app', 'lib', 'components'].flatMap((d) => fichiers(join(racine, d)))
-  chemins.push(join(racine, 'middleware.ts'))
+  chemins.push(join(racine, 'proxy.ts'))
   const fautes = chemins.flatMap((p) =>
     violations(readFileSync(p, 'utf8'), p).map((ligne) => `${relative(racine, p)}:${ligne}`),
   )
