@@ -16,7 +16,7 @@ export async function parcourirSupport(page, moteur, largeur, espace) {
     )
   const categorie = espace === 'locataire' ? 'paiement' : espace === 'garant' ? 'depot' : 'examen'
   await choix.selectOption(categorie)
-  const texte = cadre.getByRole('textbox', { name: 'Message préparé' })
+  const texte = cadre.getByRole('textbox', { name: 'Message à compléter dans la messagerie' })
   const valeur = await texte.inputValue()
   assert(valeur.includes('OCRFICTIF'))
   assert(

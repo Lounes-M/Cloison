@@ -1,14 +1,14 @@
 export const aideDossier = {
   titre: 'Besoin d’aide sur ce dossier ?',
-  aide: 'Préparez un message avec la référence et la catégorie du problème. Il sera envoyé uniquement après validation dans votre messagerie.',
+  aide: 'Préparez un message avec la référence et la catégorie du problème, puis complétez-le et envoyez-le depuis votre messagerie.',
   aidePorteur:
-    'Prépare un message avec la référence et la catégorie du problème. Il sera envoyé uniquement après validation dans ta messagerie.',
+    'Prépare un message avec la référence et la catégorie du problème, puis complète-le et envoie-le depuis ta messagerie.',
   confidentialite:
     'Ne joignez aucun justificatif, montant, pièce d’identité ou lien d’accès. Le support ne consulte pas les documents à votre place.',
   confidentialitePorteur:
     'Ne joins aucun justificatif, montant, pièce d’identité ou lien d’accès. Le support ne consulte pas les documents à ta place.',
   categorie: 'Catégorie du problème',
-  apercu: 'Message préparé',
+  apercu: 'Message à compléter dans la messagerie',
   ouvrir: 'Ouvrir ma messagerie',
   copier: 'Copier le message',
   copie: 'Message copié. Il reste à l’envoyer dans votre messagerie.',
@@ -19,7 +19,7 @@ export const aideDossier = {
   parcours: 'Espace utilisé',
   objet: 'Aide Cloison',
   invitation:
-    'Décrivez ici le blocage, sans justificatif, montant, identité complète ni lien d’accès.',
+    'Description du blocage à compléter avant envoi, sans justificatif, montant, identité complète ni lien d’accès.',
   categories: {
     acces: 'Accès à mon espace',
     suivi: 'Suivi du dossier',
