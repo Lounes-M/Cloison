@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { estUuidCanonique } from '@/lib/validation/uuid'
 
 import { baseOuvertureSupabase } from '@/lib/coffre/ouverture-supabase'
 import { filigranePour, ouvrirPiecePourLAgence } from '@/lib/coffre/ouverture'
@@ -26,7 +27,7 @@ export const maxDuration = 60
 
 export async function GET(_requete: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  if (!/^[0-9a-f-]{36}$/.test(id)) return new NextResponse(null, { status: 404 })
+  if (!estUuidCanonique(id)) return new NextResponse(null, { status: 404 })
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return new NextResponse(null, { status: 401 })

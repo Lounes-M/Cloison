@@ -1,4 +1,5 @@
 'use server'
+import { estUuidCanonique } from '@/lib/validation/uuid'
 import { cookies } from 'next/headers'
 import { estCookieAgence } from '@/lib/acces/cookies-agence'
 import { redirect } from 'next/navigation'
@@ -32,7 +33,7 @@ export async function verifierSecondFacteur(
   }
   const facteur = String(donnees.get('facteur') ?? '')
   const code = String(donnees.get('code') ?? '')
-  if (!/^[0-9]{6}$/.test(code) || !/^[0-9a-f-]{36}$/.test(facteur))
+  if (!/^[0-9]{6}$/.test(code) || !estUuidCanonique(facteur))
     return { ...etat, erreur: securite.erreur }
   const { error } = await db.auth.mfa.challengeAndVerify({ factorId: facteur, code })
   if (error) return { ...etat, erreur: securite.erreur }

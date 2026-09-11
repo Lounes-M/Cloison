@@ -1,4 +1,5 @@
 'use server'
+import { estUuidCanonique } from '@/lib/validation/uuid'
 
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { sessionPorteur } from '@/lib/content/session-porteur'
@@ -123,7 +124,7 @@ export async function retirerUnePiece(
   donnees: FormData,
 ): Promise<EtatRetrait> {
   const pieceId = String(donnees.get('piece') ?? '')
-  if (!/^[0-9a-f-]{36}$/.test(pieceId)) return { statut: 'erreur', message: 'Piece inconnue.' }
+  if (!estUuidCanonique(pieceId)) return { statut: 'erreur', message: 'Piece inconnue.' }
 
   const porteur = await porteurGarant()
   if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {

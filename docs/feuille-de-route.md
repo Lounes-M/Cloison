@@ -327,3 +327,12 @@ signe. Voir le [guide](exploitation/historique-responsables.md) et ADR0014 ; sa 
 consigne les repetitions, l'application SQL et les validations effectives.
 L'export personnel et l'effacement individuel de coffre restent distincts du
 registre prive des demandes de droits.
+
+Le correctif des identifiants refuse les chaines de 36 caracteres qui ne
+respectent pas les groupes UUID 8-4-4-4-12. Les routes dossier et piece, les
+decisions agence, le retrait garant, le facteur MFA et la confirmation de
+paiement les rejettent avant de solliciter leurs donnees ou fournisseur.
+Les UUID minuscules existants restent acceptes sans restriction de version.
+Les controles de session, de role et SQL restent necessaires (ADR 0002).
+Les tests ont reproduit 21 echecs avec les anciennes validations ; la PR
+consigne les regressions, la CI et le deploiement du correctif.
