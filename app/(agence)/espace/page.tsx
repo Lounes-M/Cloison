@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { applicationSecours } from '@/lib/content/application-secours'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -164,6 +165,9 @@ export default async function PageEspace({
         {role === 'admin' ? ', administrateur' : ''}.
       </p>
 
+      <Link href="/espace/securite" className="lien-espace mt-5 mr-3">
+        {applicationSecours.titre}
+      </Link>
       <Link href="/espace/notifications" className="lien-espace mt-5 mr-3">
         {preferences.titre}
       </Link>
