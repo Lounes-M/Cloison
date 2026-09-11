@@ -36,7 +36,7 @@ export async function verifierSecondFacteur(
   if (!/^[0-9]{6}$/.test(code) || !estUuidCanonique(facteur))
     return { ...etat, erreur: securite.erreur }
   const { error } = await db.auth.mfa.challengeAndVerify({ factorId: facteur, code })
-  if (error) return { ...etat, erreur: securite.erreur }
+  if (error) return { ...etat, facteur, erreur: securite.erreur }
   redirect('/espace')
 }
 export async function seDeconnecter() {

@@ -336,3 +336,8 @@ Les UUID minuscules existants restent acceptes sans restriction de version.
 Les controles de session, de role et SQL restent necessaires (ADR 0002).
 Les tests ont reproduit 21 echecs avec les anciennes validations ; la PR
 consigne les regressions, la CI et le deploiement du correctif.
+
+Le choix MFA permet d utiliser un facteur secondaire deja verifie et conserve
+le choix apres un code refuse. Les pannes de lecture des facteurs ferment la
+configuration. Voir [le guide](exploitation/choix-facteur-mfa.md) ; ajout de
+facteur de secours et perte de tous les facteurs restent distincts.

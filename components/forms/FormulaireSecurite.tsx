@@ -3,7 +3,13 @@ import { useActionState } from 'react'
 import { verifierSecondFacteur, type EtatSecurite } from '@/lib/agences/action-securite'
 import { securite } from '@/lib/content/securite'
 
-export function FormulaireSecurite({ initial }: { initial: EtatSecurite }) {
+export function FormulaireSecurite({
+  initial,
+  facteurs = [],
+}: {
+  initial: EtatSecurite
+  facteurs?: Array<{ id: string; nom: string }>
+}) {
   const [etat, action, pending] = useActionState(verifierSecondFacteur, initial)
   return (
     <form action={action} className="mt-8 flex flex-col gap-4">
@@ -26,7 +32,28 @@ export function FormulaireSecurite({ initial }: { initial: EtatSecurite }) {
       ) : null}
       {etat.facteur ? (
         <>
-          <input type="hidden" name="facteur" value={etat.facteur} />
+          {facteurs.length > 1 ? (
+            <>
+              <label htmlFor="facteur">{securite.choisirFacteur}</label>
+              <select
+                id="facteur"
+                name="facteur"
+                key={etat.facteur}
+                defaultValue={etat.facteur}
+                disabled={pending}
+                className="outlined bg-paper rounded-lg p-3"
+              >
+                {facteurs.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.nom}
+                  </option>
+                ))}
+              </select>
+              <p className="text-ink-secondary text-sm">{securite.aideFacteur}</p>
+            </>
+          ) : (
+            <input type="hidden" name="facteur" value={etat.facteur} />
+          )}
           <label htmlFor="code">{securite.code}</label>
           <input
             id="code"
