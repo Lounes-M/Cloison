@@ -3,6 +3,19 @@ import { resolve } from 'node:path'
 export async function parcourirPreferences(page, site, moteur, largeur, conflit) {
   await page.goto(`${site}/espace`)
   await page.getByRole('link', { name: 'Mes notifications', exact: true }).click()
+  const couleurs = await page
+    .getByRole('button', { name: 'Enregistrer mes préférences' })
+    .evaluate((el) => {
+      const token = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-cobalt')
+        .trim()
+      const n = Number.parseInt(token.slice(1), 16)
+      return {
+        fond: getComputedStyle(el).backgroundColor,
+        attendu: `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`,
+      }
+    })
+  assert.equal(couleurs.fond, couleurs.attendu, 'Bouton principal sans style de marque')
   const mode = page.getByRole('combobox', { name: 'Notifications de suivi' })
   assert.equal(await mode.inputValue(), 'tous')
   await mode.selectOption('mes')
@@ -46,6 +59,7 @@ export async function parcourirPreferences(page, site, moteur, largeur, conflit)
         `preferences-${moteur.name()}-${largeur}.png`,
       ),
       fullPage: true,
+      animations: 'disabled',
     })
   console.log(
     `OK : preferences ${moteur.name()} ${largeur}, clavier, persistance, conflit et silence`,

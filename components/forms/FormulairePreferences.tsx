@@ -31,7 +31,10 @@ export function FormulairePreferences({ courante }: { courante: PreferenceNotifi
         <input type="checkbox" name="confirmation" required disabled={attente} />
         {t.confirmation}
       </label>
-      <button disabled={attente} className="bouton-espace disabled:opacity-50">
+      <button
+        disabled={attente}
+        className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold disabled:opacity-50"
+      >
         {attente ? t.attente : t.enregistrer}
       </button>
       {!attente && etat.statut === 'erreur' ? (
