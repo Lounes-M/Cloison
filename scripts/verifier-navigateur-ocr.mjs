@@ -9,6 +9,7 @@ import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
 import { parcourirExamen } from './parcours-examen-navigateur.mjs'
 import { parcourirResponsable } from './parcours-responsable-navigateur.mjs'
 import { parcourirPreferences } from './parcours-preferences-navigateur.mjs'
+import { parcourirRappels } from './parcours-rappels-navigateur.mjs'
 import { parcourirInterface } from './parcours-interface-navigateur.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
@@ -33,6 +34,8 @@ const collegue = '22222222-2222-4222-8222-222222222222'
 let filtreDossiers = new URLSearchParams()
 let preference = { mode: 'tous', revision: null },
   conflitPreference = false
+let reglagesRappels = { relance_jours: 0, echeance_jours: 0, revision: null },
+  conflitRappels = false
 let responsable = null,
   revisionResponsable = null,
   conflitResponsable = false,
@@ -52,7 +55,26 @@ const api = createServer(async (req, res) => {
       { id, nom: 'Agence fictive', domaine: 'example.invalid', statut: 'verifiee', seuil_ratio: 3 },
     ]
   else if (path.endsWith('/membres_agence')) valeur = [{ role: roleCourant }]
-  else if (path.endsWith('/rpc/mes_preferences_notifications')) valeur = [preference]
+  else if (path.endsWith('/rpc/reglages_rappels_agence'))
+    valeur = roleCourant === 'admin' ? [reglagesRappels] : []
+  else if (path.endsWith('/rpc/regler_rappels')) {
+    assert([0, 3, 7, 14].includes(entree.relance))
+    assert([0, 3, 7].includes(entree.echeance))
+    if (
+      roleCourant !== 'admin' ||
+      conflitRappels ||
+      entree.revision_attendue !== reglagesRappels.revision
+    )
+      valeur = null
+    else {
+      reglagesRappels = {
+        relance_jours: entree.relance,
+        echeance_jours: entree.echeance,
+        revision: randomUUID(),
+      }
+      valeur = reglagesRappels.revision
+    }
+  } else if (path.endsWith('/rpc/mes_preferences_notifications')) valeur = [preference]
   else if (path.endsWith('/rpc/regler_notifications')) {
     assert(['tous', 'mes', 'aucun'].includes(entree.le_mode))
     if (conflitPreference || entree.revision_attendue !== preference.revision) valeur = null
@@ -238,6 +260,8 @@ try {
         responsable = null
         preference = { mode: 'tous', revision: null }
         conflitPreference = false
+        reglagesRappels = { relance_jours: 0, echeance_jours: 0, revision: null }
+        conflitRappels = false
         revisionResponsable = null
         conflitResponsable = false
         roleCourant = 'admin'
@@ -337,6 +361,14 @@ try {
           roleCourant = 'admin'
           await parcourirPreferences(page, relais.site, moteur, largeur, (v) => {
             conflitPreference = v
+          })
+          await parcourirRappels(page, relais.site, moteur, largeur, {
+            conflit: (v) => {
+              conflitRappels = v
+            },
+            role: (v) => {
+              roleCourant = v
+            },
           })
           await parcourirInterface(page, relais.site, id, moteur, largeur, session)
         } finally {

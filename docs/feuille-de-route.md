@@ -299,3 +299,10 @@ sur main 6a937c4 : CI main 34523159070 verte, 1176 tests Linux. La reprise du
 personnelles de notifications, avec choix Tous, Mes dossiers ou Aucun suivi.
 Voir [le guide](exploitation/preferences-notifications.md) et ADR 0011.
 Les relances automatiques et les rappels d'echeance restent des lots distincts.
+
+La PR106 est livree sur main 423829b avec 0051 appliquee, 1202 tests Linux et
+CI main 34578597259 verte. Le lot 0052 prepare les relances facultatives du
+garant et les alertes d'echeance agence, avec quotas et annulation des rappels
+obsoletes. Voir [le guide](exploitation/rappels-dossiers.md) et ADR 0012 ;
+sa PR consigne les verifications et l'application effective. Aucun reglage
+n'est active automatiquement et aucun courriel fournisseur reel n'est teste.

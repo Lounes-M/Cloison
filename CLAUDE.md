@@ -218,3 +218,9 @@ artistique. Le lot suivant prepare les preferences personnelles de notifications
 avec 0051 ; voir ADR 0011, le guide et sa PR pour l'application effective.
 Universign : Lounes attend les acces developpeur. Le socle d'authentification
 est livre, mais aucune signature ou facturation agence n'est activee.
+
+Actualisation : PR106 fusionnee en 423829b, 0051 appliquee et immuable, CI main
+34578597259 et supervision 34578794994 vertes, 1202 tests Linux. Les preferences
+personnelles sont livrees. Le lot 0052 ajoute les rappels facultatifs et leurs
+reglages administrateur ; ADR 0012 et guide rappels-dossiers. Consulter sa PR
+pour le deploiement effectif. Desactive par defaut, aucun lien renouvele.

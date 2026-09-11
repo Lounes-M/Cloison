@@ -2,6 +2,7 @@ import { secretCorrect } from '@/lib/exploitation/autorisation-cron'
 import { NextResponse } from 'next/server'
 import { clientServeur } from '@/lib/acces/serveur'
 import { livrerNotifications } from '@/lib/courriels/notifications'
+import { preparerRappels } from '@/lib/courriels/rappels'
 import { livrerLiens } from '@/lib/courriels/livraison-liens'
 import { distribuerCourriels } from '@/lib/courriels/file'
 import { purgerCoffres } from '@/lib/exploitation/purge'
@@ -56,6 +57,15 @@ export async function GET(request: Request) {
     console.error('[maintenance] notifications indisponibles')
   }
   notifications.echecs += echecsLiens
+  try {
+    const budget = AbortSignal.timeout(6_000)
+    notifications.echecs += compteur(
+      (await preparerRappels(await clientServeur(budget), budget)).echecs,
+    )
+  } catch {
+    console.error('[maintenance] rappels indisponibles')
+    notifications.echecs++
+  }
   const courriels = await executerLot('courriels', async () => {
     const budget = AbortSignal.timeout(18_000)
     return distribuerCourriels(await clientServeur(budget), undefined, budget)

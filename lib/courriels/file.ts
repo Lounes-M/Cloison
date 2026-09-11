@@ -20,6 +20,19 @@ export async function distribuerCourriels(
   let traites = 0
   for (const message of data ?? []) {
     signal?.throwIfAborted()
+    if (message.rappel_id) {
+      const { data: etatRappel, error: erreurRappel } = await db.rpc(
+        'confirmer_rappel_avant_envoi',
+        {
+          identifiant: message.id,
+          le_bail: message.bail,
+        },
+      )
+      if (erreurRappel || etatRappel !== 'pret') {
+        if (erreurRappel || etatRappel !== 'annule') echecs++
+        continue
+      }
+    }
     let reussi = false
     let referenceFournisseur: string | null = null
     try {
