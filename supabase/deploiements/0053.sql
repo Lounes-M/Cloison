@@ -19,7 +19,7 @@ create table public.suivi_demandes_droits (
  unique(operation,demande),
  foreign key(precedente,demande) references public.suivi_demandes_droits(operation,demande) on delete cascade,
  check(isfinite(recu_le) and isfinite(repondre_avant) and isfinite(effacer_le)),
- check(recu_le>='1970-01-01'::timestamptz and repondre_avant>=recu_le and effacer_le>=repondre_avant),
+ check(extract(epoch from recu_le)>=0 and repondre_avant>=recu_le and effacer_le>=repondre_avant),
  check(precedente is null or precedente<>operation)
 );
 create unique index droits_premiere_etape on public.suivi_demandes_droits(demande) where precedente is null;
@@ -98,5 +98,5 @@ revoke all on function public.purger_suivis_droits() from public,anon,authentica
 grant execute on function public.purger_suivis_droits() to serveur;
 notify pgrst,'reload schema';
 
-do $controle$ begin if public.empreinte_schema() <> '{"version":1,"empreintes":{"roles":"cbf8d0c121b9acdc52e9296b48d68997b5bab79fcf8cd6a0f7c9c89218d4bb9a","bucket":"df5651bc40713202bd865db07e8d6b9046377b65ccea7611c273e6782d99753b","schema":"1882b23bb08a24644785aaa9be96482bd0651cfe68eef70370021fc878850bef","tables":"4300d315a25590f6079b18fd3563f721deb70017295366321b4bbe6708c210dc","indexes":"346e5df875cedd7f48664b57eb6855d06eb2dc37be696ca4de1370a900d13020","colonnes":"a1ee2eee92ffd0e13da1a42445dea0ca09f033a59a5c6d08923aa65e95d46115","stockage":"c40beef08b4b6b283f5736362f2144d3d248dbebf1b130576cc11dd9b3fd772c","adhesions":"1124721a05747b8418dfcb343f00bf1abdb602fd1c0ed965ad8bae8da8c6de13","fonctions":"d643cb572bbfe52e6b8fc8711d1fbafe4bfb3a3bb51754df744040afdc7d5039","politiques":"fc1958c0a80a7d386f5629e970e73384300f3f60e3828c1bc8bf7b7a02d2cd1b","contraintes":"bf208435f1b3c2115f5440bc6da36301c3bdf8bbb04fda01068cdd5c3992a5f1","declencheurs":"062180489eae51d4ad4960568da19cb33eaa0d83611743335ce596dfc9ede731"}}'::jsonb then raise exception 'Schema inattendu : interrompre et examiner';end if;end $controle$;
+do $controle$ begin if public.empreinte_schema() <> '{"version":1,"empreintes":{"roles":"cbf8d0c121b9acdc52e9296b48d68997b5bab79fcf8cd6a0f7c9c89218d4bb9a","bucket":"df5651bc40713202bd865db07e8d6b9046377b65ccea7611c273e6782d99753b","schema":"1882b23bb08a24644785aaa9be96482bd0651cfe68eef70370021fc878850bef","tables":"4300d315a25590f6079b18fd3563f721deb70017295366321b4bbe6708c210dc","indexes":"346e5df875cedd7f48664b57eb6855d06eb2dc37be696ca4de1370a900d13020","colonnes":"a1ee2eee92ffd0e13da1a42445dea0ca09f033a59a5c6d08923aa65e95d46115","stockage":"c40beef08b4b6b283f5736362f2144d3d248dbebf1b130576cc11dd9b3fd772c","adhesions":"1124721a05747b8418dfcb343f00bf1abdb602fd1c0ed965ad8bae8da8c6de13","fonctions":"d643cb572bbfe52e6b8fc8711d1fbafe4bfb3a3bb51754df744040afdc7d5039","politiques":"fc1958c0a80a7d386f5629e970e73384300f3f60e3828c1bc8bf7b7a02d2cd1b","contraintes":"9060ee723f8506143dbc9430dfc8f55066d3d9ff88b6dc5c375551973dffdcd9","declencheurs":"062180489eae51d4ad4960568da19cb33eaa0d83611743335ce596dfc9ede731"}}'::jsonb then raise exception 'Schema inattendu : interrompre et examiner';end if;end $controle$;
 commit;

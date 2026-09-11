@@ -15,7 +15,7 @@ create table public.suivi_demandes_droits (
  unique(operation,demande),
  foreign key(precedente,demande) references public.suivi_demandes_droits(operation,demande) on delete cascade,
  check(isfinite(recu_le) and isfinite(repondre_avant) and isfinite(effacer_le)),
- check(recu_le>='1970-01-01'::timestamptz and repondre_avant>=recu_le and effacer_le>=repondre_avant),
+ check(extract(epoch from recu_le)>=0 and repondre_avant>=recu_le and effacer_le>=repondre_avant),
  check(precedente is null or precedente<>operation)
 );
 create unique index droits_premiere_etape on public.suivi_demandes_droits(demande) where precedente is null;

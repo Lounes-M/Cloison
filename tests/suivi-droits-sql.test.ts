@@ -29,6 +29,18 @@ test('la RLS cache les lignes meme apres un grant accidentel', async () => {
   )
   expect((await db.query('select * from suivi_demandes_droits')).rows).toEqual([])
 })
+test('le catalogue garde la meme empreinte en UTC et en Europe Paris', async () => {
+  await db.exec("set local timezone='UTC'")
+  const utc = (await db.query('select public.empreinte_schema() empreinte')).rows[0]
+  await db.exec("set local timezone='Europe/Paris'")
+  expect((await db.query('select public.empreinte_schema() empreinte')).rows[0]).toEqual(utc)
+})
+test('la borne de reception precedant 1970 est refusee meme avec un fuseau local', async () => {
+  await db.exec("set local timezone='Europe/Paris'")
+  await expect(
+    etape('recue', null, randomUUID(), { recu: '1969-12-31T23:30:00Z' }),
+  ).rejects.toThrow(/check constraint/)
+})
 async function etape(
   etat = 'recue',
   precedente: string | null = null,
