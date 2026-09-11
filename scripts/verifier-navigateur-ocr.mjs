@@ -225,6 +225,7 @@ const next = spawn(
       SUPABASE_JWT_SECRET: 'fixture',
       OCR_ACTIVE: 'true',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',
+      EMAIL_SUPPORT: 'support@example.invalid',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   },

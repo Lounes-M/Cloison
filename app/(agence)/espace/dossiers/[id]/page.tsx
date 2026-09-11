@@ -1,4 +1,5 @@
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
+import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
 import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
 import { ResponsableDossier } from '@/components/dossiers/ResponsableDossier'
@@ -388,6 +389,7 @@ export default async function PageDossier({
       <p className="text-muted mt-10 text-[13px] font-medium">
         Ouvert le {date(d.cree_le)}, expire le {date(d.expire_le)}.
       </p>
+      <SupportDossier reference={String(d.reference)} espace="agence" />
     </div>
   )
 }
