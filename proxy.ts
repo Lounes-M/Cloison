@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { env } from '@/lib/env'
+import { fetchAgence } from '@/lib/http/fetch-agence'
 import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
 
 /**
@@ -54,6 +55,7 @@ export async function proxy(requete: NextRequest) {
     // echouer bruyamment, pas se replier sur une chaine vide qui produirait
     // une erreur reseau incomprehensible trois appels plus loin.
     const supabase = createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+      global: { fetch: fetchAgence },
       cookies: {
         getAll: () => requete.cookies.getAll(),
         setAll: (aPoser) => {

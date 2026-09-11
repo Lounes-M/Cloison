@@ -47,9 +47,11 @@ for (const chemin of ['/espace/dossiers', '/connexion/securite']) {
     const ancienne = session(maintenant - 60, 'ancien-fictif')
     const nouvelle = session(maintenant + 3600, 'nouveau-fictif')
     const appels: string[] = []
+    const signaux: Array<AbortSignal | null | undefined> = []
     vi.stubGlobal(
       'fetch',
       vi.fn(async (url: string, options: RequestInit) => {
+        signaux.push(options.signal)
         const chemin = new URL(url).pathname
         appels.push(chemin)
         if (chemin === '/auth/v1/token') {
@@ -79,6 +81,8 @@ for (const chemin of ['/espace/dossiers', '/connexion/securite']) {
     )
     expect(appels.filter((chemin) => chemin === '/auth/v1/token')).toHaveLength(1)
     expect(appels).toContain('/auth/v1/user')
+    expect(signaux.length).toBeGreaterThan(0)
+    for (const signal of signaux) expect(signal).toBeInstanceOf(AbortSignal)
     expect(reponse.headers.get('content-security-policy')).toContain("'nonce-")
   })
 }

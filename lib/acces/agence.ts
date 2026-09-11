@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 import { env } from '@/lib/env'
+import { fetchAgence } from '@/lib/http/fetch-agence'
 
 /**
  * La session d'un collaborateur d'agence.
@@ -41,6 +42,7 @@ export async function clientAgence() {
   const magasin = await cookies()
 
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+    global: { fetch: fetchAgence },
     cookies: {
       getAll: () => magasin.getAll(),
       setAll: (aPoser) => {
