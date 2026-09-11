@@ -47,6 +47,6 @@ set local role authenticated;
 do $expire$ begin if exists(select 1 from public.historique_responsables_du_dossier(current_setting('cloison.historique_dossier')::uuid)) then raise exception 'Historique expire lisible';end if;end $expire$;
 reset role;
 set local role serveur;
-select public.purger_historique_responsables();
+do $appel$ begin perform public.purger_historique_responsables();end $appel$;
 reset role;
 do $purge$ begin if exists(select 1 from public.historique_responsables where dossier_id=current_setting('cloison.historique_dossier')::uuid) then raise exception 'Historique expire conserve';end if;end $purge$;
