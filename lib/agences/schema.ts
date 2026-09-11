@@ -8,7 +8,7 @@ import { z } from 'zod'
  * confort d'interface : n'importe qui peut poster directement sur l'action.
  */
 
-// Ce module est le seul de zod a partir dans un bundle client. Par defaut,
+// Ce schema partage part dans un bundle client. Par defaut,
 // zod sonde `new Function('')` au premier objet valide, pour compiler ses
 // schemas ; sous la Content-Security-Policy du site, le navigateur refuse et
 // le signale, meme si zod rattrape l'erreur. `jitless` supprime la sonde. Le

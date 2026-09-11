@@ -1,4 +1,5 @@
 import { Complements } from '@/components/dossiers/Complements'
+import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { type Complement } from '@/lib/content/complements'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -343,6 +344,7 @@ export default async function PageGarant({
           </p>
         )}
       </section>
+      <SupportDossier reference={String(dossier.reference)} espace="garant" />
     </div>
   )
 }

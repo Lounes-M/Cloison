@@ -224,3 +224,8 @@ Actualisation : PR106 fusionnee en 423829b, 0051 appliquee et immuable, CI main
 personnelles sont livrees. Le lot 0052 ajoute les rappels facultatifs et leurs
 reglages administrateur ; ADR 0012 et guide rappels-dossiers. Consulter sa PR
 pour le deploiement effectif. Desactive par defaut, aucun lien renouvele.
+
+PR107 : main 8cfefbd, 0052 appliquee et immuable ; CI de PR 34582602157 verte,
+1285 tests Linux et sept configurations navigateur. Rappels desactives par defaut.
+Le lot support contextuel prepare un courriel avec reference et categorie dans
+les trois espaces ; EMAIL_SUPPORT requis, aucun envoi automatique ni ticket cree.

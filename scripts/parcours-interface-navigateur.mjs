@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { SignJWT } from 'jose'
 import { createHmac } from 'node:crypto'
+import { parcourirSupport } from './parcours-support-navigateur.mjs'
 
 async function verifierSurface(page) {
   const couleurs = await page
@@ -61,6 +62,7 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
   await visiter(`/espace/dossiers/${id}`, 'dossier')
+  await parcourirSupport(page, moteur, largeur, 'agence')
   await visiter('/connexion', 'connexion')
   await visiter('/demarrer', 'demarrer')
   await visiter('/lien-invalide', 'lien-invalide')
@@ -83,6 +85,7 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
       .sign(new TextEncoder().encode('fixture'))
     await contexte.addCookies([{ name: 'cloison_capacite', value: jwt, url: site, httpOnly: true }])
     await visiter('/' + partie, partie)
+    await parcourirSupport(page, moteur, largeur, partie)
     assert.equal(new URL(page.url()).pathname, '/' + partie, 'Le parcours porteur doit etre rendu')
   }
   const encoder = (v) => Buffer.from(JSON.stringify(v)).toString('base64url')

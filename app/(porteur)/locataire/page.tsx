@@ -1,4 +1,5 @@
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
+import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -217,6 +218,7 @@ export default async function PageLocataire({
       </section>
 
       <p className="text-muted mt-10 text-[13px] font-medium">{espace.expire(expire)}</p>
+      <SupportDossier reference={String(dossier.reference)} espace="locataire" />
     </div>
   )
 }

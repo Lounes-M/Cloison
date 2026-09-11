@@ -306,3 +306,9 @@ garant et les alertes d'echeance agence, avec quotas et annulation des rappels
 obsoletes. Voir [le guide](exploitation/rappels-dossiers.md) et ADR 0012 ;
 sa PR consigne les verifications et l'application effective. Aucun reglage
 n'est active automatiquement et aucun courriel fournisseur reel n'est teste.
+
+La PR107 est fusionnee sur main 8cfefbd : 0052 appliquee et droits reels verifies,
+1285 tests Linux et sept parcours navigateur verts sur la PR. Les relances et
+alertes restent desactivees par defaut. Le lot suivant ajoute le support
+contextuel aux trois espaces, sans envoi automatique ni collecte de document.
+Voir [le guide](exploitation/support-contextuel.md).

@@ -225,6 +225,7 @@ const next = spawn(
       SUPABASE_JWT_SECRET: 'fixture',
       OCR_ACTIVE: 'true',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',
+      EMAIL_SUPPORT: 'support@example.invalid',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   },
@@ -313,6 +314,12 @@ try {
             },
           ])
           const page = await contexte.newPage()
+          await page.addInitScript(() => {
+            window.__cloisonEvalInterdit = []
+            document.addEventListener('securitypolicyviolation', (e) => {
+              if (e.blockedURI === 'eval') window.__cloisonEvalInterdit.push(e.violatedDirective)
+            })
+          })
           page.setDefaultTimeout(10000)
           await page.goto(`${relais.site}/espace/dossiers/${id}`)
           await page.getByText('Aide à la lecture', { exact: true }).click()
