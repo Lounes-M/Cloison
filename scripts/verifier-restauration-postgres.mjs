@@ -12,6 +12,12 @@ import { nouvelleCle, sceller, ouvrir } from '../lib/coffre/enveloppe.ts'
 import { ouvrirAvecTrousseau } from '../lib/coffre/rotation-format.ts'
 import { rescellerEnveloppes } from './resceller-enveloppes.mjs'
 
+import {
+  preparerParcoursRestauration,
+  verifierParcoursRestaures,
+  verifierEffacementsRestaures,
+} from './fixtures-restauration-parcours.mjs'
+
 const sha256 = (contenu) => createHash('sha256').update(contenu).digest('hex')
 const NOM_BASE = 'cloison_restauration_test'
 const ROLES_FIXTURE = [
@@ -24,6 +30,10 @@ const ROLES_FIXTURE = [
   'depot_piece',
 ]
 const CATALOGUES = {
+  declencheurs: `select n.nspname,c.relname,t.tgname,t.tgenabled,pg_get_triggerdef(t.oid) as definition
+    from pg_trigger t join pg_class c on c.oid=t.tgrelid
+    join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname in ('public','auth','storage') and not t.tgisinternal order by 1,2,3`,
   tables: `select n.nspname,c.relname,pg_get_userbyid(c.relowner) as proprietaire,
     c.relrowsecurity,c.relforcerowsecurity,
     (select jsonb_agg(a::text order by a::text) from unnest(coalesce(c.relacl,
@@ -281,6 +291,7 @@ export async function verifierRestaurationPostgres(configuration) {
         [id, partie, jti],
       )
     }
+    const parcours = await preparerParcoursRestauration(source, id, garant, kek, original)
     const attendu = await photographier(source)
     const dump = exporter('pg_dump', ['--dbname', NOM_BASE, '--format=custom', '--compress=0'])
     const rolesSql = exporter('pg_dumpall', [
@@ -292,6 +303,8 @@ export async function verifierRestaurationPostgres(configuration) {
     assert(!/PASSWORD\s+'/i.test(rolesSql), 'Export de mots de passe refuse')
     const exportLocal = join(repertoire, 'export')
     await mkdir(join(exportLocal, 'objets', id), { recursive: true })
+    await mkdir(join(exportLocal, 'objets', parcours.dossier), { recursive: true })
+    await writeFile(join(exportLocal, 'objets', parcours.chemin), parcours.chiffre)
     await writeFile(join(exportLocal, 'base.dump'), dump)
     await writeFile(join(exportLocal, 'objets', chemin), chiffre)
     await writeFile(
@@ -301,7 +314,14 @@ export async function verifierRestaurationPostgres(configuration) {
         formatBase: 'postgres-custom',
         creeLe: new Date().toISOString(),
         base: { taille: dump.length, sha256: sha256(dump) },
-        objets: [{ chemin: `objets/${chemin}`, taille: chiffre.length, sha256: sha256(chiffre) }],
+        objets: [
+          { chemin: `objets/${chemin}`, taille: chiffre.length, sha256: sha256(chiffre) },
+          {
+            chemin: `objets/${parcours.chemin}`,
+            taille: parcours.chiffre.length,
+            sha256: sha256(parcours.chiffre),
+          },
+        ],
         rolesSql,
       }),
     )
@@ -361,14 +381,19 @@ export async function verifierRestaurationPostgres(configuration) {
       await cible.query('set role porteur_lien')
     }
     await devenir('locataire', locataire)
+    assert.equal((await cible.query('select * from public.mon_brouillon_engagement()')).rowCount, 0)
+    assert.equal((await cible.query('select * from provenances_pieces')).rowCount, 0)
     assert.equal((await cible.query('select * from pieces')).rowCount, 0)
     assert.equal((await cible.query('select * from cles_dossier')).rowCount, 0)
     await devenir('garant', randomUUID())
     assert.equal((await cible.query('select * from pieces')).rowCount, 0)
     await devenir('garant', garant)
+    assert.equal((await cible.query('select * from public.mon_brouillon_engagement()')).rowCount, 0)
+    assert.equal((await cible.query('select * from provenances_pieces')).rowCount, 0)
     assert.deepEqual((await cible.query('select chemin from pieces')).rows, [{ chemin }])
-    const cleScellee = (await cible.query('select cle_scellee from cles_dossier')).rows[0]
-      .cle_scellee
+    const cleScellee = (
+      await cible.query('select cle_scellee from cles_dossier where dossier_id=$1', [id])
+    ).rows[0].cle_scellee
     const objet = await readFile(join(extraction, 'objets', chemin))
     assert.equal(sha256(objet), contrat.objets[0].sha256)
     assert.deepEqual(ouvrir(objet, ouvrir(cleScellee, kek)), original)
@@ -378,20 +403,27 @@ export async function verifierRestaurationPostgres(configuration) {
       code: '42501',
     })
     await cible.query('reset role')
+    const objetCopie = await readFile(join(extraction, 'objets', parcours.chemin))
+    await verifierParcoursRestaures(cible, parcours, objetCopie, original, {
+      historique: kek,
+      active: kek,
+      lecture: [],
+    })
     // Rotation de la DEK restauree sur cette seule copie fictive. La source est
     // deja indisponible ; les objets ne sont ni remplaces ni rechiffres.
     const nouvelleKek = nouvelleCle()
     const trousseauRotation = { historique: kek, active: nouvelleKek, lecture: [] }
     const rotation = await rescellerEnveloppes(cible, trousseauRotation, { appliquer: true })
-    assert.equal(rotation.rescellees, 1)
+    assert.equal(rotation.rescellees, 2)
     assert.equal(rotation.echecs, 0)
     assert.equal(rotation.courses, 0)
     assert.equal(
       (await rescellerEnveloppes(cible, trousseauRotation, { appliquer: true })).rescellees,
       0,
     )
-    const copieRotation = (await cible.query('select cle_scellee from cles_dossier')).rows[0]
-      .cle_scellee
+    const copieRotation = (
+      await cible.query('select cle_scellee from cles_dossier where dossier_id=$1', [id])
+    ).rows[0].cle_scellee
     assert.deepEqual(
       ouvrir(
         objet,
@@ -407,10 +439,16 @@ export async function verifierRestaurationPostgres(configuration) {
       sha256(await readFile(join(extraction, 'objets', chemin))),
       contrat.objets[0].sha256,
     )
+    const trousseauApres = { historique: nouvelleCle(), active: nouvelleKek, lecture: [] }
+    await verifierParcoursRestaures(cible, parcours, objetCopie, original, trousseauApres)
+    await verifierEffacementsRestaures(cible, parcours, objetCopie, original, trousseauApres, id)
     // Sabotages sur cette seule copie fictive : chaque verification doit detecter la perte.
     for (const sabotage of [
       'alter table pieces disable row level security',
       'revoke anon from authenticator',
+      'alter table provenances_pieces disable row level security',
+      'drop trigger invalider_brouillon_dossier on dossiers',
+      'alter table dossiers disable trigger invalider_brouillon_dossier',
     ]) {
       await cible.query('begin')
       try {
@@ -428,11 +466,14 @@ export async function verifierRestaurationPostgres(configuration) {
     return {
       tables: attendu.tables.length,
       contraintes: attendu.contraintes.length,
+      declencheurs: attendu.declencheurs.length,
       politiques: attendu.politiques.length,
       fonctions: attendu.fonctions.length,
-      sabotagesRefuses: 3,
+      sabotagesRefuses: 6,
       authFictif: true,
       objetDechiffre: true,
+      brouillonEtCopieRestaures: true,
+      rotationEtEffacementsVerifies: true,
       dureeMs: Date.now() - debut,
     }
   } finally {
@@ -471,7 +512,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     console.log(JSON.stringify(resultat))
   } catch (erreur) {
     if (
-      /^Restauration differente : (tables|contraintes|politiques|fonctions|roles|adhesions)$/.test(
+      /^Restauration differente : (tables|contraintes|politiques|fonctions|roles|adhesions|declencheurs)$/.test(
         erreur?.message ?? '',
       )
     )
