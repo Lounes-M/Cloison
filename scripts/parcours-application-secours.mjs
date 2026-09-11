@@ -49,7 +49,7 @@ export async function parcourirApplicationSecours(page, site, moteur, largeur, f
     await preparer.click()
     await page.locator('code').waitFor()
     assert.notEqual(fixture.facteurs()[1].id, ancienne)
-    const code = page.getByLabel('Code à six chiffres', { exact: true })
+    const code = page.locator('#code-secours')
     await code.fill('123456')
     await page.getByRole('button', { name: 'Vérifier le code', exact: true }).click()
     await page.getByRole('alert').filter({ hasText: 'Code non confirmé.' }).waitFor()
@@ -68,6 +68,16 @@ export async function parcourirApplicationSecours(page, site, moteur, largeur, f
       .filter({ hasText: 'Au moins deux applications sont vérifiées.' })
       .waitFor()
     assert.equal(await preparer.count(), 0)
+    const applications = page.getByRole('region', { name: 'Vos applications vérifiées' })
+    assert.equal(await applications.getByRole('listitem').count(), 2)
+    const test = applications.getByRole('listitem').last()
+    await test.getByLabel('Code à six chiffres', { exact: true }).fill('123456')
+    await test.getByRole('button', { name: 'Tester cette application', exact: true }).click()
+    await test
+      .getByRole('status')
+      .filter({ hasText: 'Le code de cette application a été confirmé.' })
+      .waitFor()
+    assert.equal(fixture.facteurs().length, 2, 'Le test ne supprime aucun facteur')
     assert.equal(fixture.facteurs().filter((f) => f.status === 'verified').length, 2)
     console.log(
       `OK : application secours ${moteur.name()} ${largeur}, preparation, rechargement, annulation, erreur et confirmation`,

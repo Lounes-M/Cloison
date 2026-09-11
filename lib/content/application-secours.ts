@@ -1,4 +1,13 @@
 export const applicationSecours = {
+  inventaire: 'Vos applications vérifiées',
+  verifiee: 'Vérifiée',
+  tester: 'Tester cette application',
+  testReussi: 'Le code de cette application a été confirmé.',
+  aideTest:
+    'Testez un code de votre appareil de secours avant de compter sur lui. La vérification peut déconnecter les autres sessions.',
+  perte:
+    'Si vous avez perdu tous vos appareils, contactez le support depuis le canal habituel. Une simple adresse e-mail ne suffit pas à rétablir un accès. La suppression des applications vérifiées reste indisponible.',
+  incertain: 'Le résultat ne peut pas être confirmé. Actualisez la page avant de recommencer.',
   titre: 'Application de secours',
   aide: 'Ajoutez une seconde application sur un autre appareil pour pouvoir vous connecter si votre appareil habituel est perdu.',
   precaution:
