@@ -12,6 +12,7 @@ import { parcourirHistoriqueResponsables } from './parcours-historique-responsab
 import { parcourirPreferences } from './parcours-preferences-navigateur.mjs'
 import { parcourirRappels } from './parcours-rappels-navigateur.mjs'
 import { parcourirInterface } from './parcours-interface-navigateur.mjs'
+import { parcourirChoixMfa } from './parcours-choix-mfa.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
 const id = '11111111-1111-4111-8111-111111111111',
@@ -43,6 +44,8 @@ let responsable = null,
   roleCourant = 'admin'
 let historiqueResponsables = [],
   panneHistorique = false
+let demandesMfa = [],
+  erreurMfa = true
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
@@ -52,7 +55,27 @@ const api = createServer(async (req, res) => {
     path = url.pathname
   let valeur = []
   if (path === '/auth/v1/user') valeur = user
-  else if (path.endsWith('/rpc/rejoindre_ou_creer_agence')) valeur = id
+  else if (/^\/auth\/v1\/factors\/[^/]+\/challenge$/.test(path)) {
+    demandesMfa.push(path.split('/')[4])
+    valeur = { id, type: 'totp', expires_at: maintenant + 300 }
+  } else if (/^\/auth\/v1\/factors\/[^/]+\/verify$/.test(path)) {
+    assert.equal(path.split('/')[4], demandesMfa.at(-1))
+    assert.equal(entree.code, '123456')
+    if (erreurMfa) {
+      res
+        .writeHead(422)
+        .end(JSON.stringify({ error_code: 'mfa_verification_failed', msg: 'Code fictif refuse' }))
+      return
+    }
+    valeur = {
+      access_token: jeton,
+      refresh_token: 'fictif',
+      expires_in: 3600,
+      expires_at: maintenant + 3600,
+      token_type: 'bearer',
+      user,
+    }
+  } else if (path.endsWith('/rpc/rejoindre_ou_creer_agence')) valeur = id
   else if (path.endsWith('/agences'))
     valeur = [
       { id, nom: 'Agence fictive', domaine: 'example.invalid', statut: 'verifiee', seuil_ratio: 3 },
@@ -421,6 +444,17 @@ try {
             },
           })
           await parcourirInterface(page, relais.site, id, moteur, largeur, session)
+          await parcourirChoixMfa(page, relais.site, moteur, largeur, {
+            preparer: (facteurs) => {
+              user.factors = facteurs
+              demandesMfa = []
+              erreurMfa = true
+            },
+            demandes: () => demandesMfa,
+            accepter: () => {
+              erreurMfa = false
+            },
+          })
         } finally {
           await contexte.close()
         }

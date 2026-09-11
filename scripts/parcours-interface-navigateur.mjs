@@ -17,9 +17,11 @@ async function verifierSurface(page) {
       return {
         fond: getComputedStyle(el).backgroundColor,
         attendu: `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`,
+        defilement: getComputedStyle(document.documentElement).scrollBehavior,
       }
     })
   assert.equal(couleurs.fond, couleurs.attendu, 'Le fond de marque est absent')
+  assert.equal(couleurs.defilement, 'auto', 'Le defilement applicatif doit rester immediat')
 }
 
 /** Rendus et acces clavier sur les pages reelles, donnees du faux fournisseur local. */
@@ -58,6 +60,15 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
     })
     await verifierSurface(page)
     console.log('OK : disparition de la palette detectee par contre-preuve navigateur')
+    await page.evaluate(() => {
+      document.documentElement.style.scrollBehavior = 'smooth'
+    })
+    await assert.rejects(verifierSurface(page), /Le defilement applicatif doit rester immediat/)
+    await page.evaluate(() => {
+      document.documentElement.style.removeProperty('scroll-behavior')
+    })
+    await verifierSurface(page)
+    console.log('OK : retour du defilement anime detecte par contre-preuve navigateur')
   }
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')

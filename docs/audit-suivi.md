@@ -5,14 +5,14 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 11 septembre 2026, apres PR110 et PR111
+## Etat courant au 11 septembre 2026, apres PR112
 
-Main 3fb8f1e integre les preferences, rappels facultatifs, support contextuel,
-proxy Next.js et suivi prive des demandes de droits. Les migrations jusqu'a
-0053 sont appliquees et immuables. La PR110 passe 1393 tests Linux, les roles
-PostgreSQL reels et sept configurations navigateur. La production et sa
-supervision sont verifiees ; les CI main de chaque livraison sont consignees
-sur les PR correspondantes.
+Main f0054ee integre les preferences, rappels facultatifs, support contextuel,
+proxy Next.js, suivi prive des demandes de droits et historique des affectations.
+Les migrations jusqu'a 0054 sont appliquees et immuables. La PR112 passe 1454
+tests Linux, les roles PostgreSQL reels et sept configurations navigateur.
+CI main 34593915267, production et supervision 34594193548 sont vertes.
+Les preuves de chaque livraison sont consignees sur les PR correspondantes.
 
 | Sujet     | Etat                                                                  | Limite restante                                                        |
 | --------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -28,6 +28,11 @@ dossier, meme signe. Voir [le guide](exploitation/historique-responsables.md) ; 
 PR consigne repetitions SQL, contre-preuves, application et verification finale.
 La presentation est testee au clavier et sur plusieurs tailles, sans revendiquer
 un audit WCAG exhaustif ni attribuer une note globale de conformite.
+
+Le choix d'un facteur MFA secondaire deja verifie et la reprise apres code
+refuse sont decrits dans [le guide](exploitation/choix-facteur-mfa.md). La PR
+consigne sa validation ; l'ajout d'un facteur de secours et la perte de tous
+les facteurs restent des lots distincts.
 
 ## Historique au 10 septembre 2026, apres PR104
 
