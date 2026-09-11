@@ -8,7 +8,7 @@ export function FormulairePreferences({ courante }: { courante: PreferenceNotifi
   } as EtatPreferences)
   const id = useId()
   return (
-    <form action={envoyer} className="grid min-w-0 gap-4">
+    <form action={envoyer} autoComplete="off" className="grid min-w-0 gap-4">
       <input type="hidden" name="revision" value={courante.revision ?? ''} />
       <label htmlFor={id} className="font-semibold">
         {t.choix}
