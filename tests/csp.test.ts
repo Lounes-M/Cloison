@@ -107,15 +107,15 @@ describe('aucune page de l applicatif ne tombe sous la politique du site public'
       .sort()
   }
 
-  /** Le `matcher` du middleware, tel que Next le lit : ecrit en clair. */
+  /** Le `matcher` du proxy, tel que Next le lit : ecrit en clair. */
   function segmentsDuMiddleware(): string[] {
-    const source = readFileSync(join(racine, 'middleware.ts'), 'utf8')
+    const source = readFileSync(join(racine, 'proxy.ts'), 'utf8')
     const bloc = /matcher:\s*\[([^\]]*)\]/.exec(source)
-    expect(bloc, 'le matcher du middleware doit etre un tableau litteral').not.toBeNull()
+    expect(bloc, 'le matcher du proxy doit etre un tableau litteral').not.toBeNull()
     return [...bloc![1]!.matchAll(/'\/([^/']+)\/:path\*'/g)].map((m) => m[1]!).sort()
   }
 
-  test('la liste, le middleware et les dossiers disent la meme chose', () => {
+  test('la liste, le proxy et les dossiers disent la meme chose', () => {
     const attendus = [...SEGMENTS_APPLICATIFS].sort()
     expect(segmentsSurLeDisque()).toEqual(attendus)
     expect(segmentsDuMiddleware()).toEqual(attendus)

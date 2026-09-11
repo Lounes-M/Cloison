@@ -35,7 +35,7 @@ import { env } from '@/lib/env'
  *
  * L'ecriture est enveloppee : dans un composant serveur, Next interdit de
  * poser un cookie, et l'exception n'a rien a nous apprendre. Le rafraichissement
- * a lieu dans le middleware, ou l'ecriture est permise.
+ * a lieu dans le proxy, ou l'ecriture est permise.
  */
 export async function clientAgence() {
   const magasin = await cookies()
@@ -47,7 +47,7 @@ export async function clientAgence() {
         try {
           for (const { name, value, options } of aPoser) magasin.set(name, value, options)
         } catch {
-          // Composant serveur : le middleware s'en charge.
+          // Composant serveur : le proxy s'en charge.
         }
       },
     },

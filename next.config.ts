@@ -187,9 +187,9 @@ const nextConfig: NextConfig = {
       },
       {
         // Le site public seulement : l'applicatif recoit sa politique, avec
-        // nonce, du middleware. Deux en-tetes CSP sur la meme reponse
+        // nonce, du proxy. Deux en-tetes CSP sur la meme reponse
         // s'appliqueraient tous les deux, et le site public n'a pas de nonce a
-        // offrir ; on exclut donc ici exactement ce que le middleware couvre.
+        // offrir ; on exclut donc ici exactement ce que le proxy couvre.
         source: `/((?!(?:${SEGMENTS_APPLICATIFS.join('|')})(?:/|$)).*)`,
         headers: [{ key: 'Content-Security-Policy', value: politiqueStatique() }],
       },
