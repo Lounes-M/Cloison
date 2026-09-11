@@ -104,11 +104,12 @@ export async function verifierRappels(db, connexion) {
   } finally {
     await db.query(definition)
     await db.query('delete from dossiers where agence_id=any($1::uuid[])', [[f.agence, autre]])
-    await db.query(
-      'delete from auth.users where id in(select utilisateur_id from membres_agence where agence_id=$1)',
-      [f.agence],
-    )
+    const utilisateurs = (
+      await db.query('select utilisateur_id from membres_agence where agence_id=$1', [f.agence])
+    ).rows.map((r) => r.utilisateur_id)
+    // La suppression du parent autorise la cascade du dernier administrateur.
     await db.query('delete from agences where id=any($1::uuid[])', [[f.agence, autre]])
+    await db.query('delete from auth.users where id=any($1::uuid[])', [utilisateurs])
   }
   assert.equal(
     (await db.query("select pg_get_functiondef('public.programmer_rappels()'::regprocedure) texte"))
