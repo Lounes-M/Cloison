@@ -1,3 +1,7 @@
+import {
+  fixtureReutilisation,
+  parcourirReutilisation,
+} from './parcours-reutilisation-navigateur.mjs'
 import { parcourirBrouillon } from './parcours-brouillon-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
@@ -58,10 +62,13 @@ let historiqueResponsables = [],
   panneHistorique = false
 let demandesMfa = [],
   erreurMfa = true
+const reutilisation = await fixtureReutilisation(id)
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
-  const entree = blocs.length ? JSON.parse(Buffer.concat(blocs).toString('utf8')) : {}
+  const brut = Buffer.concat(blocs)
+  if (reutilisation.traiter(req, res, brut)) return
+  const entree = blocs.length ? JSON.parse(brut.toString('utf8')) : {}
   res.setHeader('Content-Type', 'application/json')
   const url = new URL(req.url, 'http://127.0.0.1'),
     path = url.pathname
@@ -504,6 +511,7 @@ try {
             },
             lire: () => brouillon,
           })
+          await parcourirReutilisation(page, relais.site, moteur, largeur, reutilisation)
           await parcourirChoixMfa(page, relais.site, moteur, largeur, {
             preparer: (facteurs) => {
               user.factors = facteurs
