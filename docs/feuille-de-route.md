@@ -319,3 +319,11 @@ Le lot 0053 prepare le suivi prive des demandes de droits avec revisions, outils
 operateur et retention bornee. Voir ADR0013 et le guide de suivi des demandes.
 Il ne realise ni export personnel ni effacement individuel de coffre ; la PR
 consigne les repetitions, l'application SQL et les validations effectives.
+
+La PR110 est fusionnee sur main 3fb8f1e : 0053 appliquee, 1393 tests Linux dans
+la CI de PR et supervision de production verte. Le lot 0054 ajoute l'historique
+des affectations, reserve a l'agence et purge a l'echeance du dossier, meme
+signe. Voir le [guide](exploitation/historique-responsables.md) et ADR0014 ; sa PR
+consigne les repetitions, l'application SQL et les validations effectives.
+L'export personnel et l'effacement individuel de coffre restent distincts du
+registre prive des demandes de droits.

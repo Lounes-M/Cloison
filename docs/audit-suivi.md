@@ -5,7 +5,31 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 10 septembre 2026, apres PR104
+## Etat courant au 11 septembre 2026, apres PR110 et PR111
+
+Main 3fb8f1e integre les preferences, rappels facultatifs, support contextuel,
+proxy Next.js et suivi prive des demandes de droits. Les migrations jusqu'a
+0053 sont appliquees et immuables. La PR110 passe 1393 tests Linux, les roles
+PostgreSQL reels et sept configurations navigateur. La production et sa
+supervision sont verifiees ; les CI main de chaque livraison sont consignees
+sur les PR correspondantes.
+
+| Sujet     | Etat                                                                  | Limite restante                                                        |
+| --------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Documents | Complements, examen humain versionne, OCR facultatif et rasterisation | Aucun diagnostic automatique d'authenticite ; OCR desactive par defaut |
+| Equipe    | Collaborateurs, affectations, preferences et rappels facultatifs      | Multi-etablissements et integrations partenaires reelles ouverts       |
+| Support   | Courriel contextuel minimal prepare dans les trois espaces            | Aucun ticket ou envoi automatique ; adresse support a configurer       |
+| Droits    | Registre operateur prive, revisions et retention                      | Export personnel et effacement individuel de coffre a construire       |
+| Paiements | Registre, rapprochement, diagnostic et decisions operateur            | Corrections financieres automatiques et facturation agence ouvertes    |
+| Signature | Authentification des notifications preparee                           | Acces Universign, modele valide et parcours complet encore attendus    |
+
+Le lot 0054 ajoute l'historique des affectations et sa purge a l'echeance du
+dossier, meme signe. Voir [le guide](exploitation/historique-responsables.md) ; sa
+PR consigne repetitions SQL, contre-preuves, application et verification finale.
+La presentation est testee au clavier et sur plusieurs tailles, sans revendiquer
+un audit WCAG exhaustif ni attribuer une note globale de conformite.
+
+## Historique au 10 septembre 2026, apres PR104
 
 Reprise verifiee depuis GitHub, apres le travail sur l'autre ordinateur : PR94 a
 PR103 deja fusionnees, puis PR104 finalisee sur ce poste. Main c786704 integre

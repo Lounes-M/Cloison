@@ -14,6 +14,12 @@ export async function parcourirResponsable(page, site, id, collegue, moteur, lar
   await form.getByRole('button').focus()
   await page.keyboard.press('Enter')
   await section.getByText('Responsable enregistré.', { exact: true }).waitFor()
+  await page.locator('#historique-responsables li').first().waitFor({ state: 'attached' })
+  assert.equal(
+    await page.locator('#historique-responsables li').count(),
+    1,
+    'Premiere affectation non tracee',
+  )
   await section
     .locator('p')
     .filter({ hasText: /^essai@example\.invalid$/ })
