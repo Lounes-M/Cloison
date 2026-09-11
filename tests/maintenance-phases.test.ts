@@ -7,11 +7,13 @@ const doubles = vi.hoisted(() => ({
   courriels: vi.fn(),
   purge: vi.fn(),
   liens: vi.fn(),
+  rappels: vi.fn(),
   rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
 vi.mock('@/lib/courriels/notifications', () => ({ livrerNotifications: doubles.notifications }))
 vi.mock('@/lib/courriels/livraison-liens', () => ({ livrerLiens: doubles.liens }))
+vi.mock('@/lib/courriels/rappels', () => ({ preparerRappels: doubles.rappels }))
 vi.mock('@/lib/courriels/file', () => ({ distribuerCourriels: doubles.courriels }))
 vi.mock('@/lib/exploitation/purge', () => ({ purgerCoffres: doubles.purge }))
 const requete = () =>
@@ -28,6 +30,7 @@ beforeEach(() => {
   doubles.courriels.mockResolvedValue({ traites: 2, echecs: 0 })
   doubles.purge.mockResolvedValue({ traites: 3, echecs: 0 })
   doubles.liens.mockResolvedValue({ echecs: 0 })
+  doubles.rappels.mockResolvedValue({ echecs: 0 })
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -41,7 +44,25 @@ test('la purge precede notifications puis courriels', async () => {
     doubles.notifications.mock.invocationCallOrder[0]!,
   )
   expect(doubles.notifications.mock.invocationCallOrder[0]).toBeLessThan(
+    doubles.rappels.mock.invocationCallOrder[0]!,
+  )
+  expect(doubles.rappels.mock.invocationCallOrder[0]).toBeLessThan(
     doubles.courriels.mock.invocationCallOrder[0]!,
+  )
+})
+
+test('une panne de rappels ne bloque ni la purge ni les autres envois', async () => {
+  doubles.rappels.mockRejectedValue(new Error('ADRESSE_PRIVEE secret-fictif'))
+  const resultat = await GET(requete())
+  expect(resultat.status).toBe(503)
+  const bilan = await resultat.json()
+  expect(bilan.notifications.echecs).toBe(1)
+  expect(doubles.purge).toHaveBeenCalledOnce()
+  expect(doubles.notifications).toHaveBeenCalledOnce()
+  expect(doubles.courriels).toHaveBeenCalledOnce()
+  expect(doubles.rpc).not.toHaveBeenCalled()
+  expect(JSON.stringify([bilan, vi.mocked(console.error).mock.calls])).not.toMatch(
+    /ADRESSE_PRIVEE|secret-fictif/,
   )
 })
 
@@ -69,7 +90,7 @@ test('un budget de purge epuise laisse un budget neuf aux notifications et courr
   expect(bilan.purge.echecs).toBe(1)
   expect(bilan.notifications.echecs).toBe(0)
   expect(bilan.courriels).toEqual({ traites: 1, echecs: 0 })
-  expect(controleurs).toHaveLength(4)
+  expect(controleurs).toHaveLength(5)
 })
 
 for (const phase of ['notifications', 'courriels', 'purge'] as const) {

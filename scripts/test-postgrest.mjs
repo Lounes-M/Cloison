@@ -15,6 +15,7 @@ import { verifierConcurrenceConnecteurs } from './verifier-concurrence-connecteu
 import { verifierConcurrenceExamen } from './verifier-concurrence-examen.mjs'
 import { verifierResponsables } from './verifier-responsables.mjs'
 import { verifierPreferences } from './verifier-preferences.mjs'
+import { verifierRappels } from './verifier-rappels.mjs'
 
 export async function preparerBase(db) {
   await db.query(readFileSync('supabase/essais/harnais-supabase.sql', 'utf8'))
@@ -186,6 +187,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierConcurrenceExamen(db, connexion)
       await verifierResponsables(db, connexion, adresse, secret)
       await verifierPreferences(db, connexion, adresse, secret)
+      await verifierRappels(db, connexion)
       const ocr = spawnSync(process.execPath, ['scripts/verifier-navigateur-ocr.mjs'], {
         stdio: 'inherit',
         timeout: 240000,

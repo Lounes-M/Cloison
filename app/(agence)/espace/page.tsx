@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { connecteurs } from '@/lib/content/connecteurs'
 import { preferences } from '@/lib/content/preferences'
+import { rappels } from '@/lib/content/rappels'
 import {
   responsables as texteResponsables,
   type ResponsableDossier,
@@ -166,6 +167,11 @@ export default async function PageEspace({
       <Link href="/espace/notifications" className="lien-espace mt-5 mr-3">
         {preferences.titre}
       </Link>
+      {role === 'admin' ? (
+        <Link href="/espace/rappels" className="lien-espace mt-5 mr-3">
+          {rappels.titre}
+        </Link>
+      ) : null}
       {role === 'admin' ? (
         <Link href="/espace/connecteurs" className="lien-espace mt-5 mr-3">
           {connecteurs.titre}
