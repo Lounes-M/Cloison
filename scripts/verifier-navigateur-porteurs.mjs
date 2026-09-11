@@ -78,7 +78,7 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
             page.waitForResponse(
               (r) => r.request().method() === 'POST' && new URL(r.url()).pathname === '/garant',
             ),
-            form.locator('button[type="submit"]').press('Enter'),
+            form.locator('button[type="submit"], button:not([type])').press('Enter'),
           ])
           assert.equal(reponse.status(), 200, 'Action navigateur refusee au transport')
           return reponse
