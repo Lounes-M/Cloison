@@ -206,16 +206,22 @@ test('une remise a null directe renouvelle aussi la revision', async () => {
   expect(await affecter(second, r)).toBeNull()
 })
 
-test('la suppression du compte Auth libere le dossier et invalide la revision', async () => {
-  const r = await affecter()
-  await redevenirProprietaire(db)
-  await db.query('delete from auth.users where id=$1', [premier])
-  await devenir(db, 'authenticated', admin)
-  const apres = await lire()
-  expect(apres).toEqual([expect.objectContaining({ responsable_id: null })])
-  expect(apres[0]!.revision).not.toBe(r)
-  expect(await affecter(second, r)).toBeNull()
-})
+test.each(['administrateur', 'compte_supprime'])(
+  'la suppression Auth par %s libere le dossier et invalide la revision',
+  async (acteur) => {
+    const r = await affecter()
+    await redevenirProprietaire(db)
+    await db.query("select set_config('request.jwt.claims',$1,true)", [
+      JSON.stringify({ sub: acteur === 'compte_supprime' ? premier : admin, aal: 'aal2' }),
+    ])
+    await db.query('delete from auth.users where id=$1', [premier])
+    await devenir(db, 'authenticated', admin)
+    const apres = await lire()
+    expect(apres).toEqual([expect.objectContaining({ responsable_id: null })])
+    expect(apres[0]!.revision).not.toBe(r)
+    expect(await affecter(second, r)).toBeNull()
+  },
+)
 test('ne divulgue pas une nouvelle adresse hors agence', async () => {
   await affecter()
   await redevenirProprietaire(db)

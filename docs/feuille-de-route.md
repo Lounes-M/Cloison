@@ -292,3 +292,10 @@ Le lot suivant prepare les responsables de dossiers, les vues Mes dossiers et
 Sans responsable et le filtre par etat, avec 0050. Voir
 [le guide](exploitation/responsables-dossiers.md) et ADR 0010. L'affectation
 organise le suivi sans modifier les droits de consultation ni le statut.
+
+La PR104 est livree avec 0050 appliquee, puis la PR105 harmonise les espaces
+sur main 6a937c4 : CI main 34523159070 verte, 1176 tests Linux. La reprise du
+11 septembre conserve ces changements. Le lot 0051 prepare les preferences
+personnelles de notifications, avec choix Tous, Mes dossiers ou Aucun suivi.
+Voir [le guide](exploitation/preferences-notifications.md) et ADR 0011.
+Les relances automatiques et les rappels d'echeance restent des lots distincts.

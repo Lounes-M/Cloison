@@ -12,6 +12,7 @@ import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { connecteurs } from '@/lib/content/connecteurs'
+import { preferences } from '@/lib/content/preferences'
 import {
   responsables as texteResponsables,
   type ResponsableDossier,
@@ -162,6 +163,9 @@ export default async function PageEspace({
         {role === 'admin' ? ', administrateur' : ''}.
       </p>
 
+      <Link href="/espace/notifications" className="lien-espace mt-5 mr-3">
+        {preferences.titre}
+      </Link>
       {role === 'admin' ? (
         <Link href="/espace/connecteurs" className="lien-espace mt-5 mr-3">
           {connecteurs.titre}
