@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { historiqueResponsables as t } from '@/lib/content/historique-responsables'
 import { lirePositionResponsables, pageResponsables } from '@/lib/agences/historique-responsables'
@@ -62,20 +61,20 @@ export async function HistoriqueResponsables({
           )}
           <nav aria-label={t.navigation} className="mt-4 flex flex-wrap gap-4 text-sm">
             {curseur ? (
-              <Link
+              <a
                 className="lien-espace"
                 href={`/espace/dossiers/${dossierId}#historique-responsables`}
               >
                 {t.recent}
-              </Link>
+              </a>
             ) : null}
             {page.suivant ? (
-              <Link
+              <a
                 className="lien-espace"
                 href={`/espace/dossiers/${dossierId}?affectations=${page.suivant}#historique-responsables`}
               >
                 {t.suite}
-              </Link>
+              </a>
             ) : null}
           </nav>
         </>

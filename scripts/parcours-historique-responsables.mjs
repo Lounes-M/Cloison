@@ -37,7 +37,11 @@ export async function parcourirHistoriqueResponsables(page, site, id, moteur, la
   await summary.focus()
   await page.keyboard.press('Enter')
   assert.equal(await section.locator('li').count(), 50)
-  await section.getByRole('link', { name: 'Changements précédents', exact: true }).click()
+  await Promise.all([
+    page.waitForURL((u) => u.searchParams.has('affectations'), { waitUntil: 'domcontentloaded' }),
+    section.getByRole('link', { name: 'Changements précédents', exact: true }).click(),
+  ])
+  assert.equal(await section.getAttribute('open'), '', 'Le panneau pagine doit etre ouvert')
   await section.getByRole('link', { name: 'Changements les plus récents', exact: true }).waitFor()
   assert.equal(await section.locator('li').count(), 5)
   assert.equal(
