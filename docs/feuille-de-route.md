@@ -351,3 +351,8 @@ Le lot suivant ajoute une application de secours depuis une session AAL2,
 avec confirmation du code et reprise des preparations interrompues. Voir le
 [guide](exploitation/application-secours.md) et la PR pour les validations.
 La perte de tous les facteurs et leur suppression restent distinctes.
+
+Les echanges HTTP du client agence et du renouvellement de session ont une
+borne de dix secondes, sans reprise ajoutee ni perte du signal d'annulation.
+Voir [le guide](exploitation/delais-agence.md) ; il ne s'agit pas d'un budget
+global de page et les garanties d'idempotence restent necessaires.
