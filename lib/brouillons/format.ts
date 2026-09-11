@@ -6,7 +6,7 @@ export const schemaBrouillon = z
     couvre: z.enum(['loyer', 'loyer_charges']),
     montant: z.string().max(32),
     revenu: z.string().max(32),
-    jusquAu: z.string().max(10),
+    jusquAu: z.union([z.literal(''), z.iso.date()]),
     solidaire: z.boolean(),
   })
   .strict()

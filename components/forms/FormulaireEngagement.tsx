@@ -178,6 +178,7 @@ export function FormulaireEngagement({
       </label>
 
       <BrouillonEngagement
+        key={version}
         formulaire={formulaire}
         indisponible={enCours}
         attente={setBrouillonEnCours}

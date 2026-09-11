@@ -39,3 +39,10 @@ test('aucune mention, piece ou donnee supplementaire dans le format', () => {
     chiffrerBrouillon({ ...saisie, revenu: 'x'.repeat(33) }, 'dossier', 1, cle),
   ).toThrow()
 })
+
+test.each(['2026-02-30', 'pasdate', '2026-13-01'])(
+  'une date impossible ne sera pas silencieusement perdue a la reprise : %s',
+  (jusquAu) => {
+    expect(() => chiffrerBrouillon({ ...saisie, jusquAu }, 'dossier', 1, cle)).toThrow()
+  },
+)
