@@ -59,8 +59,14 @@ beforeEach(() => {
     data: { id: pending.id, totp: { qr_code: '<svg/>', secret: 'FICTIF' } },
     error: null,
   })
-  h.unenroll.mockResolvedValue({ error: null })
-  h.verify.mockResolvedValue({ error: null })
+  h.unenroll.mockImplementation(async () => {
+    facteurs()
+    return { error: null }
+  })
+  h.verify.mockImplementation(async () => {
+    facteurs([principal, { ...pending, status: 'verified' }])
+    return { error: null }
+  })
 })
 test.each(['anonyme', 'aal1', 'niveau', 'liste', 'aucun', 'exception'])(
   'aucune mutation sans contexte fiable : %s',
@@ -155,3 +161,27 @@ test('une operation inconnue ne modifie aucun facteur', async () => {
   expect(h.verify).not.toHaveBeenCalled()
   expect(h.enroll).not.toHaveBeenCalled()
 })
+
+test.each(['annuler', 'verifier'])(
+  'une reponse fournisseur sans effet ne vaut pas succes : %s',
+  async (operation) => {
+    facteurs([principal, pending])
+    const mutation = operation === 'annuler' ? h.unenroll : h.verify
+    mutation.mockResolvedValue({ error: null })
+    expect(await agir(operation)).toHaveProperty('erreur')
+    expect(h.refresh).not.toHaveBeenCalled()
+  },
+)
+test.each(['annuler', 'verifier'])(
+  'une relecture en panne ne vaut pas succes : %s',
+  async (operation) => {
+    facteurs([principal, pending])
+    const mutation = operation === 'annuler' ? h.unenroll : h.verify
+    mutation.mockImplementation(async () => {
+      h.liste.mockResolvedValue({ data: null, error: {} })
+      return { error: null }
+    })
+    expect(await agir(operation)).toHaveProperty('erreur')
+    expect(h.refresh).not.toHaveBeenCalled()
+  },
+)

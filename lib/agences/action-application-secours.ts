@@ -34,6 +34,9 @@ export async function gererApplicationSecours(
     if (operation === 'annuler') {
       const { error } = await c.db.auth.mfa.unenroll({ factorId: facteur })
       if (error) return { erreur: t.erreur }
+      const apres = await c.db.auth.mfa.listFactors()
+      if (apres.error || !apres.data || apres.data.all.some((f) => f.id === facteur))
+        return { erreur: t.incertain }
       revalidatePath('/espace/securite')
       return {}
     }
@@ -42,6 +45,9 @@ export async function gererApplicationSecours(
     if (!/^[0-9]{6}$/.test(code)) return { facteur, erreur: t.codeInvalide }
     const { error } = await c.db.auth.mfa.challengeAndVerify({ factorId: facteur, code })
     if (error) return { facteur, erreur: t.codeInvalide }
+    const apres = await c.db.auth.mfa.listFactors()
+    if (apres.error || !apres.data?.totp.some((f) => f.id === facteur && f.status === 'verified'))
+      return { erreur: t.incertain }
     revalidatePath('/espace/securite')
     return { succes: true }
   } catch {

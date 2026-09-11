@@ -22,9 +22,16 @@ export async function parcourirChoixMfa(page, site, moteur, largeur, fixture) {
     assert.equal(await choix.locator('option').count(), 2)
     assert.equal(await choix.inputValue(), a)
     await choix.focus()
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
-    assert.equal(await choix.inputValue(), b, 'Le second facteur est accessible au clavier')
+    assert(await choix.evaluate((element) => document.activeElement === element))
+    if (process.platform === 'darwin') {
+      // Les menus natifs headless macOS ignorent les fleches, y compris sur
+      // un select HTML sans JavaScript. Le choix est exerce par l'API navigateur.
+      await choix.selectOption(b)
+    } else {
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Enter')
+    }
+    assert.equal(await choix.inputValue(), b, 'Le second facteur est selectionne')
     assert.equal(
       await page
         .locator('script')
