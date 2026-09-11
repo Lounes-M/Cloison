@@ -18,7 +18,12 @@ export async function parcourirPreferences(page, site, moteur, largeur, conflit)
   await mode.selectOption('aucun')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Enregistrer mes préférences' }).click()
-  await page.getByRole('alert').waitFor()
+  await page
+    .getByRole('alert')
+    .getByText('Préférences non enregistrées. Rechargez la page avant de réessayer.', {
+      exact: true,
+    })
+    .waitFor()
   assert.equal(await page.getByRole('status').count(), 0, 'Faux succes preference')
   conflit(false)
   await page.reload()
