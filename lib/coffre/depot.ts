@@ -77,7 +77,7 @@ export type Retrait = { retiree: true } | { retiree: false; raison: string }
  * D'ou la regle : on ne scelle jamais avec une cle avant qu'elle soit
  * effectivement en base. Le perdant relit la gagnante et s'en sert.
  */
-async function cleDuDossier(base: DepotBase, dossierId: string): Promise<Buffer> {
+export async function cleDuDossier(base: DepotBase, dossierId: string): Promise<Buffer> {
   const deja = await base.cleScellee(dossierId)
   if (deja) return ouvrirMaitresse(deja)
 

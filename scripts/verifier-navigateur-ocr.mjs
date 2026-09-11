@@ -1,8 +1,9 @@
+import { parcourirBrouillon } from './parcours-brouillon-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
 import { spawn } from 'node:child_process'
-import { createHmac, randomUUID } from 'node:crypto'
+import { createHmac, randomUUID, createCipheriv, randomBytes } from 'node:crypto'
 import { chromium, firefox, webkit } from 'playwright'
 import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
@@ -30,6 +31,16 @@ const user = {
   user_metadata: {},
   factors: [],
 }
+const cleFictive = Buffer.alloc(32, 7)
+const nonceFictif = randomBytes(12)
+const chiffreurFictif = createCipheriv('aes-256-gcm', cleFictive, nonceFictif)
+const dekFictive = Buffer.concat([
+  chiffreurFictif.update(Buffer.alloc(32, 8)),
+  chiffreurFictif.final(),
+])
+const enveloppeFictive =
+  '\\x' + Buffer.concat([nonceFictif, chiffreurFictif.getAuthTag(), dekFictive]).toString('hex')
+let brouillon = null
 let clesConnecteurs = []
 let examensDocumentaires = [],
   examenConflit = false
@@ -55,7 +66,21 @@ const api = createServer(async (req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1'),
     path = url.pathname
   let valeur = []
-  if (path === '/auth/v1/user') valeur = user
+  if (path.endsWith('/cles_dossier')) valeur = [{ cle_scellee: enveloppeFictive }]
+  else if (path.endsWith('/rpc/mon_brouillon_engagement')) valeur = brouillon ? [brouillon] : []
+  else if (path.endsWith('/rpc/sauver_brouillon_engagement')) {
+    assert.equal(entree.la_version, 0)
+    if (entree.revision_attendue !== (brouillon?.revision ?? null)) valeur = null
+    else {
+      brouillon = {
+        revision: randomUUID(),
+        version_conditions: 0,
+        chiffre: entree.le_chiffre,
+        expire_le: new Date(Date.now() + 86400000).toISOString(),
+      }
+      valeur = brouillon.revision
+    }
+  } else if (path === '/auth/v1/user') valeur = user
   else if (path === '/auth/v1/factors' && req.method === 'POST') {
     assert.equal(entree.factor_type, 'totp')
     assert.equal(entree.friendly_name, 'Cloison secours')
@@ -307,6 +332,7 @@ const next = spawn(
       SUPABASE_URL: `http://127.0.0.1:${api.address().port}`,
       SUPABASE_PUBLISHABLE_KEY: 'fixture',
       SUPABASE_JWT_SECRET: 'fixture',
+      CLE_MAITRESSE: cleFictive.toString('base64'),
       OCR_ACTIVE: 'true',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',
       EMAIL_SUPPORT: 'support@example.invalid',
@@ -472,6 +498,12 @@ try {
             },
           })
           await parcourirInterface(page, relais.site, id, moteur, largeur, session)
+          await parcourirBrouillon(page, relais.site, moteur, largeur, {
+            reinitialiser: () => {
+              brouillon = null
+            },
+            lire: () => brouillon,
+          })
           await parcourirChoixMfa(page, relais.site, moteur, largeur, {
             preparer: (facteurs) => {
               user.factors = facteurs

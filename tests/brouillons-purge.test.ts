@@ -2,10 +2,10 @@ import { expect, test, vi } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { purgerCoffres } from '@/lib/exploitation/purge'
 test.each([0, 1000, null, -1, 1001, 0.5, '0', 'erreur', 'exception'])(
-  'la maintenance detecte un resultat invalide de purge historique : %s',
+  'la maintenance detecte un resultat invalide de purge des brouillons : %s',
   async (resultat) => {
     const rpc = vi.fn(async (nom: string) => {
-      if (nom !== 'purger_historique_responsables') return { data: 0, error: null }
+      if (nom !== 'purger_brouillons_engagement') return { data: 0, error: null }
       if (resultat === 'exception') throw new Error('detail interne prive')
       return {
         data: resultat,

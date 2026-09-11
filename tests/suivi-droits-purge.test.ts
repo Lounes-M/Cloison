@@ -8,7 +8,8 @@ test.each([0, 100, null, -1, 101, 0.5, '0', 'erreur', 'exception'])(
     const ordre: string[] = []
     const rpc = vi.fn(async (nom: string) => {
       ordre.push(nom)
-      if (nom === 'purger_historique_responsables') return { data: 0, error: null }
+      if (nom === 'purger_historique_responsables' || nom === 'purger_brouillons_engagement')
+        return { data: 0, error: null }
       if (nom !== 'purger_suivis_droits') return { data: null, error: null }
       if (resultat === 'exception') throw new Error('panne fictive privee')
       return {
@@ -51,6 +52,7 @@ test.each([0, 100, null, -1, 101, 0.5, '0', 'erreur', 'exception'])(
       'acquittement',
       'purger_suivis_droits',
       'purger_historique_responsables',
+      'purger_brouillons_engagement',
     ])
   },
 )

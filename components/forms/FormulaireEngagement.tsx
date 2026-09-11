@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState, useId } from 'react'
+import { BrouillonEngagement } from './BrouillonEngagement'
+import { useActionState, useId, useRef, useState } from 'react'
 
 import { engagement as texte, profilsRessources, type ProfilRessources } from '@/lib/content/garant'
 import { conditionsEngagement } from '@/lib/content/conditions-engagement'
@@ -41,9 +42,11 @@ export function FormulaireEngagement({
 }) {
   const [etat, envoyer, enCours] = useActionState(declarerMonEngagement, ETAT_INITIAL)
   const id = useId()
+  const formulaire = useRef<HTMLFormElement>(null)
+  const [brouillonEnCours, setBrouillonEnCours] = useState(false)
 
   return (
-    <form action={envoyer} noValidate className="flex flex-col gap-5">
+    <form ref={formulaire} action={envoyer} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="versionConditions" value={version} />
       <p className="text-muted text-[13px] font-medium">{conditionsEngagement.modification}</p>
@@ -174,9 +177,14 @@ export function FormulaireEngagement({
         </span>
       </label>
 
+      <BrouillonEngagement
+        formulaire={formulaire}
+        indisponible={enCours}
+        attente={setBrouillonEnCours}
+      />
       <button
         type="submit"
-        disabled={enCours}
+        disabled={enCours || brouillonEnCours}
         className={cn(
           'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer self-start px-8 py-4',
           'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
