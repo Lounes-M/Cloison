@@ -5,6 +5,8 @@ import {
   type EspaceSupport,
   type CategorieSupport,
 } from '@/lib/content/support-dossier'
+// Ce schema est aussi execute dans le navigateur, sous une CSP sans eval.
+z.config({ jitless: true })
 const parametres = z.object({
   adresse: z.email().max(254),
   reference: z.string().regex(/^[A-Za-z0-9]{8,32}$/),

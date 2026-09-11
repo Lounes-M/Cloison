@@ -73,6 +73,11 @@ export async function parcourirSupport(page, moteur, largeur, espace) {
   await cadre.getByRole('status').waitFor()
   assert.equal(await page.evaluate(() => window.__supportCopie), valeur)
   assert.equal(await page.evaluate(() => localStorage.length), 0, 'Support dans localStorage')
+  assert.deepEqual(
+    await page.evaluate(() => window.__cloisonEvalInterdit),
+    [],
+    'Compilation dynamique tentee sous CSP',
+  )
   assert(
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
     'Debordement support',
