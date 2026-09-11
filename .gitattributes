@@ -13,4 +13,3 @@
 
 # Bruit inutile dans les diffs de PR.
 package-lock.json linguist-generated=true -diff
-design/home.artifact.html linguist-generated=true -diff

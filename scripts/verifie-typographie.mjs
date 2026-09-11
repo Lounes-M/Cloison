@@ -29,13 +29,8 @@ const racine = process.cwd()
 /** Repertoires jamais inspectes : rien de tout cela n'est ecrit a la main. */
 const REPERTOIRES_IGNORES = new Set(['node_modules', '.next', '.git', 'out', 'coverage'])
 
-/**
- * Fichiers exclus nommement.
- *
- * `design/home.artifact.html` est l'artefact d'origine du design, conserve tel
- * qu'il a ete produit. Le reecrire reviendrait a falsifier une archive.
- */
-const FICHIERS_IGNORES = new Set(['design/home.artifact.html', 'package-lock.json'])
+/** Le verrou de dependances est produit automatiquement. */
+const FICHIERS_IGNORES = new Set(['package-lock.json'])
 
 /** Seuls les formats ou l'on ecrit du texte a la main. */
 const EXTENSIONS = new Set([
