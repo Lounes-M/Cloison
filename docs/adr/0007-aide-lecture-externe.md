@@ -2,7 +2,7 @@
 
 ## Decision
 
-Lounes demande l'OCR et impose OpenRouter pour l'IA le 10 septembre 2026.
+Decision du 10 septembre 2026 : l'aide OCR utilise exclusivement OpenRouter.
 Une agence authentifiee avec MFA peut demander la transcription d'une piece
 qu'elle est deja autorisee a consulter. La fonctionnalite est facultative et
 desactivee par defaut. L'action exige une information explicite sur l'envoi.

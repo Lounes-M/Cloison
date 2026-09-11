@@ -38,7 +38,12 @@ yarn-error.log*
 .idea
 *.swp
 
-# claude code (preferences locales)
-.claude/settings.local.json
+# Parametres locaux et documents de travail
+/.*/
+!/.github/
+/outputs/
+/work/
+/*.docx
+/*.pdf
 .env*
 /supabase/.temp/

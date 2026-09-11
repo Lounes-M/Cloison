@@ -1,205 +1,72 @@
 # Cloison
 
-> Le coffre à trois clés.
+[![CI](https://github.com/Lounes-M/Cloison/actions/workflows/ci.yml/badge.svg)](https://github.com/Lounes-M/Cloison/actions/workflows/ci.yml)
+[![Secrets](https://github.com/Lounes-M/Cloison/actions/workflows/secrets.yml/badge.svg)](https://github.com/Lounes-M/Cloison/actions/workflows/secrets.yml)
 
-Cloison prend la caution locative de A à Z. Le garant dépose ses pièces chez lui, le locataire voit
-un feu vert, l'agence signe. **Personne ne voit ce qu'il ne doit pas voir.**
+Cloison est une application de gestion de la garantie locative qui sépare les accès du locataire, du garant et de l'agence. Les justificatifs du garant sont chiffrés ; le locataire suit l'avancement sans consulter les pièces ni les montants ; l'agence consulte les documents autorisés avec un filigrane nominatif et une trace d'accès.
 
-Ce dépôt contient aujourd'hui le site public (landing) et les fondations techniques du produit.
+[Site du produit](https://www.cloison.immo) · [Documentation](docs/README.md) · [Contribution](CONTRIBUTING.md) · [Sécurité](SECURITY.md)
 
----
+## Fonctionnalités
 
-## Démarrer
+- Espaces distincts, liens de capacité pour les porteurs et authentification multifacteur pour l'agence.
+- Dépôt chiffré, restitution documentaire, contrôle des accès, expiration et reprise des suppressions.
+- Gestion des collaborateurs, affectation des dossiers et historique des changements.
+- Demandes de compléments, examen documentaire humain et gestion des modifications concurrentes.
+- OCR facultatif via OpenRouter, déclenché explicitement et soumis à des quotas ; les résultats sont à relire.
+- Préférences de notifications, rappels facultatifs et suivi des courriels.
+- API de statuts pour les intégrateurs, avec clés d'agence révocables.
+- Paiement locataire, rapprochement et outils de suivi opérationnel.
+
+Le produit est en préparation de pilote. La chaîne contractuelle Universign et la facturation agence après signature ne sont pas ouvertes de bout en bout. L'OCR ne certifie pas l'authenticité des pièces et ne prend aucune décision sur un dossier. Les [guides d'exploitation](docs/README.md) précisent la portée des fonctionnalités et leurs validations.
+
+## Développement local
+
+Prérequis : Node.js 24 et npm. Les versions de référence sont déclarées dans `.nvmrc` et `package.json`.
 
 ```bash
-npm install
+npm ci
+```
+
+Copier `.env.example` vers `.env.local`, puis renseigner les variables nécessaires avec des identifiants de développement. Les intégrations facultatives sont décrites dans leurs guides. Utiliser des données fictives et un environnement distinct de la production.
+
+```bash
 npm run dev
 ```
 
-Le site tourne sur http://localhost:3000.
+L'application est accessible sur `http://localhost:3000`. Les parcours connectés nécessitent un projet Supabase configuré ; le serveur de développement ne crée pas automatiquement son schéma. Consulter les [règles de déploiement SQL](CONTRIBUTING.md#modifications-de-données).
 
-Node 24 est requis (voir `.nvmrc`). C'est la version par defaut de Vercel et celle de la CI ;
-`engines.node` est fige sur `24.x` pour qu'aucune des trois ne derive toute seule.
+## Vérifications
 
-## Scripts
+| Commande         | Fonction                                                       |
+| ---------------- | -------------------------------------------------------------- |
+| `npm run check`  | Types, lint, format, typographie, variables publiques et tests |
+| `npm run test`   | Tests applicatifs et politiques SQL avec PGlite                |
+| `npm run build`  | Build de production et vérification des traces documentaires   |
+| `npm run start`  | Exécution du build local                                       |
+| `npm run format` | Formatage du dépôt                                             |
 
-| Commande             | Effet                                                  |
-| -------------------- | ------------------------------------------------------ |
-| `npm run dev`        | Serveur de développement (Turbopack)                   |
-| `npm run build`      | Build de production                                    |
-| `npm run start`      | Sert le build de production                            |
-| `npm run typecheck`  | TypeScript en mode strict, sans émission               |
-| `npm run lint`       | ESLint (`--fix` avec `npm run lint:fix`)               |
-| `npm run format`     | Prettier en écriture (`format:check` en lecture seule) |
-| `npm run check:env`  | Vérifie qu'aucun secret ne peut partir vers le client  |
-| `npm run check:typo` | Vérifie qu'aucun emoji ni tiret cadratin ne subsiste   |
-| `npm run check`      | Toutes les vérifications de la CI d'un coup            |
+Exécuter `check` puis `build` successivement. La CI complète ces contrôles avec PostgreSQL et PostgREST natifs, une restauration de sauvegarde, des parcours Chromium, Firefox et WebKit et un scan de l'historique Git. Les [parcours locaux](docs/exploitation/parcours-navigateur-locaux.md) utilisent des fixtures dédiées.
 
-Avant de pousser : `npm run check`.
+## Architecture
 
-## Stack
+| Répertoire             | Contenu                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `app/`                 | Site public, espaces applicatifs, routes et actions             |
+| `components/`          | Composants d'interface et formulaires                           |
+| `lib/`                 | Accès, coffre documentaire, paiements, notifications et contenu |
+| `supabase/migrations/` | Migrations PostgreSQL versionnées                               |
+| `supabase/essais/`     | Harnais SQL et scénarios de validation                          |
+| `tests/`               | Tests métier, sécurité et intégration                           |
+| `scripts/`             | Vérifications et outils d'exploitation                          |
+| `docs/`                | Architecture, décisions et guides opérationnels                 |
+| `public/brand/`        | Ressources publiques de marque                                  |
+| `design/logo-kit/`     | Sources du kit graphique                                        |
 
-- **Next.js 16** (App Router, React Server Components, Turbopack)
-- **React 19** · **TypeScript** en `strict` + `noUncheckedIndexedAccess`
-- **Tailwind CSS 4** : tokens déclarés en CSS dans `app/globals.css`
-- **ESLint** (`next/core-web-vitals` + `next/typescript`) et **Prettier**
+Next.js et React portent l'application ; PostgreSQL, Supabase Auth et Storage assurent les services de données. Les intégrations sont isolées côté serveur. Voir l'[architecture](docs/architecture.md) et les [décisions techniques](docs/adr/).
 
-## Organisation
+## Sécurité et contribution
 
-```
-app/                  Métadonnées, favicon, image Open Graph, layout racine
-  (marketing)/        Le site public, avec son en-tête et son pied de page
-components/
-  brand/              Logo et éléments d'identité
-  layout/             En-tête et pied de page du site
-  sections/           Une section de la home = un fichier
-  ui/                 Primitives réutilisables (Button, Badge, Reveal, Section…)
-lib/
-  agences/            Schéma de validation et enregistrement des demandes
-  content/            Tout le texte des pages, séparé de la mise en forme
-  env.ts              Variables serveur, jamais exposées au navigateur
-  site.ts             Config globale (nom, URL, navigation)
-  utils.ts            `cn()` : fusion de classes Tailwind
-supabase/migrations/  Schéma SQL versionné, appliqué dans l'ordre
-supabase/essais/      Scénario d'accès rejouable sur un Postgres local (à la main)
-scripts/              Garde-fous exécutables (fuite de secrets…)
-assets/fonts/         Archivo Black en TTF, lu au build pour l'image Open Graph
-public/brand/         Déclinaisons PNG du logo (réseaux sociaux, presse, emails)
-design/               Sources de design non buildées (artifact d'origine, kit logo)
-docs/                 Charte de marque et notes d'architecture
-```
+Toute modification passe par une pull request et les contrôles requis. Les secrets, documents clients, sauvegardes et rapports privés ne doivent pas être ajoutés au dépôt. Utiliser le [signalement privé](SECURITY.md) pour une vulnérabilité.
 
-Deux règles qui font gagner du temps :
-
-1. **Le texte vit dans `lib/content/`**, pas dans les composants. Modifier une accroche n'implique
-   jamais d'ouvrir un fichier `.tsx`.
-2. **Les couleurs, ombres et animations vivent dans `app/globals.css`**, sous `@theme`. Aucune valeur
-   hexadécimale en dur dans un composant.
-
-Voir [`docs/brand.md`](docs/brand.md) pour la charte, [`docs/architecture.md`](docs/architecture.md)
-pour la suite prévue, [`docs/dettes.md`](docs/dettes.md) pour ce qu'on sait devoir régler plus tard,
-et [`docs/adr/`](docs/adr) pour les décisions d'architecture et leurs raisons.
-
-## Tests
-
-```bash
-npm run test
-```
-
-Les politiques RLS s'éprouvent sur un vrai Postgres, fourni par
-[PGlite](https://pglite.dev) : c'est Postgres compilé en WebAssembly, donc **rien à installer, ni
-Docker ni base locale**, et la CI utilise exactement le même. Chaque test construit sa propre base à
-partir de `supabase/essais/harnais-supabase.sql` puis des migrations, dans l'ordre.
-
-Deux principes valent la peine d'être connus avant d'en écrire un.
-
-**On teste les refus, pas seulement les autorisations.** Une politique ne se vérifie pas en
-constatant qu'elle laisse passer, mais qu'elle arrête.
-
-**Postgres refuse de deux façons, et les confondre produit des tests qui ne prouvent rien.** Sans
-`grant`, la requête lève « permission denied » : c'est `refus()`. Avec le droit mais sans politique,
-elle réussit sans toucher une ligne : c'est `lignesTouchees()`. Un test qui se contenterait de
-constater l'absence d'exception passerait alors même que la ligne aurait été supprimée.
-
-## Contribuer
-
-**Aucun commit direct sur `main`.** Tout passe par une branche et une pull request, y compris les
-changements d'une ligne.
-
-```bash
-git checkout -b sujet/ce-que-ca-fait
-npm run check
-gh pr create --fill
-```
-
-La CI tourne sur la pull request, donc avant la fusion et non après : `main` reste déployable à tout
-instant, puisque Vercel la suit.
-
-La raison n'est pas procédurale. À partir de la phase 3, le code touche les règles d'accès, le
-chiffrement des pièces et les jetons de capacité. Sur ces fichiers, le coût d'une erreur n'est pas
-un bug d'affichage : c'est une pièce d'identité qui sort du dossier. Une relecture avant la mise en
-ligne y est moins chère que la corriger après.
-
-Convention adoptée le 2 septembre 2026, après treize commits poussés directement sur `main`.
-
-## Déploiement
-
-Hébergement cible : Vercel. Le dépôt est prêt, et **il n'y a aucune variable d'environnement à
-saisir**.
-
-1. **Importer le dépôt** sur [vercel.com/new](https://vercel.com/new). Le dépôt étant privé, pense à
-   autoriser explicitement `Lounes-M/Cloison` quand Vercel demande l'accès à GitHub. Next.js est
-   ensuite détecté seul : ne touche ni à la commande de build ni au répertoire de sortie.
-2. **Déployer.**
-3. **Brancher le domaine**, `cloison.immo`, dans Settings → Domains, avec `www` redirigé vers
-   l'apex, puis **redéployer**. Le domaine change aussi trois réglages hors du dépôt : l'URL de
-   retour du lien magique dans Supabase (`https://cloison.immo/connexion/verifie`), le domaine
-   d'envoi vérifié chez Resend pour `EMAIL_EXPEDITEUR`, et l'adresse du webhook Stripe
-   (`https://cloison.immo/api/paiement/webhook`).
-
-### Où tournent les fonctions
-
-[`vercel.json`](vercel.json) fixe la région des fonctions à `fra1`, Francfort. La clé maîtresse
-déchiffre les pièces là où la fonction s'exécute : le registre des traitements dit l'Union
-européenne, et un test refuse toute région qui n'y serait pas. L'ancien hôte `cloison.vercel.app`
-redirige vers le domaine de production, règle déclarée dans `next.config.ts`.
-
-### D'où vient l'URL du site
-
-`site.url` est résolue au build dans [`next.config.ts`](next.config.ts), dans cet ordre :
-
-| Priorité | Source                          | Quand                               |
-| -------- | ------------------------------- | ----------------------------------- |
-| 1        | `NEXT_PUBLIC_SITE_URL`          | seulement si tu la définis toi-même |
-| 2        | `VERCEL_PROJECT_PRODUCTION_URL` | sur Vercel, automatiquement         |
-| 3        | `http://localhost:3000`         | en développement                    |
-
-`VERCEL_PROJECT_PRODUCTION_URL` est le domaine de production le plus court du projet : le
-`.vercel.app` tant qu'aucun domaine personnalisé n'est rattaché, **puis le domaine personnalisé dès
-qu'il l'est**. C'est pour cela qu'il n'y a rien à saisir, ni au premier déploiement ni le jour du
-domaine : il suffit de redéployer pour que les métadonnées suivent.
-
-Cela suppose que **« Enable access to System Environment Variables »** reste coché dans
-Settings → Environment Variables (c'est le réglage par défaut). Si tu le décoches, l'URL retombe sur
-`localhost` et le sitemap devient faux.
-
-Après la mise en ligne, vérifie que `https://<domaine>/sitemap.xml` et `/robots.txt` citent bien le
-domaine de production, et passe l'URL dans un validateur d'aperçu social pour contrôler l'image
-Open Graph.
-
-### Variables d'environnement et secrets
-
-Deux mécanismes exposent une variable au navigateur sous Next : le préfixe `NEXT_PUBLIC_`, et le
-bloc `env` de [`next.config.ts`](next.config.ts). Les deux **substituent la valeur au build** : elle
-devient lisible par n'importe qui dans le code source de la page. Rien ne signale l'erreur, le site
-fonctionne parfaitement.
-
-`npm run check:env` rend la règle opposable plutôt que déclarative. Il vérifie que :
-
-1. le bloc `env` ne contient que des clés explicitement autorisées ;
-2. aucune variable `NEXT_PUBLIC_*` du code ne porte un nom de secret ;
-3. aucune valeur de variable sensible de l'environnement ne se retrouve dans les fichiers servis au
-   navigateur.
-
-La troisième est la seule qui constate une fuite réelle : elle a besoin d'un build, et la CI la
-rejoue donc après l'étape de build.
-
-**Un secret ne porte jamais le préfixe `NEXT_PUBLIC_` et ne passe jamais par le bloc `env`.** Il se
-lit côté serveur via `process.env`. Rendre une nouvelle valeur publique est une décision explicite :
-il faut l'ajouter à `CLES_PUBLIQUES_AUTORISEES` dans
-[`scripts/verifie-variables-publiques.mjs`](scripts/verifie-variables-publiques.mjs).
-
-### En-têtes de sécurité
-
-Ils sont déclarés dans [`next.config.ts`](next.config.ts) et s'appliquent à toutes les réponses.
-
-`Strict-Transport-Security` est envoyé avec `preload` : **n'ajoute le domaine à la liste de
-préchargement HSTS qu'une fois certain de rester en HTTPS**, l'opération étant longue à défaire.
-L'en-tête seul est sans risque.
-
-La **Content-Security-Policy** a deux formes, écrites dans [`lib/securite/csp.ts`](lib/securite/csp.ts).
-Le site public, prérendu, en reçoit une statique depuis `next.config.ts`, qui admet les scripts en
-ligne que Next y pose. L'applicatif, agence et porteurs de lien, en reçoit une du middleware avec un
-nonce par requête et `'strict-dynamic'` : un script injecté dans une page ne porte pas le nonce, il
-ne s'exécute pas. `tests/csp.test.ts` vérifie qu'aucun segment de l'applicatif ne tombe sous la
-politique du site public.
+Le dépôt est consultable publiquement. Aucune licence libre n'est accordée ; `package.json` déclare `UNLICENSED`. Les licences des dépendances et des ressources tierces restent applicables.

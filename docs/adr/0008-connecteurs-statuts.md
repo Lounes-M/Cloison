@@ -2,7 +2,7 @@
 
 ## Decision
 
-Lounes delegue le choix des connecteurs immobiliers le 10 septembre 2026.
+Decision du 10 septembre 2026 : privilegier un contrat commun d'integration.
 Le premier contrat est une API HTTPS commune, en lecture seule, documentee par
 `public/connecteurs-openapi.json`. Un integrateur peut l'utiliser avec son
 logiciel ou un outil d'automatisation HTTP. Les adaptateurs propres aux editeurs
