@@ -312,3 +312,10 @@ La PR107 est fusionnee sur main 8cfefbd : 0052 appliquee et droits reels verifie
 alertes restent desactivees par defaut. Le lot suivant ajoute le support
 contextuel aux trois espaces, sans envoi automatique ni collecte de document.
 Voir [le guide](exploitation/support-contextuel.md).
+
+Les PR108 et PR109 sont livrees : support contextuel puis proxy Next.js sur main
+17a8f6d, CI main 34587146784 et supervision 34587664479 vertes, 1316 tests Linux.
+Le lot 0053 prepare le suivi prive des demandes de droits avec revisions, outils
+operateur et retention bornee. Voir ADR0013 et le guide de suivi des demandes.
+Il ne realise ni export personnel ni effacement individuel de coffre ; la PR
+consigne les repetitions, l'application SQL et les validations effectives.
