@@ -92,7 +92,10 @@ test('le rappel agence pointe seulement vers son espace authentifie', async () =
   )
 })
 test.each([null, -1, 21, 1.5, '1'])('refuse un compte de planification %s', async (data) => {
-  d.rpc.mockResolvedValue({ data, error: null })
+  d.rpc.mockImplementation(async (n: string) => ({
+    data: n === 'programmer_rappels' ? data : n === 'rappels_a_preparer' ? [rappel] : 'prepare',
+    error: null,
+  }))
   await expect(preparerRappels(db)).rejects.toThrow('Planification des rappels indisponible')
   expect(d.sceller).not.toHaveBeenCalled()
 })
