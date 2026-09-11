@@ -8,6 +8,7 @@ import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
 import { parcourirExamen } from './parcours-examen-navigateur.mjs'
 import { parcourirResponsable } from './parcours-responsable-navigateur.mjs'
+import { parcourirHistoriqueResponsables } from './parcours-historique-responsables.mjs'
 import { parcourirPreferences } from './parcours-preferences-navigateur.mjs'
 import { parcourirRappels } from './parcours-rappels-navigateur.mjs'
 import { parcourirInterface } from './parcours-interface-navigateur.mjs'
@@ -40,6 +41,8 @@ let responsable = null,
   revisionResponsable = null,
   conflitResponsable = false,
   roleCourant = 'admin'
+let historiqueResponsables = [],
+  panneHistorique = false
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
@@ -119,7 +122,20 @@ const api = createServer(async (req, res) => {
         modifie_le: revisionResponsable ? new Date().toISOString() : null,
       },
     ]
-  else if (path.endsWith('/rpc/collaborateurs_agence')) {
+  else if (path.endsWith('/rpc/historique_responsables_du_dossier')) {
+    assert.equal(entree.le_dossier, id)
+    if (panneHistorique) {
+      res.statusCode = 503
+      valeur = { message: 'panne interne fictive' }
+    } else {
+      const depart = entree.avant_id
+        ? historiqueResponsables.findIndex(
+            (l) => l.id === entree.avant_id && l.quand === entree.avant_quand,
+          ) + 1
+        : 0
+      valeur = historiqueResponsables.slice(depart, depart + 51)
+    }
+  } else if (path.endsWith('/rpc/collaborateurs_agence')) {
     assert.equal(roleCourant, 'admin')
     valeur = [
       { utilisateur_id: id, email: user.email, etat: 'admin', admissible: true },
@@ -135,6 +151,23 @@ const api = createServer(async (req, res) => {
     assert([null, id, collegue].includes(entree.le_membre))
     if (conflitResponsable || entree.revision_attendue !== revisionResponsable) valeur = null
     else {
+      if (responsable !== entree.le_membre)
+        historiqueResponsables.unshift({
+          id: randomUUID(),
+          quand: new Date().toISOString(),
+          precedent: responsable,
+          precedent_email:
+            responsable === id ? user.email : responsable ? 'collegue@example.invalid' : null,
+          suivant: entree.le_membre,
+          suivant_email:
+            entree.le_membre === id
+              ? user.email
+              : entree.le_membre
+                ? 'collegue@example.invalid'
+                : null,
+          auteur: id,
+          auteur_email: user.email,
+        })
       responsable = entree.le_membre
       revisionResponsable = randomUUID()
       valeur = revisionResponsable
@@ -259,6 +292,8 @@ try {
         examensDocumentaires = []
         examenConflit = false
         responsable = null
+        historiqueResponsables = []
+        panneHistorique = false
         preference = { mode: 'tous', revision: null }
         conflitPreference = false
         reglagesRappels = { relance_jours: 0, echeance_jours: 0, revision: null }
@@ -366,6 +401,14 @@ try {
             },
           })
           roleCourant = 'admin'
+          await parcourirHistoriqueResponsables(page, relais.site, id, moteur, largeur, {
+            donnees: (v) => {
+              historiqueResponsables = v
+            },
+            panne: (v) => {
+              panneHistorique = v
+            },
+          })
           await parcourirPreferences(page, relais.site, moteur, largeur, (v) => {
             conflitPreference = v
           })
