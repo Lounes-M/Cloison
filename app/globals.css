@@ -281,6 +281,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Un changement de focus ne doit pas deplacer une commande pendant son clic. */
+  html:has(.espace-shell) {
+    scroll-behavior: auto;
+  }
+
   body {
     background-color: var(--color-cream);
     color: var(--color-ink);
