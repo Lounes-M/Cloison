@@ -8,6 +8,7 @@ import { ouvrirRelaisLocal } from './https-parcours-local.mjs'
 import { parcourirConnecteur } from './parcours-connecteur-navigateur.mjs'
 import { parcourirExamen } from './parcours-examen-navigateur.mjs'
 import { parcourirResponsable } from './parcours-responsable-navigateur.mjs'
+import { parcourirPreferences } from './parcours-preferences-navigateur.mjs'
 import { parcourirInterface } from './parcours-interface-navigateur.mjs'
 
 // Auth et donnees fictives, Next et composant reels. Aucun appel IA : POST intercepte.
@@ -30,6 +31,8 @@ let examensDocumentaires = [],
   examenConflit = false
 const collegue = '22222222-2222-4222-8222-222222222222'
 let filtreDossiers = new URLSearchParams()
+let preference = { mode: 'tous', revision: null },
+  conflitPreference = false
 let responsable = null,
   revisionResponsable = null,
   conflitResponsable = false,
@@ -49,7 +52,15 @@ const api = createServer(async (req, res) => {
       { id, nom: 'Agence fictive', domaine: 'example.invalid', statut: 'verifiee', seuil_ratio: 3 },
     ]
   else if (path.endsWith('/membres_agence')) valeur = [{ role: roleCourant }]
-  else if (path.endsWith('/rpc/jeton_est_actif')) valeur = true
+  else if (path.endsWith('/rpc/mes_preferences_notifications')) valeur = [preference]
+  else if (path.endsWith('/rpc/regler_notifications')) {
+    assert(['tous', 'mes', 'aucun'].includes(entree.le_mode))
+    if (conflitPreference || entree.revision_attendue !== preference.revision) valeur = null
+    else {
+      preference = { mode: entree.le_mode, revision: randomUUID() }
+      valeur = preference.revision
+    }
+  } else if (path.endsWith('/rpc/jeton_est_actif')) valeur = true
   else if (path.endsWith('/dossiers'))
     valeur = [
       {
@@ -225,6 +236,8 @@ try {
         examensDocumentaires = []
         examenConflit = false
         responsable = null
+        preference = { mode: 'tous', revision: null }
+        conflitPreference = false
         revisionResponsable = null
         conflitResponsable = false
         roleCourant = 'admin'
@@ -322,6 +335,9 @@ try {
             },
           })
           roleCourant = 'admin'
+          await parcourirPreferences(page, relais.site, moteur, largeur, (v) => {
+            conflitPreference = v
+          })
           await parcourirInterface(page, relais.site, id, moteur, largeur, session)
         } finally {
           await contexte.close()
