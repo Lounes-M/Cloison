@@ -37,6 +37,8 @@ export async function executerProcessus(
       const blocs: Buffer[] = []
       let octets = 0
       let erreur: Error | null = null
+      let erreurMesure = false
+      let entreeTransmise = false
       let termine = false
       let mesureEnCours = false
       const arreter = (message: string) => {
@@ -45,7 +47,7 @@ export async function executerProcessus(
       }
       const minuteur = setTimeout(() => arreter('Document trop long a traiter'), delai)
       const mesurer = async () => {
-        if (termine || erreur || mesureEnCours || !enfant.pid) return
+        if (termine || erreur || erreurMesure || mesureEnCours || !enfant.pid) return
         mesureEnCours = true
         try {
           const rss = await lireMemoireProcessus(enfant.pid)
@@ -58,7 +60,12 @@ export async function executerProcessus(
           )
             arreter('Budget memoire documentaire depasse')
         } catch {
-          if (!termine) arreter('Mesure memoire indisponible')
+          if (!termine) {
+            erreurMesure = true
+            // Arret immediat maintenu. close dira si le signal a interrompu
+            // un processus vivant ou si celui-ci etait deja sorti normalement.
+            enfant.kill('SIGKILL')
+          }
         } finally {
           mesureEnCours = false
         }
@@ -83,18 +90,30 @@ export async function executerProcessus(
       })
       // close suit la fin du processus ET des flux : le slot n'est pas libere
       // des l'envoi du signal, sinon un processus bloque pourrait s'accumuler.
-      enfant.on('close', (code) => {
+      enfant.on('close', (code, signal) => {
         termine = true
         clearTimeout(minuteur)
         if (surveillance) clearInterval(surveillance)
         memoires.delete(enfant)
-        if (erreur || code !== 0) reject(erreur ?? new Error('Document refuse par le moteur'))
+        const mesureRefusee =
+          surveillance && (!entreeTransmise || (erreurMesure && (code !== 0 || signal !== null)))
+        if (erreur) reject(erreur)
+        else if (mesureRefusee)
+          reject(
+            new Error('Mesure memoire indisponible', {
+              cause: { phase: entreeTransmise ? 'surveillance' : 'initialisation', code, signal },
+            }),
+          )
+        else if (code !== 0 || signal !== null) reject(new Error('Document refuse par le moteur'))
         else resolve(Buffer.concat(blocs, octets))
       })
       if (surveillance) {
         // Verifier la mesure avant de transmettre le document.
         void mesurer().then(() => {
-          if (!erreur && !termine) enfant.stdin.end(entree)
+          if (!erreur && !erreurMesure && !termine && (memoires.get(enfant) ?? 0) > 0) {
+            entreeTransmise = true
+            enfant.stdin.end(entree)
+          }
         })
       } else enfant.stdin.end(entree)
     })

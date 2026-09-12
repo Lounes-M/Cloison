@@ -35,3 +35,14 @@ test.runIf(process.platform === 'linux')('le budget cumule des decodeurs est pro
     'ok',
   )
 })
+
+test.runIf(process.platform === 'linux')(
+  'les sorties courtes restent verifiables sous surveillance native',
+  async () => {
+    for (let i = 0; i < 40; i++) {
+      const resultat = await executerProcessus(script, Buffer.from('ok'), { delai: 6000 })
+      expect(JSON.parse(resultat.toString()).mode).toBe('ok')
+    }
+  },
+  30000,
+)
