@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { SignJWT } from 'jose'
 import { createHmac } from 'node:crypto'
@@ -25,29 +25,88 @@ async function verifierSurface(page) {
 }
 
 /** Rendus et acces clavier sur les pages reelles, donnees du faux fournisseur local. */
-export async function parcourirInterface(page, site, id, moteur, largeur, session) {
+export async function parcourirInterface(page, site, id, moteur, largeur, session, simulerPanne) {
+  const routesVues = new Set()
   const contexte = page.context()
   const repertoire = process.env.CLOISON_CAPTURE_INTERFACE_DIR
   if (repertoire) await mkdir(repertoire, { recursive: true })
   const visiter = async (chemin, nom, shell = true) => {
+    routesVues.add(chemin.replace(id, '[id]'))
     await page.goto(site + chemin)
     await page.locator('h1').first().waitFor()
+    assert.equal(new URL(page.url()).pathname, chemin, `Route non rendue ${nom}`)
     await page.evaluate(() => document.fonts.ready)
     assert.equal(await page.locator('h1').count(), 1, 'Titre de page unique')
     assert(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
       `Debordement interface ${nom}`,
     )
+    if (largeur < 768) {
+      const champs = await page
+        .locator(
+          'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), select, textarea',
+        )
+        .evaluateAll((elements) =>
+          elements
+            .filter((e) => e.getClientRects().length)
+            .filter((e) => Number.parseFloat(getComputedStyle(e).fontSize) < 16)
+            .map((e) => e.name || e.id),
+        )
+      assert.deepEqual(champs, [], `Champs trop petits sur mobile ${nom}`)
+      const commandes = await page
+        .locator('button, a.press, .lien-espace, summary')
+        .evaluateAll((elements) =>
+          elements
+            .filter((e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
+            .filter(
+              (e) => e.getBoundingClientRect().height < 44 || e.scrollWidth > e.clientWidth + 1,
+            )
+            .map((e) => e.textContent.trim()),
+        )
+      assert.deepEqual(commandes, [], `Commande tronquee ou trop petite ${nom}`)
+      const motsCoupes = await page.locator('.entete-espace h1').evaluateAll((elements) => {
+        const resultat = []
+        for (const e of elements) {
+          const texte = document.createTreeWalker(e, NodeFilter.SHOW_TEXT)
+          while (texte.nextNode())
+            for (const mot of texte.currentNode.textContent.matchAll(/\p{L}+/gu)) {
+              const plage = document.createRange()
+              plage.setStart(texte.currentNode, mot.index)
+              plage.setEnd(texte.currentNode, mot.index + mot[0].length)
+              if (plage.getClientRects().length > 1) resultat.push(mot[0])
+            }
+        }
+        return resultat
+      })
+      assert.deepEqual(motsCoupes, [], `Mot coupe dans le titre ${nom}`)
+    }
     if (shell) await verifierSurface(page)
     await page.emulateMedia({ reducedMotion: 'reduce' })
     const entete = page.locator('.entete-espace')
     if (await entete.count())
       assert.equal(await entete.evaluate((e) => getComputedStyle(e).animationName), 'none')
     if (repertoire && moteur.name() === 'chromium')
-      await page.screenshot({ path: join(repertoire, `${nom}-${largeur}.png`), fullPage: true })
+      await page.screenshot({
+        path: join(repertoire, `${nom}-${largeur}.png`),
+        fullPage: true,
+        animations: 'disabled',
+      })
     await page.emulateMedia({ reducedMotion: 'no-preference' })
   }
   await visiter('/espace', 'tableau')
+  const dossiers = page.getByRole('list', { name: 'Vos dossiers', exact: true })
+  if (largeur < 768) {
+    await dossiers.getByText('Complet', { exact: true }).waitFor()
+    await dossiers.getByText('Non attribué', { exact: true }).waitFor()
+    const fiche = dossiers.getByRole('listitem').first()
+    assert(await fiche.evaluate((e) => e.scrollWidth <= e.clientWidth), 'Fiche dossier tronquee')
+    await dossiers.getByRole('link', { name: 'OCRFICTIF', exact: true }).focus()
+    await page.keyboard.press('Enter')
+    await page.waitForURL((u) => u.pathname === `/espace/dossiers/${id}`)
+    await visiter('/espace', 'tableau')
+  } else {
+    await page.getByRole('table').getByText('OCRFICTIF', { exact: true }).waitFor()
+  }
   if (moteur.name() === 'chromium' && largeur === 390) {
     await page.locator('.espace-shell').evaluate((e) => {
       e.classList.remove('bg-cream')
@@ -72,6 +131,18 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   }
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
+  await visiter('/espace/notifications', 'notifications')
+  await visiter('/espace/rappels', 'rappels')
+  await visiter('/espace/securite', 'applications-secours')
+  simulerPanne(true)
+  try {
+    await visiter('/espace/notifications', 'erreur', false)
+    await page.getByRole('button', { name: 'Réessayer', exact: true }).waitFor()
+  } finally {
+    simulerPanne(false)
+  }
+  await page.getByRole('button', { name: 'Réessayer', exact: true }).click()
+  await page.getByRole('heading', { name: 'Mes notifications', exact: true }).waitFor()
   await visiter(`/espace/dossiers/${id}`, 'dossier')
   await parcourirSupport(page, moteur, largeur, 'agence')
   await visiter('/connexion', 'connexion')
@@ -116,7 +187,46 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   await visiter('/connexion/securite', 'securite')
   assert.equal(new URL(page.url()).pathname, '/connexion/securite')
   await visiter('/', 'home-reference', false)
+  if (largeur < 768) {
+    const menu = page.getByRole('navigation', { name: 'Navigation principale' }).locator('details')
+    await menu.locator('summary').focus()
+    await page.keyboard.press('Enter')
+    assert.equal(await menu.evaluate((e) => e.open), true)
+    await menu.getByRole('link', { name: 'Agences', exact: true }).focus()
+    await page.keyboard.press('Escape')
+    assert.equal(await menu.evaluate((e) => e.open), false)
+    assert.equal(await menu.locator('summary').evaluate((e) => document.activeElement === e), true)
+    await page.keyboard.press('Enter')
+    await menu.getByRole('link', { name: 'Tarifs', exact: true }).click()
+    await page.waitForURL((u) => u.hash === '#tarifs')
+    await page.waitForFunction(() => {
+      const section = document.querySelector('#tarifs').getBoundingClientRect()
+      const entete = document.querySelector('header').getBoundingClientRect()
+      return section.top >= entete.bottom && section.top < innerHeight
+    })
+    assert.equal(await menu.evaluate((e) => e.open), false)
+    await menu.locator('summary').click()
+    await menu.getByRole('link', { name: 'Agences', exact: true }).click()
+    await page.waitForURL((u) => u.pathname === '/agences')
+  }
+  await visiter('/agences', 'agences', false)
+  await visiter('/page-inexistante-mobile', 'introuvable', false)
+  const pages = (await readdir('app', { recursive: true }))
+    .filter((p) => p.endsWith('/page.tsx'))
+    .map(
+      (p) =>
+        '/' +
+        p
+          .split('/')
+          .filter((segment) => !segment.startsWith('(') && segment !== 'page.tsx')
+          .join('/'),
+    )
+  assert.deepEqual(
+    pages.filter((p) => !routesVues.has(p)),
+    [],
+    'Page absente de la revue responsive',
+  )
   console.log(
-    `OK : interface ${moteur.name()} ${largeur}, dix pages, palette, clavier et mouvement reduit`,
+    `OK : interface ${moteur.name()} ${largeur}, quinze pages et page introuvable, palette, clavier et mouvement reduit`,
   )
 }

@@ -25,12 +25,12 @@ export async function parcourirResponsable(page, site, id, collegue, moteur, lar
     .filter({ hasText: /^essai@example\.invalid$/ })
     .waitFor()
   await page.goto(`${site}/espace?responsable=mes&statut=complet`)
-  await page.getByRole('table').getByText('OCRFICTIF', { exact: true }).waitFor()
+  await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
   assert.equal(simuler.filtre().get('statut'), 'eq.complet', 'Filtre etat absent de la requete')
   assert.equal(simuler.filtre().get('affecte'), 'not.is.null', 'Filtre Mes dossiers absent')
   await page.goto(`${site}/espace?responsable=sans`)
   assert.equal(
-    await page.getByRole('table').count(),
+    await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).count(),
     0,
     'Dossier attribue dans la liste sans responsable',
   )
@@ -94,7 +94,7 @@ export async function parcourirResponsable(page, site, id, collegue, moteur, lar
     .filter({ hasText: /^Non attribué$/ })
     .waitFor()
   await page.goto(`${site}/espace?responsable=sans`)
-  await page.getByRole('table').getByText('OCRFICTIF', { exact: true }).waitFor()
+  await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
   assert.equal(
     await page.evaluate(() => localStorage.length),
     0,

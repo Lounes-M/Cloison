@@ -65,7 +65,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const classes = cn(
-    'press inline-flex cursor-pointer items-center justify-center font-bold outlined',
+    'press inline-flex min-h-11 max-w-full cursor-pointer items-center justify-center text-center font-bold outlined',
     tones[tone],
     sizes[size],
     className,

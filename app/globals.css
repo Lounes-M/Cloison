@@ -404,6 +404,7 @@
     cursor: pointer;
   }
   .espace-shell :where(summary) {
+    min-height: 44px;
     padding-block: 0.5rem;
   }
   .espace-shell :where(p, label, dd) {
@@ -437,5 +438,20 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Les classes de champ locales ne doivent pas reintroduire le zoom de saisie
+   sur les petits ecrans. Cette regle suit les couches de composants/utilitaires. */
+@media (width < 48rem) {
+  input:not([type='hidden']):not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 1rem;
+    scroll-margin-top: 11rem;
+  }
+
+  section[id] {
+    scroll-margin-top: 11rem;
   }
 }

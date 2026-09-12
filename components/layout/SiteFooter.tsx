@@ -11,7 +11,11 @@ export function SiteFooter() {
           className="flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] font-semibold opacity-80"
         >
           {footerLinks.map((link) => (
-            <a key={link.href} href={link.href} className="transition-opacity hover:opacity-100">
+            <a
+              key={link.href}
+              href={link.href}
+              className="inline-flex min-h-11 items-center transition-opacity hover:opacity-100"
+            >
               {link.label}
             </a>
           ))}

@@ -1,13 +1,14 @@
 import { Logo } from '@/components/brand/Logo'
 import { Button } from '@/components/ui/Button'
+import { MenuMobile } from '@/components/layout/MenuMobile'
 import { navLinks } from '@/lib/site'
 
 export function SiteHeader() {
   return (
-    <header className="bg-cream/90 sticky top-0 z-50 px-4 py-4 backdrop-blur-md md:px-10">
+    <header className="bg-cream/90 sticky top-0 z-50 max-h-dvh overflow-y-auto px-4 py-4 backdrop-blur-md md:px-10">
       <nav
         aria-label="Navigation principale"
-        className="bg-paper shadow-brut-sm outlined mx-auto flex max-w-[1200px] items-center justify-between rounded-[14px] px-5 py-3 md:px-6"
+        className="bg-paper shadow-brut-sm outlined mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 rounded-[14px] px-3 py-3 sm:px-5 md:px-6"
       >
         <Logo className="text-lg md:text-xl" />
 
@@ -23,6 +24,7 @@ export function SiteHeader() {
             Démarrer
           </Button>
         </div>
+        <MenuMobile />
       </nav>
     </header>
   )

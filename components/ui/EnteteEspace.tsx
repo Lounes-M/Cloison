@@ -16,8 +16,8 @@ export function EnteteEspace({
       >
         <Icone nom="asterisque" className="size-6" />
       </div>
-      <p className="mb-4 text-xs font-bold tracking-widest uppercase">{etiquette}</p>
-      <h1 className="font-display text-[clamp(1.7rem,4vw,3rem)] leading-tight break-words uppercase">
+      <p className="mb-4 pr-8 text-xs font-bold tracking-widest uppercase">{etiquette}</p>
+      <h1 className="font-display text-[clamp(1.25rem,6.25vw,3rem)] leading-tight break-words uppercase sm:text-[clamp(1.7rem,4vw,3rem)]">
         {titre}
       </h1>
       {children ? (

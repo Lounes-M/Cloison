@@ -289,68 +289,136 @@ export default async function PageEspace({
               : tableau.aucun}
           </p>
         ) : (
-          <div className="outlined mt-6 overflow-x-auto rounded-[14px]">
-            <table className="w-full text-left text-[14px]">
-              <thead className="bg-sky border-ink border-b-2 text-[12px] font-bold tracking-wide uppercase">
-                <tr>
-                  <th className="px-4 py-3">{tableau.colonnes.reference}</th>
-                  <th className="px-4 py-3">{tableau.colonnes.locataire}</th>
-                  <th className="px-4 py-3">{tableau.colonnes.statut}</th>
-                  <th className="px-4 py-3">{texteResponsables.titre}</th>
-                  <th className="px-4 py-3">{tableau.colonnes.ratio}</th>
-                  <th className="px-4 py-3">{tableau.colonnes.ouvert}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lignes.map((ligne) => {
-                  const statut = statuts[ligne.statut] ?? statuts.ouvert!
-                  const ratio = ratioDe(ligne)
-                  return (
-                    <tr key={ligne.id} className="border-ink/20 border-b last:border-0">
-                      <td className="px-4 py-3 font-bold">
-                        <Link
-                          href={`/espace/dossiers/${ligne.id}`}
-                          className="hover:text-cobalt underline-offset-2 hover:underline"
-                        >
-                          {ligne.reference}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 font-medium">
-                        {ligne.email_locataire}
-                        {ligne.demonstration ? (
-                          <span className="text-muted ml-2 text-[11px] font-bold tracking-wide uppercase">
-                            {tableau.demonstration}
+          <div className="mt-6">
+            <ul className="grid gap-4 md:hidden" aria-label={tableau.dossiers}>
+              {lignes.map((ligne) => {
+                const statut = statuts[ligne.statut] ?? statuts.ouvert!
+                const ratio = ratioDe(ligne)
+                return (
+                  <li key={ligne.id} className="outlined bg-cream rounded-xl p-4">
+                    <Link
+                      href={`/espace/dossiers/${ligne.id}`}
+                      className="lien-espace mb-4 w-full break-all"
+                    >
+                      {ligne.reference}
+                    </Link>
+                    <dl className="grid gap-3 text-sm">
+                      <div>
+                        <dt className="text-muted text-xs font-bold">
+                          {tableau.colonnes.locataire}
+                        </dt>
+                        <dd className="font-medium">
+                          {ligne.email_locataire}
+                          {ligne.demonstration ? (
+                            <span className="block text-xs font-bold">{tableau.demonstration}</span>
+                          ) : null}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted mb-1 text-xs font-bold">
+                          {tableau.colonnes.statut}
+                        </dt>
+                        <dd>
+                          <span
+                            className={cn(
+                              'outlined inline-block rounded-full px-3 py-1 text-xs font-bold',
+                              tons[statut.ton],
+                            )}
+                          >
+                            {statut.libelle}
                           </span>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={cn(
-                            'border-ink inline-block rounded-full border-2 px-3 py-1 text-[12px] font-bold',
-                            tons[statut.ton],
-                          )}
-                        >
-                          {statut.libelle}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm break-all">
-                        {responsables.get(ligne.id)?.responsable_id
-                          ? (responsables.get(ligne.id)?.responsable_email ??
-                            texteResponsables.indisponible)
-                          : texteResponsables.aucun}
-                      </td>
-                      <td className="px-4 py-3 font-medium">{ratio ? `${ratio}×` : '·'}</td>
-                      <td className="text-muted px-4 py-3 font-medium">
-                        {new Date(ligne.cree_le).toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'short',
-                        })}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted text-xs font-bold">{texteResponsables.titre}</dt>
+                        <dd>
+                          {responsables.get(ligne.id)?.responsable_id
+                            ? (responsables.get(ligne.id)?.responsable_email ??
+                              texteResponsables.indisponible)
+                            : texteResponsables.aucun}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted text-xs font-bold">{tableau.colonnes.ratio}</dt>
+                        <dd>{ratio ? `${ratio}×` : '·'}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted text-xs font-bold">{tableau.colonnes.ouvert}</dt>
+                        <dd>
+                          {new Date(ligne.cree_le).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'short',
+                          })}
+                        </dd>
+                      </div>
+                    </dl>
+                  </li>
+                )
+              })}
+            </ul>
+            <div className="outlined hidden overflow-x-auto rounded-[14px] md:block">
+              <table className="w-full text-left text-[14px]">
+                <thead className="bg-sky border-ink border-b-2 text-[12px] font-bold tracking-wide uppercase">
+                  <tr>
+                    <th className="px-4 py-3">{tableau.colonnes.reference}</th>
+                    <th className="px-4 py-3">{tableau.colonnes.locataire}</th>
+                    <th className="px-4 py-3">{tableau.colonnes.statut}</th>
+                    <th className="px-4 py-3">{texteResponsables.titre}</th>
+                    <th className="px-4 py-3">{tableau.colonnes.ratio}</th>
+                    <th className="px-4 py-3">{tableau.colonnes.ouvert}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lignes.map((ligne) => {
+                    const statut = statuts[ligne.statut] ?? statuts.ouvert!
+                    const ratio = ratioDe(ligne)
+                    return (
+                      <tr key={ligne.id} className="border-ink/20 border-b last:border-0">
+                        <td className="px-4 py-3 font-bold">
+                          <Link
+                            href={`/espace/dossiers/${ligne.id}`}
+                            className="hover:text-cobalt underline-offset-2 hover:underline"
+                          >
+                            {ligne.reference}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 font-medium">
+                          {ligne.email_locataire}
+                          {ligne.demonstration ? (
+                            <span className="text-muted ml-2 text-[11px] font-bold tracking-wide uppercase">
+                              {tableau.demonstration}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={cn(
+                              'border-ink inline-block rounded-full border-2 px-3 py-1 text-[12px] font-bold',
+                              tons[statut.ton],
+                            )}
+                          >
+                            {statut.libelle}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm break-all">
+                          {responsables.get(ligne.id)?.responsable_id
+                            ? (responsables.get(ligne.id)?.responsable_email ??
+                              texteResponsables.indisponible)
+                            : texteResponsables.aucun}
+                        </td>
+                        <td className="px-4 py-3 font-medium">{ratio ? `${ratio}×` : '·'}</td>
+                        <td className="text-muted px-4 py-3 font-medium">
+                          {new Date(ligne.cree_le).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'short',
+                          })}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
         <nav
