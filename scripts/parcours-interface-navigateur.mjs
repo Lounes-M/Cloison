@@ -5,6 +5,60 @@ import { SignJWT } from 'jose'
 import { createHmac } from 'node:crypto'
 import { parcourirSupport } from './parcours-support-navigateur.mjs'
 
+async function verifierCommandes(page, nom) {
+  const commandes = await page
+    .locator('button, a.press, .lien-espace, summary')
+    .evaluateAll((elements) =>
+      elements
+        .filter((e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
+        .map((e) => ({
+          libelle: e.textContent.trim(),
+          hauteur: e.getBoundingClientRect().height,
+          largeur: e.clientWidth,
+          contenu: e.scrollWidth,
+        }))
+        // Une translation animee peut rendre 43.999969 px pour une boite de 44 px.
+        // Comparer au centieme de pixel CSS, sans accepter une commande de 43.5 px.
+        .filter((e) => Math.round(e.hauteur * 100) / 100 < 44 || e.contenu > e.largeur + 1),
+    )
+  assert.deepEqual(commandes, [], `Commande tronquee ou trop petite ${nom}`)
+}
+
+async function verifierPrecisionTactile(contexte) {
+  const preuve = await contexte.newPage()
+  try {
+    await preuve.setContent(
+      '<div style="margin-top:300px"><button style="display:inline-flex;box-sizing:border-box;height:44px;min-height:0;width:200px;border:0;padding:0">Tactile</button></div>',
+    )
+    for (const translation of [0.17, 0.42, 0.67, 0.92]) {
+      await preuve.locator('div').evaluate((e, y) => {
+        e.style.transform = `translateY(${y}px)`
+      }, translation)
+      await verifierCommandes(preuve, 'translation fractionnaire')
+    }
+    await preuve.locator('button').evaluate((e) => {
+      e.style.height = '43.5px'
+    })
+    await assert.rejects(
+      verifierCommandes(preuve, 'hauteur insuffisante'),
+      /Commande tronquee ou trop petite/,
+    )
+    await preuve.locator('button').evaluate((e) => {
+      e.style.height = '44px'
+      e.style.width = '20px'
+    })
+    await assert.rejects(
+      verifierCommandes(preuve, 'texte tronque'),
+      /Commande tronquee ou trop petite/,
+    )
+  } finally {
+    await preuve.close()
+  }
+  console.log(
+    'OK : precision tactile, translations fractionnaires, hauteur insuffisante et texte tronque',
+  )
+}
+
 async function verifierSurface(page) {
   const couleurs = await page
     .locator('.espace-shell')
@@ -28,6 +82,7 @@ async function verifierSurface(page) {
 export async function parcourirInterface(page, site, id, moteur, largeur, session, simulerPanne) {
   const routesVues = new Set()
   const contexte = page.context()
+  if (moteur.name() === 'chromium' && largeur === 320) await verifierPrecisionTactile(contexte)
   const repertoire = process.env.CLOISON_CAPTURE_INTERFACE_DIR
   if (repertoire) await mkdir(repertoire, { recursive: true })
   const visiter = async (chemin, nom, shell = true) => {
@@ -53,17 +108,7 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
             .map((e) => e.name || e.id),
         )
       assert.deepEqual(champs, [], `Champs trop petits sur mobile ${nom}`)
-      const commandes = await page
-        .locator('button, a.press, .lien-espace, summary')
-        .evaluateAll((elements) =>
-          elements
-            .filter((e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
-            .filter(
-              (e) => e.getBoundingClientRect().height < 44 || e.scrollWidth > e.clientWidth + 1,
-            )
-            .map((e) => e.textContent.trim()),
-        )
-      assert.deepEqual(commandes, [], `Commande tronquee ou trop petite ${nom}`)
+      await verifierCommandes(page, nom)
       const motsCoupes = await page.locator('.entete-espace h1').evaluateAll((elements) => {
         const resultat = []
         for (const e of elements) {
