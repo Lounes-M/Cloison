@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/Button'
  */
 export default function Error({
   error,
-  reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
@@ -41,14 +40,14 @@ export default function Error({
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Button onClick={reset}>Réessayer</Button>
+          <Button onClick={() => window.location.reload()}>Réessayer</Button>
           <Button href="/" tone="paper">
             Retour à l&apos;accueil
           </Button>
         </div>
 
         {error.digest ? (
-          <p className="text-muted text-xs">
+          <p className="text-muted max-w-full text-xs break-words">
             Référence à nous transmettre : <code className="font-mono">{error.digest}</code>
           </p>
         ) : null}

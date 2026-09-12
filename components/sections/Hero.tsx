@@ -65,18 +65,18 @@ export function Hero() {
         </p>
 
         <h1
-          className="font-display animate-fade-up mx-auto mt-7 max-w-[1000px] text-[clamp(2.25rem,7vw,76px)] leading-[1.02] uppercase [animation-delay:0.15s]"
+          className="font-display animate-fade-up mx-auto mt-7 max-w-[1000px] text-[clamp(2rem,7vw,76px)] leading-[1.02] uppercase [animation-delay:0.15s]"
           style={{ animationFillMode: 'both' }}
         >
           Ton garant t&apos;aide.
           <br />
           Il ne te doit{' '}
-          <span className="text-cobalt underline decoration-6 underline-offset-8">
+          <span className="text-cobalt underline decoration-3 underline-offset-4 md:decoration-6 md:underline-offset-8">
             ni sa fiche de paie
           </span>
           ,<br />
           ni une signature{' '}
-          <span className="border-ink bg-flame shadow-brut-sm text-ink inline-block -rotate-[1.5deg] rounded-[14px] border-[3px] px-4">
+          <span className="border-ink bg-flame shadow-brut-sm text-ink inline-block -rotate-[1.5deg] rounded-[14px] border-[3px] px-3 py-1 sm:px-4">
             à l&apos;aveugle.
           </span>
         </h1>

@@ -78,7 +78,7 @@ export default function AgencesPage() {
                   <span className="font-display text-muted text-2xl tabular-nums">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <div className="min-w-[16rem] flex-1">
+                  <div className="min-w-0 flex-1 basis-64">
                     <h3 className="font-display mb-2 text-lg">{item.titre}</h3>
                     <p className="max-w-[62ch] text-[15px] leading-relaxed font-medium">
                       {item.texte}
@@ -327,7 +327,7 @@ export default function AgencesPage() {
 
       {/* LE FORMULAIRE, inchangé */}
       <Section id="demander" className="scroll-mt-28 py-20">
-        <div className="bg-paper outlined shadow-brut-lg mx-auto max-w-[860px] rounded-[24px] p-8 md:p-12">
+        <div className="bg-paper outlined shadow-brut-lg mx-auto max-w-[860px] rounded-[24px] p-5 sm:p-8 md:p-12">
           <FormulaireAgence />
         </div>
       </Section>

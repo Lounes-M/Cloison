@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 const ETAT_INITIAL: EtatFormulaire = { statut: 'inactif' }
 
 const champBase =
-  'w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 text-[15px] font-medium ' +
+  'w-full rounded-xl border-2 border-ink bg-paper px-4 py-3 text-base font-medium ' +
   'placeholder:text-muted placeholder:font-normal'
 
 function Erreur({ id, message }: { id: string; message?: string }) {

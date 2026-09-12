@@ -44,6 +44,7 @@ const dekFictive = Buffer.concat([
 ])
 const enveloppeFictive =
   '\\x' + Buffer.concat([nonceFictif, chiffreurFictif.getAuthTag(), dekFictive]).toString('hex')
+let panneInterface = false
 let brouillon = null
 let clesConnecteurs = []
 let examensDocumentaires = [],
@@ -72,6 +73,11 @@ const api = createServer(async (req, res) => {
   res.setHeader('Content-Type', 'application/json')
   const url = new URL(req.url, 'http://127.0.0.1'),
     path = url.pathname
+  if (panneInterface && path.endsWith('/rpc/mes_preferences_notifications')) {
+    res.writeHead(503)
+    res.end(JSON.stringify({ message: 'Panne fictive' }))
+    return
+  }
   let valeur = []
   if (path.endsWith('/cles_dossier')) valeur = [{ cle_scellee: enveloppeFictive }]
   else if (path.endsWith('/rpc/mon_brouillon_engagement')) valeur = brouillon ? [brouillon] : []
@@ -504,7 +510,9 @@ try {
               roleCourant = v
             },
           })
-          await parcourirInterface(page, relais.site, id, moteur, largeur, session)
+          await parcourirInterface(page, relais.site, id, moteur, largeur, session, (valeur) => {
+            panneInterface = valeur
+          })
           await parcourirBrouillon(page, relais.site, moteur, largeur, {
             reinitialiser: () => {
               brouillon = null

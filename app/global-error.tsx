@@ -16,7 +16,6 @@ import './globals.css'
  */
 export default function GlobalError({
   error,
-  reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
@@ -27,8 +26,11 @@ export default function GlobalError({
 
   return (
     <html lang="fr" className={fontVariables}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body>
-        <main className="flex min-h-screen flex-col items-center justify-center gap-7 px-6 text-center">
+        <main className="flex min-h-dvh flex-col items-center justify-center gap-7 px-6 py-12 text-center">
           <p className="font-display text-2xl">CLOISON</p>
 
           <h1 className="font-display max-w-[620px] text-[clamp(1.75rem,5vw,2.75rem)] leading-tight">
@@ -39,14 +41,14 @@ export default function GlobalError({
 
           <button
             type="button"
-            onClick={reset}
+            onClick={() => window.location.reload()}
             className="press bg-cobalt outlined rounded-brut shadow-brut inline-flex cursor-pointer items-center justify-center px-8 py-4 text-[17px] font-bold text-white"
           >
             Recharger
           </button>
 
           {error.digest ? (
-            <p className="text-muted text-xs">
+            <p className="text-muted max-w-full text-xs break-words">
               Référence à nous transmettre : <code className="font-mono">{error.digest}</code>
             </p>
           ) : null}

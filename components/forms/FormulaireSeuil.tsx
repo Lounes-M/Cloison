@@ -32,7 +32,7 @@ export function FormulaireSeuil({ seuilActuel }: { seuilActuel: string }) {
         </p>
       ) : null}
 
-      <div className="flex items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3">
         <div>
           <label htmlFor={idChamp} className="mb-2 block text-[14px] font-bold">
             {tableau.seuilChamp}
