@@ -5,6 +5,18 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Lot du 12 septembre 2026 : fin du processus documentaire
+
+La CI de main apres PR129 a refuse une rasterisation avec une mesure memoire
+indisponible. Un test deterministe reproduit le rejet d'un processus pourtant
+sorti normalement pendant cette mesure. Le superviseur conserve l'arret
+immediat, puis distingue a la fermeture une sortie normale d'une interruption.
+Il exige une mesure positive avant transmission, et les autres erreurs restent
+bloquantes. Voir [le guide](exploitation/memoire-documentaire.md).
+
+Cette correction ne transforme pas l'echantillonnage RSS en plafond systeme.
+Les preuves de validation native, de CI et de livraison figurent sur sa PR.
+
 ## Lot du 12 septembre 2026 : diagnostic Universign
 
 Le [diagnostic en lecture seule](exploitation/diagnostic-universign.md) prepare
