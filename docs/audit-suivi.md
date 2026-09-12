@@ -5,7 +5,20 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
-## Etat courant au 11 septembre 2026, apres PR112
+## Lot du 12 septembre 2026 : paquet d'export personnel
+
+Un [outil hors ligne](exploitation/export-personnel.md) assemble les fichiers
+relus dans un paquet chiffre et verifie son extraction contre une decision
+attendue. Il refuse les revisions, destinataires, contenus ou dates differents,
+les chemins symboliques et l'ecrasement d'une destination existante.
+
+Cette implementation ne clot pas R02 : collecte par acteur, validation du
+perimetre, remise authentifiee, revocation et purge restent ouvertes. R03 reste
+distinct. Les acces developpeur Universign sont toujours attendus ; aucune
+signature reelle ni facturation agence complete n'est revendiquee. Les preuves
+de validation et de livraison de ce lot figurent sur sa pull request.
+
+## Historique au 11 septembre 2026, apres PR112
 
 Main f0054ee integre les preferences, rappels facultatifs, support contextuel,
 proxy Next.js, suivi prive des demandes de droits et historique des affectations.
