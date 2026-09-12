@@ -79,6 +79,17 @@ test('les octets autres que PDF restent refuses', async () => {
   )
 })
 
+test('un faux en tete rendu identique par le decodage ASCII est refuse', async () => {
+  const faux = Buffer.from(Buffer.from('%PDF-').map((octet) => octet | 128))
+  expect(faux.toString('ascii')).toBe('%PDF-')
+  executer.mockResolvedValue(
+    Buffer.from(JSON.stringify({ ok: true, pdf: faux.toString('base64') })),
+  )
+  await expect(traiterDocument(pdf, 'application/pdf', '', 'rasteriser')).rejects.toThrow(
+    'Sortie documentaire invalide',
+  )
+})
+
 test.each([
   { ok: false },
   { ok: false, pages: 'contenu_prive_fictif' },

@@ -56,7 +56,7 @@ export async function traiterDocument(
   if (
     pdf.length > PDF_MAX ||
     pdf.toString('base64') !== resultat.pdf ||
-    pdf.subarray(0, 5).toString('ascii') !== '%PDF-'
+    !pdf.subarray(0, 5).equals(Buffer.from('%PDF-'))
   )
     throw new Error('Sortie documentaire invalide')
   return pdf
