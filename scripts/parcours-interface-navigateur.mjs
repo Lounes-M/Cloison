@@ -95,7 +95,15 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   }
   await visiter('/espace', 'tableau')
   const dossiers = page.getByRole('list', { name: 'Vos dossiers', exact: true })
-  if (largeur < 768) {
+  const recherche = page.locator('form[method="get"] input')
+  assert.deepEqual(
+    await recherche.evaluateAll((elements) =>
+      elements.filter((e) => e.getBoundingClientRect().width < 200).map((e) => e.name),
+    ),
+    [],
+    'Champ de recherche comprime',
+  )
+  if (largeur < 1024) {
     await dossiers.getByText('Complet', { exact: true }).waitFor()
     await dossiers.getByText('Non attribué', { exact: true }).waitFor()
     const fiche = dossiers.getByRole('listitem').first()

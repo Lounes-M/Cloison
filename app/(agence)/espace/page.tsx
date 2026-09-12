@@ -220,7 +220,7 @@ export default async function PageEspace({
           key={JSON.stringify([reference, emailRecherche, etatRecherche, attribution])}
           action="/espace"
           method="get"
-          className="mt-5 grid gap-3 sm:flex sm:flex-wrap sm:items-end"
+          className="mt-5 grid items-end gap-3 sm:grid-cols-2"
         >
           <label className="min-w-0 flex-1 text-sm font-semibold">
             {tableau.rechercheReference}
@@ -290,7 +290,7 @@ export default async function PageEspace({
           </p>
         ) : (
           <div className="mt-6">
-            <ul className="grid gap-4 md:hidden" aria-label={tableau.dossiers}>
+            <ul className="grid gap-4 lg:hidden" aria-label={tableau.dossiers}>
               {lignes.map((ligne) => {
                 const statut = statuts[ligne.statut] ?? statuts.ouvert!
                 const ratio = ratioDe(ligne)
@@ -356,7 +356,7 @@ export default async function PageEspace({
                 )
               })}
             </ul>
-            <div className="outlined hidden overflow-x-auto rounded-[14px] md:block">
+            <div className="outlined hidden overflow-x-auto rounded-[14px] lg:block">
               <table className="w-full text-left text-[14px]">
                 <thead className="bg-sky border-ink border-b-2 text-[12px] font-bold tracking-wide uppercase">
                   <tr>
