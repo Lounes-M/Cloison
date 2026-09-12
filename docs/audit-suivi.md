@@ -5,6 +5,17 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Lot du 12 septembre 2026 : diagnostic Universign
+
+Le [diagnostic en lecture seule](exploitation/diagnostic-universign.md) prepare
+la verification d'une transaction connue. Il effectue un seul GET borne, sur
+une origine imposee, et ne retourne que l'etat apres controle de l'identifiant.
+Aucune creation, signature, notification, annulation ni collecte de documents.
+
+Les tests utilisent des reponses fictives ; les acces developpeur restent
+absents. Cet outil ne constitue pas une validation de la signature, de l'archive
+ou de la facturation. Les preuves de livraison figurent sur sa pull request.
+
 ## Lot du 12 septembre 2026 : paquet d'export personnel
 
 Un [outil hors ligne](exploitation/export-personnel.md) assemble les fichiers
