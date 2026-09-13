@@ -35,12 +35,22 @@ test('la reservation precede les octets et un upload incertain la laisse recuper
   expect(etapes).toEqual(['reservation', 'octets'])
   expect(rpc).toHaveBeenCalledExactlyOnceWith('reserver_depot', { le_chemin: 'dossier/objet' })
 })
-test('la maintenance ne purge pas apres echec de reprise des reservations', async () => {
-  const rpc = vi.fn(async () => ({ error: { message: 'panne fictive' } }))
-  await expect(purgerCoffres({ rpc } as unknown as SupabaseClient)).rejects.toThrow(
-    'Reprise des depots impossible',
+test('une reprise refusee bloque les documents mais laisse les retentions independantes', async () => {
+  const rpc = vi.fn(async (nom: string) =>
+    nom === 'reprendre_depots_inacheves'
+      ? { error: { message: 'panne fictive' } }
+      : { data: 0, error: null },
   )
-  expect(rpc).toHaveBeenCalledExactlyOnceWith('reprendre_depots_inacheves')
+  expect(await purgerCoffres({ rpc } as unknown as SupabaseClient)).toEqual({
+    traites: 0,
+    echecs: 1,
+  })
+  expect(rpc.mock.calls.map(([nom]) => nom)).toEqual([
+    'reprendre_depots_inacheves',
+    'purger_suivis_droits',
+    'purger_historique_responsables',
+    'purger_brouillons_engagement',
+  ])
 })
 
 test('les metadonnees utilisent le client serveur de depot et jamais le client navigateur', async () => {

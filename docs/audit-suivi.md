@@ -5,6 +5,19 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Lot du 13 septembre 2026 : maintien des purges independantes
+
+La [purge partielle](exploitation/purge-partielle.md) poursuit les retentions
+independantes apres une panne documentaire, dans le budget existant. Une
+exception sur un objet ne perd plus les acquittements deja obtenus et ne
+bloque pas les objets suivants si le budget permet de continuer.
+
+La chaine documentaire reste bloquee apres echec de reprise ou de purge des
+cles. Aucun acquittement apres retrait refuse ou budget epuise, et aucune
+confirmation globale apres echec partiel. Les tests et contre-preuves couvrent
+ces frontieres. Cette correction ne pretend pas resoudre la cause des erreurs
+fournisseur ; les preuves de livraison figurent sur la PR.
+
 ## Lot du 13 septembre 2026 : suivi des echeances agence
 
 Le [tableau agence](exploitation/echeances-dossiers.md) affiche la fin du coffre,
