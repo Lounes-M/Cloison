@@ -297,9 +297,10 @@ export default async function PageEspace({
               ))}
             </select>
           </label>
-          <label className="min-w-0 text-sm font-semibold">
-            {tableau.tri}
+          <div className="min-w-0 text-sm font-semibold">
+            <label htmlFor="tri-dossiers">{tableau.tri}</label>
             <select
+              id="tri-dossiers"
               name="tri"
               defaultValue={tri}
               className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
@@ -307,10 +308,11 @@ export default async function PageEspace({
               <option value="recent">{tableau.tris.recent}</option>
               <option value="echeance">{tableau.tris.echeance}</option>
             </select>
-          </label>
-          <label className="min-w-0 text-sm font-semibold">
-            {tableau.horizon}
+          </div>
+          <div className="min-w-0 text-sm font-semibold">
+            <label htmlFor="horizon-dossiers">{tableau.horizon}</label>
             <select
+              id="horizon-dossiers"
               name="horizon"
               defaultValue={horizon}
               aria-describedby="aide-echeance"
@@ -320,7 +322,7 @@ export default async function PageEspace({
               <option value="7">{tableau.horizons.sept}</option>
               <option value="30">{tableau.horizons.trente}</option>
             </select>
-          </label>
+          </div>
           <p id="aide-echeance" className="text-muted text-sm sm:col-span-2">
             {tableau.aideEcheance}
           </p>
