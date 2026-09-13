@@ -8,6 +8,7 @@ import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
+import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
@@ -39,8 +40,21 @@ type Ligne = {
   email_locataire: string
   statut: string
   cree_le: string
+  expire_le: string
   demonstration: boolean
   engagements: { ratio: string | null } | { ratio: string | null }[] | null
+}
+
+function dateEcheance(valeur: string): string {
+  const date = new Date(valeur)
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'Europe/Paris',
+      })
+    : tableau.dateIndisponible
 }
 
 function ratioDe(ligne: Ligne): string | null {
@@ -119,6 +133,10 @@ export default async function PageEspace({
     : ''
   const attribution =
     recherche.responsable === 'mes' ? 'mes' : recherche.responsable === 'sans' ? 'sans' : 'tous'
+  const tri = recherche.tri === 'echeance' ? 'echeance' : 'recent'
+  const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
+  // Une seule horloge pour les deux bornes ; les droits restent imposes par SQL.
+  const bornes = bornesEcheance(horizon)
   const motif = (valeur: string) => `%${valeur.replace(/[\\%_]/g, '\\$&')}%`
   const lienPage = (page: number) => {
     const params = new URLSearchParams({ page: String(page) })
@@ -126,15 +144,18 @@ export default async function PageEspace({
     if (emailRecherche) params.set('email', emailRecherche)
     if (etatRecherche) params.set('statut', etatRecherche)
     if (attribution !== 'tous') params.set('responsable', attribution)
+    if (tri !== 'recent') params.set('tri', tri)
+    if (horizon) params.set('horizon', horizon)
     return `/espace?${params.toString()}` as const
   }
   let requete = supabase
     .from('dossiers')
     .select(
-      'id, reference, email_locataire, statut, cree_le, demonstration, engagements(ratio), affecte:affectations_dossiers()',
+      'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), affecte:affectations_dossiers()',
     )
-    .order('cree_le', { ascending: false })
+    .order(tri === 'echeance' ? 'expire_le' : 'cree_le', { ascending: tri === 'echeance' })
     .order('id', { ascending: false })
+  if (bornes) requete = requete.gt('expire_le', bornes.apres).lte('expire_le', bornes.jusqua)
   if (reference) requete = requete.ilike('reference', motif(reference))
   if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
   if (etatRecherche) requete = requete.eq('statut', etatRecherche)
@@ -217,7 +238,14 @@ export default async function PageEspace({
         <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
 
         <form
-          key={JSON.stringify([reference, emailRecherche, etatRecherche, attribution])}
+          key={JSON.stringify([
+            reference,
+            emailRecherche,
+            etatRecherche,
+            attribution,
+            tri,
+            horizon,
+          ])}
           action="/espace"
           method="get"
           className="mt-5 grid items-end gap-3 sm:grid-cols-2"
@@ -269,13 +297,47 @@ export default async function PageEspace({
               ))}
             </select>
           </label>
+          <div className="min-w-0 text-sm font-semibold">
+            <label htmlFor="tri-dossiers">{tableau.tri}</label>
+            <select
+              id="tri-dossiers"
+              name="tri"
+              defaultValue={tri}
+              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+            >
+              <option value="recent">{tableau.tris.recent}</option>
+              <option value="echeance">{tableau.tris.echeance}</option>
+            </select>
+          </div>
+          <div className="min-w-0 text-sm font-semibold">
+            <label htmlFor="horizon-dossiers">{tableau.horizon}</label>
+            <select
+              id="horizon-dossiers"
+              name="horizon"
+              defaultValue={horizon}
+              aria-describedby="aide-echeance"
+              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+            >
+              <option value="">{tableau.horizons.tous}</option>
+              <option value="7">{tableau.horizons.sept}</option>
+              <option value="30">{tableau.horizons.trente}</option>
+            </select>
+          </div>
+          <p id="aide-echeance" className="text-muted text-sm sm:col-span-2">
+            {tableau.aideEcheance}
+          </p>
           <button
             type="submit"
             className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold"
           >
             {tableau.rechercher}
           </button>
-          {reference || emailRecherche || etatRecherche || attribution !== 'tous' ? (
+          {reference ||
+          emailRecherche ||
+          etatRecherche ||
+          attribution !== 'tous' ||
+          horizon ||
+          tri !== 'recent' ? (
             <Link href="/espace" className="px-2 py-2 text-sm underline">
               {tableau.effacer}
             </Link>
@@ -284,7 +346,13 @@ export default async function PageEspace({
 
         {lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">
-            {numero > 1 || reference || emailRecherche || etatRecherche || attribution !== 'tous'
+            {numero > 1 ||
+            reference ||
+            emailRecherche ||
+            etatRecherche ||
+            attribution !== 'tous' ||
+            horizon ||
+            tri !== 'recent'
               ? tableau.aucunResultat
               : tableau.aucun}
           </p>
@@ -349,6 +417,9 @@ export default async function PageEspace({
                             day: 'numeric',
                             month: 'short',
                           })}
+                          <span className="mt-1 block text-xs">
+                            {tableau.finCoffre(dateEcheance(ligne.expire_le))}
+                          </span>
                         </dd>
                       </div>
                     </dl>
@@ -412,6 +483,9 @@ export default async function PageEspace({
                             day: 'numeric',
                             month: 'short',
                           })}
+                          <span className="mt-1 block text-xs">
+                            {tableau.finCoffre(dateEcheance(ligne.expire_le))}
+                          </span>
                         </td>
                       </tr>
                     )

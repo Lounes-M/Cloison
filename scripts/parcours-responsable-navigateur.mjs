@@ -28,6 +28,31 @@ export async function parcourirResponsable(page, site, id, collegue, moteur, lar
   await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
   assert.equal(simuler.filtre().get('statut'), 'eq.complet', 'Filtre etat absent de la requete')
   assert.equal(simuler.filtre().get('affecte'), 'not.is.null', 'Filtre Mes dossiers absent')
+  const filtres = page.locator('form[method="get"]')
+  await filtres.getByLabel('Trier les dossiers').selectOption('echeance')
+  await filtres.getByLabel('Échéance du coffre', { exact: true }).selectOption('7')
+  await filtres.getByRole('button', { name: 'Rechercher', exact: true }).focus()
+  await page.keyboard.press('Enter')
+  await page.waitForURL((url) => url.searchParams.get('horizon') === '7')
+  await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
+  assert.equal(simuler.filtre().get('order'), 'expire_le.asc,id.desc')
+  const bornes = simuler.filtre().getAll('expire_le')
+  assert.equal(bornes.length, 2)
+  assert(bornes[0].startsWith('gt.'))
+  assert(bornes[1].startsWith('lte.'))
+  assert.equal(Date.parse(bornes[1].slice(4)) - Date.parse(bornes[0].slice(3)), 7 * 86400000)
+  assert.equal(simuler.filtre().get('affecte'), 'not.is.null')
+  assert.equal(simuler.filtre().get('statut'), 'eq.complet')
+  assert(
+    await page
+      .getByText('Fin du coffre :', { exact: false })
+      .evaluateAll((elements) => elements.some((e) => e.getClientRects().length > 0)),
+  )
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  await page.getByRole('link', { name: 'Effacer les filtres', exact: true }).click()
+  await page.waitForURL(`${site}/espace`)
+  assert.equal(await filtres.getByLabel('Trier les dossiers').inputValue(), 'recent')
+  assert.equal(await filtres.getByLabel('Échéance du coffre', { exact: true }).inputValue(), '')
   await page.goto(`${site}/espace?responsable=sans`)
   assert.equal(
     await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).count(),

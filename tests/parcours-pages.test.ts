@@ -14,6 +14,7 @@ const doublures = vi.hoisted(() => ({
   plage: vi.fn(),
   filtre: vi.fn(),
   ordre: vi.fn(),
+  borne: vi.fn(),
   rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/session', () => ({
@@ -41,6 +42,14 @@ function client() {
       requetes.push(table)
       const chaine = {
         select: () => chaine,
+        gt: (...args: unknown[]) => {
+          doublures.borne('gt', ...args)
+          return chaine
+        },
+        lte: (...args: unknown[]) => {
+          doublures.borne('lte', ...args)
+          return chaine
+        },
         eq: () => chaine,
         not: () => chaine,
         is: () => chaine,
@@ -329,6 +338,69 @@ describe('la liste des dossiers reste bornee et navigable', () => {
       )
     },
   )
+
+  test.each(['7', '30'])(
+    'echeance %s : fenetre bornee et pagination conservee',
+    async (horizon) => {
+      reponses.dossiers!.data = []
+      const avant = Date.now()
+      const arbre = elements(
+        await PageEspace({
+          searchParams: Promise.resolve({
+            page: '2',
+            tri: 'echeance',
+            horizon,
+            responsable: 'mes',
+          }),
+        }),
+      )
+      const appels = doublures.borne.mock.calls
+      expect(appels).toHaveLength(2)
+      expect(appels[0]!.slice(0, 2)).toEqual(['gt', 'expire_le'])
+      expect(appels[1]!.slice(0, 2)).toEqual(['lte', 'expire_le'])
+      const debut = Date.parse(appels[0]![2] as string)
+      expect(debut).toBeGreaterThanOrEqual(avant)
+      expect(debut).toBeLessThanOrEqual(Date.now())
+      expect(Date.parse(appels[1]![2] as string) - debut).toBe(Number(horizon) * 86400000)
+      expect(doublures.ordre.mock.calls).toEqual([
+        ['expire_le', { ascending: true }],
+        ['id', { ascending: false }],
+      ])
+      expect(arbre.map((e) => e.props.href)).toContain(
+        `/espace?page=1&responsable=mes&tri=echeance&horizon=${horizon}`,
+      )
+    },
+  )
+
+  test.each(['0', '-7', '365', ['7', '30'], '7);drop'])(
+    'horizon invalide %s ignore',
+    async (horizon) => {
+      reponses.dossiers!.data = []
+      await PageEspace({ searchParams: Promise.resolve({ horizon, tri: 'expire_le.desc' }) })
+      expect(doublures.borne).not.toHaveBeenCalled()
+      expect(doublures.ordre.mock.calls).toEqual([
+        ['cree_le', { ascending: false }],
+        ['id', { ascending: false }],
+      ])
+    },
+  )
+
+  test('dates du coffre visibles sans confondre la duree de l acte', async () => {
+    reponses.dossiers!.data = [
+      {
+        id: ID,
+        reference: 'REF',
+        statut: 'signe',
+        email_locataire: 'essai@example.invalid',
+        cree_le: '2026-09-01',
+        expire_le: '2027-01-01T23:30:00Z',
+        engagements: null,
+      },
+    ]
+    const arbre = await PageEspace()
+    expect(texteVisible(arbre)).toContain('Fin du coffre : 2 janv. 2027')
+    expect(texteVisible(arbre)).toContain('elle ne décrit pas la durée de l’acte signé')
+  })
 
   test.each(['0', '-1', '2.5', '1e2', '999999999999999999999', ['2', '3']])(
     'page invalide %s : retour a une plage sure',
