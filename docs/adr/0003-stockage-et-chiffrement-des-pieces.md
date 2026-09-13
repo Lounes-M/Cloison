@@ -91,8 +91,14 @@ d'effacement **vérifiable** au lieu de déclarative.
 **Le format du filigrane.** Le point de passage est décidé, ce qu'il inscrit ne l'est pas : ADR
 suivant.
 
-**La rotation de la KEK.** Rechiffrer les DEK sous une nouvelle clé maîtresse est un travail
-mécanique, mais il demande un identifiant de version sur chaque DEK. Le schéma actuel ne porte pas encore cette version. Ne jamais remplacer la KEK sans une migration de rechiffrement vérifiée.
+**La rotation de la KEK, mise a jour du 13 septembre 2026.** Les enveloppes v2
+portent maintenant un identifiant de cle ; le lecteur conserve la compatibilite
+avec les enveloppes historiques. Le rescellement administratif compare la valeur
+precedente pour ne pas annuler une suppression concurrente. Suivre la
+[procedure de rotation](../exploitation/rotation-cles.md), notamment la conservation
+des cles necessaires aux anciennes enveloppes et aux sauvegardes. L'outillage et
+ses tests fictifs ne prouvent pas une rotation de production ni la disponibilite
+des cles de secours.
 
 **Un vrai KMS.** Une variable d'environnement Vercel est un endroit correct pour une clé maîtresse à
 ce stade, pas un endroit idéal. Le signal de sortie est le premier salarié qui a accès au tableau de
