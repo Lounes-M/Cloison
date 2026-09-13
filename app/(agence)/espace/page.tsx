@@ -8,6 +8,7 @@ import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
+import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
@@ -135,7 +136,7 @@ export default async function PageEspace({
   const tri = recherche.tri === 'echeance' ? 'echeance' : 'recent'
   const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
   // Une seule horloge pour les deux bornes ; les droits restent imposes par SQL.
-  const maintenant = Date.now()
+  const bornes = bornesEcheance(horizon)
   const motif = (valeur: string) => `%${valeur.replace(/[\\%_]/g, '\\$&')}%`
   const lienPage = (page: number) => {
     const params = new URLSearchParams({ page: String(page) })
@@ -154,10 +155,7 @@ export default async function PageEspace({
     )
     .order(tri === 'echeance' ? 'expire_le' : 'cree_le', { ascending: tri === 'echeance' })
     .order('id', { ascending: false })
-  if (horizon)
-    requete = requete
-      .gt('expire_le', new Date(maintenant).toISOString())
-      .lte('expire_le', new Date(maintenant + Number(horizon) * 86400000).toISOString())
+  if (bornes) requete = requete.gt('expire_le', bornes.apres).lte('expire_le', bornes.jusqua)
   if (reference) requete = requete.ilike('reference', motif(reference))
   if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
   if (etatRecherche) requete = requete.eq('statut', etatRecherche)
