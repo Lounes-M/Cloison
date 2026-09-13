@@ -7,6 +7,18 @@
  */
 
 export const tableau = {
+  tri: 'Trier les dossiers',
+  tris: { recent: 'Ouverts récemment', echeance: 'Échéance la plus proche' },
+  horizon: 'Échéance du coffre',
+  horizons: {
+    tous: 'Toutes les échéances',
+    sept: 'Dans les 7 prochains jours',
+    trente: 'Dans les 30 prochains jours',
+  },
+  aideEcheance:
+    'Les périodes partent de maintenant. Cette échéance concerne le coffre documentaire ; elle ne décrit pas la durée de l’acte signé. Les dates sont affichées à l’heure de Paris.',
+  finCoffre: (date: string) => `Fin du coffre : ${date}`,
+  dateIndisponible: 'date indisponible',
   rechercheReference: 'Référence du dossier',
   rechercheEmail: 'E-mail du locataire',
   rechercher: 'Rechercher',

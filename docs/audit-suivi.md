@@ -5,6 +5,17 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Lot du 13 septembre 2026 : suivi des echeances agence
+
+Le [tableau agence](exploitation/echeances-dossiers.md) affiche la fin du coffre,
+propose un tri par echeance et des fenetres de 7 ou 30 jours. Ces choix se
+combinent avec les filtres existants et restent conserves dans la pagination.
+Les cartes mobiles et le tableau utilisent les composants et couleurs existants.
+
+Aucun changement de droits, de retention, de signature ou de facturation.
+Cette amelioration du suivi quotidien ne clot pas les validations fournisseur
+et les decisions d'ouverture. Les preuves de livraison figurent sur la PR.
+
 ## Lot du 13 septembre 2026 : cible documentaire Linux
 
 Un [moteur en conteneur de reference](exploitation/isolation-documentaire-linux.md)
