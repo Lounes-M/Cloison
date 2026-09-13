@@ -1,10 +1,11 @@
-import { constants, fstatSync, readSync } from 'node:fs'
-import { open, lstat, readdir, mkdir, rm, writeFile } from 'node:fs/promises'
+import { fstatSync, readSync } from 'node:fs'
+import { lstat, readdir, mkdir, rm, writeFile } from 'node:fs/promises'
 import { resolve, join, dirname, isAbsolute } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { sceller, ouvrir } from '../lib/coffre/enveloppe.ts'
 import { verifierContratExport } from './contrat-export.mjs'
+import { lireFichierBorne } from './lecture-fichier-bornee.mjs'
 
 // Petit export pilote, charge en memoire. Aucun appel SQL ou reseau dans cet outil.
 const MAX_FICHIER = 64 * 1024 * 1024
@@ -12,24 +13,6 @@ const MAX_TOTAL = 128 * 1024 * 1024
 const MAX_ARCHIVE = 180 * 1024 * 1024
 const MAX_FICHIERS = 1000
 const empreinte = (octets) => createHash('sha256').update(octets).digest('hex')
-
-async function lireFichier(chemin, maximum) {
-  const attendu = await lstat(chemin)
-  if (!attendu.isFile()) throw new Error('Fichier non regulier refuse.')
-  const fichier = await open(
-    chemin,
-    constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
-  )
-  try {
-    const stat = await fichier.stat()
-    if (!stat.isFile() || stat.size > maximum) throw new Error('Fichier refuse ou trop volumineux.')
-    const contenu = await fichier.readFile()
-    if (contenu.length > maximum) throw new Error('Fichier trop volumineux.')
-    return contenu
-  } finally {
-    await fichier.close()
-  }
-}
 
 async function verifierParents(chemin) {
   let courant = resolve(chemin)
@@ -78,7 +61,10 @@ export async function sauvegarder(source, destination, cle) {
       } else {
         verifierChemin(chemin)
         if (fichiers.length >= MAX_FICHIERS) throw new Error('Trop de fichiers.')
-        const octets = await lireFichier(join(repertoire, entree.name), MAX_FICHIER)
+        const octets = await lireFichierBorne(
+          join(repertoire, entree.name),
+          Math.min(MAX_FICHIER, MAX_TOTAL - total),
+        )
         total += octets.length
         if (total > MAX_TOTAL) throw new Error('Export trop volumineux.')
         fichiers.push({
@@ -110,7 +96,9 @@ export async function restaurer(archive, destination, cle) {
   await verifierParents(dirname(resolve(destination)))
   let manifeste
   try {
-    manifeste = JSON.parse(ouvrir(await lireFichier(archive, MAX_ARCHIVE), cle).toString('utf8'))
+    manifeste = JSON.parse(
+      ouvrir(await lireFichierBorne(archive, MAX_ARCHIVE), cle).toString('utf8'),
+    )
   } catch {
     throw new Error('Archive illisible, alteree ou cle incorrecte.')
   }

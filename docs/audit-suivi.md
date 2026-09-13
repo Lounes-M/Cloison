@@ -5,6 +5,20 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Lot du 13 septembre 2026 : lectures de sauvegarde bornees
+
+L'emballage et l'extraction locaux ne chargent plus entierement un fichier qui
+grossit apres la verification de sa taille. La lecture par blocs est bornee,
+avec un octet supplementaire pour detecter un depassement. Le budget cumule
+restant limite aussi la lecture suivante avant allocation du contenu.
+
+Les essais sur fichiers fictifs couvrent les tailles limites, la croissance
+apres controle et pendant lecture, les erreurs et la fermeture des descripteurs.
+Deux contre-preuves observent un depassement avec l'ancienne lecture entiere.
+Voir [le guide de restauration](exploitation/sauvegardes-et-restauration.md).
+La copie coherente de production, Auth, Storage et les cles de secours restent
+une validation separee. Les preuves de livraison figurent sur la pull request.
+
 ## Lot du 12 septembre 2026 : fin du processus documentaire
 
 La CI de main apres PR129 a refuse une rasterisation avec une mesure memoire
