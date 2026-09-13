@@ -67,6 +67,33 @@ jobs:
       - name: Fuites dans le bundle client
         run: npm run check:env
 
+  isolation:
+    name: Isolation documentaire Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Verifier le contexte sans fichiers prives
+        run: |
+          echo 'secret exclusivement fictif' > .env.isolation-fictive
+          echo 'fichier exclu fictif' > workers/sonde-exclue.txt
+          docker build -f infra/documentaire/Dockerfile --target contexte --output type=local,dest=/tmp/cloison-contexte .
+          node scripts/verifier-contexte-documentaire.mjs /tmp/cloison-contexte
+          rm .env.isolation-fictive workers/sonde-exclue.txt
+      - name: Construire uniquement le moteur et ses dependances
+        run: docker build --iidfile /tmp/cloison-image-id -f infra/documentaire/Dockerfile .
+      - name: Restrictions noyau et vrais documents fictifs
+        env:
+          CLOISON_SECRET_FICTIF: ne-doit-pas-entrer-dans-le-conteneur
+        run: node scripts/verifier-isolation-linux.mjs "$(cat /tmp/cloison-image-id)"
+
   postgrest:
     name: PostgreSQL et PostgREST HTTP
     runs-on: ubuntu-latest
