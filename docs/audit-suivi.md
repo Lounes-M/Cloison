@@ -5,6 +5,18 @@ a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document re
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
 configuration de production.
 
+## Lot du 13 septembre 2026 : cible documentaire Linux
+
+Un [moteur en conteneur de reference](exploitation/isolation-documentaire-linux.md)
+prepare R08 : image minimale, reseau absent, utilisateur non privilegie, racine
+en lecture seule et ressources bornees par cgroup v2. Un conteneur neuf traite
+chaque document, avec suppression verifiee et protocole de reponse partage avec
+le moteur applicatif. La CI dediee exerce les restrictions et le vrai decodeur.
+
+Cette cible n'est pas raccordee au trafic Vercel. L'exploitation, la capacite,
+la politique antivirus et la qualification de production restent ouvertes.
+Les preuves effectivement passees, dont les contre-preuves, figurent sur la PR.
+
 ## Lot du 13 septembre 2026 : lectures de sauvegarde bornees
 
 L'emballage et l'extraction locaux ne chargent plus entierement un fichier qui

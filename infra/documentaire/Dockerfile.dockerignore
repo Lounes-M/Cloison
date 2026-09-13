@@ -1,0 +1,14 @@
+**
+!infra/
+infra/**
+!infra/documentaire/
+infra/documentaire/**
+!infra/documentaire/package.json
+!infra/documentaire/package-lock.json
+!infra/documentaire/entree.mjs
+!workers/
+workers/**
+!workers/document.mjs
+!workers/dimensions.ts
+!workers/validation-document.ts
+!workers/rasterisation.ts
