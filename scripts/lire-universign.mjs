@@ -12,7 +12,8 @@ const selection = z.strictObject({
   environnement: z.enum(['alpha', 'production']),
   transaction: z.string().regex(/^tx_[A-Za-z0-9_-]{1,192}$/),
 })
-const etats = z.enum(['draft', 'started', 'paused', 'cancelled', 'expired', 'completed'])
+const etats = z.enum(['draft', 'started', 'paused', 'cancelled', 'expired', 'closed', 'completed'])
+const systemeCliSupporte = () => ['linux', 'darwin'].includes(process.platform)
 const refuser = () => {
   throw new Error('Lecture Universign indisponible.')
 }
@@ -82,6 +83,7 @@ export async function lireUniversign(valeur, cleApi, requete = fetch) {
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   let cle
   try {
+    if (!systemeCliSupporte()) refuser()
     if (process.argv.length !== 2 || process.stdin.isTTY) refuser()
     const stat = fstatSync(3)
     if (!stat.isFile() || stat.size < 1 || stat.size > 1024 || (stat.mode & 0o077) !== 0) refuser()
@@ -104,7 +106,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     console.log(JSON.stringify(resultat))
   } catch {
     console.error(
-      'Lecture Universign indisponible. Verifier acces API, environnement et transaction.',
+      systemeCliSupporte()
+        ? 'Lecture Universign indisponible. Verifier acces API, environnement et transaction.'
+        : 'Lecture Universign indisponible sur ce systeme.',
     )
     process.exitCode = 1
   } finally {

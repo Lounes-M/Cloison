@@ -36,7 +36,7 @@ describe('Lecture Universign bornee et sans mutation', () => {
       )
     },
   )
-  it.each(['draft', 'started', 'paused', 'cancelled', 'expired', 'completed'])(
+  it.each(['draft', 'started', 'paused', 'cancelled', 'expired', 'closed', 'completed'])(
     'conserve l etat %s sans le transformer en preuve de signature',
     async (state) => {
       expect(
