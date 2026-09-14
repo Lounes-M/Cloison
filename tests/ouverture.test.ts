@@ -107,6 +107,16 @@ describe('ouvrir une piece', () => {
     expect(base.appels.indexOf('journaliser')).toBeLessThan(base.appels.indexOf('telecharger'))
   }, 30_000)
 
+  test('l ouverture OCR conserve le journal et la pagination du document produit', async () => {
+    const resultat = await ouvrirPiecePourLAgence(base, PIECE, 'essai', true)
+    if (!resultat.ouverte) throw new Error(resultat.raison)
+    expect(resultat.pages).toBe(1)
+    expect((await PDFDocument.load(resultat.pdf)).getPageCount()).toBe(resultat.pages)
+    expect(resultat.pdf.equals(document)).toBe(false)
+    expect(base.entrees).toEqual([{ dossierId: DOSSIER, pieceId: PIECE }])
+    expect(base.appels.indexOf('journaliser')).toBeLessThan(base.appels.indexOf('cleScellee'))
+  }, 30_000)
+
   test('le journal recoit le dossier de la piece', async () => {
     await ouvrirPiecePourLAgence(base, PIECE, 'essai')
     expect(base.entrees).toEqual([{ dossierId: DOSSIER, pieceId: PIECE }])

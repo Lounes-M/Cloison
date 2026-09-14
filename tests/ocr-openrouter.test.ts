@@ -16,6 +16,49 @@ afterEach(() => {
   vi.unstubAllGlobals()
   vi.unstubAllEnvs()
 })
+
+test.each([undefined, 0, -1, 1.5, 41, NaN])(
+  'refuse une pagination source invalide : %s',
+  async (pages) => {
+    const appel = vi.fn()
+    vi.stubGlobal('fetch', appel)
+    await expect(extraireTexte(pdf, configuration, pages)).rejects.toThrow(
+      'Lecture documentaire indisponible',
+    )
+    expect(appel).not.toHaveBeenCalled()
+  },
+)
+
+test.each([1, 3])('refuse %s pages transcrites pour un PDF de deux pages', async (pages) => {
+  vi.stubGlobal(
+    'fetch',
+    vi
+      .fn()
+      .mockResolvedValue(
+        sortie(
+          JSON.stringify({
+            pages: Array.from({ length: pages }, (_, i) => ({ page: i + 1, texte: 'Fictif' })),
+          }),
+        ),
+      ),
+  )
+  await expect(extraireTexte(pdf, configuration, 2)).rejects.toThrow(
+    'Lecture documentaire indisponible',
+  )
+})
+
+test('conserve une page vide dans une transcription de deux pages', async () => {
+  const pages = [
+    { page: 1, texte: 'Texte fictif' },
+    { page: 2, texte: '' },
+  ]
+  const appel = vi.fn().mockResolvedValue(sortie(JSON.stringify({ pages })))
+  vi.stubGlobal('fetch', appel)
+  expect((await extraireTexte(pdf, configuration, 2)).pages).toEqual(pages)
+  expect(JSON.parse(appel.mock.calls[0]![1].body).messages[0].content).toContain(
+    'exactement 2 pages',
+  )
+})
 test('reste desactive sans activation explicite ou cle', () => {
   vi.stubEnv('OCR_ACTIVE', 'false')
   vi.stubEnv('OPENROUTER_API_KEY', 'cle-fictive')
@@ -31,7 +74,7 @@ test('reste desactive sans activation explicite ou cle', () => {
 test('impose destination, confidentialite, moteur natif et sortie avec provenance', async () => {
   const appel = vi.fn().mockResolvedValue(sortie())
   vi.stubGlobal('fetch', appel)
-  const resultat = await extraireTexte(pdf, configuration)
+  const resultat = await extraireTexte(pdf, configuration, 1)
   expect(resultat.pages).toEqual([{ page: 1, texte: 'Texte fictif' }])
   expect(resultat.empreinte).toMatch(/^[a-f0-9]{64}$/)
   expect(resultat.modele).toBe(configuration.modele)
@@ -61,7 +104,7 @@ test.each([
 ])('ne transmet pas une entree invalide', async (entree) => {
   const appel = vi.fn()
   vi.stubGlobal('fetch', appel)
-  await expect(extraireTexte(entree, configuration)).rejects.toThrow(
+  await expect(extraireTexte(entree, configuration, 1)).rejects.toThrow(
     'Lecture documentaire indisponible',
   )
   expect(appel).not.toHaveBeenCalled()
@@ -93,7 +136,7 @@ test.each([
   ),
 ])('refuse sans divulguer une reponse fournisseur invalide (%#)', async (reponse) => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(reponse))
-  await expect(extraireTexte(pdf, configuration)).rejects.toThrow(
+  await expect(extraireTexte(pdf, configuration, 1)).rejects.toThrow(
     /^Lecture documentaire indisponible$/,
   )
 })
@@ -104,7 +147,7 @@ test('une annulation interrompt un flux qui ne finit pas', async () => {
     'fetch',
     vi.fn().mockResolvedValue(new Response(new ReadableStream({ cancel: annulation }))),
   )
-  const promesse = extraireTexte(pdf, configuration, controleur.signal)
+  const promesse = extraireTexte(pdf, configuration, 1, controleur.signal)
   await new Promise((r) => setTimeout(r, 5))
   controleur.abort()
   await expect(promesse).rejects.toThrow('Lecture documentaire indisponible')

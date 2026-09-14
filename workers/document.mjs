@@ -1,5 +1,5 @@
 import { verifierDocument } from './validation-document.ts'
-import { rasteriser } from './rasterisation.ts'
+import { rasteriserAvecPages } from './rasterisation.ts'
 
 try {
   let taille = 0
@@ -15,19 +15,23 @@ try {
     !['application/pdf', 'image/png', 'image/jpeg'].includes(demande.type) ||
     typeof demande.contenu !== 'string' ||
     typeof demande.filigrane !== 'string' ||
-    demande.filigrane.length > 320
+    demande.filigrane.length > 320 ||
+    (demande.pagination !== undefined &&
+      (demande.pagination !== true || demande.operation !== 'rasteriser'))
   )
     throw new Error('Entree invalide')
   const contenu = Buffer.from(demande.contenu, 'base64')
   if (!contenu.length || contenu.length > 20 * 1024 * 1024) throw new Error('Taille invalide')
   let pdf
+  let pages
   if (demande.operation === 'verifier') await verifierDocument(contenu, demande.type)
   else {
-    const sortie = await rasteriser(contenu, demande.type, demande.filigrane)
-    if (sortie.length > 20 * 1024 * 1024) throw new Error('Sortie trop volumineuse')
-    pdf = sortie.toString('base64')
+    const sortie = await rasteriserAvecPages(contenu, demande.type, demande.filigrane)
+    if (sortie.pdf.length > 20 * 1024 * 1024) throw new Error('Sortie trop volumineuse')
+    pdf = sortie.pdf.toString('base64')
+    if (demande.pagination) pages = sortie.pages
   }
-  process.stdout.write(JSON.stringify({ ok: true, pdf }), () => process.exit(0))
+  process.stdout.write(JSON.stringify({ ok: true, pdf, pages }), () => process.exit(0))
 } catch (erreur) {
   // Les erreurs des decodeurs peuvent contenir du texte du document.
   // Seul un nombre de pages extrait d'une erreur controlee sort du processus.

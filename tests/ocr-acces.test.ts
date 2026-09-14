@@ -34,7 +34,7 @@ beforeEach(() => {
     supabase: { rpc: doubles.reserver },
   })
   doubles.reserver.mockResolvedValue({ data: true, error: null })
-  doubles.ouvrir.mockResolvedValue({ ouverte: true, pdf: Buffer.from('%PDF-fictif') })
+  doubles.ouvrir.mockResolvedValue({ ouverte: true, pdf: Buffer.from('%PDF-fictif'), pages: 1 })
   doubles.piece.mockResolvedValue({ dossierId: id })
   doubles.extraire.mockResolvedValue({ pages: [{ page: 1, texte: 'prive' }] })
 })
@@ -80,6 +80,13 @@ test('rend une transcription sans cache apres autorisations et journal', async (
   expect(reponse.status).toBe(200)
   expect(reponse.headers.get('cache-control')).toBe('no-store')
   expect(doubles.reserver).toHaveBeenCalledWith('reserver_lecture_ocr', { la_piece: id })
+  expect(doubles.ouvrir).toHaveBeenCalledWith(expect.anything(), id, 'Filigrane fictif', true)
+  expect(doubles.extraire).toHaveBeenCalledWith(
+    Buffer.from('%PDF-fictif'),
+    expect.anything(),
+    1,
+    expect.any(AbortSignal),
+  )
   expect(doubles.reserver.mock.invocationCallOrder[0]).toBeLessThan(
     doubles.ouvrir.mock.invocationCallOrder[0]!,
   )

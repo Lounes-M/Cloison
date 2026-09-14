@@ -1,7 +1,7 @@
 import { createCanvas } from '@napi-rs/canvas'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import { describe, expect, test } from 'vitest'
-import { rasteriser } from '@/lib/coffre/rasterisation'
+import { rasteriser, rasteriserAvecPages } from '@/lib/coffre/rasterisation'
 
 /**
  * Ce que l'agence recoit a la place du document.
@@ -188,6 +188,20 @@ describe('le filigrane', () => {
 })
 
 describe('ce qui entre et ce qui sort', () => {
+  test('le processus compte les pages du PDF produit pour l OCR', async () => {
+    const sortie = await rasteriserAvecPages(
+      await pdfDEssai({ pages: 3 }),
+      'application/pdf',
+      'essai',
+    )
+    expect(sortie.pages).toBe(3)
+    expect((await relire(sortie.pdf)).nombreDePages).toBe(sortie.pages)
+  }, 60_000)
+  test('la pagination du processus compte une page pour une image', async () => {
+    const sortie = await rasteriserAvecPages(pngDEssai(), 'image/png', 'essai')
+    expect(sortie.pages).toBe(1)
+    expect((await relire(sortie.pdf)).nombreDePages).toBe(1)
+  }, 30_000)
   test('une image ressort en PDF d une page', async () => {
     const sortie = await rasteriser(pngDEssai(), 'image/png', 'essai')
 

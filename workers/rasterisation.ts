@@ -287,6 +287,14 @@ export async function rasteriser(
   typeReel: TypeAccepte,
   filigrane: string,
 ): Promise<Buffer> {
+  return (await rasteriserAvecPages(contenu, typeReel, filigrane)).pdf
+}
+
+export async function rasteriserAvecPages(
+  contenu: Buffer,
+  typeReel: TypeAccepte,
+  filigrane: string,
+): Promise<{ pdf: Buffer; pages: number }> {
   await verifierDocument(contenu, typeReel)
   const pages =
     typeReel === 'application/pdf'
@@ -303,5 +311,5 @@ export async function rasteriser(
     feuille.drawImage(image, { x: 0, y: 0, width: page.largeur, height: page.hauteur })
   }
 
-  return Buffer.from(await sortie.save())
+  return { pdf: Buffer.from(await sortie.save()), pages: pages.length }
 }
