@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { SignJWT } from 'jose'
 
 import { env } from '@/lib/env'
+import { fetchBorne } from '@/lib/http/fetch-borne'
 
 /**
  * Le serveur, quand il agit pour lui-meme.
@@ -36,22 +37,8 @@ export async function clientServeur(signal?: AbortSignal) {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       headers: { Authorization: `Bearer ${jeton}` },
-      ...(signal
-        ? {
-            fetch: (input: RequestInfo | URL, options?: RequestInit) =>
-              fetch(input, {
-                ...options,
-                signal: AbortSignal.any([
-                  signal,
-                  ...(options?.signal
-                    ? [options.signal]
-                    : input instanceof Request
-                      ? [input.signal]
-                      : []),
-                ]),
-              }),
-          }
-        : {}),
+      fetch: (input: RequestInfo | URL, options?: RequestInit) =>
+        fetchBorne(input, options, signal),
     },
   })
 }
