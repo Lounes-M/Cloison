@@ -1,7 +1,9 @@
+import { lireJsonBorne } from './lire-json-borne.mjs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 export async function executerMaintenance(adresse, secret) {
+  const signal = AbortSignal.timeout(70_000)
   if (!secret) throw new Error('CRON_SECRET absent')
   let reponse
   try {
@@ -9,7 +11,7 @@ export async function executerMaintenance(adresse, secret) {
       headers: { Authorization: `Bearer ${secret}` },
       // Une redirection ne vaut pas execution et ne doit pas recevoir le secret.
       redirect: 'error',
-      signal: AbortSignal.timeout(70_000),
+      signal,
     })
   } catch {
     throw new Error('Maintenance inaccessible ou redirigee')
@@ -17,7 +19,7 @@ export async function executerMaintenance(adresse, secret) {
   if (reponse.status !== 200) throw new Error(`Maintenance : HTTP ${reponse.status}`)
   let resultat
   try {
-    resultat = await reponse.json()
+    resultat = await lireJsonBorne(reponse, signal)
   } catch {
     throw new Error('Reponse de maintenance invalide')
   }
