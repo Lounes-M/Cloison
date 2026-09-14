@@ -1,15 +1,17 @@
+import { lireJsonBorne } from './lire-json-borne.mjs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { lireEtatPaiements, paiementsAExaminer } from '../lib/exploitation/paiements.mjs'
 export async function verifierPaiements(adresse, secret) {
+  const signal = AbortSignal.timeout(10000)
   if (!secret) throw new Error('Authentification absente')
   const reponse = await fetch(adresse, {
     headers: { Authorization: `Bearer ${secret}` },
     redirect: 'error',
-    signal: AbortSignal.timeout(10000),
+    signal,
   })
   if (reponse.status !== 200) throw new Error('Etat financier inaccessible')
-  return lireEtatPaiements(await reponse.json())
+  return lireEtatPaiements(await lireJsonBorne(reponse, signal))
 }
 if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {

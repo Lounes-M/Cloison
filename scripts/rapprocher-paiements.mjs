@@ -1,15 +1,17 @@
+import { lireJsonBorne } from './lire-json-borne.mjs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 export async function rapprocherPaiements(adresse, secret) {
+  const signal = AbortSignal.timeout(40000)
   if (!secret) throw new Error('Authentification absente')
   const reponse = await fetch(adresse, {
     method: 'POST',
     headers: { Authorization: `Bearer ${secret}` },
     redirect: 'error',
-    signal: AbortSignal.timeout(40000),
+    signal,
   })
   if (reponse.status !== 200) throw new Error('Rapprochement incomplet')
-  const resultat = await reponse.json()
+  const resultat = await lireJsonBorne(reponse, signal)
   if (
     !resultat ||
     Object.keys(resultat).length !== 2 ||

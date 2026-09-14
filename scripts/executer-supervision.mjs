@@ -1,14 +1,16 @@
+import { lireJsonBorne } from './lire-json-borne.mjs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { lireRapportSupervision, contientAlertes } from '../lib/exploitation/supervision.mjs'
 export async function executerSupervision(adresse, secret) {
+  const signal = AbortSignal.timeout(30_000)
   if (!secret) throw new Error('CRON_SECRET absent')
   let reponse
   try {
     reponse = await fetch(adresse, {
       headers: { Authorization: `Bearer ${secret}` },
       redirect: 'error',
-      signal: AbortSignal.timeout(30_000),
+      signal,
     })
   } catch {
     throw new Error('Supervision inaccessible ou redirigee')
@@ -16,7 +18,7 @@ export async function executerSupervision(adresse, secret) {
   if (reponse.status !== 200) throw new Error(`Supervision : HTTP ${reponse.status}`)
   let rapport
   try {
-    rapport = await reponse.json()
+    rapport = await lireJsonBorne(reponse, signal)
   } catch {
     throw new Error('Rapport de supervision invalide')
   }

@@ -1,3 +1,4 @@
+import { lireJsonBorne } from './lire-json-borne.mjs'
 import { pathToFileURL } from 'node:url'
 import { resolve } from 'node:path'
 const ADRESSE = 'https://www.cloison.immo/api/maintenance/etat'
@@ -15,14 +16,15 @@ export function ageMaintenance(rapport, maintenant = Date.now()) {
   return Math.max(0, Math.floor(age / 1000))
 }
 export async function verifierCadence(adresse, secret) {
+  const signal = AbortSignal.timeout(15000)
   if (adresse !== ADRESSE || !secret) throw new Error('Configuration de supervision absente')
   const reponse = await fetch(adresse, {
     headers: { Authorization: `Bearer ${secret}` },
     redirect: 'error',
-    signal: AbortSignal.timeout(15000),
+    signal,
   })
   if (!reponse.ok) throw new Error('Historique de maintenance indisponible')
-  return ageMaintenance(await reponse.json())
+  return ageMaintenance(await lireJsonBorne(reponse, signal))
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {

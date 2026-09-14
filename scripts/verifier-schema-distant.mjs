@@ -1,14 +1,16 @@
+import { lireJsonBorne } from './lire-json-borne.mjs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 export async function verifierSchemaDistant(adresse, secret) {
+  const signal = AbortSignal.timeout(30_000)
   if (!secret) throw new Error('Secret absent')
   const r = await fetch(adresse, {
     headers: { Authorization: `Bearer ${secret}` },
     redirect: 'error',
-    signal: AbortSignal.timeout(30_000),
+    signal,
   })
   if (r.status !== 200) throw new Error('Controle schema refuse')
-  const data = await r.json()
+  const data = await lireJsonBorne(r, signal)
   if (
     !data ||
     typeof data !== 'object' ||
