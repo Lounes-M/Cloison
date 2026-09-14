@@ -15,7 +15,7 @@
         "parameters": [{ "name": "apres", "in": "query", "required": false, "description": "Valeur suite de la page precedente, encodee comme parametre URL. Omettre pour commencer une nouvelle synchronisation.", "schema": { "type": "string", "minLength": 8, "maxLength": 32 } }],
         "responses": {
           "200": {
-            "description": "Photographie courante, sans cache. Les changements entre deux pages sont possibles ; ne pas interpreter ce parcours comme une transaction globale.",
+            "description": "Photographie courante, sans cache. Une suite non nulle accompagne exactement cinquante dossiers et correspond a la derniere reference de la page. Les references sont uniques dans le parcours. Les changements entre deux pages sont possibles ; ne pas interpreter ce parcours comme une transaction globale.",
             "content": { "application/json": { "schema": {
               "type": "object", "additionalProperties": false, "required": ["version", "dossiers", "suite"],
               "properties": {
