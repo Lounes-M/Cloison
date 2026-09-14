@@ -2,6 +2,7 @@ import 'server-only'
 import { SignJWT } from 'jose'
 import { createClient } from '@supabase/supabase-js'
 import { env } from '@/lib/env'
+import { fetchBorne } from '@/lib/http/fetch-borne'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import type { Capacite } from './jeton'
 
@@ -40,6 +41,6 @@ export async function clientStockage(capacite: Capacite, copie?: ProvenanceCopie
     .sign(new TextEncoder().encode(env.supabaseJwtSecret))
   return createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { Authorization: `Bearer ${jeton}` } },
+    global: { headers: { Authorization: `Bearer ${jeton}` }, fetch: fetchBorne },
   })
 }

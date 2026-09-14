@@ -3,6 +3,7 @@ import 'server-only'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { env } from '@/lib/env'
+import { fetchBorne } from '@/lib/http/fetch-borne'
 import { DUREE_JETON, signerJeton, verifierSignature, type Capacite, type Partie } from './jeton'
 import { clientServeur } from './serveur'
 
@@ -26,7 +27,7 @@ import { clientServeur } from './serveur'
 export function clientPorteurDeLien(jeton: string) {
   return createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { Authorization: `Bearer ${jeton}` } },
+    global: { headers: { Authorization: `Bearer ${jeton}` }, fetch: fetchBorne },
   })
 }
 
