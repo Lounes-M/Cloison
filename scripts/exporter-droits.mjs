@@ -8,6 +8,18 @@ import { creerPaquetDroits, ouvrirPaquetDroits, verifierDecisionPaquet } from '.
 const refuser = () => {
   throw new Error('Export personnel refuse.')
 }
+function systemeSupporte() {
+  return (
+    ['linux', 'darwin'].includes(process.platform) &&
+    Number.isInteger(constants.O_NOFOLLOW) &&
+    constants.O_NOFOLLOW > 0 &&
+    Number.isInteger(constants.O_NONBLOCK) &&
+    constants.O_NONBLOCK > 0
+  )
+}
+function verifierSysteme() {
+  if (!systemeSupporte()) throw new Error('Export personnel indisponible sur ce systeme.')
+}
 async function parentsDirects(chemin) {
   let courant = resolve(chemin)
   for (;;) {
@@ -59,6 +71,7 @@ async function ecrireNeuf(chemin, octets) {
 
 /** Outil hors ligne. Le repertoire prive doit etre reserve a l'operateur. */
 export async function exporterDroits(commande, decisionPath, source, destination, cle) {
+  verifierSysteme()
   if (!['creer', 'extraire'].includes(commande)) refuser()
   const decision = verifierDecisionPaquet(
     JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
@@ -107,6 +120,7 @@ export async function exporterDroits(commande, decisionPath, source, destination
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   let cle
   try {
+    verifierSysteme()
     if (process.argv.length !== 6) refuser()
     const stat = fstatSync(3)
     if (!stat.isFile() || stat.size !== 32 || (stat.mode & 0o077) !== 0) refuser()
@@ -116,7 +130,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     console.log(JSON.stringify(await exporterDroits(commande, decision, source, destination, cle)))
   } catch {
     console.error(
-      'Export personnel refuse. Verifier decision, fichiers, cle et repertoires prives.',
+      systemeSupporte()
+        ? 'Export personnel refuse. Verifier decision, fichiers, cle et repertoires prives.'
+        : 'Export personnel indisponible sur ce systeme. Utiliser Linux ou macOS avec permissions POSIX.',
     )
     process.exitCode = 1
   } finally {
