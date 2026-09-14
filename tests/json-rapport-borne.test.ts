@@ -25,32 +25,31 @@ test.each(['65537', '-1', '1.5', 'invalide', '9999999999999999999999'])(
   },
 )
 
-test.each([{}, { 'content-length': '2' }])(
-  'borne les octets cumules sans croire la longueur %#',
-  async (headers) => {
-    const cancel = vi.fn()
-    let blocs = 0
-    const reponse = new Response(
-      new ReadableStream({
-        pull(c) {
-          blocs++
-          const octets = new Uint8Array(16384).fill(32)
-          if (blocs === 1) {
-            octets[0] = 123
-            octets[1] = 125
-          }
-          c.enqueue(octets)
-          if (blocs === 6) c.close()
-        },
-        cancel,
-      }),
-      { headers },
-    )
-    await expect(lireJsonBorne(reponse, signal())).rejects.toThrow()
-    expect(cancel).toHaveBeenCalledTimes(1)
-    expect(blocs).toBeLessThanOrEqual(6)
-  },
-)
+test.each([null, '2'])('borne les octets cumules sans croire la longueur %#', async (longueur) => {
+  const headers = new Headers()
+  if (longueur !== null) headers.set('content-length', longueur)
+  const cancel = vi.fn()
+  let blocs = 0
+  const reponse = new Response(
+    new ReadableStream({
+      pull(c) {
+        blocs++
+        const octets = new Uint8Array(16384).fill(32)
+        if (blocs === 1) {
+          octets[0] = 123
+          octets[1] = 125
+        }
+        c.enqueue(octets)
+        if (blocs === 6) c.close()
+      },
+      cancel,
+    }),
+    { headers },
+  )
+  await expect(lireJsonBorne(reponse, signal())).rejects.toThrow()
+  expect(cancel).toHaveBeenCalledTimes(1)
+  expect(blocs).toBeLessThanOrEqual(6)
+})
 
 test('refuse un UTF-8 invalide au lieu de remplacer des octets', async () => {
   const corps = Buffer.concat([Buffer.from('{"valeur":"'), Buffer.from([0xff]), Buffer.from('"}')])
