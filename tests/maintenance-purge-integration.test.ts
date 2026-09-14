@@ -2,7 +2,14 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { GET } from '@/app/api/maintenance/route'
 
 const rpc = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/acces/serveur', () => ({ clientServeur: async () => ({ rpc }) }))
+vi.mock('@/lib/acces/serveur', () => ({
+  clientServeur: async () => ({
+    rpc,
+    from: () => ({
+      select: () => ({ order: () => ({ limit: async () => ({ data: [], error: null }) }) }),
+    }),
+  }),
+}))
 vi.mock('@/lib/courriels/notifications', () => ({
   livrerNotifications: async () => ({ echecs: 0 }),
 }))
@@ -45,6 +52,7 @@ test.each(['refus', 'exception'])(
     })
     expect(rpc.mock.calls.map(([nom]) => nom)).toEqual([
       'reprendre_depots_inacheves',
+      ...(cas === 'refus' ? ['reprendre_depots_inacheves'] : []),
       'purger_suivis_droits',
       'purger_historique_responsables',
       'purger_brouillons_engagement',
@@ -52,3 +60,26 @@ test.each(['refus', 'exception'])(
     expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain('DETAIL_PRIVE')
   },
 )
+
+test('une reprise effective permet la confirmation HTTP sans effacer le diagnostic initial', async () => {
+  rpc.mockResolvedValueOnce({ error: { message: 'DETAIL_PRIVE' }, status: 504 })
+  rpc.mockImplementation(async (nom: string) => ({
+    data: nom === 'confirmer_maintenance' ? true : 0,
+    error: null,
+  }))
+  const reponse = await GET(
+    new Request('https://example.test/api/maintenance', {
+      headers: { authorization: 'Bearer fictif' },
+    }),
+  )
+  expect(reponse.status).toBe(200)
+  expect((await reponse.json()).purge).toEqual({ traites: 0, echecs: 0 })
+  expect(rpc.mock.calls.filter(([nom]) => nom === 'reprendre_depots_inacheves')).toHaveLength(2)
+  expect(rpc.mock.calls.filter(([nom]) => nom === 'confirmer_maintenance')).toHaveLength(1)
+  expect(console.error).toHaveBeenCalledWith(
+    '[purge] etape en echec',
+    'reprise',
+    'passerelle_indisponible',
+  )
+  expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain('DETAIL_PRIVE')
+})
