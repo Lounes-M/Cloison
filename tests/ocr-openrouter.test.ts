@@ -32,15 +32,13 @@ test.each([undefined, 0, -1, 1.5, 41, NaN])(
 test.each([1, 3])('refuse %s pages transcrites pour un PDF de deux pages', async (pages) => {
   vi.stubGlobal(
     'fetch',
-    vi
-      .fn()
-      .mockResolvedValue(
-        sortie(
-          JSON.stringify({
-            pages: Array.from({ length: pages }, (_, i) => ({ page: i + 1, texte: 'Fictif' })),
-          }),
-        ),
+    vi.fn().mockResolvedValue(
+      sortie(
+        JSON.stringify({
+          pages: Array.from({ length: pages }, (_, i) => ({ page: i + 1, texte: 'Fictif' })),
+        }),
       ),
+    ),
   )
   await expect(extraireTexte(pdf, configuration, 2)).rejects.toThrow(
     'Lecture documentaire indisponible',
