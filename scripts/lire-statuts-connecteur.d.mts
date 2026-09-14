@@ -3,6 +3,7 @@ export type StatutConnecteur = {
   etat: 'a_completer' | 'pret' | 'en_cours' | 'signe' | 'clos'
 }
 export class ErreurLectureStatuts extends Error {
+  constructor(code: string, reessayerApres?: number | null)
   code: string
   reessayerApres: number | null
 }
