@@ -4,6 +4,7 @@ import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { creerPaquetDroits, ouvrirPaquetDroits, verifierDecisionPaquet } from './paquet-droits.mjs'
+import { avecSuiviExport } from './suivi-export-droits.mjs'
 
 const refuser = () => {
   throw new Error('Export personnel refuse.')
@@ -70,18 +71,27 @@ async function ecrireNeuf(chemin, octets) {
 }
 
 /** Outil hors ligne. Le repertoire prive doit etre reserve a l'operateur. */
-export async function exporterDroits(commande, decisionPath, source, destination, cle) {
+export async function exporterDroits(
+  commande,
+  decisionPath,
+  source,
+  destination,
+  cle,
+  verifierSuivi,
+) {
   verifierSysteme()
   if (!['creer', 'extraire'].includes(commande)) refuser()
   const decision = verifierDecisionPaquet(
     JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
   )
+  await verifierSuivi?.(decision)
   await repertoirePrive(dirname(resolve(destination)))
   const reverifier = async () => {
     const actuelle = verifierDecisionPaquet(
       JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
     )
     if (JSON.stringify(actuelle) !== JSON.stringify(decision)) refuser()
+    await verifierSuivi?.(actuelle)
   }
   if (commande === 'creer') {
     await repertoirePrive(source)
@@ -121,13 +131,28 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   let cle
   try {
     verifierSysteme()
-    if (process.argv.length !== 6) refuser()
+    const suivi = process.argv.length === 7 && process.argv[6] === '--suivi'
+    if (process.argv.length !== 6 && !suivi) refuser()
     const stat = fstatSync(3)
     if (!stat.isFile() || stat.size !== 32 || (stat.mode & 0o077) !== 0) refuser()
     cle = Buffer.alloc(32)
     if (readSync(3, cle, 0, 32, 0) !== 32) refuser()
     const [commande, decision, source, destination] = process.argv.slice(2)
-    console.log(JSON.stringify(await exporterDroits(commande, decision, source, destination, cle)))
+    const executer = (verifier) =>
+      exporterDroits(commande, decision, source, destination, cle, verifier)
+    let resultat
+    if (suivi) {
+      if (process.stdin.isTTY) refuser()
+      const blocs = []
+      let taille = 0
+      for await (const bloc of process.stdin) {
+        taille += bloc.length
+        if (taille > 8192) refuser()
+        blocs.push(bloc)
+      }
+      resultat = await avecSuiviExport(JSON.parse(Buffer.concat(blocs).toString('utf8')), executer)
+    } else resultat = await executer()
+    console.log(JSON.stringify(resultat))
   } catch {
     console.error(
       systemeSupporte()
