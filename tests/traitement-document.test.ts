@@ -7,6 +7,29 @@ beforeEach(() => executer.mockReset())
 
 const pdf = Buffer.from('%PDF-1.7\nfixture de protocole')
 
+test('la pagination demandee reste liee a la meme sortie documentaire', async () => {
+  executer.mockResolvedValue(
+    Buffer.from(JSON.stringify({ ok: true, pdf: pdf.toString('base64'), pages: 3 })),
+  )
+  expect(await traiterDocument(pdf, 'application/pdf', 'Agence', 'rasteriser', true)).toEqual({
+    pdf,
+    pages: 3,
+  })
+  expect(JSON.parse(executer.mock.calls[0]![1].toString()).pagination).toBe(true)
+})
+
+test.each([undefined, null, 0, -1, 1.5, 41, '2'])(
+  'refuse une pagination du moteur invalide : %s',
+  async (pages) => {
+    executer.mockResolvedValue(
+      Buffer.from(JSON.stringify({ ok: true, pdf: pdf.toString('base64'), pages })),
+    )
+    await expect(
+      traiterDocument(pdf, 'application/pdf', 'Agence', 'rasteriser', true),
+    ).rejects.toThrow()
+  },
+)
+
 test('les deux reponses normales conservent leur contrat', async () => {
   executer.mockResolvedValueOnce(Buffer.from(JSON.stringify({ ok: true })))
   expect(await traiterDocument(pdf, 'application/pdf', '', 'verifier')).toEqual(Buffer.alloc(0))

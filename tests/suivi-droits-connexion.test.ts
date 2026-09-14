@@ -20,6 +20,36 @@ vi.mock('pg', () => ({
 }))
 import { enregistrerSuiviDroits } from '../scripts/consigner-suivi-droits.mjs'
 import { lireSuiviDroits } from '../scripts/examiner-suivi-droits.mjs'
+import { avecSuiviExport } from '../scripts/suivi-export-droits.mjs'
+
+test('export suivi : TLS verifie, requetes bornees et fermeture sur panne', async () => {
+  doubles.configurations.length = 0
+  doubles.fin.mockClear()
+  const executer = vi.fn()
+  await expect(
+    avecSuiviExport({ connexion: 'postgresql://db.example.com/fiction' }, executer),
+  ).rejects.toThrow('Connexion fictive interrompue')
+  expect(executer).not.toHaveBeenCalled()
+  expect(doubles.configurations).toEqual([
+    {
+      connectionString: 'postgresql://db.example.com/fiction',
+      connectionTimeoutMillis: 5000,
+      query_timeout: 6000,
+      statement_timeout: 5000,
+      ssl: { rejectUnauthorized: true },
+    },
+  ])
+  expect(doubles.fin).toHaveBeenCalledOnce()
+})
+
+test.each([
+  'postgresql://db.example.com/fiction?sslmode=disable',
+  'https://db.example.com/fiction',
+])('export suivi : refuse la connexion %s avant ouverture', async (connexion) => {
+  doubles.configurations.length = 0
+  await expect(avecSuiviExport({ connexion }, vi.fn())).rejects.toThrow()
+  expect(doubles.configurations).toHaveLength(0)
+})
 test.each(['lecture', 'ecriture'])(
   'la %s exige TLS distant et ferme une connexion en echec',
   async (mode) => {

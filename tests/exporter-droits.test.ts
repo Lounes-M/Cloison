@@ -62,6 +62,45 @@ afterEach(async () => {
 describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
   'Export personnel hors ligne',
   () => {
+    it.each(['creer', 'extraire'])(
+      'retire le resultat si le suivi change apres ecriture (%s)',
+      async (commande) => {
+        if (commande === 'extraire') await creer()
+        const verifier = vi
+          .fn()
+          .mockResolvedValue(undefined)
+          .mockResolvedValueOnce(undefined)
+          .mockResolvedValueOnce(undefined)
+          .mockRejectedValueOnce(new Error('Suivi remplace'))
+        const destination = chemin(commande === 'creer' ? 'paquet' : 'sortie')
+        await expect(
+          exporterDroits(
+            commande,
+            chemin('decision.json'),
+            chemin(commande === 'creer' ? 'source' : 'paquet'),
+            destination,
+            cle,
+            verifier,
+          ),
+        ).rejects.toThrow('Suivi remplace')
+        expect(verifier).toHaveBeenCalledTimes(3)
+        await expect(access(destination)).rejects.toThrow()
+      },
+    )
+    it('refuse avant lecture des fichiers lorsque le suivi est indisponible', async () => {
+      const verifier = vi.fn().mockRejectedValue(new Error('Suivi indisponible'))
+      await expect(
+        exporterDroits(
+          'creer',
+          chemin('decision.json'),
+          chemin('source-inexistante'),
+          chemin('paquet'),
+          cle,
+          verifier,
+        ),
+      ).rejects.toThrow('Suivi indisponible')
+      await expect(access(chemin('paquet'))).rejects.toThrow()
+    })
     it('cree et extrait exclusivement les fichiers approuves dans des destinations privees', async () => {
       await writeFile(chemin('source/ne-pas-exporter.txt'), 'secret tiers', { mode: 0o600 })
       expect((await creer()).fichiers).toBe(1)

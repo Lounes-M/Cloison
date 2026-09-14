@@ -10,3 +10,7 @@ export async function rasteriser(
 ): Promise<Buffer> {
   return traiterDocument(contenu, type, filigrane, 'rasteriser')
 }
+
+export async function rasteriserAvecPages(contenu: Buffer, type: TypeAccepte, filigrane: string) {
+  return traiterDocument(contenu, type, filigrane, 'rasteriser', true)
+}

@@ -1,6 +1,19 @@
 const PDF_MAX = 20 * 1024 * 1024
 
-export function lireReponseDocumentaire(sortie: Buffer, operation: 'verifier' | 'rasteriser') {
+export function lireReponseDocumentaire(
+  sortie: Buffer,
+  operation: 'verifier' | 'rasteriser',
+): Buffer
+export function lireReponseDocumentaire(
+  sortie: Buffer,
+  operation: 'rasteriser',
+  pagination: true,
+): { pdf: Buffer; pages: number }
+export function lireReponseDocumentaire(
+  sortie: Buffer,
+  operation: 'verifier' | 'rasteriser',
+  pagination = false,
+): Buffer | { pdf: Buffer; pages: number } {
   let resultat: Record<string, unknown>
   try {
     const lu: unknown = JSON.parse(sortie.toString('utf8'))
@@ -12,7 +25,13 @@ export function lireReponseDocumentaire(sortie: Buffer, operation: 'verifier' | 
     throw new Error('Reponse du moteur documentaire invalide')
   }
   const champs =
-    resultat.ok === false ? ['ok', 'pages'] : operation === 'verifier' ? ['ok'] : ['ok', 'pdf']
+    resultat.ok === false
+      ? ['ok', 'pages']
+      : operation === 'verifier'
+        ? ['ok']
+        : pagination
+          ? ['ok', 'pdf', 'pages']
+          : ['ok', 'pdf']
   if (
     (resultat.ok !== true && resultat.ok !== false) ||
     Object.keys(resultat).length !== champs.length ||
@@ -43,5 +62,15 @@ export function lireReponseDocumentaire(sortie: Buffer, operation: 'verifier' | 
     !pdf.subarray(0, 5).equals(Buffer.from('%PDF-'))
   )
     throw new Error('Sortie documentaire invalide')
+  if (pagination) {
+    if (
+      typeof resultat.pages !== 'number' ||
+      !Number.isSafeInteger(resultat.pages) ||
+      resultat.pages < 1 ||
+      resultat.pages > 40
+    )
+      throw new Error('Pagination du moteur documentaire invalide')
+    return { pdf, pages: resultat.pages }
+  }
   return pdf
 }

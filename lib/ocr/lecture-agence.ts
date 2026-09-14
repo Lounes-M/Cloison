@@ -22,9 +22,14 @@ export async function lirePieceParOcr(requete: Request, id: string) {
     const { data, error } = await contexte.supabase.rpc('reserver_lecture_ocr', { la_piece: id })
     if (error || data !== true) return repondre(404)
     const base = baseOuvertureSupabase(contexte.supabase)
-    const ouverture = await ouvrirPiecePourLAgence(base, id, filigranePour(contexte.email))
+    const ouverture = await ouvrirPiecePourLAgence(base, id, filigranePour(contexte.email), true)
     if (!ouverture.ouverte) return repondre(404)
-    const resultat = await extraireTexte(ouverture.pdf, configuration, requete.signal)
+    const resultat = await extraireTexte(
+      ouverture.pdf,
+      configuration,
+      ouverture.pages,
+      requete.signal,
+    )
     // Ne pas rendre une transcription lorsque les droits ont expire pendant l'appel.
     if (!(await base.piece(id))) return repondre(404)
     return repondre(200, resultat)

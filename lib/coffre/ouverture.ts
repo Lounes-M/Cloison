@@ -2,7 +2,7 @@ import 'server-only'
 
 import { ouvrirMaitresse } from './rotation-maitresse'
 import { ouvrir } from './enveloppe'
-import { rasteriser } from './rasterisation'
+import { rasteriser, rasteriserAvecPages } from './rasterisation'
 import type { TypeAccepte } from './type-reel'
 
 /**
@@ -40,7 +40,8 @@ export interface OuvertureBase {
   journaliser(dossierId: string, action: 'piece_ouverte', pieceId: string): Promise<boolean>
 }
 
-export type Ouverture = { ouverte: true; pdf: Buffer } | { ouverte: false; raison: string }
+export type Ouverture =
+  { ouverte: true; pdf: Buffer; pages?: number } | { ouverte: false; raison: string }
 
 /** Ce que la personne lit, et ce qu'on ne lui detaille pas. */
 const INTROUVABLE = "Cette piece n'existe pas, ou tu n'y as pas acces."
@@ -80,6 +81,7 @@ export async function ouvrirPiecePourLAgence(
   base: OuvertureBase,
   pieceId: string,
   filigrane: string,
+  pagination = false,
 ): Promise<Ouverture> {
   const piece = await base.piece(pieceId)
   if (!piece) return { ouverte: false, raison: INTROUVABLE }
@@ -110,6 +112,8 @@ export async function ouvrirPiecePourLAgence(
   }
 
   try {
+    if (pagination)
+      return { ouverte: true, ...(await rasteriserAvecPages(contenu, piece.typeReel, filigrane)) }
     return { ouverte: true, pdf: await rasteriser(contenu, piece.typeReel, filigrane) }
   } catch {
     // Un document que le moteur refuse ne repart pas en clair pour autant : ce
