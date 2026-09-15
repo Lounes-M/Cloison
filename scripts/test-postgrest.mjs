@@ -1,7 +1,6 @@
 import { verifierReutilisationPieces } from './verifier-reutilisation-pieces.mjs'
 import { verifierBrouillonsEngagement } from './verifier-brouillons-engagement.mjs'
 import assert from 'node:assert/strict'
-import { spawnSync } from 'node:child_process'
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -196,11 +195,6 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierHistoriqueResponsables(db)
       await verifierBrouillonsEngagement(db, process.env.PGTEST_URL)
       await verifierReutilisationPieces(db, process.env.PGTEST_URL)
-      const ocr = spawnSync(process.execPath, ['scripts/verifier-navigateur-ocr.mjs'], {
-        stdio: 'inherit',
-        timeout: 240000,
-      })
-      assert.equal(ocr.status, 0, 'Parcours navigateur OCR refuse')
     }
   } finally {
     await db.end()

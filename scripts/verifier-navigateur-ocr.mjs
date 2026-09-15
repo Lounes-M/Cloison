@@ -3,6 +3,7 @@ import {
   parcourirReutilisation,
 } from './parcours-reutilisation-navigateur.mjs'
 import { parcourirBrouillon } from './parcours-brouillon-navigateur.mjs'
+import { parcourirDepot } from './parcours-depot-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
@@ -519,6 +520,7 @@ try {
             },
             lire: () => brouillon,
           })
+          await parcourirDepot(page, relais.site, moteur, largeur)
           await parcourirReutilisation(page, relais.site, moteur, largeur, reutilisation)
           await parcourirChoixMfa(page, relais.site, moteur, largeur, {
             preparer: (facteurs) => {

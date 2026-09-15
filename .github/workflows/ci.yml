@@ -67,6 +67,25 @@ jobs:
       - name: Fuites dans le bundle client
         run: npm run check:env
 
+  interface:
+    name: Interface Chromium Firefox WebKit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Installer les trois moteurs
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Parcours des interfaces sur donnees fictives
+        run: node scripts/verifier-navigateur-ocr.mjs
+
   isolation:
     name: Isolation documentaire Linux
     runs-on: ubuntu-latest
