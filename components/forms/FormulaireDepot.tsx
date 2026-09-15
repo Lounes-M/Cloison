@@ -133,6 +133,11 @@ export function FormulaireDepot({
         name="fichier"
         type="file"
         required
+        onInvalid={(evenement) => {
+          evenement.preventDefault()
+          verifier(evenement.currentTarget)
+          evenement.currentTarget.focus()
+        }}
         aria-describedby={`${idChamp}-aide ${idChamp}-selection`}
         aria-invalid={erreurLocale ? true : undefined}
         // Lister JPEG ici fait que iOS convertit lui-meme ses HEIC en JPEG au
