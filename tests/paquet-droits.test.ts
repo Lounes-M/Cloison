@@ -38,6 +38,25 @@ function alterer(archive: Buffer, transformation: (paquet: Record<string, unknow
 }
 
 describe('Paquet personnel lie a une decision explicite', () => {
+  it('borne la creation et l ouverture a 72 heures, meme sans suivi SQL', () => {
+    const d = decision()
+    d.expireLe = new Date(Date.parse(d.creeLe) + 72 * 3600000).toISOString()
+    const archive = creerPaquetDroits(d, fichiers, cle, maintenant)
+    expect(ouvrirPaquetDroits(archive, cle, d, maintenant).fichiers).toEqual(fichiers)
+    const tropLongue = { ...d, expireLe: new Date(Date.parse(d.expireLe) + 1).toISOString() }
+    expect(() => creerPaquetDroits(tropLongue, fichiers, cle, maintenant)).toThrow()
+    const legacy = sceller(
+      Buffer.from(
+        JSON.stringify({
+          format: 'cloison.droits-personnels.v1',
+          decision: tropLongue,
+          contenus: [contenu.toString('base64')],
+        }),
+      ),
+      cle,
+    )
+    expect(() => ouvrirPaquetDroits(legacy, cle, tropLongue, maintenant)).toThrow()
+  })
   it('restitue les octets et le manifeste, avec un chiffrement aleatoire', () => {
     const d = decision()
     const a = creerPaquetDroits(d, fichiers, cle, maintenant)

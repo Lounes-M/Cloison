@@ -35,6 +35,7 @@ export function verifierDecisionPaquet(valeur, maintenant = Date.now()) {
   if (
     Date.parse(d.creeLe) > maintenant ||
     Date.parse(d.expireLe) <= maintenant ||
+    Date.parse(d.expireLe) - Date.parse(d.creeLe) > 72 * 3600000 ||
     new Set(d.fichiers.map((f) => f.nom)).size !== d.fichiers.length ||
     new Set(d.exclusions).size !== d.exclusions.length ||
     d.fichiers.reduce((total, f) => total + f.taille, 0) > MAX_TOTAL
