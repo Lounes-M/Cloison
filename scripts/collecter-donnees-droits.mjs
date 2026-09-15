@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url'
 import { rm } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { configurationLectureDroits } from './examiner-suivi-droits.mjs'
-import { collecterDonneesDroits, verifierSuiviCollecte } from '../lib/droits/collecte.ts'
+import { collecterCopiePersonnelle } from '../lib/droits/brouillons.ts'
 import {
   verifierSysteme,
   repertoirePrive,
@@ -49,6 +49,8 @@ export async function ecrireCollecteDroits(decisionPath, destination, collecter,
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   let db
   let minuterie
+  let trousseau
+  const blocs = []
   try {
     verifierSysteme()
     if (process.argv.length !== 4 || process.stdin.isTTY) throw new Error()
@@ -60,7 +62,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       process.stderr.write('Lecture de configuration interrompue.\n')
       process.exit(1)
     }, 5000)
-    const blocs = []
     let taille = 0
     for await (const bloc of process.stdin) {
       taille += bloc.length
@@ -68,11 +69,32 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       blocs.push(bloc)
     }
     clearTimeout(minuterie)
+    const cle = z
+      .string()
+      .regex(/^[A-Za-z0-9+/]{43}=$/)
+      .transform((s) => {
+        const b = Buffer.from(s, 'base64')
+        if (b.length !== 32 || b.toString('base64') !== s) throw new Error()
+        return b
+      })
     const entree = z
-      .strictObject({ connexion: z.string().max(4096) })
+      .strictObject({
+        connexion: z.string().max(4096),
+        trousseau: z
+          .strictObject({
+            historique: cle,
+            active: cle.nullable(),
+            lecture: z.array(cle).max(4),
+          })
+          .optional(),
+      })
       .parse(JSON.parse(Buffer.concat(blocs).toString('utf8')))
+    trousseau = entree.trousseau
     for (const bloc of blocs) bloc.fill(0)
-    const c = configurationLectureDroits({ ...entree, selection: { etat: 'tous' } })
+    const c = configurationLectureDroits({
+      connexion: entree.connexion,
+      selection: { etat: 'tous' },
+    })
     db = new Client({
       connectionString: c.connexion,
       connectionTimeoutMillis: 5000,
@@ -82,11 +104,18 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     })
     db.on('error', () => {})
     await db.connect()
+    let copie
     const resultat = await ecrireCollecteDroits(
       decisionPath,
       destination,
-      (brut) => collecterDonneesDroits(db, brut),
-      (brut) => verifierSuiviCollecte(db, brut),
+      async (brut) => {
+        copie = await collecterCopiePersonnelle(db, brut, trousseau)
+        return copie.donnees
+      },
+      async () => {
+        if (!copie) throw new Error()
+        await copie.verifier()
+      },
     )
     process.stdout.write(`${JSON.stringify(resultat)}\n`)
   } catch {
@@ -96,6 +125,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     process.exitCode = 1
   } finally {
     clearTimeout(minuterie)
+    trousseau?.historique.fill(0)
+    trousseau?.active?.fill(0)
+    for (const cle of trousseau?.lecture ?? []) cle.fill(0)
+    for (const bloc of blocs) bloc.fill(0)
     await db?.end().catch(() => {})
   }
 }

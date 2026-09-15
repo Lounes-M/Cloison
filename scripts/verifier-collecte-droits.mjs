@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process'
 import { fixtureCollecteDroits } from './fixture-collecte-droits.mjs'
 import { collecterDonneesDroits } from '../lib/droits/collecte.ts'
 import { verifierPiecesDroits } from './verifier-pieces-droits.mjs'
+import { verifierCollecteBrouillons } from './verifier-collecte-brouillons.mjs'
 
 export async function verifierCollecteDroits(db, connexion) {
   assert.equal((await db.query('select current_database() nom')).rows[0].nom, 'cloison_audit_test')
@@ -107,4 +108,5 @@ export async function verifierCollecteDroits(db, connexion) {
     'OK : collecte personnelle SQL, tiers exclus, montants exacts, six roles refuses et revision concurrente detectee',
   )
   await verifierPiecesDroits(db, connexion)
+  await verifierCollecteBrouillons(db, connexion)
 }

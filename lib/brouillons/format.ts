@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ouvrir, sceller } from '@/lib/coffre/enveloppe'
+import { ouvrir, sceller } from '../coffre/enveloppe.ts'
 export const schemaBrouillon = z
   .object({
     profil: z.enum(['salarie', 'independant', 'retraite']),
@@ -17,17 +17,19 @@ export function chiffrerBrouillon(
   version: number,
   cle: Buffer,
 ) {
-  return sceller(
-    Buffer.from(
-      JSON.stringify({
-        usage: 'brouillon-engagement-v1',
-        dossier,
-        version,
-        saisie: schemaBrouillon.parse(saisie),
-      }),
-    ),
-    cle,
+  const clair = Buffer.from(
+    JSON.stringify({
+      usage: 'brouillon-engagement-v1',
+      dossier,
+      version,
+      saisie: schemaBrouillon.parse(saisie),
+    }),
   )
+  try {
+    return sceller(clair, cle)
+  } finally {
+    clair.fill(0)
+  }
 }
 export function dechiffrerBrouillon(
   chiffre: Buffer,
@@ -35,13 +37,21 @@ export function dechiffrerBrouillon(
   version: number,
   cle: Buffer,
 ): SaisieBrouillon {
-  if (chiffre.length > 4096) throw new Error('Brouillon invalide')
-  const brut = JSON.parse(ouvrir(chiffre, cle).toString('utf8'))
-  if (
-    brut.usage !== 'brouillon-engagement-v1' ||
-    brut.dossier !== dossier ||
-    brut.version !== version
-  )
-    throw new Error('Brouillon invalide')
-  return schemaBrouillon.parse(brut.saisie)
+  if (chiffre.length < 29 || chiffre.length > 4096) throw new Error('Brouillon invalide')
+  const clair = ouvrir(chiffre, cle)
+  try {
+    const texte = clair.toString('utf8')
+    if (!Buffer.from(texte).equals(clair)) throw new Error('Brouillon invalide')
+    const brut = z
+      .strictObject({
+        usage: z.literal('brouillon-engagement-v1'),
+        dossier: z.literal(dossier),
+        version: z.literal(version),
+        saisie: schemaBrouillon,
+      })
+      .parse(JSON.parse(texte))
+    return brut.saisie
+  } finally {
+    clair.fill(0)
+  }
 }
