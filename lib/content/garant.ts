@@ -102,6 +102,12 @@ export const documentsDeclares = {
 }
 
 export const depot = {
+  vide: 'Choisis un fichier non vide.',
+  tropLourd:
+    'Ce fichier dépasse 4 Mo. Réduis sa taille ou choisis une photo mieux cadrée avant de réessayer.',
+  preparation: 'Préparation de la photo…',
+  selection: 'Fichier sélectionné :',
+  annulerSelection: 'Annuler la sélection',
   debit: 'Trop de documents ont été proposés récemment. Réessaie dans un quart d’heure.',
   original: 'Télécharger mon original',
   titre: 'Ton dépôt',

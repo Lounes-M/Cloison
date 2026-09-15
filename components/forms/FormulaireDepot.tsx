@@ -5,6 +5,7 @@ import { useActionState, useId, useRef, useState } from 'react'
 import { depot, documentsDeclares } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
 import { reduireSiPhoto } from './reduire-photo'
+import { TAILLE_MAX_DEPOT } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 
 const ETAT_INITIAL: EtatDepot = { statut: 'inactif' }
@@ -22,6 +23,21 @@ export function FormulaireDepot({
   const idChamp = useId()
   const [preparation, preparer] = useState(false)
   const champ = useRef<HTMLInputElement>(null)
+  const [selection, selectionner] = useState<string | null>(null)
+  const [erreurLocale, signaler] = useState<string | null>(null)
+
+  function verifier(entree: HTMLInputElement) {
+    const fichier = entree.files?.[0]
+    const message =
+      !fichier || fichier.size === 0
+        ? depot.vide
+        : fichier.size > TAILLE_MAX_DEPOT
+          ? depot.tropLourd
+          : ''
+    entree.setCustomValidity(message)
+    signaler(message || null)
+    return !message
+  }
 
   const erreur = etat.statut === 'erreur' && etat.nature === nature ? etat.message : null
 
@@ -30,7 +46,11 @@ export function FormulaireDepot({
   async function auChoix() {
     const entree = champ.current
     const fichier = entree?.files?.[0]
-    if (!entree || !fichier) return
+    if (!entree) return
+    entree.setCustomValidity('')
+    signaler(null)
+    selectionner(null)
+    if (!fichier) return
 
     preparer(true)
     try {
@@ -40,13 +60,36 @@ export function FormulaireDepot({
         transfert.items.add(reduit)
         entree.files = transfert.files
       }
+    } catch {
+      // Si le navigateur refuse le remplacement, verifier le fichier original.
     } finally {
+      const choisi = entree.files?.[0]
+      selectionner(
+        choisi
+          ? `${choisi.name} (${(choisi.size / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Mo)`
+          : null,
+      )
+      verifier(entree)
       preparer(false)
     }
   }
 
   return (
-    <form action={envoyer} className="flex flex-col gap-2">
+    <form
+      action={envoyer}
+      className="flex flex-col gap-2"
+      onReset={() => {
+        selectionner(null)
+        signaler(null)
+        champ.current?.setCustomValidity('')
+      }}
+      onSubmit={(evenement) => {
+        if (preparation || enCours || !champ.current || !verifier(champ.current)) {
+          evenement.preventDefault()
+          champ.current?.reportValidity()
+        }
+      }}
+    >
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="nature" value={nature} />
       {['bulletin_paie', 'bilan_comptable'].includes(nature) ? (
@@ -89,6 +132,9 @@ export function FormulaireDepot({
         id={idChamp}
         name="fichier"
         type="file"
+        required
+        aria-describedby={`${idChamp}-aide ${idChamp}-selection`}
+        aria-invalid={erreurLocale ? true : undefined}
         // Lister JPEG ici fait que iOS convertit lui-meme ses HEIC en JPEG au
         // moment du choix. Sans cette liste, le serveur le refuserait en le
         // nommant, ce qui est correct mais coute un aller-retour.
@@ -97,18 +143,43 @@ export function FormulaireDepot({
         onChange={auChoix}
         className="border-ink rounded-xl border-2 p-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-4"
       />
+      <p id={`${idChamp}-aide`} className="text-muted text-sm">
+        {depot.formats}
+      </p>
+      <p id={`${idChamp}-selection`} role="status" className="text-sm break-words">
+        {preparation ? depot.preparation : selection ? `${depot.selection} ${selection}` : ''}
+      </p>
+      {selection ? (
+        <button
+          type="button"
+          disabled={enCours || preparation}
+          className="lien-espace self-start"
+          onClick={() => {
+            if (champ.current) {
+              champ.current.value = ''
+              champ.current.setCustomValidity('')
+            }
+            selectionner(null)
+            signaler(null)
+            champ.current?.focus()
+          }}
+        >
+          {depot.annulerSelection}
+        </button>
+      ) : null}
 
       <button
         type="submit"
         disabled={enCours || preparation}
         className="press shadow-brut-xs outlined bg-cobalt cursor-pointer rounded-xl px-4 py-3 font-bold text-white disabled:translate-none disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {preparation
-          ? 'Préparation de la photo…'
-          : enCours
-            ? depot.envoi
-            : 'Déposer le fichier sélectionné'}
+        {preparation ? depot.preparation : enCours ? depot.envoi : 'Déposer le fichier sélectionné'}
       </button>
+      {erreurLocale ? (
+        <p role="alert" className="text-sm font-semibold">
+          {erreurLocale}
+        </p>
+      ) : null}
       {erreur ? (
         <p
           role="alert"
