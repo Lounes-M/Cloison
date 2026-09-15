@@ -18,6 +18,7 @@ import { verifierResponsables } from './verifier-responsables.mjs'
 import { verifierPreferences } from './verifier-preferences.mjs'
 import { verifierRappels } from './verifier-rappels.mjs'
 import { verifierSuiviDroits } from './verifier-suivi-droits.mjs'
+import { verifierCollecteDroits } from './verifier-collecte-droits.mjs'
 import { verifierHistoriqueResponsables } from './verifier-historique-responsables.mjs'
 
 export async function preparerBase(db) {
@@ -192,6 +193,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierPreferences(db, connexion, adresse, secret)
       await verifierRappels(db, connexion)
       await verifierSuiviDroits(db, connexion)
+      await verifierCollecteDroits(db, connexion)
       await verifierHistoriqueResponsables(db)
       await verifierBrouillonsEngagement(db, process.env.PGTEST_URL)
       await verifierReutilisationPieces(db, process.env.PGTEST_URL)

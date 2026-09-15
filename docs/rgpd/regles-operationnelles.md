@@ -133,3 +133,8 @@ Les identifiants dupliques, champs inconnus et preuves mal formees sont refuses.
 Le resultat porte toujours `executionAutorisee: false`. Une copie mixte demande
 une expurgation a relire ; une conservation echue demande un reexamen ; une
 ressource partagee ne devient jamais une proposition d'effacement global.
+
+Une [collecte SQL privee](../exploitation/collecte-personnelle.md) prepare les
+donnees structurees des dossiers explicitement approuves dans le registre. Sa
+copie de travail reste a relire ; elle declare ses sources manquantes et ne vaut
+pas une decision de remise.
