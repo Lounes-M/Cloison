@@ -19,6 +19,7 @@ export function FormulaireAttributions({
 }) {
   const [selection, selectionner] = useState<ChoixDossier[]>([])
   const [recu, conserverRecu] = useState<ChoixDossier[]>([])
+  const selectionVisible = selection.every((s) => dossiers.some((d) => d.id === s.id))
   const [etat, action, attente] = useActionState<EtatAttributions, FormData>(attribuerPlusieurs, {
     statut: 'inactif',
     resultats: [],
@@ -85,13 +86,18 @@ export function FormulaireAttributions({
           </label>
           <button
             type="submit"
-            disabled={selection.length === 0}
+            disabled={selection.length === 0 || !selectionVisible}
             className="press outlined bg-cobalt text-paper rounded-lg p-3 font-bold disabled:opacity-50"
           >
             {attente ? t.attente : t.envoyer}
           </button>
         </fieldset>
       </form>
+      {!selectionVisible && etat.statut !== 'termine' ? (
+        <p role="alert" className="mt-3">
+          {t.selectionModifiee}
+        </p>
+      ) : null}
       {etat.statut === 'erreur' ? (
         <p role="alert" className="mt-4">
           {t.erreur}

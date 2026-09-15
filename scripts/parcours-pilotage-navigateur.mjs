@@ -30,6 +30,15 @@ export async function parcourirPilotage(page, site, id, moteur, largeur, simuler
     .getByText('OCRFICTIF : Refusé : actualisez le dossier', { exact: true })
     .waitFor()
   simuler.conflit(false)
+  await page.reload()
+  await section.getByLabel('OCRFICTIF', { exact: true }).check()
+  await section.getByRole('combobox').selectOption('')
+  await section.getByLabel('Je confirme l’affectation des dossiers sélectionnés.').check()
+  await section.getByRole('button').click()
+  await section
+    .getByRole('status')
+    .getByText('OCRFICTIF : Affectation confirmée', { exact: true })
+    .waitFor()
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
   console.log(
     `OK : pilotage ${moteur.name()} ${largeur}, compteurs, affectation clavier, conflit et bilan`,

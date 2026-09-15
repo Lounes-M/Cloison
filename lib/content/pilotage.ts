@@ -25,6 +25,8 @@ export const pilotage = {
   selection: (n: number) =>
     `${n} dossier${n > 1 ? 's' : ''} sélectionné${n > 1 ? 's' : ''} sur 20 maximum`,
   aucun: 'Aucun dossier modifiable sur cette page.',
+  selectionModifiee:
+    'La liste a changé et certains dossiers sélectionnés ne sont plus visibles. Actualisez la page avant de préparer une nouvelle sélection.',
   equipeIndisponible:
     'La liste des collaborateurs est indisponible. Actualisez avant de préparer une attribution groupée.',
   erreur:
