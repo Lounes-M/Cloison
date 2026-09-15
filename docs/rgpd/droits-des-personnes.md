@@ -6,7 +6,9 @@ reponse et la cloture. Il ne realise ni export personnel ni effacement sur deman
 Les [regles operationnelles](regles-operationnelles.md) fixent maintenant la
 verification proportionnee, la revue des tiers, les choix de remise et la
 conservation du suivi. Leur previsualisation technique produit un avis par
-ressource ; la collecte et l'effacement individuels restent a raccorder.
+ressource. Une [collecte SQL privee](../exploitation/collecte-personnelle.md)
+prepare maintenant les donnees structurees des dossiers approuves pour revue.
+L'inventaire complet, la remise et l'effacement individuels restent a raccorder.
 
 ## Reception et verification
 
