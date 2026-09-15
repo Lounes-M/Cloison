@@ -5,6 +5,7 @@ import {
 import { parcourirBrouillon } from './parcours-brouillon-navigateur.mjs'
 import { parcourirDepot } from './parcours-depot-navigateur.mjs'
 import { parcourirCalendrier } from './parcours-calendrier-navigateur.mjs'
+import { parcourirPilotage } from './parcours-pilotage-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
@@ -310,6 +311,14 @@ const api = createServer(async (req, res) => {
     return
   }
   if (path.endsWith('/dossiers')) {
+    if (req.method === 'HEAD') {
+      const statut = url.searchParams.get('statut')
+      assert.equal(url.searchParams.get('agence_id'), `eq.${id}`)
+      assert.match(url.searchParams.getAll('expire_le').join(','), /gt\./)
+      res.setHeader('content-range', `*/${!statut || statut === 'eq.complet' ? 1 : 0}`)
+      res.end()
+      return
+    }
     filtreDossiers = url.searchParams
     if (url.searchParams.get('affecte') === 'not.is.null') {
       assert.equal(url.searchParams.get('affecte.membre_id'), `eq.${id}`)
@@ -500,6 +509,11 @@ try {
             },
             panne: (v) => {
               panneHistorique = v
+            },
+          })
+          await parcourirPilotage(page, relais.site, id, moteur, largeur, {
+            conflit: (v) => {
+              conflitResponsable = v
             },
           })
           await parcourirPreferences(page, relais.site, moteur, largeur, (v) => {

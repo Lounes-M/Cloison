@@ -3,6 +3,11 @@
 Le registre prive de la migration 0053 suit la reception, la verification, la
 reponse et la cloture. Il ne realise ni export personnel ni effacement sur demande.
 
+Les [regles operationnelles](regles-operationnelles.md) fixent maintenant la
+verification proportionnee, la revue des tiers, les choix de remise et la
+conservation du suivi. Leur previsualisation technique produit un avis par
+ressource ; la collecte et l'effacement individuels restent a raccorder.
+
 ## Reception et verification
 
 Utiliser le canal de contact effectivement publie et suivi. Conserver la
@@ -15,9 +20,8 @@ de doute raisonnable, demander seulement les informations complementaires
 necessaires, sans collecte systematique de piece d'identite. Determiner le
 responsable du traitement concerne.
 
-Le responsable fixe les echeances de reponse et d'effacement du suivi. Le programme
-n'invente ni delai legal ni conservation uniforme. Prolongations, restrictions et
-motifs exigent une decision documentee et une reponse a la personne.
+Appliquer les echeances des regles operationnelles au suivi. Prolongations,
+restrictions et motifs exigent une decision documentee et une reponse a la personne.
 
 ## Acces et autres droits
 
