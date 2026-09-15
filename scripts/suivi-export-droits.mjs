@@ -14,6 +14,7 @@ export async function verifierSuiviExport(db, valeur) {
        and s.effacer_le>clock_timestamp()
        and $4::timestamptz>=s.inscrit_le and $4::timestamptz<=clock_timestamp()
        and $5::timestamptz>clock_timestamp() and $5::timestamptz<=s.effacer_le
+       and $5::timestamptz<=s.inscrit_le+interval '72 hours'
        and not exists(select 1 from public.suivi_demandes_droits n where n.precedente=s.operation)`,
       [d.demande, d.revision, d.decisionSha256, d.creeLe, d.expireLe],
     )

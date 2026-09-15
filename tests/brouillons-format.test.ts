@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import { chiffrerBrouillon, dechiffrerBrouillon } from '@/lib/brouillons/format'
+import { sceller } from '@/lib/coffre/enveloppe'
 const cle = Buffer.alloc(32, 1)
 const saisie = {
   profil: 'salarie' as const,
@@ -9,6 +10,29 @@ const saisie = {
   jusquAu: '',
   solidaire: false,
 }
+
+test('refuse les champs supplementaires dans une enveloppe authentifiee', () => {
+  const c = sceller(
+    Buffer.from(
+      JSON.stringify({
+        usage: 'brouillon-engagement-v1',
+        dossier: 'dossier',
+        version: 1,
+        saisie,
+        secret: 'interdit',
+      }),
+    ),
+    cle,
+  )
+  expect(() => dechiffrerBrouillon(c, 'dossier', 1, cle)).toThrow()
+})
+test('refuse un UTF-8 invalide meme si AES-GCM est valide', () => {
+  const b = Buffer.from(
+    JSON.stringify({ usage: 'brouillon-engagement-v1', dossier: 'dossier', version: 1, saisie }),
+  )
+  b[b.indexOf('1200')] = 255
+  expect(() => dechiffrerBrouillon(sceller(b, cle), 'dossier', 1, cle)).toThrow()
+})
 test('une saisie incomplete est chiffree et retrouvee exactement', () => {
   const a = chiffrerBrouillon(saisie, 'dossier', 1, cle),
     b = chiffrerBrouillon(saisie, 'dossier', 1, cle)
