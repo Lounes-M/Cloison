@@ -4,6 +4,7 @@ import {
 } from './parcours-reutilisation-navigateur.mjs'
 import { parcourirBrouillon } from './parcours-brouillon-navigateur.mjs'
 import { parcourirDepot } from './parcours-depot-navigateur.mjs'
+import { parcourirCalendrier } from './parcours-calendrier-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
@@ -478,6 +479,7 @@ try {
           console.log(
             `OK : OCR ${moteur.name()} ${largeur}, accord, clavier, texte inerte, effacement et panne`,
           )
+          await parcourirCalendrier(page, relais.site, id, moteur, largeur)
           await parcourirConnecteur(page, relais.site, moteur, largeur)
           await parcourirExamen(page, relais.site, id, moteur, largeur, (v) => {
             examenConflit = v

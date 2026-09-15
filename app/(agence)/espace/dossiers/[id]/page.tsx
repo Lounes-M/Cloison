@@ -1,4 +1,5 @@
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
+import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
@@ -396,6 +397,7 @@ export default async function PageDossier({
       <p className="text-muted mt-10 text-[13px] font-medium">
         Ouvert le {date(d.cree_le)}, expire le {date(d.expire_le)}.
       </p>
+      <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />
     </div>
   )
