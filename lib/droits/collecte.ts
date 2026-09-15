@@ -16,12 +16,23 @@ const schema = z
       mandat: z.enum(['non_requis', 'verifie']),
     }),
     expireLe: z.iso.datetime(),
+    pieces: z
+      .array(z.strictObject({ id: uuid, dossier: uuid }))
+      .min(1)
+      .max(100)
+      .optional(),
     dossiers: z
       .array(z.strictObject({ id: uuid, partie: z.enum(['locataire', 'garant']) }))
       .min(1)
       .max(50),
   })
   .superRefine((d, ctx) => {
+    if (
+      d.pieces &&
+      (new Set(d.pieces.map((p) => p.id)).size !== d.pieces.length ||
+        d.pieces.some((p) => !d.dossiers.some((s) => s.id === p.dossier && s.partie === 'garant')))
+    )
+      ctx.addIssue({ code: 'custom', message: 'Pieces hors selection.' })
     if (new Set(d.dossiers.map((s) => `${s.id}/${s.partie}`)).size !== d.dossiers.length)
       ctx.addIssue({ code: 'custom', message: 'Selection dupliquee.' })
   })
