@@ -190,6 +190,13 @@ export async function verifierParcoursLocaux(db, adresseRest, secret) {
         )
       }
       noter(`${partie} : lien verifie par SQL, cookie HttpOnly et rendu Next du seul dossier`)
+      const calendrier = await requeter(`/espace/dossiers/${dossier.id}/echeance`, cookies[partie])
+      assert.equal(
+        calendrier.status,
+        401,
+        'Un lien porteur ne donne pas acces au calendrier agence',
+      )
+      assert.equal(calendrier.headers.get('content-disposition'), null)
     }
     if (process.env.CLOISON_TEST_NAVIGATEUR === '1') {
       const { verifierNavigateurPorteurs } = await import('./verifier-navigateur-porteurs.mjs')
