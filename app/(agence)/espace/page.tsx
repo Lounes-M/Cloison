@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { FormulaireActivation } from '@/components/forms/FormulaireActivation'
+import { PrioritesAgence } from '@/components/dossiers/PrioritesAgence'
+import { AttributionsGroupees } from '@/components/dossiers/AttributionsGroupees'
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
@@ -234,6 +236,7 @@ export default async function PageEspace({
         </div>
       ) : null}
 
+      <PrioritesAgence contexte={contexte} />
       <section className="panneau-espace mt-12">
         <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
 
@@ -513,6 +516,13 @@ export default async function PageEspace({
         </nav>
       </section>
 
+      <AttributionsGroupees
+        contexte={contexte}
+        lignes={lignes}
+        responsables={responsables}
+        pageEquipe={recherche.equipe}
+        baseUrl={lienPage(numero)}
+      />
       <section className="panneau-espace mt-12 grid gap-10 md:grid-cols-2">
         <div>
           <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>
