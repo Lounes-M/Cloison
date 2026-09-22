@@ -12,17 +12,17 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
     let repertoire: string
     const cle = 'apikey_fictive_sans_acces'
     beforeEach(async () => {
-      repertoire = await mkdtemp(join(tmpdir(), 'cloison-universign-'))
+      repertoire = await mkdtemp(join(tmpdir(), 'cloison-youtrust-'))
       await writeFile(join(repertoire, 'cle'), cle, { mode: 0o600 })
       // Aucun appel fournisseur : le vrai CLI recoit un transport local impose au demarrage.
       await writeFile(
         join(repertoire, 'transport.mjs'),
         `
     globalThis.fetch = async (url, options) => {
-      if (url !== 'https://api.alpha.universign.com/v1/transactions/tx_Fictive_123'
+      if (url !== 'https://api-sandbox.yousign.app/v3/signature_requests/11111111-1111-4111-8111-111111111111'
           || options.method !== 'GET' || options.redirect !== 'error'
           || options.headers.Authorization !== 'Bearer ${cle}') throw new Error('Transport refuse');
-      return new Response(JSON.stringify({object:'transaction', id:'tx_Fictive_123', state:'draft',
+      return new Response(JSON.stringify({id:'11111111-1111-4111-8111-111111111111', status:'draft',
         participants:[{email:'prive@example.test'}], secret:'${cle}'}),
         {headers:{'content-type':'application/json'}});
     }
@@ -40,7 +40,7 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
           [
             '--import',
             pathToFileURL(join(repertoire, 'transport.mjs')).href,
-            resolve('scripts/lire-universign.mjs'),
+            resolve('scripts/lire-youtrust.mjs'),
             ...supplement,
           ],
           {
@@ -54,7 +54,10 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
         closeSync(fd)
       }
     }
-    const configuration = JSON.stringify({ environnement: 'alpha', transaction: 'tx_Fictive_123' })
+    const configuration = JSON.stringify({
+      environnement: 'sandbox',
+      transaction: '11111111-1111-4111-8111-111111111111',
+    })
     it('lit la cle sur fd 3 et ne produit que l etat', () => {
       const resultat = executer(configuration)
       expect(resultat.status, resultat.stderr).toBe(0)
@@ -80,13 +83,13 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
     it.each([
       '{',
       ' '.repeat(1025),
-      JSON.stringify({ environnement: 'alpha', transaction: 'tx_secret/invalide' }),
+      JSON.stringify({ environnement: 'sandbox', transaction: 'tx_secret/invalide' }),
     ])('refuse une entree incorrecte sans details prives %#', (input) => {
       const resultat = executer(input)
       expect(resultat.status).toBe(1)
       expect(resultat.stdout).toBe('')
       expect(resultat.stderr).toBe(
-        'Lecture Universign indisponible. Verifier acces API, environnement et transaction.\n',
+        'Lecture Youtrust indisponible. Verifier acces API, environnement et transaction.\n',
       )
     })
     it('refuse un argument supplementaire sans le journaliser', () => {

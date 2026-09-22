@@ -1,5 +1,7 @@
 # Suite de l'audit du 5 septembre 2026
 
+> Historique : depuis le 22 septembre 2026, Youtrust remplace Universign. Les constats dates ci-dessous decrivent l ancien fournisseur. Voir le [guide actuel](exploitation/youtrust-authentification.md).
+
 La [PR 43](https://github.com/Lounes-M/Cloison/pull/43) a ete fusionnee le 6 septembre
 a 01:08, dans le commit a9ad93a41725ced9db90162ec75a1a49203bd17d. Ce document remplace
 l'affirmation selon laquelle les phases 0 a 7 seraient terminees. Aucun resultat de test local ne vaut preuve de
@@ -69,7 +71,7 @@ Les preuves de validation native, de CI et de livraison figurent sur sa PR.
 
 ## Lot du 12 septembre 2026 : diagnostic Universign
 
-Le [diagnostic en lecture seule](exploitation/diagnostic-universign.md) prepare
+Le [diagnostic en lecture seule](exploitation/diagnostic-youtrust.md) prepare
 la verification d'une transaction connue. Il effectue un seul GET borne, sur
 une origine imposee, et ne retourne que l'etat apres controle de l'identifiant.
 Aucune creation, signature, notification, annulation ni collecte de documents.

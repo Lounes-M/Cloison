@@ -2,7 +2,7 @@
 
 Version 1. Cette procedure fixe les choix de fonctionnement de Cloison pour
 l'acces, la portabilite et l'effacement. Elle ne modifie pas les durees des coffres
-en base et ne constitue pas une certification juridique. Universign est hors du
+en base et ne constitue pas une certification juridique. Youtrust est hors du
 perimetre technique actuel.
 
 ## Reception et delais

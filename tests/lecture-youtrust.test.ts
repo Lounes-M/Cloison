@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { lireUniversign } from '../scripts/lire-universign.mjs'
+import { lireYoutrust } from '../scripts/lire-youtrust.mjs'
 
-const choix = { environnement: 'alpha', transaction: 'tx_Fictive_123' }
+const choix = { environnement: 'sandbox', transaction: '11111111-1111-4111-8111-111111111111' }
 const cle = 'apikey_fictive_sans_acces'
-const objet = { object: 'transaction', id: choix.transaction, state: 'completed' }
+const objet = { id: choix.transaction, status: 'done' }
 const json = (valeur: unknown = objet) =>
   new Response(JSON.stringify(valeur), {
     headers: { 'content-type': 'application/json; charset=utf-8' },
   })
 afterEach(() => vi.restoreAllMocks())
 
-describe('Lecture Universign bornee et sans mutation', () => {
-  it.each(['alpha', 'production'])(
+describe('Lecture Youtrust bornee et sans mutation', () => {
+  it.each(['sandbox', 'production'])(
     'effectue un seul GET sur %s et ne restitue que l etat',
     async (environnement) => {
       const requete = vi.fn<typeof fetch>().mockResolvedValue(
@@ -21,11 +21,11 @@ describe('Lecture Universign bornee et sans mutation', () => {
           metadata: { secret: cle },
         }),
       )
-      expect(await lireUniversign({ ...choix, environnement }, cle, requete)).toEqual({
-        etat: 'completed',
+      expect(await lireYoutrust({ ...choix, environnement }, cle, requete)).toEqual({
+        etat: 'done',
       })
       expect(requete).toHaveBeenCalledExactlyOnceWith(
-        `https://api.${environnement === 'alpha' ? 'alpha.' : ''}universign.com/v1/transactions/${choix.transaction}`,
+        `https://api${environnement === 'sandbox' ? '-sandbox' : ''}.yousign.app/v3/signature_requests/${choix.transaction}`,
         {
           method: 'GET',
           headers: { Authorization: `Bearer ${cle}`, Accept: 'application/json' },
@@ -36,18 +36,26 @@ describe('Lecture Universign bornee et sans mutation', () => {
       )
     },
   )
-  it.each(['draft', 'started', 'paused', 'cancelled', 'expired', 'closed', 'completed'])(
-    'conserve l etat %s sans le transformer en preuve de signature',
-    async (state) => {
-      expect(
-        await lireUniversign(
-          choix,
-          cle,
-          vi.fn<typeof fetch>().mockResolvedValue(json({ ...objet, state })),
-        ),
-      ).toEqual({ etat: state })
-    },
-  )
+  it.each([
+    'draft',
+    'approval',
+    'ongoing',
+    'paused',
+    'rejected',
+    'declined',
+    'canceled',
+    'expired',
+    'deleted',
+    'done',
+  ])('conserve l etat %s sans le transformer en preuve de signature', async (status) => {
+    expect(
+      await lireYoutrust(
+        choix,
+        cle,
+        vi.fn<typeof fetch>().mockResolvedValue(json({ ...objet, status })),
+      ),
+    ).toEqual({ etat: status })
+  })
   it.each([
     { ...choix, environnement: 'test' },
     { ...choix, environnement: 'https://evil.example.test' },
@@ -59,8 +67,8 @@ describe('Lecture Universign bornee et sans mutation', () => {
     { ...choix, method: 'POST' },
   ])('refuse une selection invalide sans requete %#', async (selection) => {
     const requete = vi.fn<typeof fetch>()
-    await expect(lireUniversign(selection, cle, requete)).rejects.toThrow(
-      'Lecture Universign indisponible.',
+    await expect(lireYoutrust(selection, cle, requete)).rejects.toThrow(
+      'Lecture Youtrust indisponible.',
     )
     expect(requete).not.toHaveBeenCalled()
   })
@@ -68,7 +76,7 @@ describe('Lecture Universign bornee et sans mutation', () => {
     'refuse une cle malformee sans requete %#',
     async (cleApi) => {
       const requete = vi.fn<typeof fetch>()
-      await expect(lireUniversign(choix, cleApi, requete)).rejects.toThrow()
+      await expect(lireYoutrust(choix, cleApi, requete)).rejects.toThrow()
       expect(requete).not.toHaveBeenCalled()
     },
   )
@@ -78,34 +86,34 @@ describe('Lecture Universign bornee et sans mutation', () => {
       const requete = vi
         .fn<typeof fetch>()
         .mockResolvedValue(new Response(status === 204 ? null : 'donnee privee', { status }))
-      await expect(lireUniversign(choix, cle, requete)).rejects.toThrow(
-        /^Lecture Universign indisponible\.$/,
+      await expect(lireYoutrust(choix, cle, requete)).rejects.toThrow(
+        /^Lecture Youtrust indisponible\.$/,
       )
       expect(requete).toHaveBeenCalledTimes(1)
     },
   )
   it.each([
     { ...objet, id: 'tx_autre' },
-    { ...objet, object: 'file' },
-    { ...objet, state: 'unknown' },
-    { ...objet, state: null },
+    { ...objet, status: undefined },
+    { ...objet, status: 'unknown' },
+    { ...objet, status: null },
     [objet],
     null,
   ])('refuse une reponse incoherente %#', async (valeur) => {
     await expect(
-      lireUniversign(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(json(valeur))),
+      lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(json(valeur))),
     ).rejects.toThrow()
   })
   it('refuse une redirection suivie par un transport non conforme', async () => {
     const reponse = json()
     Object.defineProperty(reponse, 'redirected', { value: true })
     await expect(
-      lireUniversign(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
+      lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
     ).rejects.toThrow()
   })
   it.each(['text/html', 'text/plain', ''])('refuse le type %s', async (type) => {
     await expect(
-      lireUniversign(
+      lireYoutrust(
         choix,
         cle,
         vi
@@ -124,7 +132,7 @@ describe('Lecture Universign bornee et sans mutation', () => {
         headers: { 'content-type': 'application/json', 'content-length': taille },
       })
       await expect(
-        lireUniversign(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
+        lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
       ).rejects.toThrow()
       expect(annuler).toHaveBeenCalled()
     },
@@ -139,7 +147,7 @@ describe('Lecture Universign bornee et sans mutation', () => {
         { headers },
       )
       await expect(
-        lireUniversign(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
+        lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
       ).rejects.toThrow()
     },
   )
@@ -152,13 +160,13 @@ describe('Lecture Universign bornee et sans mutation', () => {
     expect(Buffer.byteLength(texte)).toBe(1024 * 1024)
     const reponse = new Response(texte, { headers: { 'content-type': 'application/json' } })
     expect(
-      await lireUniversign(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
-    ).toEqual({ etat: 'completed' })
+      await lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
+    ).toEqual({ etat: 'done' })
   })
   it('refuse JSON invalide et UTF-8 corrompu', async () => {
     for (const octets of [Buffer.from('{'), Buffer.from([0xff])]) {
       await expect(
-        lireUniversign(
+        lireYoutrust(
           choix,
           cle,
           vi
@@ -172,12 +180,8 @@ describe('Lecture Universign bornee et sans mutation', () => {
   })
   it('masque les details d erreur du transport', async () => {
     await expect(
-      lireUniversign(
-        choix,
-        cle,
-        vi.fn<typeof fetch>().mockRejectedValue(new Error(`secret ${cle}`)),
-      ),
-    ).rejects.toThrow(/^Lecture Universign indisponible\.$/)
+      lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockRejectedValue(new Error(`secret ${cle}`))),
+    ).rejects.toThrow(/^Lecture Youtrust indisponible\.$/)
   })
   it('annule la lecture du corps lorsque le delai expire', async () => {
     const controle = new AbortController()
@@ -193,7 +197,7 @@ describe('Lecture Universign bornee et sans mutation', () => {
       { headers: { 'content-type': 'application/json' } },
     )
     await expect(
-      lireUniversign(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
+      lireYoutrust(choix, cle, vi.fn<typeof fetch>().mockResolvedValue(reponse)),
     ).rejects.toThrow()
     expect(delai).toHaveBeenCalledWith(5000)
     expect(annuler).toHaveBeenCalled()

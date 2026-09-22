@@ -4,22 +4,33 @@ import { pathToFileURL } from 'node:url'
 import { z } from 'zod'
 
 const ORIGINES = {
-  alpha: 'https://api.alpha.universign.com',
-  production: 'https://api.universign.com',
+  sandbox: 'https://api-sandbox.yousign.app',
+  production: 'https://api.yousign.app',
 }
 const MAX_REPONSE = 1024 * 1024
 const selection = z.strictObject({
-  environnement: z.enum(['alpha', 'production']),
-  transaction: z.string().regex(/^tx_[A-Za-z0-9_-]{1,192}$/),
+  environnement: z.enum(['sandbox', 'production']),
+  transaction: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i),
 })
-const etats = z.enum(['draft', 'started', 'paused', 'cancelled', 'expired', 'closed', 'completed'])
+const etats = z.enum([
+  'draft',
+  'approval',
+  'ongoing',
+  'paused',
+  'rejected',
+  'declined',
+  'canceled',
+  'expired',
+  'deleted',
+  'done',
+])
 const systemeCliSupporte = () => ['linux', 'darwin'].includes(process.platform)
 const refuser = () => {
-  throw new Error('Lecture Universign indisponible.')
+  throw new Error('Lecture Youtrust indisponible.')
 }
 
 /** GET unique, sans pagination, mutation, document ni donnee de participant retournee. */
-export async function lireUniversign(valeur, cleApi, requete = fetch) {
+export async function lireYoutrust(valeur, cleApi, requete = fetch) {
   const p = selection.safeParse(valeur)
   if (!p.success || typeof cleApi !== 'string' || !/^[!-~]{1,1024}$/.test(cleApi)) refuser()
   const signal = AbortSignal.timeout(5000)
@@ -29,7 +40,7 @@ export async function lireUniversign(valeur, cleApi, requete = fetch) {
   }
   try {
     const reponse = await requete(
-      `${ORIGINES[p.data.environnement]}/v1/transactions/${p.data.transaction}`,
+      `${ORIGINES[p.data.environnement]}/v3/signature_requests/${p.data.transaction}`,
       {
         method: 'GET',
         headers: { Authorization: `Bearer ${cleApi}`, Accept: 'application/json' },
@@ -66,8 +77,8 @@ export async function lireUniversign(valeur, cleApi, requete = fetch) {
     const valeur = JSON.parse(
       new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(blocs, taille)),
     )
-    if (valeur?.object !== 'transaction' || valeur.id !== p.data.transaction) refuser()
-    const etat = etats.safeParse(valeur.state)
+    if (valeur.id !== p.data.transaction) refuser()
+    const etat = etats.safeParse(valeur.status)
     if (!etat.success) refuser()
     // Une transaction peut contenir des identites, URLs et messages : ne rien propager d'autre.
     return { etat: etat.data }
@@ -99,7 +110,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     const valeur = JSON.parse(
       new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(blocs)),
     )
-    const resultat = await lireUniversign(
+    const resultat = await lireYoutrust(
       valeur,
       new TextDecoder('utf-8', { fatal: true }).decode(cle),
     )
@@ -107,8 +118,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   } catch {
     console.error(
       systemeCliSupporte()
-        ? 'Lecture Universign indisponible. Verifier acces API, environnement et transaction.'
-        : 'Lecture Universign indisponible sur ce systeme.',
+        ? 'Lecture Youtrust indisponible. Verifier acces API, environnement et transaction.'
+        : 'Lecture Youtrust indisponible sur ce systeme.',
     )
     process.exitCode = 1
   } finally {
