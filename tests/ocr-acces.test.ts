@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { PDFDocument } from 'pdf-lib'
 const doubles = vi.hoisted(() => ({
   contexte: vi.fn(),
   reserver: vi.fn(),
@@ -74,6 +75,55 @@ test('une revocation pendant le traitement ne rend pas le texte', async () => {
   const reponse = await lirePieceParOcr(requete(), id)
   expect(reponse.status).toBe(404)
   expect(await reponse.text()).not.toContain('prive')
+  expect(doubles.extraire).not.toHaveBeenCalled()
+})
+
+test('une revocation apres le fournisseur ne rend pas la transcription', async () => {
+  doubles.piece.mockResolvedValueOnce({ dossierId: id }).mockResolvedValueOnce(null)
+  const reponse = await lirePieceParOcr(requete(), id)
+  expect(reponse.status).toBe(404)
+  expect(await reponse.text()).not.toContain('prive')
+  expect(doubles.extraire).toHaveBeenCalledTimes(1)
+})
+
+test('la selection ne transmet que les pages demandees et restitue leur numero original', async () => {
+  const source = await PDFDocument.create()
+  for (const largeur of [101, 202, 303]) source.addPage([largeur, 400])
+  doubles.ouvrir.mockResolvedValue({
+    ouverte: true,
+    pdf: Buffer.from(await source.save()),
+    pages: 3,
+  })
+  doubles.extraire.mockResolvedValue({ pages: [{ page: 1, texte: 'selection' }] })
+  const r = requete()
+  r.headers.set('x-cloison-ocr-pages', '3')
+  const reponse = await lirePieceParOcr(r, id)
+  expect(reponse.status).toBe(200)
+  expect((await reponse.json()).pages).toEqual([{ page: 3, texte: 'selection' }])
+  const envoye = await PDFDocument.load(doubles.extraire.mock.calls[0]![0])
+  expect(envoye.getPages().map((p) => p.getWidth())).toEqual([303])
+  expect(doubles.extraire.mock.calls[0]![2]).toBe(1)
+})
+
+test.each(['0', '41', '2-1', '1,'])(
+  'une selection invalide ne consomme pas le quota : %s',
+  async (pages) => {
+    const r = requete()
+    r.headers.set('x-cloison-ocr-pages', pages)
+    expect((await lirePieceParOcr(r, id)).status).toBe(400)
+    expect(doubles.reserver).not.toHaveBeenCalled()
+    expect(doubles.extraire).not.toHaveBeenCalled()
+  },
+)
+
+test('une page absente ou une interruption avant envoi ne parvient pas au fournisseur', async () => {
+  const r = requete()
+  r.headers.set('x-cloison-ocr-pages', '2')
+  expect((await lirePieceParOcr(r, id)).status).toBe(400)
+  expect(doubles.extraire).not.toHaveBeenCalled()
+  const annulee = new Request(requete(), { signal: AbortSignal.abort() })
+  expect((await lirePieceParOcr(annulee, id)).status).toBe(503)
+  expect(doubles.extraire).not.toHaveBeenCalled()
 })
 test('rend une transcription sans cache apres autorisations et journal', async () => {
   const reponse = await lirePieceParOcr(requete(), id)
