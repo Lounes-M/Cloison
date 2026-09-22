@@ -151,6 +151,135 @@ describe('Client API Youtrust', () => {
       `https://api-sandbox.yousign.app/v3/signature_requests/${id}/signers/${signataire}/audit_trails/download`,
     ])
   })
+  it.each([false, true])('borne le paquet cumule avec longueur annoncee %s', async (annoncee) => {
+    const signataires = [signataire, document, id]
+    const annuler = vi.fn()
+    let numero = 0
+    const transport = vi.fn<typeof fetch>().mockImplementation(async () => {
+      if (numero++ === 0)
+        return reponse({
+          id,
+          status: 'done',
+          documents: [{ id: document, nature: 'signable_document' }],
+          signers: signataires.map((id) => ({ id, status: 'signed' })),
+        })
+      const taille = numero <= 3 ? 20 * 1024 * 1024 : 10 * 1024 * 1024 + 1
+      const bloc = Buffer.alloc(taille)
+      bloc.write('%PDF-1.7')
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.enqueue(bloc)
+          },
+          cancel: annuler,
+          pull(controller) {
+            controller.close()
+          },
+        }),
+        {
+          headers: {
+            'content-type': 'application/pdf',
+            ...(annoncee ? { 'content-length': String(taille) } : {}),
+          },
+        },
+      )
+    })
+    const resultat = await creerClientYoutrust(config, transport)
+      .recupererPieces(id, document, signataires)
+      .then(
+        () => 'paquet restitue',
+        (erreur: Error) => erreur.message,
+      )
+    expect(resultat).toBe('Operation Youtrust indisponible')
+    expect(transport).toHaveBeenCalledTimes(4)
+    if (annoncee) expect(annuler).toHaveBeenCalled()
+  })
+  it('accepte exactement 50 Mio sans partager le budget entre recuperations', async () => {
+    const signataires = [signataire, document]
+    let numero = 0
+    const transport = vi.fn<typeof fetch>().mockImplementation(async () => {
+      const index = numero++ % 4
+      if (index === 0)
+        return reponse({
+          id,
+          status: 'done',
+          documents: [{ id: document, nature: 'signable_document' }],
+          signers: signataires.map((id) => ({ id, status: 'signed' })),
+        })
+      const bloc = Buffer.alloc((index === 3 ? 10 : 20) * 1024 * 1024)
+      bloc.write('%PDF-1.7')
+      return new Response(bloc, { headers: { 'content-type': 'application/pdf' } })
+    })
+    const client = creerClientYoutrust(config, transport)
+    for (let tour = 0; tour < 2; tour++) {
+      const resultat = await client.recupererPieces(id, document, signataires)
+      expect(
+        resultat.acte.pdf.length + resultat.preuves.reduce((n, p) => n + p.pdf.length, 0),
+      ).toBe(50 * 1024 * 1024)
+    }
+    expect(transport).toHaveBeenCalledTimes(8)
+  })
+  it('refuse une recuperation deja annulee avant tout appel', async () => {
+    const transport = vi.fn<typeof fetch>()
+    await expect(
+      creerClientYoutrust(config, transport).recupererPieces(
+        id,
+        document,
+        [signataire],
+        AbortSignal.abort(),
+      ),
+    ).rejects.toThrow(/^Operation Youtrust indisponible$/)
+    expect(transport).not.toHaveBeenCalled()
+  })
+  it.each(['appelant', 'global'] as const)(
+    'annule la preuve en cours sur interruption %s',
+    async (source) => {
+      const controle = new AbortController()
+      const delaiGlobal = new AbortController()
+      const timeout = vi
+        .spyOn(AbortSignal, 'timeout')
+        .mockImplementation((ms) =>
+          ms === 45000 ? delaiGlobal.signal : new AbortController().signal,
+        )
+      const annuler = vi.fn()
+      let numero = 0
+      const transport = vi.fn<typeof fetch>().mockImplementation(async () => {
+        if (numero++ === 0)
+          return reponse({
+            id,
+            status: 'done',
+            documents: [{ id: document, nature: 'signable_document' }],
+            signers: [
+              { id: signataire, status: 'signed' },
+              { id: document, status: 'signed' },
+            ],
+          })
+        if (numero === 2)
+          return new Response(pdf, { headers: { 'content-type': 'application/pdf' } })
+        return new Response(
+          new ReadableStream({
+            pull() {
+              ;(source === 'global' ? delaiGlobal : controle).abort()
+            },
+            cancel: annuler,
+          }),
+          { headers: { 'content-type': 'application/pdf' } },
+        )
+      })
+      await expect(
+        creerClientYoutrust(config, transport).recupererPieces(
+          id,
+          document,
+          [signataire, document],
+          controle.signal,
+        ),
+      ).rejects.toThrow(/^Operation Youtrust indisponible$/)
+      expect(timeout.mock.calls.filter(([ms]) => ms === 45000)).toHaveLength(1)
+      expect(annuler).toHaveBeenCalledTimes(1)
+      expect(transport).toHaveBeenCalledTimes(3)
+      expect(transport.mock.calls[2]?.[1]?.signal?.aborted).toBe(true)
+    },
+  )
   it.each([
     { status: 'ongoing' },
     { id: document },
