@@ -38,7 +38,7 @@ export async function POST(requete: Request) {
     for (const ligne of lignes.data) {
       try {
         signal.throwIfAborted()
-        const distant = await client.lirePourRapprochement(ligne.reference_fournisseur)
+        const distant = await client.lirePourRapprochement(ligne.reference_fournisseur, signal)
         signal.throwIfAborted()
         const resultat = await db.rpc('confirmer_rapprochement_signature', {
           la_demande: ligne.id,

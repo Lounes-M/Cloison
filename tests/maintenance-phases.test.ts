@@ -181,3 +181,15 @@ test.each([false, null, undefined])(
     expect((await GET(requete())).status).toBe(503)
   },
 )
+
+test.each(['refus', 'connexion', 'phase', 'succes'])(
+  'le bilan %s ne peut pas etre stocke',
+  async (cas) => {
+    if (cas === 'refus') vi.stubEnv('CRON_SECRET', '')
+    if (cas === 'connexion') doubles.client.mockRejectedValue(new Error('indisponible'))
+    if (cas === 'phase') doubles.purge.mockRejectedValue(new Error('indisponible'))
+    const r = await GET(requete())
+    expect(r.headers.get('cache-control')).toBe('no-store')
+    expect(r.status).toBe(cas === 'refus' ? 401 : cas === 'succes' ? 200 : 503)
+  },
+)

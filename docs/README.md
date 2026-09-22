@@ -20,7 +20,7 @@
 
 ## Exploiter et vérifier
 
-- [Parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md).
+- [Parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md) et [recette publique de production](exploitation/recette-production.md).
 - [Supervision](exploitation/supervision-deploiement.md), [budgets de maintenance](exploitation/budgets-maintenance.md) et [délais agence](exploitation/delais-agence.md).
 - [Dérive du schéma](exploitation/derive-schema.md), [sauvegarde et restauration](exploitation/sauvegardes-et-restauration.md), [rotation des clés](exploitation/rotation-cles.md).
 - [Journaux applicatifs](exploitation/journaux-applicatifs.md), [accès anormaux](exploitation/acces-anormaux.md) et [sécurité du dépôt public](exploitation/depot-public.md).
