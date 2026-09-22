@@ -62,10 +62,19 @@ export function creerClientYoutrust(
 
   async function requete(
     chemin: string,
-    options: { corps?: BodyInit; json?: boolean; pdf?: boolean; post?: boolean } = {},
+    options: {
+      corps?: BodyInit
+      json?: boolean
+      pdf?: boolean
+      post?: boolean
+      signal?: AbortSignal
+      limite?: number
+    } = {},
   ) {
     if (options.post && !autoriserMutations) throw indisponible()
-    const signal = AbortSignal.timeout(15000)
+    const delai = AbortSignal.timeout(15000)
+    const signal = options.signal ? AbortSignal.any([options.signal, delai]) : delai
+    signal.throwIfAborted()
     const headers: Record<string, string> = {
       Authorization: `Bearer ${cleApi}`,
       Accept: options.pdf ? 'application/pdf' : 'application/json',
@@ -79,7 +88,7 @@ export function creerClientYoutrust(
       cache: 'no-store',
       signal,
     })
-    const limite = options.pdf ? MAX_PDF : 1024 * 1024
+    const limite = Math.min(options.pdf ? MAX_PDF : 1024 * 1024, options.limite ?? Infinity)
     const longueur = reponse.headers.get('content-length')
     if (
       ![200, 201].includes(reponse.status) ||
@@ -117,12 +126,13 @@ export function creerClientYoutrust(
       lecteur.releaseLock()
     }
   }
-  async function json(chemin: string, corps?: unknown) {
+  async function json(chemin: string, corps?: unknown, signal?: AbortSignal) {
     const octets = await requete(
       chemin,
       corps === undefined
-        ? {}
+        ? { signal }
         : {
+            signal,
             post: true,
             json: true,
             corps: JSON.stringify(corps),
@@ -244,8 +254,17 @@ export function creerClientYoutrust(
       }),
     /** Les PDF restent en memoire. Leur presence et leur empreinte ne valident pas
      * cryptographiquement la signature et ne constituent pas un archivage probant. */
-    recupererPieces: (id: string, document: string, signataires: string[]) =>
+    recupererPieces: (
+      id: string,
+      document: string,
+      signataires: string[],
+      signalAppelant?: AbortSignal,
+    ) =>
       proteger(async () => {
+        const delai = AbortSignal.timeout(45000)
+        const signal = signalAppelant ? AbortSignal.any([signalAppelant, delai]) : delai
+        signal.throwIfAborted()
+        let restant = 50 * 1024 * 1024
         const cible = chemin(id)
         identifiantYoutrust.parse(document)
         const attendus = z.array(identifiantYoutrust).min(1).max(10).parse(signataires)
@@ -257,7 +276,7 @@ export function creerClientYoutrust(
             documents: z.array(z.object({ id: identifiantYoutrust, nature: z.string() })),
             signers: z.array(z.object({ id: identifiantYoutrust, status: z.string() })),
           })
-          .parse(await json(cible))
+          .parse(await json(cible, undefined, signal))
         if (
           !etat.documents.some((d) => d.id === document && d.nature === 'signable_document') ||
           etat.signers.length !== attendus.length ||
@@ -265,7 +284,10 @@ export function creerClientYoutrust(
         )
           throw indisponible()
         const telecharger = async (suffixe: string) => {
-          const pdf = await requete(`${cible}${suffixe}`, { pdf: true })
+          signal.throwIfAborted()
+          if (restant < 8) throw indisponible()
+          const pdf = await requete(`${cible}${suffixe}`, { pdf: true, signal, limite: restant })
+          restant -= pdf.byteLength
           verifierPdf(pdf)
           return { pdf, sha256: createHash('sha256').update(pdf).digest('hex') }
         }
