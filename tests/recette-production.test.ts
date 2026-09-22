@@ -133,15 +133,13 @@ test.each(['titre', 'robots', 'langue', 'tronque', 'taille', 'utf8'])(
 
 test('ne suit jamais une redirection distante et nettoie le corps refuse', async () => {
   const annuler = vi.fn()
-  const transport = vi
-    .fn<typeof fetch>()
-    .mockImplementation(
-      async () =>
-        new Response(new ReadableStream({ cancel: annuler }), {
-          status: 302,
-          headers: { location: 'https://intrus.invalid' },
-        }),
-    )
+  const transport = vi.fn<typeof fetch>().mockImplementation(
+    async () =>
+      new Response(new ReadableStream({ cancel: annuler }), {
+        status: 302,
+        headers: { location: 'https://intrus.invalid' },
+      }),
+  )
   const rapport = await verifierProduction(transport)
   expect(rapport.conforme).toBe(false)
   expect(annuler).toHaveBeenCalledTimes(12)
