@@ -168,11 +168,11 @@ export function creerClientYoutrust(
 
   return {
     lire: (id: string) => proteger(() => lire(id)),
-    lirePourRapprochement: (id: string) =>
+    lirePourRapprochement: (id: string, signal?: AbortSignal) =>
       proteger(async () => {
         const resultat = demande
           .extend({ external_id: identifiantYoutrust })
-          .parse(await json(chemin(id)))
+          .parse(await json(chemin(id), undefined, signal))
         if (resultat.id !== id) throw indisponible()
         return resultat
       }),

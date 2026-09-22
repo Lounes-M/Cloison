@@ -100,3 +100,22 @@ test('un snapshot devenu obsolete ne compte pas comme traite', async () => {
   }))
   expect(await (await POST(requete())).json()).toEqual({ actif: true, traites: 0, echecs: 1 })
 })
+
+test('transmet le meme budget au fournisseur et a la base', async () => {
+  const controle = new AbortController()
+  h.distant.mockImplementation(async (_id: string, signal: AbortSignal) => {
+    expect(signal).toBe(h.client.mock.calls[0]?.[0])
+    controle.abort()
+    expect(signal.aborted).toBe(true)
+    signal.throwIfAborted()
+  })
+  const r = await POST(
+    new Request('https://example.test', {
+      method: 'POST',
+      headers: { authorization: 'Bearer fictif' },
+      signal: controle.signal,
+    }),
+  )
+  expect(r.status).toBe(503)
+  expect(h.rpc.mock.calls.some(([nom]) => nom === 'confirmer_rapprochement_signature')).toBe(false)
+})

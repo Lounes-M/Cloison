@@ -31,3 +31,11 @@ test('une panne de lecture ne retourne pas un etat vide reussi', async () => {
   expect(reponse.status).toBe(503)
   expect(await reponse.json()).toEqual({ disponible: false })
 })
+
+test('le refus de lecture est explicitement non stockable', async () => {
+  vi.stubEnv('CRON_SECRET', 'premier')
+  const r = await GET(new Request('https://example.test/api/maintenance/etat'))
+  expect(r.status).toBe(401)
+  expect(r.headers.get('cache-control')).toBe('no-store')
+  expect(h.client).not.toHaveBeenCalled()
+})

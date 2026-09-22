@@ -435,6 +435,32 @@ describe('Client API Youtrust', () => {
       expect(transport).toHaveBeenCalledTimes(2)
     },
   )
+  it('arrete la lecture de rapprochement sur annulation de son appelant', async () => {
+    const controle = new AbortController()
+    const annuler = vi.fn()
+    const transport = vi.fn<typeof fetch>().mockImplementation(
+      async () =>
+        new Response(
+          new ReadableStream({
+            pull() {
+              controle.abort()
+            },
+            cancel: annuler,
+          }),
+          { headers: { 'content-type': 'application/json' } },
+        ),
+    )
+    await expect(
+      creerClientYoutrust(config, transport).lirePourRapprochement(id, controle.signal),
+    ).rejects.toThrow(/^Operation Youtrust indisponible$/)
+    expect(annuler).toHaveBeenCalledTimes(1)
+    expect(transport.mock.calls[0]?.[1]?.signal?.aborted).toBe(true)
+    transport.mockClear()
+    await expect(
+      creerClientYoutrust(config, transport).lirePourRapprochement(id, controle.signal),
+    ).rejects.toThrow()
+    expect(transport).not.toHaveBeenCalled()
+  })
   it('refuse les environnements absents et laisse les mutations fermees', async () => {
     vi.stubEnv('YOUTRUST_ENVIRONMENT', '')
     expect(() => clientYoutrustConfigure()).toThrow('Configuration Youtrust indisponible')

@@ -9,13 +9,14 @@ import { purgerCoffres } from '@/lib/exploitation/purge'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
+const headers = { 'Cache-Control': 'no-store' }
 export async function GET(request: Request) {
   const recu = request.headers.get('authorization')
   if (
     !secretCorrect(recu, process.env.CRON_SECRET) &&
     !secretCorrect(recu, process.env.CRON_SUPABASE_SECRET)
   ) {
-    return new NextResponse(null, { status: 401 })
+    return new NextResponse(null, { status: 401, headers })
   }
   let db: Awaited<ReturnType<typeof clientServeur>>
   const budgetPurge = AbortSignal.timeout(15_000)
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
         courriels: { traites: 0, echecs: 1 },
         purge: { traites: 0, echecs: 1 },
       },
-      { status: 503 },
+      { status: 503, headers },
     )
   }
 
@@ -82,7 +83,7 @@ export async function GET(request: Request) {
   }
   return NextResponse.json(
     { notifications, courriels, purge },
-    { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200 },
+    { status: notifications.echecs || courriels.echecs || purge.echecs ? 503 : 200, headers },
   )
 }
 
