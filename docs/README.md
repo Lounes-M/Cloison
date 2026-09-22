@@ -16,7 +16,7 @@
 - [Compléments documentaires](exploitation/complements-documentaires.md), [examen humain](exploitation/examen-documentaire.md) et [OCR OpenRouter](exploitation/ocr-openrouter.md).
 - [Préférences](exploitation/preferences-notifications.md), [rappels](exploitation/rappels-dossiers.md) et [support contextuel](exploitation/support-contextuel.md).
 - [Connecteurs de statuts](exploitation/connecteurs-statuts.md) et [contrat OpenAPI](../public/connecteurs-openapi.json).
-- [Registre des paiements](exploitation/registre-paiements.md), [reprise du paiement](exploitation/reprise-paiement.md) et [Universign](exploitation/universign-authentification.md).
+- [Registre des paiements](exploitation/registre-paiements.md), [reprise du paiement](exploitation/reprise-paiement.md) et [Youtrust](exploitation/youtrust-authentification.md).
 
 ## Exploiter et vérifier
 

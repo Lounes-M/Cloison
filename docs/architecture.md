@@ -29,7 +29,7 @@ Le décodage est exécuté dans un processus interrompable avec limites de temps
 - Stripe assure le paiement locataire ; le registre et les outils de rapprochement suivent les événements et leurs anomalies.
 - OpenRouter fournit une aide OCR facultative, avec accord explicite, quotas et résultat soumis à relecture. Il ne prend pas de décision de solvabilité.
 - L'API des connecteurs expose des statuts limités avec des clés d'agence révocables ; elle n'expose pas les justificatifs.
-- La chaîne Universign nécessite encore l'intégration et la validation du parcours contractuel complet avant ouverture.
+- La chaîne Youtrust nécessite encore l'intégration et la validation du parcours contractuel complet avant ouverture.
 
 Les fonctions métier utilisent révisions, préconditions et idempotence selon leur contrat. Une erreur de transport ne prouve pas qu'une écriture n'a pas abouti. Les [guides d'exploitation](README.md) décrivent les reprises et les limites de chaque intégration.
 

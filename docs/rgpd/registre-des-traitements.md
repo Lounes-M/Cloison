@@ -73,12 +73,12 @@ suivies d'un compte, durée du compte pour les autres.
 
 ## Sous-traitants
 
-| Sous-traitant                      | Rôle                                        | Localisation                                                                                                                         | DPA                             |
-| ---------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
-| Supabase                           | base de données, stockage, authentification | région UE choisie à l'ADR 0001, **à vérifier dans le projet**                                                                        | **à signer**                    |
-| Vercel                             | hébergement, fonctions, clé maîtresse       | fonctions en `fra1` (Francfort), fixé dans `vercel.json` le 5 septembre 2026 et tenu par un test ; **à vérifier sur un déploiement** | **à signer**                    |
-| Resend                             | envoi des courriels                         | **à vérifier** : région de traitement et transferts                                                                                  | **à signer**                    |
-| Universign (Cryptolog, Signaturit) | signature électronique                      | QTSP UE, centres en France (ADR 0005)                                                                                                | **à signer**, compte non ouvert |
+| Sous-traitant         | Rôle                                        | Localisation                                                                                                                         | DPA                             |
+| --------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| Supabase              | base de données, stockage, authentification | région UE choisie à l'ADR 0001, **à vérifier dans le projet**                                                                        | **à signer**                    |
+| Vercel                | hébergement, fonctions, clé maîtresse       | fonctions en `fra1` (Francfort), fixé dans `vercel.json` le 5 septembre 2026 et tenu par un test ; **à vérifier sur un déploiement** | **à signer**                    |
+| Resend                | envoi des courriels                         | **à vérifier** : région de traitement et transferts                                                                                  | **à signer**                    |
+| Youtrust (ex-Yousign) | signature électronique                      | Hebergement annonce en France ; perimetre et sous-traitants a confirmer (ADR 0015)                                                   | **à signer**, compte non ouvert |
 
 Le point Vercel est réglé par le dépôt plutôt que par un clic : la clé maîtresse et le
 déchiffrement s'exécutent dans les fonctions, donc là où elles tournent, et `vercel.json` fixe

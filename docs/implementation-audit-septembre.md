@@ -1,5 +1,7 @@
 # Implementation de l'audit du 8 septembre 2026
 
+> Historique : depuis le 22 septembre 2026, Youtrust remplace Universign. Les constats dates ci-dessous decrivent l ancien fournisseur. Voir le [guide actuel](exploitation/youtrust-authentification.md).
+
 ## Reprise depuis GitHub et interface, 10 septembre
 
 La reprise part de 7b186b7 (PR103), puis finalise PR104 sur c786704. Les outils
@@ -435,7 +437,7 @@ HTTP ni modification SQL. 36 tests passent apres 13 sabotages detectes.
 Les acces developpeur restent en attente, comme confirme par Lounes.
 Ce lot ne clot pas F15 : aucun acte signe, registre anti-rejeu, rattachement
 metier ou paiement agence n'est active. Voir
-[le perimetre exact](exploitation/universign-authentification.md).
+[le perimetre exact](exploitation/youtrust-authentification.md).
 
 ## Parcours sur trois moteurs, 10 septembre 2026
 

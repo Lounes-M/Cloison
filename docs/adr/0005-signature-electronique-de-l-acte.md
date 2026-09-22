@@ -1,9 +1,11 @@
 # ADR 0005 · Signature électronique de l'acte de cautionnement
 
 **Date** : 1er septembre 2026
-**Statut** : acceptée
+**Statut** : remplacee pour le choix du fournisseur par l [ADR 0015](0015-migration-youtrust.md). Les exigences metier restent a valider avec le modele contractuel.
 **Portée** : dernier point de la phase 2. Précise la rétention décidée par
 l'[ADR 0003](0003-stockage-et-chiffrement-des-pieces.md), qui ne couvrait que les pièces.
+
+> Les comparaisons tarifaires ci-dessous sont historiques et ne constituent pas des devis API comparables. Ne pas les utiliser pour souscrire.
 
 ## Contexte
 

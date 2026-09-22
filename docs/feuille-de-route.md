@@ -18,7 +18,7 @@ exige une CI complete avant fusion.
 Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
 Une implementation seule ne termine pas une tache exigeant une livraison ou un
 parcours reel. Aucun total de cases ne mesure la preparation au lancement.
-Universign et le modele contractuel sont pris en charge par Lounes ; le reste
+Youtrust et le modele contractuel sont pris en charge par Lounes ; le reste
 avance techniquement sans attendre cette dependance.
 
 La remise a niveau demandee le 8 septembre est suivie dans
@@ -81,7 +81,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - [ ] **31** Terminer l'espace agence jusqu'a l'acte. Consultation et ratio implementes ; generation de l'acte et chaine contractuelle non terminees.
 - [x] **32** Implementer la demonstration fictive pour les comptes non actives.
 - [x] **33** Implementer demande d'activation et traitement agence, avec refus sur comptes suspendus et membres exclus.
-- [ ] **34** Valider modele, generation d'acte, mention, Universign, retour signe, preuve et archivage ensemble. Le compte connecte ne suffit pas. Lounes gere Universign et le modele ; integration et essais techniques dependent de ces elements.
+- [ ] **34** Valider modele, generation d'acte, mention, Youtrust, retour signe, preuve et archivage ensemble. Le compte connecte ne suffit pas. Lounes gere Youtrust et le modele ; integration et essais techniques dependent de ces elements.
 - [ ] **35** Prouver la reception effective des courriels et des liens. Files chiffrees, reprise et transport testes ; expediteur configure, livraison destinataire non prouvee.
 
 ## Phase 5. Prerequis avant les justificatifs reels
@@ -240,11 +240,11 @@ processus, budget cumule et refus en cas de panne de mesure. Les limites du tas
 V8 sont ainsi completees, sans revendiquer une sandbox ou une limite OS stricte.
 Voir [la surveillance documentaire](exploitation/memoire-documentaire.md).
 
-Le socle d'authentification Universign verifie les notifications PS256 et borne
-les lectures de clefs publiques. Aucun parcours de signature n'est active.
+Le socle d'authentification Youtrust verifie les notifications HMAC SHA-256 et borne
+la taille des messages, sans lecture de clefs publiques. Aucun parcours de signature n'est active.
 Les acces developpeur sont en attente ; registre durable, rattachement local,
 reconciliation, acte et preuve archives restent a implementer. Voir
-[les preuves et limites](exploitation/universign-authentification.md).
+[les preuves et limites](exploitation/youtrust-authentification.md).
 
 Le harnais navigateur est etendu a Chromium, Firefox et WebKit, a 390 et
 1280 pixels. Les passages exigent une mutation fraiche, le parcours clavier
