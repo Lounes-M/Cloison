@@ -4,6 +4,8 @@ import { contexteAgence } from '@/lib/agences/contexte'
 import { baseOuvertureSupabase } from '@/lib/coffre/ouverture-supabase'
 import { filigranePour, ouvrirPiecePourLAgence } from '@/lib/coffre/ouverture'
 import { configurationOcr, extraireTexte } from './openrouter'
+import { analyserPagesOcr } from './selection'
+import { extrairePagesRasterisees } from './extrait'
 
 const repondre = (statut: number, valeur: unknown = null) =>
   Response.json(valeur, { status: statut, headers: { 'Cache-Control': 'no-store' } })
@@ -15,6 +17,13 @@ export async function lirePieceParOcr(requete: Request, id: string) {
       requete.headers.get('x-cloison-ocr') !== 'lecture-explicite'
     )
       return repondre(403)
+    let selection: number[] | null
+    try {
+      selection = analyserPagesOcr(requete.headers.get('x-cloison-ocr-pages'))
+    } catch {
+      return repondre(400)
+    }
+    requete.signal.throwIfAborted()
     const configuration = configurationOcr()
     if (!configuration) return repondre(503)
     const contexte = await contexteAgence()
@@ -24,15 +33,33 @@ export async function lirePieceParOcr(requete: Request, id: string) {
     const base = baseOuvertureSupabase(contexte.supabase)
     const ouverture = await ouvrirPiecePourLAgence(base, id, filigranePour(contexte.email), true)
     if (!ouverture.ouverte) return repondre(404)
+    requete.signal.throwIfAborted()
+    if (selection && (!ouverture.pages || selection.some((p) => p > ouverture.pages!)))
+      return repondre(400)
+    const pdf = selection
+      ? await extrairePagesRasterisees(ouverture.pdf, ouverture.pages, selection, requete.signal)
+      : ouverture.pdf
+    // Ne pas transmettre a un tiers si l'acces a ete retire pendant la rasterisation.
+    if (!(await base.piece(id))) return repondre(404)
+    requete.signal.throwIfAborted()
     const resultat = await extraireTexte(
-      ouverture.pdf,
+      pdf,
       configuration,
-      ouverture.pages,
+      selection?.length ?? ouverture.pages,
       requete.signal,
     )
     // Ne pas rendre une transcription lorsque les droits ont expire pendant l'appel.
     if (!(await base.piece(id))) return repondre(404)
-    return repondre(200, resultat)
+    requete.signal.throwIfAborted()
+    return repondre(
+      200,
+      selection
+        ? {
+            ...resultat,
+            pages: resultat.pages.map((p, i) => ({ ...p, page: selection[i]! })),
+          }
+        : resultat,
+    )
   } catch {
     return repondre(503)
   }

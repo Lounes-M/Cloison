@@ -1,17 +1,13 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
+import type { ResultatOcr } from './resultat'
 
 const page = z
   .object({ page: z.number().int().min(1).max(40), texte: z.string().max(24000) })
   .strict()
 const extraction = z.object({ pages: z.array(page).min(1).max(40) }).strict()
-export type LectureOcr = {
-  pages: { page: number; texte: string }[]
-  modele: string
-  empreinte: string
-  observeLe: string
-}
+export type LectureOcr = ResultatOcr
 export function configurationOcr() {
   const cle = process.env.OPENROUTER_API_KEY?.trim()
   const modele = process.env.OPENROUTER_OCR_MODEL?.trim() || 'google/gemini-2.5-flash'

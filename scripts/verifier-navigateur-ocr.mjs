@@ -3,6 +3,7 @@ import {
   parcourirReutilisation,
 } from './parcours-reutilisation-navigateur.mjs'
 import { parcourirBrouillon } from './parcours-brouillon-navigateur.mjs'
+import { parcourirOcrSelectif } from './parcours-ocr-selectif.mjs'
 import { parcourirDepot } from './parcours-depot-navigateur.mjs'
 import { parcourirCalendrier } from './parcours-calendrier-navigateur.mjs'
 import { parcourirPilotage } from './parcours-pilotage-navigateur.mjs'
@@ -386,6 +387,7 @@ try {
   assert(pret, 'Build OCR indisponible')
   relais = await ouvrirRelaisLocal(site)
   for (const moteur of [chromium, firefox, webkit]) {
+    if (process.env.PARCOURS_OCR_SEUL === 'chromium' && moteur !== chromium) continue
     const navigateur = await moteur.launch()
     try {
       for (const largeur of moteur.name() === 'chromium' ? [320, 390, 1280] : [390, 1280]) {
@@ -480,6 +482,7 @@ try {
           await page.getByRole('button', { name: 'Effacer la transcription' }).click()
           assert.equal(await page.getByText('Texte OCR fictif', { exact: false }).count(), 0)
           panne = true
+          await page.getByRole('checkbox', { name: 'Envoyer cette copie à', exact: false }).check()
           await bouton.click()
           await page.getByText('Lecture indisponible :', { exact: false }).waitFor()
           await page.getByText('Aide à la lecture', { exact: true }).click()
@@ -488,6 +491,8 @@ try {
           console.log(
             `OK : OCR ${moteur.name()} ${largeur}, accord, clavier, texte inerte, effacement et panne`,
           )
+          await parcourirOcrSelectif(page, contexte, id, moteur, largeur)
+          if (['true', 'chromium'].includes(process.env.PARCOURS_OCR_SEUL)) continue
           await parcourirCalendrier(page, relais.site, id, moteur, largeur)
           await parcourirConnecteur(page, relais.site, moteur, largeur)
           await parcourirExamen(page, relais.site, id, moteur, largeur, (v) => {
