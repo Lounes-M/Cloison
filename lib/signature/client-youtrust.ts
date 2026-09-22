@@ -158,6 +158,14 @@ export function creerClientYoutrust(
 
   return {
     lire: (id: string) => proteger(() => lire(id)),
+    lirePourRapprochement: (id: string) =>
+      proteger(async () => {
+        const resultat = demande
+          .extend({ external_id: identifiantYoutrust })
+          .parse(await json(chemin(id)))
+        if (resultat.id !== id) throw indisponible()
+        return resultat
+      }),
     creer: (entree: z.infer<typeof creation>) =>
       proteger(async () => {
         const p = creation.parse(entree)

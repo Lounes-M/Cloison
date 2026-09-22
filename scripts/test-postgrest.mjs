@@ -175,6 +175,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       console.log('OK : dernier administrateur preserve sur deux connexions et deux isolations')
       await db.query('begin')
       try {
+        await db.query(readFileSync('supabase/essais/registre-signatures.sql', 'utf8'))
         await db.query(
           readFileSync(resolve('supabase/essais/complements-documentaires.sql'), 'utf8'),
         )

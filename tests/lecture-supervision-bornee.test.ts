@@ -6,6 +6,8 @@ import { executerMaintenance } from '../scripts/executer-maintenance.mjs'
 // @ts-expect-error Programme Node autonome.
 import { rapprocherPaiements } from '../scripts/rapprocher-paiements.mjs'
 // @ts-expect-error Programme Node autonome.
+import { rapprocherSignatures } from '../scripts/rapprocher-signatures.mjs'
+// @ts-expect-error Programme Node autonome.
 import { verifierPaiements } from '../scripts/verifier-paiements.mjs'
 // @ts-expect-error Programme Node autonome.
 import { verifierCadence } from '../scripts/verifier-cadence.mjs'
@@ -37,6 +39,7 @@ test.each([
     },
   ],
   ['rapprochement', rapprocherPaiements, { traites: 0, echecs: 0 }],
+  ['signatures', rapprocherSignatures, { actif: false, traites: 0, echecs: 0 }],
   [
     'paiements',
     verifierPaiements,

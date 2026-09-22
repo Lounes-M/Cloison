@@ -44,3 +44,8 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: node scripts/verifier-paiements.mjs
+      - name: Rapprochement des signatures
+        if: ${{ !cancelled() }}
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: node scripts/rapprocher-signatures.mjs

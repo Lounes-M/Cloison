@@ -32,6 +32,27 @@ afterEach(() => {
 })
 
 describe('Client API Youtrust', () => {
+  it('exige et minimise la reference externe lors du rapprochement', async () => {
+    const transport = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(reponse({ id, status: 'done', external_id: document, signers: [entree] }))
+    expect(await creerClientYoutrust(config, transport).lirePourRapprochement(id)).toEqual({
+      id,
+      status: 'done',
+      external_id: document,
+    })
+  })
+  it.each([{ external_id: null }, { external_id: 'identite-privee' }, { id: document }])(
+    'refuse un rapprochement sans rattachement valide %#',
+    async (changement) => {
+      const transport = vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(reponse({ id, status: 'done', external_id: id, ...changement }))
+      await expect(
+        creerClientYoutrust(config, transport).lirePourRapprochement(id),
+      ).rejects.toThrow(/^Operation Youtrust indisponible$/)
+    },
+  )
   it.each(['sandbox', 'production'] as const)(
     'utilise uniquement l origine %s et minimise la reponse',
     async (environnement) => {
