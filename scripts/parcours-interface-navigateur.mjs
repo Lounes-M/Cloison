@@ -193,6 +193,23 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
   await visiter('/espace/notifications', 'notifications')
+  if (largeur < 768) {
+    const navigation = page.getByRole('navigation', { name: 'Réglages', exact: true })
+    assert(
+      await navigation.evaluate((e) => e.getBoundingClientRect().height < 90),
+      'Navigation des reglages trop haute sur mobile',
+    )
+    const dernierLien = navigation.getByRole('link').last()
+    await dernierLien.focus()
+    assert(
+      await dernierLien.evaluate((e) => {
+        const lien = e.getBoundingClientRect()
+        const nav = e.closest('nav').getBoundingClientRect()
+        return lien.left >= nav.left && lien.right <= nav.right + 1
+      }),
+      'Reglage hors champ au clavier',
+    )
+  }
   await visiter('/espace/rappels', 'rappels')
   await visiter('/espace/securite', 'applications-secours')
   simulerPanne(true)

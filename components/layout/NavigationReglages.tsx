@@ -25,7 +25,7 @@ export function NavigationReglages({
       : []),
   ]
   return (
-    <nav className="navigation-sections" aria-label={t.reglages}>
+    <nav className="navigation-sections navigation-reglages" aria-label={t.reglages}>
       {liens.map(({ href, titre }) => (
         <Link key={href} href={href} aria-current={courant === href ? 'page' : undefined}>
           {titre}

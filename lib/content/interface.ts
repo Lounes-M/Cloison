@@ -1,6 +1,6 @@
 export const interfaceEspace = {
   agence: 'Espace agence',
-  porteur: 'Chacun son espace',
+  porteur: 'Espace privé',
   accueil: 'Retour à l’accueil',
   navigation: 'Navigation de votre espace',
   tableau: 'Mes dossiers',

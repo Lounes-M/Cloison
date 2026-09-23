@@ -392,6 +392,15 @@
     color: var(--color-cobalt);
     border-color: var(--color-cobalt);
   }
+  .navigation-reglages {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 4px 4px 12px;
+    scrollbar-width: thin;
+  }
+  .navigation-reglages a {
+    flex-shrink: 0;
+  }
   .espace-shell section[id] {
     scroll-margin-top: 1.5rem;
   }
