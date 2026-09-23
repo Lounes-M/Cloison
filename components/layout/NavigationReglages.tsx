@@ -14,13 +14,13 @@ export function NavigationReglages({
   administration?: boolean
 }) {
   const liens = [
-    { href: '/espace/notifications', titre: preferences.titre },
-    { href: '/espace/securite', titre: applicationSecours.titre },
+    { href: '/espace/notifications' as const, titre: preferences.titre },
+    { href: '/espace/securite' as const, titre: applicationSecours.titre },
     ...(administration
       ? [
-          { href: '/espace/rappels', titre: rappels.titre },
-          { href: '/espace/connecteurs', titre: connecteurs.titre },
-          { href: '/espace/collaborateurs', titre: collaborateurs.titre },
+          { href: '/espace/rappels' as const, titre: rappels.titre },
+          { href: '/espace/connecteurs' as const, titre: connecteurs.titre },
+          { href: '/espace/collaborateurs' as const, titre: collaborateurs.titre },
         ]
       : []),
   ]
