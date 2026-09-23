@@ -59,7 +59,7 @@ export default async function Page({
         <ul className="grid gap-4">
           {liste.map((f) => (
             <li className="panneau-espace" key={f.id}>
-              <dl className="flex flex-wrap items-start justify-between gap-5">
+              <dl className="grid grid-cols-2 items-start gap-5 sm:grid-cols-[1fr_1fr_1.4fr]">
                 <div>
                   <dt className="text-muted text-xs font-semibold">{t.montant}</dt>
                   <dd className="mt-1 text-2xl font-bold tabular-nums">
@@ -77,7 +77,7 @@ export default async function Page({
                     </time>
                   </dd>
                 </div>
-                <div>
+                <div className="col-span-2 sm:col-span-1 sm:justify-self-end">
                   <dt className="sr-only">{t.etat}</dt>
                   <dd
                     className={`inline-block rounded-lg px-3 py-2 text-sm font-semibold ${f.anomalie ? 'bg-sun/30' : 'bg-sky/20'}`}
