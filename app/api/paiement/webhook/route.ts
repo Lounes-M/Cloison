@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { lireCorpsWebhook } from '@/lib/http/corps-webhook'
 import { clientServeur } from '@/lib/acces/serveur'
-import { lireEvenement, retrouverSessionFinanciere } from '@/lib/paiement/stripe'
+import {
+  lireEvenement,
+  retrouverSessionFinanciere,
+  traiterEvenementActe,
+} from '@/lib/paiement/stripe'
 import { extraireEvenementFinancier } from '@/lib/paiement/evenement-financier'
 export const runtime = 'nodejs'
 export const maxDuration = 25
@@ -13,6 +17,21 @@ export async function POST(requete: NextRequest) {
     if (corps === null) return NextResponse.json({ recu: false }, { status: 413 })
     const evenement = lireEvenement(corps, requete.headers.get('stripe-signature'))
     if (!evenement) return new NextResponse('signature refusee', { status: 400 })
+    if (
+      process.env.FACTURATION_ACTES_ENABLED === 'true' &&
+      (await traiterEvenementActe(
+        evenement,
+        AbortSignal.any([requete.signal, AbortSignal.timeout(20000)]),
+      ))
+    )
+      return NextResponse.json({ recu: true })
+    // Le paiement agence ne doit jamais entrer dans le registre locataire.
+    if (
+      evenement.type.startsWith('checkout.session.') &&
+      'metadata' in evenement.data.object &&
+      evenement.data.object.metadata?.produit === 'cloison_acte'
+    )
+      return NextResponse.json({ recu: true })
     let financier
     try {
       financier = extraireEvenementFinancier(evenement)

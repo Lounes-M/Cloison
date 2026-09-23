@@ -152,3 +152,30 @@ test('un courriel excessif est compte en echec et reste intact', async () => {
     ).rows[0]!.taille,
   ).toBe(excessif.length)
 })
+
+test('la rotation inclut la cle archivee sans modifier le document signe', async () => {
+  await db.query("insert into agences(id,nom,domaine) values($1,'Recette','recette.invalid')", [id])
+  await db.query(
+    "insert into demandes_signature(id,dossier_id,source_dossier,environnement,empreinte_acte) values($1,$1,$1,'sandbox',repeat('a',64))",
+    [id],
+  )
+  await db.query(
+    "insert into actes_signature(id,agence_id,modele,version_conditions,cle_scellee,contexte_chiffre,expire_signature,conserver_jusqu_au) values($1,$1,'recette',1,$2,$2,now()+interval '1 day',now()+interval '2 days')",
+    [id, ancienne],
+  )
+  expect(await rescellerEnveloppes(base, cles, { appliquer: true })).toMatchObject({
+    rescellees: 3,
+    echecs: 0,
+  })
+  const archive = (
+    await db.query<{ cle_scellee: Buffer }>('select cle_scellee from actes_signature')
+  ).rows[0]!
+  expect(
+    ouvrirAvecTrousseau(Buffer.from(archive.cle_scellee), {
+      historique: nouvelleCle(),
+      active,
+      lecture: [],
+    }),
+  ).toEqual(dek)
+  expect(ouvrir(objet, dek).toString()).toBe('Document fictif intact')
+})

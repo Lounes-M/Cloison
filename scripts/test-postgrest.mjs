@@ -176,6 +176,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await db.query('begin')
       try {
         await db.query(readFileSync('supabase/essais/registre-signatures.sql', 'utf8'))
+        await db.query(readFileSync('supabase/essais/actes.sql', 'utf8'))
         await db.query(
           readFileSync(resolve('supabase/essais/complements-documentaires.sql'), 'utf8'),
         )

@@ -9,12 +9,16 @@ function configuration() {
 }
 
 /** Aucune origine configurable, aucun environnement de repli, aucune cle client. */
-export function clientYoutrustConfigure() {
-  return creerClientYoutrust({
-    environnement: configuration(),
-    cleApi: process.env.YOUTRUST_API_KEY ?? '',
-    autoriserMutations: process.env.YOUTRUST_MUTATIONS_ENABLED === 'true',
-  })
+export function clientYoutrustConfigure(signal?: AbortSignal) {
+  return creerClientYoutrust(
+    {
+      environnement: configuration(),
+      cleApi: process.env.YOUTRUST_API_KEY ?? '',
+      autoriserMutations: process.env.YOUTRUST_MUTATIONS_ENABLED === 'true',
+    },
+    fetch,
+    signal,
+  )
 }
 
 export function verificateurYoutrustConfigure() {
