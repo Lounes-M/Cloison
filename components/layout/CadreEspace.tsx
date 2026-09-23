@@ -46,10 +46,10 @@ export function CadreEspace({
             {navigation && agence ? (
               <>
                 <Link href="/espace/archives" className="lien-espace">
-                  {signature.archives}
+                  {signature.lienArchives}
                 </Link>
                 <Link href="/espace/facturation" className="lien-espace">
-                  {facturation.titre}
+                  {facturation.lien}
                 </Link>
               </>
             ) : null}

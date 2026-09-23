@@ -1,3 +1,4 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { notFound, redirect } from 'next/navigation'
 
 import { z } from 'zod'
@@ -35,7 +36,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <h1 className="font-display text-3xl uppercase">{t.preparation}</h1>
+      <EnteteEspace titre={t.preparation} etiquette={t.etiquette} />
       <p className="my-6">{t.explication}</p>
       <p className="mb-6">
         {t.modele} : {config.modele}

@@ -1,4 +1,6 @@
 export const signature = {
+  etiquette: 'Acte de cautionnement',
+  lienArchives: 'Archives',
   titre: 'Signature de l’acte',
   preparation: 'Préparer l’acte',
   explication:
@@ -30,7 +32,7 @@ export const signature = {
   modele: 'Modèle',
   etat: 'État',
   telephoneGarant: 'Téléphone utilisé pour la signature',
-  echeance: 'Disponible jusqu’au',
+  echeance: 'Conservation prévue jusqu’au',
   suite: 'Page suivante',
   retour: 'Retour à l’espace agence',
   retourGarant: 'Retour à mon dossier',

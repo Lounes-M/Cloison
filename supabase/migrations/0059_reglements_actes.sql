@@ -69,7 +69,7 @@ $$;
 create function public.factures_de_mon_agence(avant uuid default null) returns jsonb language sql stable security definer set search_path='' as $$
  select coalesce(jsonb_agg(t),'[]'::jsonb) from (select f.id,f.montant_cents,f.cree_le,f.paye_le,f.tarif_version,coalesce(r.etat,'a_regler') etat,r.anomalie,r.rembourse_cents
  from public.factures_actes f left join public.reglements_actes r on r.facture_id=f.id and r.etat<>'expire'
- where f.agence_id=public.agence_courante() and (avant is null or f.id<avant) order by f.id desc limit 20) t;
+ where f.agence_id=public.agence_courante() and (avant is null or (f.cree_le,f.id)<(select x.cree_le,x.id from public.factures_actes x where x.id=avant and x.agence_id=public.agence_courante())) order by f.cree_le desc,f.id desc limit 20) t;
 $$;
 revoke all on function public.reserver_reglement_acte(uuid),public.rattacher_reglement_acte(uuid,text),public.rapprocher_reglement_acte(uuid,uuid,text,text,integer,text,text,text,integer,boolean),public.reglements_actes_a_rapprocher(),public.reglements_actes_a_examiner(),public.factures_de_mon_agence(uuid) from public,anon,authenticated,porteur_lien,serveur,depot_piece,service_role,archive_signature;
 grant execute on function public.reserver_reglement_acte(uuid),public.factures_de_mon_agence(uuid) to authenticated;

@@ -1,4 +1,6 @@
 export const facturation = {
+  etiquette: 'Gestion agence',
+  lien: 'Règlements',
   titre: 'Règlements des actes',
   explication:
     'Un règlement est créé après la signature et l’archivage complet. Aucun règlement agence n’est créé en sandbox.',

@@ -1,3 +1,4 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -34,7 +35,7 @@ export default async function Page({
     actif = process.env.FACTURATION_ACTES_ENABLED === 'true'
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <h1 className="font-display text-3xl uppercase">{t.titre}</h1>
+      <EnteteEspace titre={t.titre} etiquette={t.etiquette} />
       <p className="mt-4">{t.explication}</p>
       {q.paiement === 'indisponible' ? (
         <p role="status" className="mt-4">

@@ -1,3 +1,4 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { accesActe } from '@/lib/signature/lecture'
@@ -12,7 +13,7 @@ export async function DetailActe({ id, partie }: { id: string; partie: 'agence' 
   cle.fill(0)
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <h1 className="font-display text-3xl uppercase">{t.titre}</h1>
+      <EnteteEspace titre={t.titre} etiquette={t.etiquette} />
       <p className="mt-4">
         {t.modele} : {d.acte.modele}
       </p>

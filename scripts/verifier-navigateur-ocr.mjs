@@ -394,7 +394,13 @@ try {
   }
   assert(pret, 'Build OCR indisponible')
   relais = await ouvrirRelaisLocal(site)
+  if (
+    process.env.PARCOURS_MOTEUR &&
+    !['chromium', 'firefox', 'webkit'].includes(process.env.PARCOURS_MOTEUR)
+  )
+    throw new Error('Moteur de recette inconnu')
   for (const moteur of [chromium, firefox, webkit]) {
+    if (process.env.PARCOURS_MOTEUR && moteur.name() !== process.env.PARCOURS_MOTEUR) continue
     if (process.env.PARCOURS_OCR_SEUL === 'chromium' && moteur !== chromium) continue
     const navigateur = await moteur.launch()
     try {

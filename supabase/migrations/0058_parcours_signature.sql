@@ -296,7 +296,7 @@ grant execute on function public.operations_actes_a_examiner() to serveur;
 create function public.archives_de_mon_agence(avant uuid default null) returns jsonb language sql stable security definer set search_path='' as $$
  select coalesce(jsonb_agg(t),'[]'::jsonb) from (select a.id,a.modele,a.archive_le,a.conserver_jusqu_au,s.environnement
  from public.actes_signature a join public.demandes_signature s on s.id=a.id where a.etape='archive' and a.agence_id=public.agence_courante()
- and public.acte_signature_accessible(a.id) and (avant is null or a.id<avant) order by a.id desc limit 20) t;
+ and public.acte_signature_accessible(a.id) and (avant is null or (a.archive_le,a.id)<(select x.archive_le,x.id from public.actes_signature x where x.id=avant and x.agence_id=public.agence_courante())) order by a.archive_le desc,a.id desc limit 20) t;
 $$;
 revoke all on function public.archives_de_mon_agence(uuid) from public,anon,authenticated,porteur_lien,serveur,depot_piece,service_role,archive_signature;
 grant execute on function public.archives_de_mon_agence(uuid) to authenticated;

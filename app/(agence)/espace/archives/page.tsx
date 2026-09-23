@@ -1,3 +1,4 @@
+import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -30,7 +31,7 @@ export default async function Page({
     .parse(r.data)
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <h1 className="font-display text-3xl uppercase">{t.archives}</h1>
+      <EnteteEspace titre={t.archives} etiquette={t.etiquette} />
       <p className="mt-4">{t.conserve}</p>
       <ul className="mt-6 grid gap-4">
         {liste.map((a) => (

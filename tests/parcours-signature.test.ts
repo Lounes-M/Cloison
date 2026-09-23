@@ -509,3 +509,31 @@ test('un dossier ne se refuse pas pendant une signature active mais se libere ap
     { statut: 'refuse' },
   ])
 })
+
+test('la pagination des reglements suit les dates, pas l ordre aleatoire des UUID', async () => {
+  const r = await facturePrete()
+  await redevenirProprietaire(db)
+  const agence = (
+    await db.query<{ agence_id: string }>('select agence_id from factures_actes where id=$1', [
+      r.facture,
+    ])
+  ).rows[0]!.agence_id
+  const recent = '00000000-0000-4000-8000-000000000001',
+    ancien = 'ffffffff-ffff-4fff-8fff-ffffffffffff'
+  await db.query(
+    "insert into factures_actes(id,agence_id,montant_cents,cree_le) values($1,$2,2900,now()+interval '1 minute'),($3,$2,2900,now()-interval '1 day')",
+    [recent, agence, ancien],
+  )
+  await devenir(db, 'authenticated', membre)
+  expect(((await rpc('factures_de_mon_agence')) as { id: string }[]).map((f) => f.id)).toEqual([
+    recent,
+    r.facture,
+    ancien,
+  ])
+  expect(
+    ((await rpc('factures_de_mon_agence', { avant: r.facture })) as { id: string }[]).map(
+      (f) => f.id,
+    ),
+  ).toEqual([ancien])
+  expect(await rpc('factures_de_mon_agence', { avant: randomUUID() })).toEqual([])
+})
