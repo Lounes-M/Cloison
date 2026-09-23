@@ -3,6 +3,7 @@ import { connection } from 'next/server'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { Button } from '@/components/ui/Button'
+import { NavigationReprise } from '@/components/ui/NavigationReprise'
 import { erreurs } from '@/lib/content/erreurs'
 
 export const metadata: Metadata = {
@@ -19,16 +20,16 @@ export default async function NotFound() {
   return (
     <>
       <SiteHeader />
-      {/* `min-h-[70vh]` et non `min-h-screen` : l'en-tete et le pied de page
-          occupent desormais leur part, et un plein ecran repousserait le pied
-          hors de vue. */}
-      <main className="flex min-h-[70vh] flex-col items-center justify-center gap-8 px-6 py-20 text-center">
-        {/* Le 404 porte le titre de la page : sans lui, elle n'aurait aucun
-            titre de niveau 1, et le logo de l'en-tete suffit desormais a
-            l'identite. */}
-        <h1 className="font-display text-cobalt text-[clamp(3rem,12vw,120px)] leading-none">404</h1>
-        <p className="max-w-[420px] text-lg font-semibold">{erreurs.introuvable}</p>
-        <Button href="/">Retour à l&apos;accueil</Button>
+      <main className="ecran-reprise">
+        <div className="carte-reprise">
+          <p className="font-display text-cobalt text-[clamp(4rem,12vw,7rem)] leading-none">404</p>
+          <h1>{erreurs.titreIntrouvable}</h1>
+          <p className="description-reprise">{erreurs.adresse}</p>
+          <div className="actions-reprise">
+            <Button href="/">{erreurs.accueil}</Button>
+          </div>
+          <NavigationReprise />
+        </div>
       </main>
       <SiteFooter />
     </>

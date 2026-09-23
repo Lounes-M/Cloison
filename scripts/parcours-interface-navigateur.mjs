@@ -8,7 +8,7 @@ import { parcourirSupport } from './parcours-support-navigateur.mjs'
 
 async function verifierCommandes(page, nom) {
   const commandes = await page
-    .locator('button, a.press, .lien-espace, .carte-priorite, summary')
+    .locator('button, a.press, .lien-espace, .carte-priorite, .navigation-reprise a, summary')
     .evaluateAll((elements) =>
       elements
         .filter((e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
@@ -345,6 +345,17 @@ export async function parcourirInterface(
   }
   await visiter('/agences', 'agences', false)
   await visiter('/page-inexistante-mobile', 'introuvable', false)
+  const reprise = page.getByRole('navigation', { name: 'Reprendre la navigation', exact: true })
+  const retourDossier = reprise.getByRole('link', { name: 'Retrouver mon dossier', exact: true })
+  await retourDossier.focus()
+  await page.keyboard.press('Enter')
+  await page.waitForURL((u) => u.pathname === '/lien-invalide')
+  await page.goto(site + '/page-inexistante-mobile')
+  await page
+    .getByRole('navigation', { name: 'Reprendre la navigation', exact: true })
+    .getByRole('link', { name: 'Connexion agence', exact: true })
+    .click()
+  await page.waitForURL((u) => u.pathname === '/connexion')
   const pages = (await readdir('app', { recursive: true }))
     .filter((p) => p.endsWith('/page.tsx'))
     .map(

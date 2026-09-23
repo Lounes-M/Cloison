@@ -30,28 +30,30 @@ export default function GlobalError({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-        <main className="flex min-h-dvh flex-col items-center justify-center gap-7 px-6 py-12 text-center">
-          <p className="font-display text-2xl">CLOISON</p>
+        <main className="ecran-reprise min-h-dvh">
+          <div className="carte-reprise">
+            <p className="font-display text-cobalt text-xl">CLOISON</p>
 
-          <h1 className="font-display max-w-[620px] text-[clamp(1.75rem,5vw,2.75rem)] leading-tight">
-            Le site est momentanément indisponible.
-          </h1>
+            <h1>{erreurs.titreIndisponibilite}</h1>
 
-          <p className="max-w-[440px] text-lg font-semibold">{erreurs.indisponibilite}</p>
+            <p className="description-reprise">{erreurs.indisponibilite}</p>
 
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="press bg-cobalt outlined rounded-brut shadow-brut inline-flex cursor-pointer items-center justify-center px-8 py-4 text-[17px] font-bold text-white"
-          >
-            Recharger
-          </button>
+            <div className="actions-reprise">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="press bg-cobalt outlined rounded-brut shadow-brut inline-flex cursor-pointer items-center justify-center px-8 py-4 text-[17px] font-bold text-white"
+              >
+                {erreurs.recharger}
+              </button>
+            </div>
 
-          {error.digest ? (
-            <p className="text-muted max-w-full text-xs break-words">
-              Référence à nous transmettre : <code className="font-mono">{error.digest}</code>
-            </p>
-          ) : null}
+            {error.digest ? (
+              <p className="reference-reprise">
+                {erreurs.reference} : <code>{error.digest}</code>
+              </p>
+            ) : null}
+          </div>
         </main>
       </body>
     </html>

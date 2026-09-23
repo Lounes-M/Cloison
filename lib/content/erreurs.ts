@@ -1,4 +1,16 @@
 export const erreurs = {
+  titreIntrouvable: 'Cette page est introuvable.',
   introuvable: 'Cette page est introuvable. Vérifie son adresse ou reviens à l’accueil.',
+  adresse: 'Le lien est peut-être incomplet ou la page a changé d’adresse.',
+  titreChargement: 'Le chargement a été interrompu.',
+  chargement: 'Réessayer dans un instant pour reprendre la navigation.',
+  titreIndisponibilite: 'Le site est momentanément indisponible.',
   indisponibilite: 'Le chargement a échoué. Réessaie dans un instant.',
+  reprise: 'Reprendre la navigation',
+  accueil: 'Retour à l’accueil',
+  reessayer: 'Réessayer',
+  recharger: 'Recharger',
+  dossier: 'Retrouver mon dossier',
+  agence: 'Connexion agence',
+  reference: 'Référence à nous transmettre',
 } as const
