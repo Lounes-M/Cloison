@@ -1,3 +1,5 @@
+import { SommaireDossier } from '@/components/layout/SommaireDossier'
+import { interfaceEspace } from '@/lib/content/interface'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -159,12 +161,10 @@ export default async function PageDossier({
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-full min-w-0">
-          <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
+          <h1 className="font-display text-2xl break-words md:text-3xl">
             {texte.reference} {String(d.reference)}
-          </p>
-          <h1 className="font-display mt-1 text-3xl break-all uppercase md:text-4xl">
-            {String(d.email_locataire)}
           </h1>
+          <p className="text-muted mt-2 text-sm break-all">{String(d.email_locataire)}</p>
         </div>
         <span
           className={cn(
@@ -182,6 +182,15 @@ export default async function PageDossier({
         </p>
       ) : null}
 
+      <SommaireDossier
+        liens={[
+          { id: 'pieces', titre: interfaceEspace.pieces },
+          { id: 'engagement', titre: interfaceEspace.engagement },
+          { id: 'decision', titre: interfaceEspace.decision },
+          { id: 'organisation', titre: interfaceEspace.organisation },
+          { id: 'journal', titre: interfaceEspace.historique },
+        ]}
+      />
       <Complements
         dossierId={id}
         demandes={(demandes ?? []) as Complement[]}
@@ -190,23 +199,6 @@ export default async function PageDossier({
         modifiable={['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
           String(d.statut),
         )}
-      />
-      <ResponsableDossier
-        dossierId={id}
-        contexte={contexte}
-        pageEquipe={(await searchParams)?.equipe}
-        modifiable={[
-          'ouvert',
-          'depot_en_cours',
-          'complet',
-          'garant_insuffisant',
-          'transmis',
-        ].includes(String(d.statut))}
-      />
-      <HistoriqueResponsables
-        dossierId={id}
-        supabase={supabase}
-        position={(await searchParams)?.affectations}
       />
       <dl className="mt-8 grid gap-4 text-[14px] md:grid-cols-3">
         <div className="outlined bg-paper rounded-xl p-4">
@@ -247,8 +239,8 @@ export default async function PageDossier({
         </div>
       </dl>
 
-      <section className="panneau-espace mt-12">
-        <h2 className="font-display text-2xl uppercase">{texte.engagementTitre}</h2>
+      <section id="engagement" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texte.engagementTitre}</h2>
         {e ? (
           <dl className="mt-4 grid gap-x-8 gap-y-2 text-[14px] md:grid-cols-2">
             <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
@@ -285,8 +277,8 @@ export default async function PageDossier({
         )}
       </section>
 
-      <section className="panneau-espace mt-12">
-        <h2 className="font-display text-2xl uppercase">{texte.piecesTitre}</h2>
+      <section id="pieces" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texte.piecesTitre}</h2>
         <p className="text-muted mt-2 text-sm">{documentsDeclares.presence}</p>
         <p className="mt-2 text-sm">{texteExamen.aide}</p>
         <p className="mt-2 text-sm font-bold">
@@ -304,7 +296,7 @@ export default async function PageDossier({
                 key={String(p.id)}
                 className="bg-paper outlined flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3 text-[14px]"
               >
-                <span className="flex items-center gap-2 font-semibold">
+                <span className="flex min-w-0 flex-wrap items-center gap-2 font-semibold">
                   <Icone nom="fichier" className="size-4" />
                   {natures[String(p.type)] ?? String(p.type)}
                   <span className="text-muted font-medium">
@@ -347,8 +339,8 @@ export default async function PageDossier({
         )}
       </section>
 
-      <section className="panneau-espace mt-12">
-        <h2 className="font-display text-2xl uppercase">{texte.actionsTitre}</h2>
+      <section id="decision" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texte.actionsTitre}</h2>
         <div className="mt-6">
           {d.statut === 'transmis' || d.statut === 'signe' ? (
             <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
@@ -367,7 +359,27 @@ export default async function PageDossier({
         </div>
       </section>
 
-      <section id="journal" className="panneau-espace mt-12">
+      <section id="organisation" className="border-ink/15 mt-8 border-t pt-6">
+        <h2 className="text-xl font-bold">{interfaceEspace.organisation}</h2>
+        <ResponsableDossier
+          dossierId={id}
+          contexte={contexte}
+          pageEquipe={(await searchParams)?.equipe}
+          modifiable={[
+            'ouvert',
+            'depot_en_cours',
+            'complet',
+            'garant_insuffisant',
+            'transmis',
+          ].includes(String(d.statut))}
+        />
+        <HistoriqueResponsables
+          dossierId={id}
+          supabase={supabase}
+          position={(await searchParams)?.affectations}
+        />
+      </section>
+      <section id="journal" className="panneau-espace mt-8">
         <h2 className="font-display text-2xl uppercase">{texte.journalTitre}</h2>
         {historique.lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">{texte.journalAucun}</p>

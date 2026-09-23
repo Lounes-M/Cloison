@@ -4,6 +4,7 @@ import { useActionState, useEffect, useId, useRef } from 'react'
 
 import { envoyerLienDeConnexion, type EtatConnexion } from '@/lib/agences/connexion'
 import { cn } from '@/lib/utils'
+import { connexion as t } from '@/lib/content/connexion'
 
 const ETAT_INITIAL: EtatConnexion = { statut: 'inactif' }
 
@@ -39,10 +40,9 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
         tabIndex={-1}
         className="bg-mint outlined shadow-brut rounded-[18px] p-8 text-center"
       >
-        <p className="font-display text-2xl uppercase">Regarde tes e-mails.</p>
+        <p className="font-display text-2xl uppercase">{t.succes}</p>
         <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-relaxed font-medium">
-          Si cette adresse peut ouvrir un espace, un lien vient de partir. Il est valable une heure,
-          et une seule fois.
+          {t.envoye}
         </p>
       </div>
     )
@@ -51,9 +51,7 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       {lienExpire ? (
-        <p className="bg-sun outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
-          Ce lien a expiré ou a déjà servi. Demandes-en un nouveau.
-        </p>
+        <p className="bg-sun outlined rounded-xl px-4 py-3 text-[14px] font-semibold">{t.expire}</p>
       ) : null}
 
       {etat.statut === 'erreur' ? (
@@ -67,7 +65,7 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
 
       <div>
         <label htmlFor={idChamp} className="mb-2 block text-[14px] font-bold">
-          Ton adresse professionnelle
+          {t.email}
         </label>
         <input
           id={idChamp}
@@ -76,13 +74,12 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
           autoComplete="email"
           required
           defaultValue={etat.statut === 'erreur' ? etat.valeur : ''}
-          placeholder="prenom@ton-agence.fr"
+          placeholder={t.exemple}
           aria-describedby={`${idChamp}-aide`}
           className={cn(champBase)}
         />
         <p id={`${idChamp}-aide`} className="text-muted mt-2 text-[13px] font-medium">
-          C&apos;est elle qui rattache ton compte à ton agence. Une adresse Gmail ou Outlook
-          personnelle ne peut pas ouvrir d&apos;espace.
+          {t.aide}
         </p>
       </div>
 
@@ -94,7 +91,7 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
           'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
         )}
       >
-        {enCours ? 'Envoi…' : 'Recevoir mon lien'}
+        {enCours ? t.envoi : t.recevoir}
       </button>
     </form>
   )

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Logo } from '@/components/brand/Logo'
-import { Icone } from '@/components/ui/Icone'
 import { interfaceEspace as t } from '@/lib/content/interface'
 
 /** Identite commune, sans lecture de session ni decision d'autorisation. */
@@ -29,9 +28,9 @@ export function CadreEspace({
         {t.principal}
       </a>
       <header className="border-ink bg-cream relative z-10 border-b-2">
-        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8 lg:px-12">
           <div className="flex flex-wrap items-center gap-4">
-            <Logo className="text-2xl" />
+            <Logo className="text-xl" />
             <span className="bg-sun outlined rounded-full px-3 py-1 text-[11px] font-bold tracking-wide uppercase">
               {agence ? t.agence : t.porteur}
             </span>
@@ -46,19 +45,10 @@ export function CadreEspace({
           </nav>
         </div>
       </header>
-      <div
-        className="bandeau-espace border-ink bg-cobalt text-paper overflow-hidden border-b-2"
-        aria-hidden="true"
-      >
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-5 py-3 sm:px-8 lg:px-12">
-          <span className="text-xs font-bold tracking-wider uppercase">{t.signature}</span>
-          <Icone nom="asterisque" className="animate-spin-slow text-sun size-6 shrink-0" />
-        </div>
-      </div>
       <main
         id="contenu-espace"
         tabIndex={-1}
-        className="espace-content relative mx-auto flex w-full max-w-[1280px] flex-1 justify-center px-5 py-10 sm:px-8 md:py-14 lg:px-12"
+        className="espace-content relative mx-auto flex w-full max-w-[1280px] flex-1 justify-center px-5 py-6 sm:px-8 md:py-10 lg:px-12"
       >
         {children}
       </main>

@@ -7,7 +7,7 @@ import { FormulaireConnexion } from '@/components/forms/FormulaireConnexion'
 
 export const metadata: Metadata = {
   title: 'Connexion',
-  description: 'Accede a ton espace agence Cloison.',
+  description: 'Accédez à votre espace agence Cloison.',
   // Une page de connexion n'a rien a faire dans un index de moteur : elle
   // n'apporte rien a qui la trouverait, et elle attire ce qu'on ne veut pas.
   robots: { index: false, follow: false },

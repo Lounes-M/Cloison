@@ -1,3 +1,5 @@
+import { SommaireDossier } from '@/components/layout/SommaireDossier'
+import { interfaceEspace } from '@/lib/content/interface'
 import { FormulaireReutilisation } from '@/components/forms/FormulaireReutilisation'
 import { Complements } from '@/components/dossiers/Complements'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
@@ -159,7 +161,7 @@ export default async function PageGarant({
         {depot.demandePar(String(dossier.email_locataire))}
       </p>
 
-      <div className="bg-sky outlined shadow-brut mt-6 flex items-start gap-3 rounded-[18px] p-5">
+      <div className="bg-sun/25 border-sun mt-5 flex items-start gap-3 rounded-[18px] border p-5">
         <Icone nom="cadenas" className="mt-0.5 size-5 shrink-0" />
         <p className="text-[14px] leading-relaxed font-medium">{depot.discretion}</p>
       </div>
@@ -171,6 +173,13 @@ export default async function PageGarant({
         </div>
       ) : null}
 
+      <SommaireDossier
+        liens={[
+          { id: 'pieces', titre: interfaceEspace.pieces },
+          { id: 'engagement', titre: interfaceEspace.engagement },
+          { id: 'journal', titre: interfaceEspace.historique },
+        ]}
+      />
       <Complements
         dossierId={dossierId}
         demandes={(demandes ?? []) as Complement[]}
@@ -178,8 +187,8 @@ export default async function PageGarant({
         agence={false}
         modifiable={ouvert}
       />
-      <section className="panneau-espace mt-12">
-        <h2 className="font-display text-2xl uppercase">{depot.piecesTitre}</h2>
+      <section id="pieces" className="panneau-espace mt-6">
+        <h2 className="text-xl font-bold">{depot.piecesTitre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
         <p className="text-muted mb-6 text-sm">{documentsDeclares.presence}</p>
         <p className="mb-6 text-sm">
@@ -264,8 +273,8 @@ export default async function PageGarant({
       </section>
 
       {mentionAttendue ? (
-        <section className="panneau-espace mt-14">
-          <h2 className="font-display text-2xl uppercase">{texteMention.titre}</h2>
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{texteMention.titre}</h2>
           <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
           <FormulaireMention
             key={Number(engagement?.version_conditions ?? 0)}
@@ -289,8 +298,8 @@ export default async function PageGarant({
         </section>
       ) : null}
 
-      <section id="journal" className="panneau-espace mt-14">
-        <h2 className="font-display text-2xl uppercase">{texteJournal.titre}</h2>
+      <section id="journal" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texteJournal.titre}</h2>
         <p className="text-muted mt-2 text-sm">{texteJournal.aide}</p>
         {erreurJournal ? (
           <p role="alert">{texteJournal.indisponible}</p>
@@ -326,8 +335,8 @@ export default async function PageGarant({
           />
         ) : null}
       </section>
-      <section id="engagement" className="panneau-espace mt-14">
-        <h2 className="font-display text-2xl uppercase">{texteEngagement.titre}</h2>
+      <section id="engagement" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texteEngagement.titre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
           {texteEngagement.aide}
         </p>

@@ -3,6 +3,7 @@ import { securite } from '@/lib/content/securite'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { FormulaireApplicationSecours } from '@/components/forms/FormulaireApplicationSecours'
 import { contexteApplicationSecours } from '@/lib/agences/application-secours'
 import { applicationSecours as t } from '@/lib/content/application-secours'
@@ -18,6 +19,7 @@ export default async function PageApplicationSecours() {
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>
+      <NavigationReglages courant="/espace/securite" />
       {c ? (
         <section className="panneau-espace mb-6" aria-labelledby="applications-verifiees">
           <h2 id="applications-verifiees" className="mb-3 text-xl font-bold">

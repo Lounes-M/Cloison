@@ -9,7 +9,7 @@ export function MenuMobile() {
   return (
     <details
       ref={menu}
-      className="w-full md:hidden"
+      className="lg:hidden"
       onKeyDown={(event) => {
         if (event.key === 'Escape' && menu.current?.open) {
           menu.current.open = false
@@ -18,10 +18,10 @@ export function MenuMobile() {
         }
       }}
     >
-      <summary className="outlined bg-sun shadow-brut-xs min-h-11 cursor-pointer rounded-lg px-4 py-3 text-sm font-bold">
+      <summary className="bg-sun min-h-11 cursor-pointer rounded-lg px-2 py-3 text-xs font-bold sm:px-3 sm:text-sm">
         {navigationMobile.menu}
       </summary>
-      <div className="mt-3 grid gap-2 border-t-2 pt-3">
+      <div className="bg-paper outlined shadow-brut-sm absolute top-full right-0 left-0 mt-3 grid max-h-[70dvh] gap-1 overflow-y-auto rounded-xl p-3">
         {navLinks.map((link) => (
           <a
             key={link.href}

@@ -23,19 +23,22 @@ export const metadata: Metadata = {
  */
 export default function PageDemarrer() {
   return (
-    <Section className="espace-shell bg-cream py-12 md:py-20" innerClassName="max-w-[1040px]">
+    <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[1040px]">
       <div className="grid items-start gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
         <div className="min-w-0">
-          <EnteteEspace titre={porte.titre} etiquette={interfaceEspace.ouverture}>
+          <EnteteEspace titre={porte.titre} etiquette={interfaceEspace.ouverture} ton="mint">
             <p>{porte.sousTitre}</p>
           </EnteteEspace>
           <div className="panneau-espace">
-            <p className="border-ink bg-sun mb-8 rounded-xl border-2 p-4 text-sm leading-relaxed">
+            <p className="border-sun mb-5 border-l-4 pl-3 text-sm leading-relaxed">
               {pilote.avantOuverture}
             </p>
             <FormulaireOuverture />
-            <FormulaireContinuite mode="retrouver" />
           </div>
+          <details className="aide-espace mt-6">
+            <summary>{interfaceEspace.retrouver}</summary>
+            <FormulaireContinuite mode="retrouver" />
+          </details>
         </div>
         <RepereParcours />
       </div>

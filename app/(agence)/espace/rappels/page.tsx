@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { FormulaireRappels } from '@/components/forms/FormulaireRappels'
+import { NavigationReglages } from '@/components/layout/NavigationReglages'
+import { interfaceEspace } from '@/lib/content/interface'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { rappels as t, type ReglagesRappels } from '@/lib/content/rappels'
 export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
@@ -20,11 +22,15 @@ export default async function PageRappels() {
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>
+      <NavigationReglages courant="/espace/rappels" administration />
       <div className="panneau-espace">
-        <p className="mb-4">{t.limites}</p>
-        <p className="mb-4">{t.preferences}</p>
-        <p className="mb-6 text-sm">{t.cadence}</p>
         <FormulaireRappels courants={data[0] as ReglagesRappels} />
+        <details className="aide-espace mt-6">
+          <summary>{interfaceEspace.reglageDetails}</summary>
+          <p>{t.limites}</p>
+          <p className="mt-3">{t.preferences}</p>
+          <p className="mt-3">{t.cadence}</p>
+        </details>
       </div>
     </div>
   )

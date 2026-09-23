@@ -15,6 +15,7 @@ export const navLinks = [
   { label: 'Produit', href: '/#produit' },
   { label: 'Tarifs', href: '/#tarifs' },
   { label: 'Agences', href: '/agences' },
+  { label: 'Connexion', href: '/connexion' },
 ] as const
 
 export const footerLinks = [
@@ -22,4 +23,6 @@ export const footerLinks = [
   { label: 'Produit', href: '/#produit' },
   { label: 'Tarifs', href: '/#tarifs' },
   { label: 'Agences', href: '/agences' },
+  { label: 'Connexion agence', href: '/connexion' },
+  { label: 'Retrouver mon dossier', href: '/lien-invalide' },
 ] as const
