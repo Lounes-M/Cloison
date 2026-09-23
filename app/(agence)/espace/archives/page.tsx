@@ -1,3 +1,4 @@
+import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { EtatVide } from '@/components/ui/EtatVide'
 import { Icone } from '@/components/ui/Icone'
@@ -39,6 +40,7 @@ export default async function Page({
       <EnteteEspace titre={t.archives} etiquette={t.etiquette}>
         <p>{t.conserve}</p>
       </EnteteEspace>
+      {c.agence.statut === 'verifiee' ? <ExportRegistre registre="archives" /> : null}
       {liste.length ? (
         <ul className="grid gap-4">
           {liste.map((a) => (
