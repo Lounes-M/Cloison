@@ -57,7 +57,8 @@ export const problem = {
     ],
     stamp: 'Rescanné. Refait.',
   },
-  body: "Louer à Paris, Lyon ou Bordeaux quand tu as 25 ans, c'est presque toujours un proche qui se porte caution. Un oncle, un ami, la belle-famille. Et aujourd'hui, ça donne : ses bulletins de paie sur ton WhatsApp, son avis d'imposition dans ton Drive, un acte de caution imprimé, mal rempli, rescanné, refait.",
+  title: 'Un proche se porte caution. Ses papiers font le tour.',
+  body: "Ses bulletins de paie sur ton WhatsApp. Son avis d'imposition dans ton Drive. Un acte imprimé, mal rempli, rescanné. Aider un proche à louer ne devrait pas ressembler à ça.",
   punchline:
     'Trois personnes gênées. Zéro processus. Et des documents sensibles qui traînent partout.',
 } as const
@@ -74,6 +75,7 @@ export const spaces = [
     step: 1,
     title: 'Le locataire',
     tone: 'mint',
+    icone: 'acte',
     body: "Il crée le dossier et invite son garant. Il suit l'avancement du dossier, sans voir les pièces ni les montants.",
     footnote: { left: 'Avancement du dossier', live: true },
   },
@@ -82,6 +84,7 @@ export const spaces = [
     step: 2,
     title: 'Le garant',
     tone: 'sun',
+    icone: 'cadenas',
     body: 'Il reçoit un lien et dépose ses pièces seul, chez lui. Il voit ce qu\u2019il couvre, combien, jusqu\u2019à quand.',
     footnote: { left: 'Couvre : loyer + charges', iconeDroite: 'cadenas' },
   },
@@ -90,6 +93,7 @@ export const spaces = [
     step: 3,
     title: "L'agence",
     tone: 'sky',
+    icone: 'fichier',
     body: 'Elle se connecte à son espace : pièces filigranées et ratio calculé à partir du revenu déclaré. Elle examine le dossier avant de décider.',
     footnote: { left: 'Pièces filigranées', right: 'Ratio calculé', iconeDroite: 'coche' },
   },

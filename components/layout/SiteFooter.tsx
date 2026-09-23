@@ -4,17 +4,17 @@ import { footerLinks, site } from '@/lib/site'
 export function SiteFooter() {
   return (
     <footer className="bg-ink text-cream overflow-hidden px-6 pt-12 pb-9 md:px-10">
-      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-5">
+      <div className="mx-auto flex max-w-[1200px] flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <Logo variant="inverse" className="text-lg" />
         <nav
           aria-label="Navigation de pied de page"
-          className="flex flex-wrap gap-x-6 gap-y-2 text-[13.5px] font-semibold opacity-80"
+          className="grid grid-cols-2 gap-x-6 gap-y-1 text-[13.5px] font-semibold sm:flex sm:flex-wrap"
         >
           {footerLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-11 items-center transition-opacity hover:opacity-100"
+              className="text-cream/80 hover:text-sun focus-visible:outline-sun inline-flex min-h-11 items-center underline-offset-4 transition-colors hover:underline"
             >
               {link.label}
             </a>
@@ -30,7 +30,7 @@ export function SiteFooter() {
         CLOISON
       </div>
 
-      <p className="mx-auto mt-6 max-w-[1200px] text-xs opacity-50">
+      <p className="text-cream/70 mx-auto mt-6 max-w-[1200px] border-t border-white/15 pt-6 text-xs leading-relaxed">
         © {new Date().getFullYear()} {site.name} · {site.tagline}.
       </p>
     </footer>
