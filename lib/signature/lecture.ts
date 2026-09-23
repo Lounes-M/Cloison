@@ -5,6 +5,7 @@ import { dossierActe } from './parcours-types'
 import { ouvrirContexteActe } from './parcours'
 import { ouvrirFichierActe } from './archive-format'
 import { stockageActe } from './stockage-actes'
+import { fluxArchive } from './flux-archive'
 import { z } from 'zod'
 
 export async function accesActe(id: string, partie: 'agence' | 'garant') {
@@ -64,29 +65,10 @@ export async function telechargerActe(
       pdf.fill(0)
       throw new Error()
     }
+    signal.throwIfAborted()
     // La verification GCM et la derniere autorisation precedent le premier octet.
     // Le flux conserve l'original signe et evite la limite des reponses bufferisees.
-    let offset = 0
-    const flux = new ReadableStream<Uint8Array>({
-      pull(controller) {
-        if (signal.aborted) {
-          pdf.fill(0)
-          controller.error(new Error('Lecture interrompue'))
-          return
-        }
-        if (offset === pdf.length) {
-          pdf.fill(0)
-          controller.close()
-          return
-        }
-        const fin = Math.min(offset + 65536, pdf.length)
-        controller.enqueue(new Uint8Array(pdf.subarray(offset, fin)))
-        offset = fin
-      },
-      cancel() {
-        pdf.fill(0)
-      },
-    })
+    const flux = fluxArchive(pdf, signal)
     return new Response(flux, {
       headers: {
         ...headers,
