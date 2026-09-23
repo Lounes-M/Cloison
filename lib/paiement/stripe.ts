@@ -326,6 +326,7 @@ export async function creerSessionActe(
     )
   }
   if (
+    (r.session && session.id !== r.session) ||
     !session.livemode ||
     session.metadata?.produit !== 'cloison_acte' ||
     session.metadata.facture_id !== r.facture ||
@@ -337,10 +338,16 @@ export async function creerSessionActe(
     session.client_reference_id !== r.facture
   )
     throw new Error('Reglement incoherent')
+  if (session.status !== 'open' || session.payment_status !== 'unpaid') {
+    // Un webhook peut avoir deja confirme le reglement pendant cette reprise.
+    await rapprocherSessionActe(session.id, r.id)
+    return null
+  }
   const db = await clientServeur()
   const lien = await db.rpc('rattacher_reglement_acte', { le_id: r.id, la_session: session.id })
-  if (lien.error || lien.data !== true) throw new Error('Reglement non confirme')
-  if (session.status !== 'open' || session.payment_status !== 'unpaid') {
+  if (lien.error || typeof lien.data !== 'boolean') throw new Error('Reglement non confirme')
+  if (!lien.data) {
+    // La session pouvait encore etre ouverte lors de la premiere lecture.
     await rapprocherSessionActe(session.id, r.id)
     return null
   }
@@ -378,30 +385,53 @@ export async function rapprocherSessionActe(
   const paiement = typeof s.payment_intent === 'object' ? s.payment_intent : null
   const charge =
     paiement && typeof paiement.latest_charge === 'object' ? paiement.latest_charge : null
+  const paiementCharge =
+    typeof charge?.payment_intent === 'string' ? charge.payment_intent : charge?.payment_intent?.id
   const paye = s.payment_status === 'paid'
   if (
     paye &&
-    (!paiement ||
+    (s.status !== 'complete' ||
+      !paiement ||
       !charge ||
+      !/^pi_[A-Za-z0-9_]{1,190}$/.test(paiement.id) ||
+      !/^ch_[A-Za-z0-9_]{1,190}$/.test(charge.id) ||
+      paiementCharge !== paiement.id ||
+      paiement.livemode !== true ||
+      charge.livemode !== true ||
+      paiement.metadata?.produit !== 'cloison_acte' ||
+      paiement.metadata.facture_id !== m.facture_id ||
+      paiement.metadata.tentative !== m.tentative ||
       paiement.status !== 'succeeded' ||
-      !charge.paid ||
+      paiement.amount !== s.amount_total ||
+      paiement.amount_received !== s.amount_total ||
+      paiement.currency !== 'eur' ||
+      charge.status !== 'succeeded' ||
+      charge.paid !== true ||
+      charge.captured !== true ||
       charge.amount !== s.amount_total ||
-      charge.currency !== 'eur')
+      charge.amount_captured !== s.amount_total ||
+      charge.currency !== 'eur' ||
+      !Number.isSafeInteger(charge.amount_refunded) ||
+      charge.amount_refunded < 0 ||
+      charge.amount_refunded > s.amount_total! ||
+      typeof charge.disputed !== 'boolean')
   )
     throw new Error('Paiement incomplet')
   const statut = paye
     ? 'paye'
-    : s.status === 'expired'
-      ? 'expire'
-      : s.status === 'open'
-        ? 'ouvert'
-        : null
+    : s.payment_status !== 'unpaid'
+      ? null
+      : s.status === 'expired'
+        ? 'expire'
+        : s.status === 'open'
+          ? 'ouvert'
+          : null
   if (!statut) throw new Error('Paiement a revoir')
   signal.throwIfAborted()
   const db = await clientServeur(signal)
   const lien = await db.rpc('rattacher_reglement_acte', { le_id: m.tentative, la_session: s.id })
   // Un reglement deja paye ne se rattache plus : la confirmation reste idempotente.
-  if (lien.error) throw new Error('Reglement indisponible')
+  if (lien.error || typeof lien.data !== 'boolean') throw new Error('Reglement indisponible')
   const r = await db.rpc('rapprocher_reglement_acte', {
     le_id: m.tentative,
     la_facture: m.facture_id,
