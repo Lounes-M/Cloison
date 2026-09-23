@@ -35,6 +35,33 @@ const session = () => ({
   payment_status: 'unpaid',
   url: 'https://checkout.stripe.com/c/pay/fixture',
 })
+const sessionPayee = () => ({
+  ...session(),
+  status: 'complete',
+  payment_status: 'paid',
+  payment_intent: {
+    id: 'pi_fixture',
+    livemode: true,
+    status: 'succeeded',
+    amount: 2900,
+    amount_received: 2900,
+    currency: 'eur',
+    metadata: { produit: 'cloison_acte', facture_id: facture, tentative: id },
+    latest_charge: {
+      id: 'ch_fixture',
+      payment_intent: 'pi_fixture',
+      livemode: true,
+      status: 'succeeded',
+      paid: true,
+      captured: true,
+      amount: 2900,
+      amount_captured: 2900,
+      currency: 'eur',
+      amount_refunded: 0,
+      disputed: false,
+    },
+  },
+})
 beforeEach(() => {
   vi.resetAllMocks()
   h.rpc.mockResolvedValue({ data: true, error: null })
@@ -76,23 +103,7 @@ test('une reference persistante est relue sans creation', async () => {
   expect(h.create).not.toHaveBeenCalled()
 })
 test('le rapprochement exige le paiement et la charge coherents, pas le retour navigateur', async () => {
-  h.retrieve.mockResolvedValue({
-    ...session(),
-    status: 'complete',
-    payment_status: 'paid',
-    payment_intent: {
-      id: 'pi_fixture',
-      status: 'succeeded',
-      latest_charge: {
-        id: 'ch_fixture',
-        paid: true,
-        amount: 2900,
-        currency: 'eur',
-        amount_refunded: 0,
-        disputed: false,
-      },
-    },
-  })
+  h.retrieve.mockResolvedValue(sessionPayee())
   await rapprocherSessionActe('cs_fixture', id)
   expect(h.rpc).toHaveBeenCalledWith(
     'rapprocher_reglement_acte',
@@ -113,3 +124,123 @@ test('le rapprochement exige le paiement et la charge coherents, pas le retour n
   await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow('Paiement incomplet')
   expect(h.rpc).not.toHaveBeenCalled()
 })
+
+test('une session deja payee se rapproche meme si le webhook a deja ferme la reservation', async () => {
+  h.retrieve.mockResolvedValue(sessionPayee())
+  h.rpc.mockImplementation(async (nom) => ({
+    data: nom !== 'rattacher_reglement_acte',
+    error: null,
+  }))
+  expect(
+    await creerSessionActe({ ...r(), session: 'cs_fixture' }, 'https://example.invalid'),
+  ).toBeNull()
+  expect(h.create).not.toHaveBeenCalled()
+  expect(h.rpc).toHaveBeenCalledWith(
+    'rapprocher_reglement_acte',
+    expect.objectContaining({ statut: 'paye' }),
+  )
+})
+test('une session ouverte au premier instant est relue si le webhook ferme la reservation entre-temps', async () => {
+  h.retrieve.mockResolvedValueOnce(session()).mockResolvedValueOnce(sessionPayee())
+  h.rpc.mockImplementation(async (nom) => ({
+    data: nom !== 'rattacher_reglement_acte',
+    error: null,
+  }))
+  expect(
+    await creerSessionActe({ ...r(), session: 'cs_fixture' }, 'https://example.invalid'),
+  ).toBeNull()
+  expect(h.retrieve).toHaveBeenCalledTimes(2)
+  expect(h.create).not.toHaveBeenCalled()
+})
+test('un refus SQL persistant ne devient pas une reprise reussie', async () => {
+  h.rpc.mockResolvedValue({ data: false, error: null })
+  await expect(
+    creerSessionActe({ ...r(), session: 'cs_fixture' }, 'https://example.invalid'),
+  ).rejects.toThrow('Reglement non rapproche')
+  expect(h.create).not.toHaveBeenCalled()
+})
+test('une relecture ne peut substituer une autre session a celle reservee', async () => {
+  h.retrieve.mockResolvedValue({ ...session(), id: 'cs_autre' })
+  await expect(
+    creerSessionActe({ ...r(), session: 'cs_fixture' }, 'https://example.invalid'),
+  ).rejects.toThrow('Reglement incoherent')
+  expect(h.rpc).not.toHaveBeenCalled()
+})
+test.each([
+  { id: 'invalide' },
+  { livemode: false },
+  { status: 'processing' },
+  { amount: 1 },
+  { amount_received: 1 },
+  { currency: 'usd' },
+  { metadata: {} },
+  { metadata: { produit: 'autre', facture_id: facture, tentative: id } },
+  { metadata: { produit: 'cloison_acte', facture_id: id, tentative: id } },
+  { metadata: { produit: 'cloison_acte', facture_id: facture, tentative: facture } },
+])('un paiement incoherent est refuse avant toute ecriture : %j', async (modif) => {
+  const s = sessionPayee()
+  Object.assign(s.payment_intent, modif)
+  h.retrieve.mockResolvedValue(s)
+  await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow('Paiement incomplet')
+  expect(h.rpc).not.toHaveBeenCalled()
+})
+test.each([
+  { id: 'invalide' },
+  { payment_intent: 'pi_autre' },
+  { payment_intent: null },
+  { livemode: false },
+  { status: 'failed' },
+  { paid: false },
+  { captured: false },
+  { amount: 1 },
+  { amount_captured: 1 },
+  { currency: 'usd' },
+  { amount_refunded: -1 },
+  { amount_refunded: 2901 },
+  { amount_refunded: 0.5 },
+  { disputed: null },
+])('une charge incoherente est refusee avant toute ecriture : %j', async (modif) => {
+  const s = sessionPayee()
+  Object.assign(s.payment_intent.latest_charge, modif)
+  h.retrieve.mockResolvedValue(s)
+  await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow('Paiement incomplet')
+  expect(h.rpc).not.toHaveBeenCalled()
+})
+test.each([
+  { status: 'open', payment_status: 'paid' },
+  { status: 'expired', payment_status: 'paid' },
+  { status: 'open', payment_status: 'no_payment_required' },
+  { status: 'complete', payment_status: 'unpaid' },
+])('un etat Checkout ambigu ne modifie aucun reglement : %j', async (modif) => {
+  h.retrieve.mockResolvedValue({ ...sessionPayee(), ...modif })
+  await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow()
+  expect(h.rpc).not.toHaveBeenCalled()
+})
+test.each([
+  { rembourse: 500, conteste: false },
+  { rembourse: 2900, conteste: false },
+  { rembourse: 0, conteste: true },
+])(
+  'un remboursement ou litige confirme est transmis au registre : %j',
+  async ({ rembourse, conteste }) => {
+    const s = sessionPayee()
+    Object.assign(s.payment_intent.latest_charge, {
+      amount_refunded: rembourse,
+      disputed: conteste,
+    })
+    h.retrieve.mockResolvedValue(s)
+    await rapprocherSessionActe('cs_fixture', id)
+    expect(h.rpc).toHaveBeenCalledWith(
+      'rapprocher_reglement_acte',
+      expect.objectContaining({ statut: 'paye', rembourse, conteste }),
+    )
+  },
+)
+test.each([null, 'true', 1])(
+  'une confirmation SQL mal formee ne valide pas la reprise : %j',
+  async (data) => {
+    h.rpc.mockResolvedValue({ data, error: null })
+    await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow('Reglement indisponible')
+    expect(h.rpc).not.toHaveBeenCalledWith('rapprocher_reglement_acte', expect.anything())
+  },
+)
