@@ -247,7 +247,7 @@ declare a record; n integer:=0;
 begin
  for a in select x.id from public.actes_signature x join public.demandes_signature s on s.id=x.id
  left join public.dossiers d on d.id=s.dossier_id
- where x.cle_scellee is not null and (x.conserver_jusqu_au<=clock_timestamp() or (x.etape<>'archive' and (d.id is null or d.expire_le<=clock_timestamp() or (x.expire_signature<=clock_timestamp() and x.etape in ('preparation','a_valider','refuse')) or (x.expire_signature<clock_timestamp()-interval '7 days' and s.etat in ('expired','declined','rejected','canceled','deleted')))))
+ where x.cle_scellee is not null and (x.conserver_jusqu_au<=clock_timestamp() or (x.etape<>'archive' and (d.id is null or d.expire_le<=clock_timestamp() or (x.expire_signature<=clock_timestamp() and (x.etape in ('preparation','a_valider','refuse') or (x.operation is null and s.reference_fournisseur is null))) or (x.expire_signature<clock_timestamp()-interval '7 days' and s.etat in ('expired','declined','rejected','canceled','deleted')))))
  order by x.id for update of x skip locked limit 10 loop
   insert into public.archives_signature_a_supprimer(chemin)
    select o.name from storage.objects o where o.bucket_id='actes' and o.name like a.id::text||'/%'
@@ -288,8 +288,8 @@ end;$$;
 revoke all on function public.proteger_dossier_en_signature() from public,anon,authenticated,porteur_lien,serveur,depot_piece,service_role,archive_signature;
 create trigger dossier_en_signature before update of statut on public.dossiers for each row execute function public.proteger_dossier_en_signature();
 create function public.operations_actes_a_examiner() returns integer language sql stable security definer set search_path='' as $$
- select count(*)::integer from public.actes_signature a where a.cle_scellee is not null and
- ((a.operation is not null and a.operation_jusqu_au<=clock_timestamp()) or a.etape='incertain');
+ select count(*)::integer from public.actes_signature a join public.demandes_signature s on s.id=a.id where a.cle_scellee is not null and
+ ((a.operation is not null and a.operation_jusqu_au<=clock_timestamp()) or a.etape='incertain' or (a.expire_signature<=clock_timestamp() and a.etape not in ('archive','refuse') and s.etat not in ('canceled','declined','rejected','deleted','expired')));
 $$;
 revoke all on function public.operations_actes_a_examiner() from public,anon,authenticated,porteur_lien,serveur,depot_piece,service_role,archive_signature;
 grant execute on function public.operations_actes_a_examiner() to serveur;

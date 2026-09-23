@@ -537,3 +537,29 @@ test('la pagination des reglements suit les dates, pas l ordre aleatoire des UUI
   ).toEqual([ancien])
   expect(await rpc('factures_de_mon_agence', { avant: randomUUID() })).toEqual([])
 })
+
+test('un projet valide jamais envoye est detruit a echeance sans conserver sa cle', async () => {
+  await deposer()
+  await valider()
+  await redevenirProprietaire(db)
+  await db.exec("update actes_signature set expire_signature=now()-interval '1 second'")
+  await devenir(db, 'serveur')
+  expect(await rpc('expirer_archives_signature')).toBe(1)
+  await redevenirProprietaire(db)
+  expect((await db.query('select cle_scellee from actes_signature')).rows).toEqual([
+    { cle_scellee: null },
+  ])
+})
+test('une creation incertaine expiree conserve sa cle et declenche un rapprochement', async () => {
+  await deposer()
+  await valider()
+  await devenir(db, 'serveur')
+  expect(
+    await rpc('reserver_operation_acte', { le_id: id, etape_attendue: 'valide' }),
+  ).not.toBeNull()
+  await redevenirProprietaire(db)
+  await db.exec("update actes_signature set expire_signature=now()-interval '1 second'")
+  await devenir(db, 'serveur')
+  expect(await rpc('expirer_archives_signature')).toBe(0)
+  expect(await rpc('operations_actes_a_examiner')).toBe(1)
+})

@@ -9,6 +9,7 @@ import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { sceller } from '@/lib/coffre/enveloppe'
 import { scellerMaitresse } from '@/lib/coffre/rotation-maitresse'
 import { signature } from '@/lib/content/signature'
+import { echeanceActe } from './echeance'
 import { configurationParcours } from './configuration-parcours'
 import { empreintePdf } from './archive-format'
 import { archiverFichier, ouvrirContexteActe } from './parcours'
@@ -76,10 +77,7 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
       y: p.y,
     })
     cle = randomBytes(32)
-    const expiration = new Date(
-      Math.min(Date.now() + 3 * 86400000, Date.parse(d.expire_le) - 86400000),
-    )
-    if (expiration.getTime() < Date.now() + 86400000) throw new Error()
+    const expiration = echeanceActe(d.expire_le)
     const r = await supabase.rpc('preparer_acte_signature', {
       le_id: id,
       le_dossier: p.dossier,
