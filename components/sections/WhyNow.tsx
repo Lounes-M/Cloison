@@ -8,7 +8,7 @@ export function WhyNow() {
     <Section id="agences" className="pb-20 md:pb-22">
       <div className="grid gap-5 md:grid-cols-[1.2fr_1fr]">
         <Reveal>
-          <div className="border-ink animate-wiggle h-full rounded-[18px] border-2 border-dashed p-8">
+          <div className="border-ink/20 bg-paper h-full rounded-[18px] border p-6 sm:p-8">
             <p className="font-display text-cobalt mb-3.5 flex items-center gap-2 text-[15px] uppercase">
               <Icone nom="eclair" />
               {whyNow.eyebrow}
@@ -20,7 +20,7 @@ export function WhyNow() {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="bg-cobalt shadow-brut outlined h-full rounded-[18px] p-8 text-white">
+          <div className="bg-cobalt h-full rounded-[18px] p-6 text-white sm:p-8">
             <p className="font-display text-sun mb-3.5 text-[15px] uppercase">
               {goToMarket.eyebrow}
             </p>

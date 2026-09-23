@@ -401,6 +401,29 @@
   .navigation-reglages a {
     flex-shrink: 0;
   }
+  .navigation-reglages a[aria-current='page'] {
+    background: var(--color-cobalt);
+    color: var(--color-paper);
+  }
+  .sommaire-dossier {
+    gap: 0;
+    padding-block: 0.5rem;
+    border-block: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  }
+  .sommaire-dossier a {
+    gap: 0.6rem;
+    border-color: transparent;
+    background: transparent;
+  }
+  .sommaire-dossier a:hover {
+    background: var(--color-paper);
+  }
+  .badge-espace {
+    background: var(--color-sun);
+  }
+  [data-espace='agence'] .badge-espace {
+    background: var(--color-sky);
+  }
   .espace-shell section[id] {
     scroll-margin-top: 1.5rem;
   }
@@ -448,6 +471,9 @@
     color: var(--color-ink);
     font-weight: 700;
     cursor: pointer;
+  }
+  .espace-shell input[type='file']:hover::file-selector-button {
+    background: var(--color-cream);
   }
   .espace-shell :where(summary) {
     min-height: 44px;

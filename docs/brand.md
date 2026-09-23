@@ -33,7 +33,7 @@ presse, documents. Dans le site, on utilise toujours le composant.
 | `mint`   | `#7de08a` | Espace **locataire**                  |
 | `sky`    | `#9db8ff` | Espace **agence**                     |
 | `live`   | `#1db954` | Pastille d'état vérifié               |
-| `muted`  | `#888888` | Texte secondaire                      |
+| `muted`  | `#646464` | Texte secondaire                      |
 
 Les trois espaces ont chacun leur couleur (`sun`, `mint`, `sky`) et cette association ne bouge pas.
 Un lecteur doit pouvoir identifier de quel côté de la cloison il se trouve à la couleur seule.
@@ -56,6 +56,12 @@ Trois règles suffisent à reproduire n'importe quel élément du site :
 
 Les rotations légères (`rotate-1`, `-rotate-2`) sont volontaires et doivent rester rares : elles
 signalent ce qui compte (la règle d'or des tarifs, le tampon « Rescanné. Refait. »).
+
+Les cartes de lecture et les outils métier utilisent un contour fin et une surface blanche,
+sans mouvement au survol. Les ombres pleines restent réservées aux appels à l'action et aux
+accents éditoriaux. Les couleurs de rôle structurent les en-têtes des cartes ; le texte long
+reste sur fond blanc. Les sommaires numérotés indiquent l'ordre des rubriques, pas un état
+d'avancement. L'onglet de réglages actif possède un fond cobalt et l'attribut `aria-current`.
 
 ## Icônes et ponctuation
 
