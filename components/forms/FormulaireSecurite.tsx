@@ -1,5 +1,6 @@
 'use client'
 import { useActionState } from 'react'
+import { ConfigurationAuthentification } from '@/components/forms/ConfigurationAuthentification'
 import { verifierSecondFacteur, type EtatSecurite } from '@/lib/agences/action-securite'
 import { securite } from '@/lib/content/securite'
 
@@ -12,31 +13,18 @@ export function FormulaireSecurite({
 }) {
   const [etat, action, pending] = useActionState(verifierSecondFacteur, initial)
   return (
-    <form action={action} className="mt-8 flex flex-col gap-4">
-      {etat.qr ? (
-        <>
-          {/* Le SVG est produit par Supabase et charge comme image, jamais comme HTML. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            width={240}
-            height={240}
-            src={
-              etat.qr.startsWith('data:')
-                ? etat.qr
-                : `data:image/svg+xml,${encodeURIComponent(etat.qr)}`
-            }
-            alt={securite.aide}
-          />
-          <code className="break-all">{etat.secret}</code>
-        </>
-      ) : null}
+    <form action={action} className="flex flex-col gap-5">
+      {etat.qr ? <ConfigurationAuthentification qr={etat.qr} secret={etat.secret} /> : null}
       {etat.facteur ? (
         <>
           {facteurs.length > 1 ? (
             <>
-              <label htmlFor="facteur">{securite.choisirFacteur}</label>
+              <label htmlFor="facteur" className="text-sm font-bold">
+                {securite.choisirFacteur}
+              </label>
               <select
                 id="facteur"
+                aria-describedby="facteur-aide"
                 name="facteur"
                 key={etat.facteur}
                 defaultValue={etat.facteur}
@@ -49,22 +37,30 @@ export function FormulaireSecurite({
                   </option>
                 ))}
               </select>
-              <p className="text-ink-secondary text-sm">{securite.aideFacteur}</p>
+              <p id="facteur-aide" className="text-muted text-sm leading-relaxed">
+                {securite.aideFacteur}
+              </p>
             </>
           ) : (
             <input type="hidden" name="facteur" value={etat.facteur} />
           )}
-          <label htmlFor="code">{securite.code}</label>
+          <label htmlFor="code" className="text-sm font-bold">
+            {securite.code}
+          </label>
           <input
             id="code"
             name="code"
+            aria-describedby="code-aide"
             inputMode="numeric"
             autoComplete="one-time-code"
             pattern="[0-9]{6}"
             maxLength={6}
             required
-            className="outlined bg-paper rounded-lg p-3"
+            className="champ-code"
           />
+          <p id="code-aide" className="text-muted text-sm leading-relaxed">
+            {securite.aideCode}
+          </p>
           <button
             disabled={pending}
             name="operation"
@@ -84,7 +80,11 @@ export function FormulaireSecurite({
           {securite.activer}
         </button>
       )}
-      {etat.erreur ? <p role="alert">{etat.erreur}</p> : null}
+      {etat.erreur ? (
+        <p role="alert" className="retour-formulaire retour-formulaire-erreur">
+          {etat.erreur}
+        </p>
+      ) : null}
     </form>
   )
 }

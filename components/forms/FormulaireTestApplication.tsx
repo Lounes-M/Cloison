@@ -10,7 +10,9 @@ export function FormulaireTestApplication({ facteur }: { facteur: string }) {
   return (
     <form action={action} className="mt-4 flex flex-col gap-3">
       <input type="hidden" name="facteur" value={facteur} />
-      <label htmlFor={id}>{securite.code}</label>
+      <label htmlFor={id} className="text-sm font-bold">
+        {securite.code}
+      </label>
       <input
         id={id}
         name="code"
@@ -19,13 +21,21 @@ export function FormulaireTestApplication({ facteur }: { facteur: string }) {
         pattern="[0-9]{6}"
         maxLength={6}
         required
-        className="outlined bg-paper rounded-lg p-3"
+        className="champ-code"
       />
       <button disabled={pending} className="lien-espace disabled:opacity-50">
         {t.tester}
       </button>
-      {etat.erreur ? <p role="alert">{etat.erreur}</p> : null}
-      {etat.succes ? <p role="status">{t.testReussi}</p> : null}
+      {etat.erreur ? (
+        <p role="alert" className="retour-formulaire retour-formulaire-erreur">
+          {etat.erreur}
+        </p>
+      ) : null}
+      {etat.succes ? (
+        <p role="status" className="retour-formulaire retour-formulaire-succes">
+          {t.testReussi}
+        </p>
+      ) : null}
     </form>
   )
 }

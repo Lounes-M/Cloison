@@ -19,7 +19,17 @@ export async function parcourirApplicationSecours(page, site, moteur, largeur, f
       exact: true,
     })
     await preparer.click()
-    await page.locator('code').filter({ hasText: 'CLE_FICTIVE_SECOURS' }).waitFor()
+    const manuel = page.locator('details').filter({ hasText: 'Saisir la clé manuellement' })
+    await manuel.waitFor()
+    const cle = page.locator('code').filter({ hasText: 'CLE_FICTIVE_SECOURS' })
+    assert.equal(await cle.isVisible(), false, 'La cle manuelle est repliee au depart')
+    await manuel.locator('summary').focus()
+    await page.keyboard.press('Enter')
+    await cle.waitFor()
+    assert(
+      await manuel.locator('summary').evaluate((e) => e.getBoundingClientRect().height >= 44),
+      'La commande de configuration manuelle reste accessible au toucher',
+    )
     assert.equal(fixture.facteurs().length, 2)
     const ancienne = fixture.facteurs()[1].id
     assert(
@@ -47,7 +57,7 @@ export async function parcourirApplicationSecours(page, site, moteur, largeur, f
     await preparer.waitFor()
     assert.deepEqual(fixture.facteurs(), [principal])
     await preparer.click()
-    await page.locator('code').waitFor()
+    await page.locator('details').filter({ hasText: 'Saisir la clé manuellement' }).waitFor()
     assert.notEqual(fixture.facteurs()[1].id, ancienne)
     const code = page.locator('#code-secours')
     await code.fill('123456')

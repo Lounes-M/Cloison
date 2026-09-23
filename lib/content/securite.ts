@@ -11,6 +11,12 @@ export const securite = {
   activer: 'Configurer l’authentification à deux facteurs',
   verifier: 'Vérifier le code',
   code: 'Code à six chiffres',
+  scanner: 'Scannez ce QR code avec votre application',
+  qr: 'QR code de configuration de votre application d’authentification',
+  manuel: 'Saisir la clé manuellement',
+  aideManuelle:
+    'Si le scan est impossible, saisissez cette clé dans votre application. Ne la partagez pas.',
+  aideCode: 'Utilisez le code actuellement affiché dans votre application.',
   erreur: 'Vérification impossible. Vérifiez votre code et réessayez.',
   deconnexion: 'Se déconnecter',
 }
