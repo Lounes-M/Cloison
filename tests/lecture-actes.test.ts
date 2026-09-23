@@ -107,3 +107,32 @@ test('une capacite locataire ne devient jamais une capacite garant', async () =>
   ).toBe(404)
   expect(h.lire).not.toHaveBeenCalled()
 })
+
+test('une interruption pendant le dernier controle ne retourne aucun PDF', async () => {
+  const c = new AbortController()
+  const original = h.rpc.getMockImplementation()!
+  h.rpc.mockImplementation(async (n, p) => {
+    if (n === 'journaliser_lecture_acte') c.abort()
+    return original(n, p)
+  })
+  const r = await telechargerActe(
+    new Request('https://example.invalid', { signal: c.signal }),
+    id,
+    'acte',
+    'agence',
+  )
+  expect(r.status).toBe(404)
+  expect(await r.text()).toBe('')
+})
+test('une reponse deja ouverte refuse toute lecture apres interruption', async () => {
+  const c = new AbortController()
+  const r = await telechargerActe(
+    new Request('https://example.invalid', { signal: c.signal }),
+    id,
+    'acte',
+    'agence',
+  )
+  expect(r.status).toBe(200)
+  c.abort()
+  await expect(r.arrayBuffer()).rejects.toThrow('Lecture interrompue')
+})

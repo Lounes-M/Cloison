@@ -42,8 +42,20 @@ export function ouvrirFichierActe(octets: Buffer, cle: Buffer, reference: Fichie
   const dechiffre = createDecipheriv('aes-256-gcm', cle, Buffer.from(f.nonce.slice(2), 'hex'))
   dechiffre.setAAD(contexte(f))
   dechiffre.setAuthTag(octets.subarray(-16))
-  const pdf = Buffer.concat([dechiffre.update(octets.subarray(0, -16)), dechiffre.final()])
-  if (empreintePdf(pdf) !== f.empreinte || pdf.subarray(0, 5).toString() !== '%PDF-')
-    throw new Error('Archive invalide')
-  return pdf
+  const blocs: Buffer[] = []
+  let pdf: Buffer | undefined
+  let valide = false
+  try {
+    blocs.push(dechiffre.update(octets.subarray(0, -16)))
+    blocs.push(dechiffre.final())
+    pdf = Buffer.concat(blocs)
+    if (empreintePdf(pdf) !== f.empreinte || pdf.subarray(0, 5).toString() !== '%PDF-')
+      throw new Error('Archive invalide')
+    valide = true
+    return pdf
+  } finally {
+    // GCM peut produire des octets provisoires avant de refuser le tag final.
+    for (const bloc of blocs) bloc.fill(0)
+    if (!valide) pdf?.fill(0)
+  }
 }
