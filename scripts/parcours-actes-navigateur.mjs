@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { parcourirExport } from './parcours-exports-navigateur.mjs'
 import { randomUUID } from 'node:crypto'
 export function fixtureActes(dossier) {
   let active = false,
@@ -145,6 +146,7 @@ export function fixtureActes(dossier) {
               {
                 id: acte.id,
                 montant_cents: 2900,
+                rembourse_cents: null,
                 cree_le: '2026-09-23T12:00:00Z',
                 paye_le: null,
                 tarif_version: 'recette',
@@ -154,6 +156,7 @@ export function fixtureActes(dossier) {
               {
                 id: dossier,
                 montant_cents: 5800,
+                rembourse_cents: 0,
                 cree_le: '2026-09-22T12:00:00Z',
                 paye_le: null,
                 tarif_version: 'recette',
@@ -210,6 +213,7 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
     await visiter('/espace/archives', 'archives-remplies')
     const archive = page.getByRole('link', { name: /Modèle de recette avec une référence longue/ })
     assert.equal(await archive.getAttribute('href'), `/espace/actes/${fixture.lire().id}`)
+    await parcourirExport(page, 'archives', fixture.lire().id)
     await archive.focus()
     assert(await archive.evaluate((e) => document.activeElement === e))
     await visiter('/espace/facturation', 'facturation-remplie')
@@ -219,6 +223,7 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
       0,
       'Le paiement ferme ne doit pas etre rendu disponible par la presentation',
     )
+    await parcourirExport(page, 'reglements', fixture.lire().id)
     console.log(
       `OK : acte ${moteur.name()} ${largeur}, depot chiffre, original, consentement explicite, clavier et espaces archives/reglements`,
     )

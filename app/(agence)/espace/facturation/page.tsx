@@ -1,3 +1,4 @@
+import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { EtatVide } from '@/components/ui/EtatVide'
 import { notFound } from 'next/navigation'
@@ -42,6 +43,7 @@ export default async function Page({
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.explication}</p>
       </EnteteEspace>
+      {c.agence.statut === 'verifiee' ? <ExportRegistre registre="reglements" /> : null}
       {q.paiement === 'indisponible' ? (
         <p
           role="status"
