@@ -41,6 +41,9 @@ export const signature = {
   valide: 'Validation enregistrée.',
   refuse: 'Refus enregistré.',
   aucun: 'Aucun acte disponible.',
+  archivesAide:
+    'Les actes archivés et leurs preuves de signature sont accessibles depuis cet espace.',
+  documents: 'Documents disponibles',
   fournisseur: {
     draft: 'Préparation',
     approval: 'Approbation attendue',

@@ -5,6 +5,10 @@ export const facturation = {
   explication:
     'Un règlement est créé après la signature et l’archivage complet. Aucun règlement agence n’est créé en sandbox.',
   aucun: 'Aucun acte à régler.',
+  aucunAide: 'Les règlements apparaissent ici après la signature et l’archivage complet des actes.',
+  date: 'Créé le',
+  montant: 'Montant',
+  etat: 'État du règlement',
   payer: 'Régler par carte',
   suite: 'Page suivante',
   retour: 'Retour à l’espace agence',
