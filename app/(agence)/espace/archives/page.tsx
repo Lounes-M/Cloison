@@ -1,4 +1,6 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { EtatVide } from '@/components/ui/EtatVide'
+import { Icone } from '@/components/ui/Icone'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -31,33 +33,50 @@ export default async function Page({
     .parse(r.data)
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <EnteteEspace titre={t.archives} etiquette={t.etiquette} />
-      <p className="mt-4">{t.conserve}</p>
-      <ul className="mt-6 grid gap-4">
-        {liste.map((a) => (
-          <li className="panneau-espace p-5" key={a.id}>
-            <Link className="lien-espace" href={`/espace/actes/${a.id}`}>
-              {a.modele} · {new Date(a.archive_le).toLocaleDateString('fr-FR')}
-            </Link>
-            {a.environnement === 'sandbox' ? <p>{t.sandbox}</p> : null}
-            <p>
-              {t.echeance} {new Date(a.conserver_jusqu_au).toLocaleDateString('fr-FR')}
-            </p>
-          </li>
-        ))}
-      </ul>
-      {!liste.length ? <p className="mt-6">{t.aucun}</p> : null}
+      <Link className="lien-espace mb-6" href="/espace">
+        {t.retour}
+      </Link>
+      <EnteteEspace titre={t.archives} etiquette={t.etiquette}>
+        <p>{t.conserve}</p>
+      </EnteteEspace>
+      {liste.length ? (
+        <ul className="grid gap-4">
+          {liste.map((a) => (
+            <li className="panneau-espace" key={a.id}>
+              <div className="flex items-start gap-4">
+                <span className="bg-sky/20 text-cobalt grid size-11 shrink-0 place-items-center rounded-xl">
+                  <Icone nom="acte" className="size-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    className="text-cobalt inline-flex min-h-11 items-center font-bold break-words underline-offset-4 hover:underline"
+                    href={`/espace/actes/${a.id}`}
+                  >
+                    {a.modele} · {new Date(a.archive_le).toLocaleDateString('fr-FR')}
+                  </Link>
+                  <p className="text-muted mt-2 text-sm leading-relaxed">
+                    {t.echeance} {new Date(a.conserver_jusqu_au).toLocaleDateString('fr-FR')}
+                  </p>
+                </div>
+              </div>
+              {a.environnement === 'sandbox' ? (
+                <p className="bg-sun/20 mt-4 rounded-lg px-3 py-2 text-xs leading-relaxed font-semibold">
+                  {t.sandbox}
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EtatVide titre={t.aucun} icone="acte">
+          <p>{t.archivesAide}</p>
+        </EtatVide>
+      )}
       {liste.length === 20 ? (
-        <Link
-          className="lien-espace mt-6 block"
-          href={`/espace/archives?avant=${liste.at(-1)!.id}`}
-        >
+        <Link className="lien-espace mt-6" href={`/espace/archives?avant=${liste.at(-1)!.id}`}>
           {t.suite}
         </Link>
       ) : null}
-      <Link className="lien-espace mt-6 block" href="/espace">
-        {t.retour}
-      </Link>
     </div>
   )
 }

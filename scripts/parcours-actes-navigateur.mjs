@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 export function fixtureActes(dossier) {
   let active = false,
+    listesRemplies = false,
     acte = null,
     demande = null,
     fichiers = [],
@@ -9,6 +10,7 @@ export function fixtureActes(dossier) {
   return {
     activer() {
       active = true
+      listesRemplies = false
       acte = null
       demande = null
       fichiers = []
@@ -18,6 +20,9 @@ export function fixtureActes(dossier) {
       active = false
     },
     lire: () => acte,
+    remplirListes() {
+      listesRemplies = true
+    },
     traiter(req, res, brut) {
       const chemin = new URL(req.url, 'http://fixture.invalid').pathname
       if (!active) {
@@ -122,8 +127,41 @@ export function fixtureActes(dossier) {
               },
             ]
           : []
-      else if (chemin.endsWith('/rpc/archives_de_mon_agence')) resultat = []
-      else if (chemin.endsWith('/rpc/factures_de_mon_agence')) resultat = []
+      else if (chemin.endsWith('/rpc/archives_de_mon_agence'))
+        resultat = listesRemplies
+          ? [
+              {
+                id: acte.id,
+                modele: 'Modèle de recette avec une référence longue pour la vérification mobile',
+                archive_le: '2026-09-23T12:00:00Z',
+                conserver_jusqu_au: '2031-09-23T12:00:00Z',
+                environnement: 'sandbox',
+              },
+            ]
+          : []
+      else if (chemin.endsWith('/rpc/factures_de_mon_agence'))
+        resultat = listesRemplies
+          ? [
+              {
+                id: acte.id,
+                montant_cents: 2900,
+                cree_le: '2026-09-23T12:00:00Z',
+                paye_le: null,
+                tarif_version: 'recette',
+                etat: 'a_regler',
+                anomalie: false,
+              },
+              {
+                id: dossier,
+                montant_cents: 5800,
+                cree_le: '2026-09-22T12:00:00Z',
+                paye_le: null,
+                tarif_version: 'recette',
+                etat: 'litige',
+                anomalie: true,
+              },
+            ]
+          : []
       else return false
       res.setHeader('Content-Type', 'application/json')
       if (req.headers.accept?.includes('vnd.pgrst.object') && Array.isArray(resultat))
@@ -168,6 +206,19 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
       await page.locator('h1').waitFor()
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     }
+    fixture.remplirListes()
+    await visiter('/espace/archives', 'archives-remplies')
+    const archive = page.getByRole('link', { name: /Modèle de recette avec une référence longue/ })
+    assert.equal(await archive.getAttribute('href'), `/espace/actes/${fixture.lire().id}`)
+    await archive.focus()
+    assert(await archive.evaluate((e) => document.activeElement === e))
+    await visiter('/espace/facturation', 'facturation-remplie')
+    await page.getByText('Rapprochement à examiner', { exact: true }).waitFor()
+    assert.equal(
+      await page.getByRole('button', { name: 'Régler par carte', exact: true }).count(),
+      0,
+      'Le paiement ferme ne doit pas etre rendu disponible par la presentation',
+    )
     console.log(
       `OK : acte ${moteur.name()} ${largeur}, depot chiffre, original, consentement explicite, clavier et espaces archives/reglements`,
     )
