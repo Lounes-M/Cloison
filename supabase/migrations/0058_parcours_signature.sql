@@ -120,7 +120,7 @@ declare a public.actes_signature; s public.demandes_signature;
 begin
  select * into s from public.demandes_signature where id=le_id;
  if not found or public.partie_courante()<>'garant' or public.dossier_courant() is distinct from s.dossier_id then return false;end if;
- perform 1 from public.dossiers where id=s.dossier_id and statut='transmis' and expire_le>clock_timestamp() for update;
+ perform 1 from public.dossiers d where d.id=s.dossier_id and d.statut='transmis' and not d.demonstration and d.expire_le>clock_timestamp() and exists(select 1 from public.agences g where g.id=d.agence_id and g.statut='verifiee') for update;
  if not found then return false;end if;
  select * into a from public.actes_signature where id=le_id for update;
  if not found or a.etape<>'a_valider' or a.expire_signature<=clock_timestamp() or s.empreinte_acte is distinct from empreinte or accepter is null then return false;end if;
@@ -176,7 +176,7 @@ declare resultat uuid;
 begin
  if etape_attendue not in ('valide','document','signataire','activation') then return null;end if;
  perform 1 from public.dossiers d join public.demandes_signature s on s.dossier_id=d.id
- where s.id=le_id and d.statut='transmis' and d.expire_le>clock_timestamp() and not s.anomalie for update of d;
+ where s.id=le_id and d.statut='transmis' and not d.demonstration and d.expire_le>clock_timestamp() and not s.anomalie and exists(select 1 from public.agences g where g.id=d.agence_id and g.statut='verifiee') for update of d;
  if not found then return null;end if;
  update public.actes_signature set operation=gen_random_uuid(),operation_jusqu_au=clock_timestamp()+interval '2 minutes'
  where id=le_id and etape=etape_attendue and operation is null and valide_le is not null and expire_signature>clock_timestamp()
@@ -206,7 +206,7 @@ create function public.actes_a_traiter(le_mode text) returns setof uuid language
  join public.dossiers d on d.id=s.dossier_id
  where s.environnement=le_mode and not s.anomalie and d.statut='transmis' and d.expire_le>clock_timestamp()
  and (a.expire_signature>clock_timestamp() or (a.etape='en_cours' and s.etat='done')) and a.operation is null
- and ((a.etape in ('valide','document','signataire','activation') and s.etat not in ('canceled','declined','rejected','deleted','expired')) or (a.etape='en_cours' and s.etat='done'))
+ and ((a.etape in ('valide','document','signataire','activation') and not d.demonstration and exists(select 1 from public.agences g where g.id=d.agence_id and g.statut='verifiee') and s.etat not in ('canceled','declined','rejected','deleted','expired')) or (a.etape='en_cours' and s.etat='done'))
  order by s.cree_le limit 1;
 $$;
 create function public.publier_archive_signature(le_id uuid,la_revision bigint) returns boolean

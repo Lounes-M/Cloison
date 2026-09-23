@@ -563,3 +563,40 @@ test('une creation incertaine expiree conserve sa cle et declenche un rapprochem
   expect(await rpc('expirer_archives_signature')).toBe(0)
   expect(await rpc('operations_actes_a_examiner')).toBe(1)
 })
+
+test('une agence suspendue ne peut faire valider un nouveau projet', async () => {
+  await deposer()
+  await redevenirProprietaire(db)
+  await db.exec("update agences set statut='suspendue'")
+  expect(await valider()).toBe(false)
+})
+test('la suspension apres consentement interdit toute mutation fournisseur', async () => {
+  await deposer()
+  await valider()
+  await redevenirProprietaire(db)
+  await db.exec("update agences set statut='suspendue'")
+  await devenir(db, 'serveur')
+  const f = fournisseur()
+  expect((await db.query("select * from actes_a_traiter('production')")).rows).toHaveLength(0)
+  await expect(traiterActe(serveur, id, 'production', f, signal(), stockage)).rejects.toThrow(
+    'Operation non reservee',
+  )
+  expect(f.creer).not.toHaveBeenCalled()
+})
+test('une suspension entre deux etapes empeche le depot du document suivant', async () => {
+  await deposer()
+  await valider()
+  await devenir(db, 'serveur')
+  const f = fournisseur()
+  vi.mocked(f.creer).mockImplementationOnce(async () => {
+    await redevenirProprietaire(db)
+    await db.exec("update agences set statut='suspendue'")
+    await devenir(db, 'serveur')
+    return { id: distante, status: 'draft' }
+  })
+  await expect(traiterActe(serveur, id, 'production', f, signal(), stockage)).rejects.toThrow(
+    'Operation non reservee',
+  )
+  expect(f.creer).toHaveBeenCalledTimes(1)
+  expect(f.ajouterDocument).not.toHaveBeenCalled()
+})
