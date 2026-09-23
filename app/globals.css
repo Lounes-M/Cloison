@@ -313,6 +313,51 @@
 
 /* Personne ne doit subir les animations. */
 @layer components {
+  .configuration-authentification {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
+    border-radius: var(--radius-brut-lg);
+    background: var(--color-cream);
+  }
+
+  .espace-shell .champ-code {
+    width: 100%;
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 12px;
+    background: var(--color-paper);
+    font-family: ui-monospace, monospace;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    letter-spacing: 0.25em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .retour-formulaire {
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+    border-left-width: 4px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .retour-formulaire-erreur {
+    border-left-color: var(--color-flame);
+    background: color-mix(in srgb, var(--color-flame) 8%, var(--color-paper));
+  }
+
+  .retour-formulaire-succes {
+    border-left-color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-mint) 25%, var(--color-paper));
+  }
+
   .ecran-reprise {
     display: grid;
     min-height: 70vh;
