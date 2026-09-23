@@ -17,21 +17,34 @@ export async function POST(requete: Request) {
   const actif = process.env.SIGNATURE_PARCOURS_ENABLED === 'true'
   // La retention continue meme quand les nouveaux parcours sont fermes.
   try {
-    const db = await clientServeur(AbortSignal.any([requete.signal, AbortSignal.timeout(10000)]))
+    const signal = AbortSignal.any([requete.signal, AbortSignal.timeout(10000)])
+    const db = await clientServeur(signal)
     const expiration = await db.rpc('expirer_archives_signature')
     if (expiration.error) throw new Error()
     const file = await db.rpc('fichiers_archives_a_supprimer')
     const chemins = z
-      .array(z.string().regex(/^[a-f0-9-]{36}\/[a-f0-9-]{36}$/))
+      .array(
+        z.string().refine((v) => {
+          const parties = v.split('/')
+          return parties.length === 2 && parties.every((p) => z.uuid().safeParse(p).success)
+        }),
+      )
       .max(10)
+      .refine((v) => new Set(v).size === v.length)
       .parse(file.data)
     if (file.error) throw new Error()
     for (const chemin of chemins) {
-      const r = await db.storage.from('actes').remove([chemin])
-      if (r.error) throw new Error()
-      const confirmation = await db.rpc('acquitter_suppression_archive', { le_chemin: chemin })
-      if (confirmation.error || confirmation.data !== true) throw new Error()
-      effaces++
+      signal.throwIfAborted()
+      try {
+        const r = await db.storage.from('actes').remove([chemin])
+        if (r.error) throw new Error()
+        const confirmation = await db.rpc('acquitter_suppression_archive', { le_chemin: chemin })
+        if (confirmation.error || confirmation.data !== true) throw new Error()
+        effaces++
+      } catch {
+        // Le chemin reste en file ; les autres suppressions peuvent encore aboutir.
+        echecs++
+      }
     }
   } catch {
     echecs++

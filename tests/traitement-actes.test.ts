@@ -79,3 +79,73 @@ test('le rapprochement bancaire echoue si une des sessions ne se confirme pas', 
   expect(r.status).toBe(503)
   expect(await r.json()).toEqual({ actif: true, traites: 0, echecs: 1 })
 })
+
+const premier = '11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222'
+const second = '11111111-1111-4111-8111-111111111111/33333333-3333-4333-8333-333333333333'
+function fileSuppression(chemins: string[]) {
+  h.rpc.mockImplementation(async (n) => ({
+    data:
+      n === 'fichiers_archives_a_supprimer'
+        ? chemins
+        : n === 'acquitter_suppression_archive'
+          ? true
+          : 0,
+    error: null,
+  }))
+  h.retirer.mockResolvedValue({ error: null })
+}
+test.each(['storage', 'confirmation'])(
+  'un echec %s conserve le fichier en file sans bloquer les autres',
+  async (etape) => {
+    fileSuppression([premier, second])
+    if (etape === 'storage')
+      h.retirer.mockResolvedValueOnce({ error: { message: 'DONNEE_PRIVEE' } })
+    else
+      h.rpc.mockImplementation(async (n, args) => ({
+        data: n === 'fichiers_archives_a_supprimer' ? [premier, second] : true,
+        error:
+          n === 'acquitter_suppression_archive' && args.le_chemin === premier
+            ? { message: 'DONNEE_PRIVEE' }
+            : null,
+      }))
+    const r = await signature(requete())
+    expect(r.status).toBe(503)
+    expect(await r.json()).toEqual({ actif: false, traites: 0, effaces: 1, echecs: 1 })
+    expect(h.retirer.mock.calls).toEqual([[[premier]], [[second]]])
+    expect(h.rpc).toHaveBeenCalledWith('acquitter_suppression_archive', { le_chemin: second })
+    if (etape === 'storage')
+      expect(h.rpc).not.toHaveBeenCalledWith('acquitter_suppression_archive', {
+        le_chemin: premier,
+      })
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain('DONNEE_PRIVEE')
+  },
+)
+test('une interruption arrete les suppressions suivantes dans le meme budget', async () => {
+  fileSuppression([premier, second])
+  const c = new AbortController()
+  h.retirer.mockImplementationOnce(async () => {
+    c.abort()
+    throw new Error('interruption')
+  })
+  const r = await signature(
+    new Request('https://example.invalid', {
+      method: 'POST',
+      headers: { authorization: 'Bearer fictif' },
+      signal: c.signal,
+    }),
+  )
+  expect(r.status).toBe(503)
+  expect(h.retirer).toHaveBeenCalledTimes(1)
+  expect(h.rpc).not.toHaveBeenCalledWith('acquitter_suppression_archive', expect.anything())
+})
+test.each([
+  [premier, premier],
+  ['------------------------------------/------------------------------------'],
+  ['../pieces/fichier'],
+  Array(11).fill(premier),
+])('une file invalide ne supprime aucun objet : %j', async (...chemins) => {
+  fileSuppression(chemins as string[])
+  const r = await signature(requete())
+  expect(r.status).toBe(503)
+  expect(h.retirer).not.toHaveBeenCalled()
+})
