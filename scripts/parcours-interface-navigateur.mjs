@@ -8,7 +8,7 @@ import { parcourirSupport } from './parcours-support-navigateur.mjs'
 
 async function verifierCommandes(page, nom) {
   const commandes = await page
-    .locator('button, a.press, .lien-espace, summary')
+    .locator('button, a.press, .lien-espace, .carte-priorite, summary')
     .evaluateAll((elements) =>
       elements
         .filter((e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')
@@ -175,11 +175,14 @@ export async function parcourirInterface(
   await page.getByLabel('Trier les dossiers').waitFor({ state: 'visible' })
   await verifierCommandes(page, 'filtres avances ouverts')
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
-  if (repertoire && moteur.name() === 'chromium')
+  if (repertoire && moteur.name() === 'chromium') {
+    await page.evaluate(() => window.scrollTo(0, 0))
     await page.screenshot({
       path: join(repertoire, `tableau-filtres-${largeur}.png`),
       fullPage: true,
+      animations: 'disabled',
     })
+  }
   await filtresAvances.locator('summary').focus()
   await page.keyboard.press('Enter')
   const dossiers = page.getByRole('list', { name: 'Vos dossiers', exact: true })
