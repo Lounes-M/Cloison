@@ -1,5 +1,6 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace } from '@/lib/content/interface'
+import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -411,6 +412,7 @@ export default async function PageDossier({
       </p>
       <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />
+      <SuiviSignature db={supabase} dossier={id} partie="agence" />
     </div>
   )
 }

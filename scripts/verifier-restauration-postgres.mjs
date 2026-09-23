@@ -28,6 +28,7 @@ const ROLES_FIXTURE = [
   'porteur_lien',
   'serveur',
   'depot_piece',
+  'archive_signature',
 ]
 const CATALOGUES = {
   declencheurs: `select n.nspname,c.relname,t.tgname,t.tgenabled,pg_get_triggerdef(t.oid) as definition

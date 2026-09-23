@@ -1,5 +1,6 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace } from '@/lib/content/interface'
+import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
 import { FormulaireReutilisation } from '@/components/forms/FormulaireReutilisation'
 import { Complements } from '@/components/dossiers/Complements'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
@@ -356,6 +357,7 @@ export default async function PageGarant({
         )}
       </section>
       <SupportDossier reference={String(dossier.reference)} espace="garant" />
+      <SuiviSignature db={supabase} dossier={dossierId} partie="garant" />
     </div>
   )
 }

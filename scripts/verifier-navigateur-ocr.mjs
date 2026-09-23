@@ -1,3 +1,4 @@
+import { fixtureActes } from './parcours-actes-navigateur.mjs'
 import {
   fixtureReutilisation,
   parcourirReutilisation,
@@ -68,10 +69,12 @@ let historiqueResponsables = [],
 let demandesMfa = [],
   erreurMfa = true
 const reutilisation = await fixtureReutilisation(id)
+const actes = fixtureActes(id)
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
   const brut = Buffer.concat(blocs)
+  if (actes.traiter(req, res, brut)) return
   if (reutilisation.traiter(req, res, brut)) return
   const entree = blocs.length ? JSON.parse(brut.toString('utf8')) : {}
   res.setHeader('Content-Type', 'application/json')
@@ -359,6 +362,11 @@ const next = spawn(
       SUPABASE_JWT_SECRET: 'fixture',
       CLE_MAITRESSE: cleFictive.toString('base64'),
       OCR_ACTIVE: 'true',
+      SIGNATURE_PARCOURS_ENABLED: 'true',
+      YOUTRUST_ENVIRONMENT: 'sandbox',
+      YOUTRUST_REGISTRY_ENABLED: 'true',
+      ACTE_MODELE_VERSION: 'recette-v1',
+      ACTE_CONSERVATION_JOURS: '30',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',
       EMAIL_SUPPORT: 'support@example.invalid',
     },
@@ -532,9 +540,18 @@ try {
               roleCourant = v
             },
           })
-          await parcourirInterface(page, relais.site, id, moteur, largeur, session, (valeur) => {
-            panneInterface = valeur
-          })
+          await parcourirInterface(
+            page,
+            relais.site,
+            id,
+            moteur,
+            largeur,
+            session,
+            (valeur) => {
+              panneInterface = valeur
+            },
+            actes,
+          )
           await parcourirBrouillon(page, relais.site, moteur, largeur, {
             reinitialiser: () => {
               brouillon = null

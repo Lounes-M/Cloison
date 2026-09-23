@@ -1,3 +1,5 @@
+import { signature } from '@/lib/content/signature'
+import { facturation } from '@/lib/content/facturation'
 import Link from 'next/link'
 import { Logo } from '@/components/brand/Logo'
 import { interfaceEspace as t } from '@/lib/content/interface'
@@ -40,6 +42,16 @@ export function CadreEspace({
               <Link href="/espace" className="lien-espace">
                 {t.tableau}
               </Link>
+            ) : null}
+            {navigation && agence ? (
+              <>
+                <Link href="/espace/archives" className="lien-espace">
+                  {signature.archives}
+                </Link>
+                <Link href="/espace/facturation" className="lien-espace">
+                  {facturation.titre}
+                </Link>
+              </>
             ) : null}
             {sortie}
           </nav>

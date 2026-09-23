@@ -273,3 +273,170 @@ export async function lireSessionPourRapprochement(referenceSession: string) {
     paye: session.payment_status === 'paid',
   }
 }
+
+export type ReservationActe = {
+  id: string
+  facture: string
+  montant: number
+  tarif: string
+  session: string | null
+  cree_le: string
+}
+/** La meme reservation et les memes parametres restent utilises apres une interruption. */
+export async function creerSessionActe(
+  r: ReservationActe,
+  origine: string,
+): Promise<string | null> {
+  const api = stripe()
+  let session: Stripe.Checkout.Session
+  if (r.session) session = await api.checkout.sessions.retrieve(r.session)
+  else {
+    const age = Date.now() - Date.parse(r.cree_le)
+    if (!Number.isFinite(age) || age < -300000 || age >= 23 * 3600000)
+      throw new Error('Reglement a rapprocher')
+    session = await api.checkout.sessions.create(
+      {
+        mode: 'payment',
+        payment_method_types: ['card'],
+        client_reference_id: r.facture,
+        metadata: {
+          produit: 'cloison_acte',
+          facture_id: r.facture,
+          tentative: r.id,
+          tarif_version: r.tarif,
+        },
+        payment_intent_data: {
+          metadata: { produit: 'cloison_acte', facture_id: r.facture, tentative: r.id },
+        },
+        line_items: [
+          {
+            quantity: 1,
+            price_data: {
+              currency: 'eur',
+              unit_amount: r.montant,
+              product_data: { name: 'Acte Cloison signe' },
+            },
+          },
+        ],
+        success_url: `${origine}/espace/facturation`,
+        cancel_url: `${origine}/espace/facturation`,
+        locale: 'fr',
+      },
+      { idempotencyKey: `cloison-acte:${r.id}` },
+    )
+  }
+  if (
+    !session.livemode ||
+    session.metadata?.produit !== 'cloison_acte' ||
+    session.metadata.facture_id !== r.facture ||
+    session.metadata.tentative !== r.id ||
+    session.metadata.tarif_version !== r.tarif ||
+    session.amount_total !== r.montant ||
+    session.currency !== 'eur' ||
+    session.mode !== 'payment' ||
+    session.client_reference_id !== r.facture
+  )
+    throw new Error('Reglement incoherent')
+  const db = await clientServeur()
+  const lien = await db.rpc('rattacher_reglement_acte', { le_id: r.id, la_session: session.id })
+  if (lien.error || lien.data !== true) throw new Error('Reglement non confirme')
+  if (session.status !== 'open' || session.payment_status !== 'unpaid') {
+    await rapprocherSessionActe(session.id, r.id)
+    return null
+  }
+  if (!session.url || new URL(session.url).origin !== 'https://checkout.stripe.com')
+    throw new Error('Destination invalide')
+  return session.url
+}
+/** Un webhook sert de reveil : la decision utilise une lecture fournisseur courante. */
+export async function rapprocherSessionActe(
+  reference: string,
+  tentative?: string,
+  signal = AbortSignal.timeout(20000),
+) {
+  signal.throwIfAborted()
+  if (!/^cs_[A-Za-z0-9_]{1,190}$/.test(reference)) throw new Error('Reference invalide')
+  const s = await stripe().checkout.sessions.retrieve(reference, {
+    expand: ['payment_intent.latest_charge'],
+  })
+  const m = s.metadata
+  if (
+    s.id !== reference ||
+    !s.livemode ||
+    s.mode !== 'payment' ||
+    m?.produit !== 'cloison_acte' ||
+    !estUuidCanonique(m.facture_id) ||
+    !estUuidCanonique(m.tentative) ||
+    (tentative && tentative !== m.tentative) ||
+    s.client_reference_id !== m.facture_id ||
+    !m.tarif_version ||
+    s.currency !== 'eur' ||
+    !Number.isSafeInteger(s.amount_total) ||
+    s.amount_total! < 1
+  )
+    throw new Error('Reglement incoherent')
+  const paiement = typeof s.payment_intent === 'object' ? s.payment_intent : null
+  const charge =
+    paiement && typeof paiement.latest_charge === 'object' ? paiement.latest_charge : null
+  const paye = s.payment_status === 'paid'
+  if (
+    paye &&
+    (!paiement ||
+      !charge ||
+      paiement.status !== 'succeeded' ||
+      !charge.paid ||
+      charge.amount !== s.amount_total ||
+      charge.currency !== 'eur')
+  )
+    throw new Error('Paiement incomplet')
+  const statut = paye
+    ? 'paye'
+    : s.status === 'expired'
+      ? 'expire'
+      : s.status === 'open'
+        ? 'ouvert'
+        : null
+  if (!statut) throw new Error('Paiement a revoir')
+  signal.throwIfAborted()
+  const db = await clientServeur(signal)
+  const lien = await db.rpc('rattacher_reglement_acte', { le_id: m.tentative, la_session: s.id })
+  // Un reglement deja paye ne se rattache plus : la confirmation reste idempotente.
+  if (lien.error) throw new Error('Reglement indisponible')
+  const r = await db.rpc('rapprocher_reglement_acte', {
+    le_id: m.tentative,
+    la_facture: m.facture_id,
+    la_session: s.id,
+    le_paiement: paiement?.id ?? null,
+    montant: s.amount_total,
+    devise: s.currency,
+    tarif: m.tarif_version,
+    statut,
+    rembourse: charge?.amount_refunded ?? 0,
+    conteste: charge?.disputed ?? false,
+  })
+  if (r.error || r.data !== true) throw new Error('Reglement non rapproche')
+}
+export async function traiterEvenementActe(
+  e: Stripe.Event,
+  signal = AbortSignal.timeout(20000),
+): Promise<boolean> {
+  signal.throwIfAborted()
+  if (e.type.startsWith('checkout.session.')) {
+    const s = e.data.object as Stripe.Checkout.Session
+    if (s.metadata?.produit !== 'cloison_acte') return false
+    await rapprocherSessionActe(s.id, undefined, signal)
+    return true
+  }
+  if (e.type === 'charge.refunded' || e.type.startsWith('charge.dispute.')) {
+    const o = e.data.object as Stripe.Charge | Stripe.Dispute
+    const pi = typeof o.payment_intent === 'string' ? o.payment_intent : o.payment_intent?.id
+    if (!pi) return false
+    const sessions = await stripe().checkout.sessions.list({ payment_intent: pi, limit: 2 })
+    const s = sessions.data.find((s) => s.metadata?.produit === 'cloison_acte')
+    if (!s) return false
+    if (sessions.has_more || sessions.data.length !== 1) throw new Error('Reglement ambigu')
+    await rapprocherSessionActe(s.id, undefined, signal)
+    return true
+  }
+  return false
+}

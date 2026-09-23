@@ -37,6 +37,7 @@ export function creerClientYoutrust(
     autoriserMutations?: boolean
   },
   transport: typeof fetch = fetch,
+  budget?: AbortSignal,
 ) {
   const config = z
     .strictObject({
@@ -73,7 +74,11 @@ export function creerClientYoutrust(
   ) {
     if (options.post && !autoriserMutations) throw indisponible()
     const delai = AbortSignal.timeout(15000)
-    const signal = options.signal ? AbortSignal.any([options.signal, delai]) : delai
+    const signal = AbortSignal.any([
+      delai,
+      ...(options.signal ? [options.signal] : []),
+      ...(budget ? [budget] : []),
+    ])
     signal.throwIfAborted()
     const headers: Record<string, string> = {
       Authorization: `Bearer ${cleApi}`,

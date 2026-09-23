@@ -1,3 +1,4 @@
+import { parcourirActes } from './parcours-actes-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { mkdir, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -79,14 +80,25 @@ async function verifierSurface(page) {
 }
 
 /** Rendus et acces clavier sur les pages reelles, donnees du faux fournisseur local. */
-export async function parcourirInterface(page, site, id, moteur, largeur, session, simulerPanne) {
+export async function parcourirInterface(
+  page,
+  site,
+  id,
+  moteur,
+  largeur,
+  session,
+  simulerPanne,
+  actes,
+) {
   const routesVues = new Set()
   const contexte = page.context()
   if (moteur.name() === 'chromium' && largeur === 320) await verifierPrecisionTactile(contexte)
   const repertoire = process.env.CLOISON_CAPTURE_INTERFACE_DIR
   if (repertoire) await mkdir(repertoire, { recursive: true })
   const visiter = async (chemin, nom, shell = true) => {
-    routesVues.add(chemin.replace(id, '[id]'))
+    routesVues.add(
+      chemin.replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/g, '[id]'),
+    )
     await page.goto(site + chemin)
     await page.locator('h1').first().waitFor()
     assert.equal(new URL(page.url()).pathname, chemin, `Route non rendue ${nom}`)
@@ -258,6 +270,7 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
     await parcourirSupport(page, moteur, largeur, partie)
     assert.equal(new URL(page.url()).pathname, '/' + partie, 'Le parcours porteur doit etre rendu')
   }
+  await parcourirActes(page, site, id, moteur, largeur, actes, visiter)
   const encoder = (v) => Buffer.from(JSON.stringify(v)).toString('base64url')
   const segments = session.access_token.split('.')
   const contenu = JSON.parse(Buffer.from(segments[1], 'base64url').toString())
