@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button'
 import { Icone } from '@/components/ui/Icone'
-import { LiveDot } from '@/components/ui/LiveDot'
 import { Section } from '@/components/ui/Section'
 import { hero } from '@/lib/content/home'
 import { cn } from '@/lib/utils'
@@ -15,48 +14,25 @@ export function Hero() {
   return (
     <Section
       contained={false}
-      className="relative overflow-hidden pt-14 pb-18 text-center md:pb-20"
+      className="relative overflow-hidden pt-7 pb-12 text-center md:pt-8 md:pb-16"
     >
-      {/* Étiquettes flottantes : décoratives, masquées sous lg pour laisser
-          respirer le titre sur mobile. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
+      {/* Les etiquettes restent dans le flux pour ne jamais recouvrir le titre. */}
+      <div
+        aria-hidden
+        className="pointer-events-none mx-auto mb-6 hidden max-w-[900px] items-center justify-center gap-5 lg:flex"
+      >
         {hero.badges.map((badge) => (
           <div
             key={badge.label}
             className={cn(
-              'shadow-brut-sm outlined animate-float absolute rounded-xl px-4 py-2.5 text-sm font-bold',
+              'outlined rounded-full px-3 py-1 text-xs font-bold',
               badgeTones[badge.tone],
-              badge.position,
             )}
-            style={{ rotate: `${badge.tilt}deg`, animationDelay: `${badge.delay}s` }}
           >
             {badge.label}
             <Icone nom="coche" className="ml-1.5" />
           </div>
         ))}
-
-        <div
-          className={cn(
-            'bg-paper shadow-brut-sm outlined animate-float absolute flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold',
-            hero.liveBadge.position,
-          )}
-          style={{
-            rotate: `${hero.liveBadge.tilt}deg`,
-            animationDelay: `${hero.liveBadge.delay}s`,
-          }}
-        >
-          <LiveDot />
-          {hero.liveBadge.label}
-        </div>
-
-        <Icone
-          nom="asterisque"
-          className="animate-spin-slow absolute bottom-10 left-[10%] size-13"
-        />
-        <Icone
-          nom="etoile"
-          className="text-flame animate-spin-slow absolute top-15 right-[26%] size-8 [animation-direction:reverse]"
-        />
       </div>
 
       <div className="relative mx-auto max-w-[1200px]">
@@ -65,7 +41,7 @@ export function Hero() {
         </p>
 
         <h1
-          className="font-display animate-fade-up mx-auto mt-7 max-w-[1000px] text-[clamp(2rem,7vw,76px)] leading-[1.02] uppercase [animation-delay:0.15s]"
+          className="font-display animate-fade-up mx-auto mt-5 max-w-[850px] text-[clamp(1.7rem,4.8vw,56px)] leading-[1.08] text-balance uppercase [animation-delay:0.15s]"
           style={{ animationFillMode: 'both' }}
         >
           Ton garant t&apos;aide.
@@ -82,14 +58,14 @@ export function Hero() {
         </h1>
 
         <p
-          className="animate-fade-up mx-auto mt-8 max-w-[560px] text-lg leading-relaxed font-semibold [animation-delay:0.3s]"
+          className="animate-fade-up mx-auto mt-6 max-w-[560px] text-base leading-relaxed font-medium [animation-delay:0.3s]"
           style={{ animationFillMode: 'both' }}
         >
           {hero.subtitle}
         </p>
 
         <div
-          className="animate-fade-up mt-9 flex flex-wrap justify-center gap-4 [animation-delay:0.45s]"
+          className="animate-fade-up mt-6 flex flex-wrap justify-center gap-4 [animation-delay:0.45s]"
           style={{ animationFillMode: 'both' }}
         >
           <Button href="/demarrer">{hero.primaryCta} →</Button>

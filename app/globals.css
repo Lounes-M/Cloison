@@ -317,14 +317,13 @@
   .panneau-espace {
     min-width: 0;
     padding: clamp(1.15rem, 3vw, 2rem);
-    border: 2px solid var(--color-ink);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
     border-radius: var(--radius-brut-lg);
     background: var(--color-paper);
-    box-shadow: var(--shadow-brut-sm);
   }
 
   .panneau-espace > h2 {
-    border-bottom: 3px solid var(--color-sun);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
     padding-bottom: 0.8rem;
     margin-bottom: 1rem;
   }
@@ -336,13 +335,12 @@
     gap: 0.5rem;
     min-height: 44px;
     padding: 0.6rem 1rem;
-    border: 2px solid var(--color-ink);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
     border-radius: 10px;
     background: var(--color-paper);
     color: var(--color-ink);
     font-size: 0.8rem;
     font-weight: 700;
-    box-shadow: var(--shadow-brut-xs);
     cursor: pointer;
     transition:
       translate 0.15s ease,
@@ -356,7 +354,46 @@
   }
 
   .entete-espace {
-    animation: fade-up 0.45s both;
+    animation: none;
+  }
+
+  .aide-espace {
+    border-top: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
+    padding-top: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .aide-espace > summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .aide-espace[open] > summary {
+    margin-bottom: 0.75rem;
+  }
+  .navigation-sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block: 1.5rem;
+  }
+  .navigation-sections a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0.5rem 0.85rem;
+    border-radius: 10px;
+    background: var(--color-paper);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .navigation-sections a:hover,
+  .navigation-sections a[aria-current='page'] {
+    color: var(--color-cobalt);
+    border-color: var(--color-cobalt);
+  }
+  .espace-shell section[id] {
+    scroll-margin-top: 1.5rem;
   }
 
   .page-espace > h1 {

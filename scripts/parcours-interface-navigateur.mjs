@@ -92,6 +92,14 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
     assert.equal(new URL(page.url()).pathname, chemin, `Route non rendue ${nom}`)
     await page.evaluate(() => document.fonts.ready)
     assert.equal(await page.locator('h1').count(), 1, 'Titre de page unique')
+    const ancresAbsentes = await page
+      .locator('.navigation-sections a[href^="#"]')
+      .evaluateAll((liens) =>
+        liens
+          .filter((lien) => !document.getElementById(lien.hash.slice(1)))
+          .map((lien) => lien.hash),
+      )
+    assert.deepEqual(ancresAbsentes, [], `Section de dossier inaccessible ${nom}`)
     assert(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
       `Debordement interface ${nom}`,
@@ -200,6 +208,16 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   await parcourirSupport(page, moteur, largeur, 'agence')
   await visiter('/connexion', 'connexion')
   await visiter('/demarrer', 'demarrer')
+  const ouverture = page.getByRole('button', { name: 'Ouvrir mon dossier', exact: true })
+  assert(
+    await ouverture.evaluate((e) => e.getBoundingClientRect().bottom <= innerHeight),
+    'Ouverture repoussee sous le premier ecran',
+  )
+  const retrouver = page.locator('details').filter({ hasText: 'Tu as déjà un dossier ?' })
+  await retrouver.locator('summary').focus()
+  await page.keyboard.press('Enter')
+  assert(await page.locator('#email-retour').isVisible(), 'Recuperation inaccessible au clavier')
+  await retrouver.locator('summary').press('Enter')
   await visiter('/lien-invalide', 'lien-invalide')
   // Le lien de saut doit rendre le contenu atteignable au clavier.
   await page.keyboard.press(
@@ -240,6 +258,13 @@ export async function parcourirInterface(page, site, id, moteur, largeur, sessio
   await visiter('/connexion/securite', 'securite')
   assert.equal(new URL(page.url()).pathname, '/connexion/securite')
   await visiter('/', 'home-reference', false)
+  const creation = page.getByRole('link', { name: 'Créer mon dossier →', exact: true }).first()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  assert(
+    await creation.evaluate((e) => e.getBoundingClientRect().bottom <= innerHeight),
+    'Action principale repoussee sous le premier ecran',
+  )
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   if (largeur < 768) {
     const menu = page.getByRole('navigation', { name: 'Navigation principale' }).locator('details')
     await menu.locator('summary').focus()

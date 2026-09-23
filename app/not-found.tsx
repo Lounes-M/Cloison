@@ -3,6 +3,7 @@ import { connection } from 'next/server'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { Button } from '@/components/ui/Button'
+import { erreurs } from '@/lib/content/erreurs'
 
 export const metadata: Metadata = {
   title: 'Page introuvable',
@@ -26,9 +27,7 @@ export default async function NotFound() {
             titre de niveau 1, et le logo de l'en-tete suffit desormais a
             l'identite. */}
         <h1 className="font-display text-cobalt text-[clamp(3rem,12vw,120px)] leading-none">404</h1>
-        <p className="max-w-[420px] text-lg font-semibold">
-          Cette porte ne mène nulle part. Rien n&apos;a fuité, il n&apos;y a juste rien ici.
-        </p>
+        <p className="max-w-[420px] text-lg font-semibold">{erreurs.introuvable}</p>
         <Button href="/">Retour à l&apos;accueil</Button>
       </main>
       <SiteFooter />

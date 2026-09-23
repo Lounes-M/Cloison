@@ -1,4 +1,5 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { interfaceEspace } from '@/lib/content/interface'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -50,12 +51,10 @@ export default async function PageCollaborateurs({
         <p>{textes.aide}</p>
         <p className="mt-2 text-sm">{textes.readmission}</p>
       </EnteteEspace>
+      <NavigationReglages courant="/espace/collaborateurs" administration />
       <ul className="mt-8 grid gap-4 sm:grid-cols-2">
         {membres.slice(0, 50).map((m) => (
-          <li
-            key={`${m.utilisateur_id}:${m.etat}`}
-            className="outlined bg-paper shadow-brut-sm rounded-brut min-w-0 p-5"
-          >
+          <li key={`${m.utilisateur_id}:${m.etat}`} className="panneau-espace">
             <h2 className="font-bold break-words">{m.email ?? textes.adresseMasquee}</h2>
             <p className="mt-1 text-sm">{textes.roles[m.etat]}</p>
             <FormulaireCollaborateur

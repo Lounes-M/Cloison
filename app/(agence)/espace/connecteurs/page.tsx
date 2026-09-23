@@ -1,4 +1,5 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { interfaceEspace } from '@/lib/content/interface'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -29,6 +30,7 @@ export default async function PageConnecteurs() {
           {t.documentation}
         </a>
       </EnteteEspace>
+      <NavigationReglages courant="/espace/connecteurs" administration />
       <div className="panneau-espace">
         <FormulaireConnecteur agence={c.agence.id} />
       </div>
@@ -36,10 +38,7 @@ export default async function PageConnecteurs() {
         {data.map((k) => {
           const active = k.active
           return (
-            <li
-              key={k.id}
-              className="outlined bg-paper shadow-brut-sm rounded-brut min-w-0 p-5 break-words"
-            >
+            <li key={k.id} className="panneau-espace break-words">
               <h2 className="font-bold">{k.nom}</h2>
               <p>{k.revoque_le ? t.revoque : active ? t.actif : t.expire}</p>
               <p className="text-sm">

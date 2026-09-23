@@ -206,10 +206,10 @@ export function FormulaireAgence() {
         doit savoir a quoi elle consent quand elle laisse son adresse.
       */}
       <p className="text-muted text-[12.5px] leading-relaxed">
-        Ces informations servent uniquement à te recontacter au sujet du pilote Cloison. Elles ne
+        Ces informations servent uniquement à vous recontacter au sujet du pilote Cloison. Elles ne
         sont ni revendues, ni utilisées pour de la prospection tierce, et sont conservées
         jusqu&apos;à la fin du pilote. Pour y accéder, les corriger ou les faire supprimer, il
-        suffit de répondre à l&apos;e-mail que tu recevras.
+        suffit de répondre à l&apos;e-mail que vous recevrez.
       </p>
     </form>
   )

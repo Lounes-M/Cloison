@@ -1,3 +1,5 @@
+import { SommaireDossier } from '@/components/layout/SommaireDossier'
+import { interfaceEspace } from '@/lib/content/interface'
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import type { Metadata } from 'next'
@@ -104,12 +106,21 @@ export default async function PageLocataire({
       <h1 className="font-display mt-2 text-3xl uppercase md:text-4xl">{espace.titre}</h1>
 
       <div className={cn('outlined shadow-brut mt-8 rounded-[18px] p-6', tons[statut.ton])}>
-        <p className="font-display text-xl uppercase">{statut.libelle}</p>
+        <p className="text-xl font-bold">{statut.libelle}</p>
         <p className="mt-2 text-[15px] leading-relaxed font-medium">{statut.explication}</p>
       </div>
 
-      <section className="panneau-espace mt-10">
-        <h2 className="font-display text-xl uppercase">{espace.loyerTitre}</h2>
+      <SommaireDossier
+        liens={[
+          { id: 'logement', titre: interfaceEspace.loyer },
+          ...(aRegler || dossier.paye_le
+            ? [{ id: 'paiement', titre: interfaceEspace.paiement }]
+            : []),
+          { id: 'garant', titre: interfaceEspace.garant },
+        ]}
+      />
+      <section id="logement" className="panneau-espace mt-6">
+        <h2 className="text-xl font-bold">{espace.loyerTitre}</h2>
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {espace.loyerAide}
         </p>
@@ -127,8 +138,8 @@ export default async function PageLocataire({
       </section>
 
       {aRegler || dossier.paye_le ? (
-        <section className="panneau-espace mt-10">
-          <h2 className="font-display text-xl uppercase">{paiementLocataire.titre}</h2>
+        <section id="paiement" className="panneau-espace mt-6">
+          <h2 className="text-xl font-bold">{paiementLocataire.titre}</h2>
           {paiement === 'ok' && !dossier.paye_le ? (
             <p className="bg-sun outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
               {paiementLocataire.enAttente}
@@ -187,8 +198,8 @@ export default async function PageLocataire({
         </section>
       ) : null}
 
-      <section className="panneau-espace mt-10">
-        <h2 className="font-display text-xl uppercase">{espace.garantTitre}</h2>
+      <section id="garant" className="panneau-espace mt-6">
+        <h2 className="text-xl font-bold">{espace.garantTitre}</h2>
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {garant ? espace.garantDesigne(garant) : espace.garantAucun}
         </p>

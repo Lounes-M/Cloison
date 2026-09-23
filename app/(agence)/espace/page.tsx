@@ -1,5 +1,6 @@
+import { NavigationReglages } from '@/components/layout/NavigationReglages'
+import { interfaceEspace } from '@/lib/content/interface'
 import type { Metadata } from 'next'
-import { applicationSecours } from '@/lib/content/application-secours'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -14,10 +15,6 @@ import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
-import { collaborateurs } from '@/lib/content/collaborateurs'
-import { connecteurs } from '@/lib/content/connecteurs'
-import { preferences } from '@/lib/content/preferences'
-import { rappels } from '@/lib/content/rappels'
 import {
   responsables as texteResponsables,
   type ResponsableDossier,
@@ -188,27 +185,17 @@ export default async function PageEspace({
         {role === 'admin' ? ', administrateur' : ''}.
       </p>
 
-      <Link href="/espace/securite" className="lien-espace mt-5 mr-3">
-        {applicationSecours.titre}
-      </Link>
-      <Link href="/espace/notifications" className="lien-espace mt-5 mr-3">
-        {preferences.titre}
-      </Link>
-      {role === 'admin' ? (
-        <Link href="/espace/rappels" className="lien-espace mt-5 mr-3">
-          {rappels.titre}
-        </Link>
-      ) : null}
-      {role === 'admin' ? (
-        <Link href="/espace/connecteurs" className="lien-espace mt-5 mr-3">
-          {connecteurs.titre}
-        </Link>
-      ) : null}
-      {role === 'admin' ? (
-        <Link href="/espace/collaborateurs" className="lien-espace mt-5">
-          {collaborateurs.titre}
-        </Link>
-      ) : null}
+      <div className="mt-6 flex flex-wrap items-center gap-4">
+        <a
+          href="#nouveau-dossier"
+          className="press outlined bg-cobalt text-paper shadow-brut-xs inline-flex min-h-11 items-center rounded-xl px-5 py-3 text-sm font-bold"
+        >
+          {interfaceEspace.nouveauDossier}
+        </a>
+        <a href="#reglages" className="lien-espace">
+          {interfaceEspace.reglages}
+        </a>
+      </div>
 
       {!verifiee ? (
         <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">
@@ -523,7 +510,7 @@ export default async function PageEspace({
         pageEquipe={recherche.equipe}
         baseUrl={lienPage(numero)}
       />
-      <section className="panneau-espace mt-12 grid gap-10 md:grid-cols-2">
+      <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
         <div>
           <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>
           <div className="mt-6">
@@ -557,6 +544,10 @@ export default async function PageEspace({
             <p className="text-[14px] font-medium">{tableau.seuilLecture(seuil)}</p>
           )}
         </div>
+      </section>
+      <section id="reglages" className="border-ink/15 mt-8 border-t pt-6">
+        <h2 className="text-xl font-bold">{interfaceEspace.reglages}</h2>
+        <NavigationReglages administration={role === 'admin'} />
       </section>
     </div>
   )
