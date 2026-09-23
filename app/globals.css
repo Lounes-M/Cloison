@@ -421,6 +421,23 @@
   .badge-espace {
     background: var(--color-sun);
   }
+  .carte-priorite {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
+    border-radius: 12px;
+    background: var(--color-cream);
+    overflow-wrap: anywhere;
+  }
+  .carte-priorite:hover {
+    border-color: var(--color-cobalt);
+    background: color-mix(in srgb, var(--color-sky) 15%, var(--color-paper));
+  }
   [data-espace='agence'] .badge-espace {
     background: var(--color-sky);
   }

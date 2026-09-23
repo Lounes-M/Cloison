@@ -29,6 +29,11 @@ export async function parcourirResponsable(page, site, id, collegue, moteur, lar
   assert.equal(simuler.filtre().get('statut'), 'eq.complet', 'Filtre etat absent de la requete')
   assert.equal(simuler.filtre().get('affecte'), 'not.is.null', 'Filtre Mes dossiers absent')
   const filtres = page.locator('form[method="get"]')
+  assert.notEqual(
+    await filtres.locator('details').getAttribute('open'),
+    null,
+    'Les criteres actifs doivent rester visibles',
+  )
   await filtres.getByLabel('Trier les dossiers').selectOption('echeance')
   await filtres.getByLabel('Échéance du coffre', { exact: true }).selectOption('7')
   await filtres.getByRole('button', { name: 'Rechercher', exact: true }).focus()

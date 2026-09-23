@@ -178,7 +178,7 @@ export default async function PageEspace({
   const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
 
   return (
-    <div className="page-espace w-full max-w-[880px] self-start">
+    <div className="page-espace w-full max-w-[1040px] self-start">
       <h1 className="font-display text-3xl uppercase md:text-4xl">{agence.nom}</h1>
       <p className="text-muted mt-2 text-[14px] font-medium">
         Connecté en tant que <strong className="text-ink">{email}</strong>
@@ -224,8 +224,8 @@ export default async function PageEspace({
       ) : null}
 
       <PrioritesAgence contexte={contexte} />
-      <section className="panneau-espace mt-12">
-        <h2 className="font-display text-2xl uppercase">{tableau.dossiers}</h2>
+      <section className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{tableau.dossiers}</h2>
 
         <form
           key={JSON.stringify([
@@ -238,7 +238,7 @@ export default async function PageEspace({
           ])}
           action="/espace"
           method="get"
-          className="mt-5 grid items-end gap-3 sm:grid-cols-2"
+          className="border-ink/10 bg-cream/60 mt-5 grid items-end gap-4 rounded-xl border p-4 sm:grid-cols-2"
         >
           <label className="min-w-0 flex-1 text-sm font-semibold">
             {tableau.rechercheReference}
@@ -258,64 +258,72 @@ export default async function PageEspace({
               className="outlined mt-2 w-full rounded-lg px-3 py-2"
             />
           </label>
-          <label className="min-w-0 text-sm font-semibold">
-            {texteResponsables.statut}
-            <select
-              name="statut"
-              defaultValue={etatRecherche}
-              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
-            >
-              <option value="">{texteResponsables.tousStatuts}</option>
-              {Object.entries(statuts).map(([v, s]) => (
-                <option key={v} value={v}>
-                  {s.libelle}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="min-w-0 text-sm font-semibold">
-            {texteResponsables.filtre}
-            <select
-              name="responsable"
-              defaultValue={attribution}
-              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
-            >
-              {Object.entries(texteResponsables.filtres).map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="min-w-0 text-sm font-semibold">
-            <label htmlFor="tri-dossiers">{tableau.tri}</label>
-            <select
-              id="tri-dossiers"
-              name="tri"
-              defaultValue={tri}
-              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
-            >
-              <option value="recent">{tableau.tris.recent}</option>
-              <option value="echeance">{tableau.tris.echeance}</option>
-            </select>
-          </div>
-          <div className="min-w-0 text-sm font-semibold">
-            <label htmlFor="horizon-dossiers">{tableau.horizon}</label>
-            <select
-              id="horizon-dossiers"
-              name="horizon"
-              defaultValue={horizon}
-              aria-describedby="aide-echeance"
-              className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
-            >
-              <option value="">{tableau.horizons.tous}</option>
-              <option value="7">{tableau.horizons.sept}</option>
-              <option value="30">{tableau.horizons.trente}</option>
-            </select>
-          </div>
-          <p id="aide-echeance" className="text-muted text-sm sm:col-span-2">
-            {tableau.aideEcheance}
-          </p>
+          <details
+            open={Boolean(etatRecherche || attribution !== 'tous' || horizon || tri !== 'recent')}
+            className="border-ink/15 border-t pt-2 sm:col-span-2"
+          >
+            <summary className="cursor-pointer text-sm font-bold">{tableau.filtresAvances}</summary>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <label className="min-w-0 text-sm font-semibold">
+                {texteResponsables.statut}
+                <select
+                  name="statut"
+                  defaultValue={etatRecherche}
+                  className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+                >
+                  <option value="">{texteResponsables.tousStatuts}</option>
+                  {Object.entries(statuts).map(([v, s]) => (
+                    <option key={v} value={v}>
+                      {s.libelle}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="min-w-0 text-sm font-semibold">
+                {texteResponsables.filtre}
+                <select
+                  name="responsable"
+                  defaultValue={attribution}
+                  className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+                >
+                  {Object.entries(texteResponsables.filtres).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="min-w-0 text-sm font-semibold">
+                <label htmlFor="tri-dossiers">{tableau.tri}</label>
+                <select
+                  id="tri-dossiers"
+                  name="tri"
+                  defaultValue={tri}
+                  className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+                >
+                  <option value="recent">{tableau.tris.recent}</option>
+                  <option value="echeance">{tableau.tris.echeance}</option>
+                </select>
+              </div>
+              <div className="min-w-0 text-sm font-semibold">
+                <label htmlFor="horizon-dossiers">{tableau.horizon}</label>
+                <select
+                  id="horizon-dossiers"
+                  name="horizon"
+                  defaultValue={horizon}
+                  aria-describedby="aide-echeance"
+                  className="outlined bg-paper mt-2 w-full rounded-lg px-3 py-2"
+                >
+                  <option value="">{tableau.horizons.tous}</option>
+                  <option value="7">{tableau.horizons.sept}</option>
+                  <option value="30">{tableau.horizons.trente}</option>
+                </select>
+              </div>
+              <p id="aide-echeance" className="text-muted text-sm sm:col-span-2">
+                {tableau.aideEcheance}
+              </p>
+            </div>
+          </details>
           <button
             type="submit"
             className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold"
@@ -328,7 +336,7 @@ export default async function PageEspace({
           attribution !== 'tous' ||
           horizon ||
           tri !== 'recent' ? (
-            <Link href="/espace" className="px-2 py-2 text-sm underline">
+            <Link href="/espace" className="lien-espace">
               {tableau.effacer}
             </Link>
           ) : null}
@@ -353,15 +361,15 @@ export default async function PageEspace({
                 const statut = statuts[ligne.statut] ?? statuts.ouvert!
                 const ratio = ratioDe(ligne)
                 return (
-                  <li key={ligne.id} className="outlined bg-cream rounded-xl p-4">
+                  <li key={ligne.id} className="border-ink/15 bg-paper rounded-xl border p-4">
                     <Link
                       href={`/espace/dossiers/${ligne.id}`}
-                      className="lien-espace mb-4 w-full break-all"
+                      className="text-cobalt border-ink/10 mb-4 flex min-h-11 items-center border-b pb-3 font-bold break-all underline-offset-4 hover:underline"
                     >
                       {ligne.reference}
                     </Link>
-                    <dl className="grid gap-3 text-sm">
-                      <div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+                      <div className="col-span-2">
                         <dt className="text-muted text-xs font-bold">
                           {tableau.colonnes.locataire}
                         </dt>
@@ -372,14 +380,14 @@ export default async function PageEspace({
                           ) : null}
                         </dd>
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <dt className="text-muted mb-1 text-xs font-bold">
                           {tableau.colonnes.statut}
                         </dt>
                         <dd>
                           <span
                             className={cn(
-                              'outlined inline-block rounded-full px-3 py-1 text-xs font-bold',
+                              'inline-block rounded-full px-3 py-1 text-xs font-bold',
                               tons[statut.ton],
                             )}
                           >
@@ -387,7 +395,7 @@ export default async function PageEspace({
                           </span>
                         </dd>
                       </div>
-                      <div>
+                      <div className="col-span-2">
                         <dt className="text-muted text-xs font-bold">{texteResponsables.titre}</dt>
                         <dd>
                           {responsables.get(ligne.id)?.responsable_id
@@ -417,9 +425,9 @@ export default async function PageEspace({
                 )
               })}
             </ul>
-            <div className="outlined hidden overflow-x-auto rounded-[14px] lg:block">
+            <div className="border-ink/15 hidden overflow-x-auto rounded-[14px] border lg:block">
               <table className="w-full text-left text-[14px]">
-                <thead className="bg-sky border-ink border-b-2 text-[12px] font-bold tracking-wide uppercase">
+                <thead className="bg-sky/20 border-ink/15 border-b text-xs font-bold">
                   <tr>
                     <th className="px-4 py-3">{tableau.colonnes.reference}</th>
                     <th className="px-4 py-3">{tableau.colonnes.locataire}</th>
@@ -434,11 +442,14 @@ export default async function PageEspace({
                     const statut = statuts[ligne.statut] ?? statuts.ouvert!
                     const ratio = ratioDe(ligne)
                     return (
-                      <tr key={ligne.id} className="border-ink/20 border-b last:border-0">
+                      <tr
+                        key={ligne.id}
+                        className="border-ink/10 hover:bg-cream/60 border-b last:border-0"
+                      >
                         <td className="px-4 py-3 font-bold">
                           <Link
                             href={`/espace/dossiers/${ligne.id}`}
-                            className="hover:text-cobalt underline-offset-2 hover:underline"
+                            className="text-cobalt inline-flex min-h-11 items-center underline-offset-4 hover:underline"
                           >
                             {ligne.reference}
                           </Link>
@@ -454,7 +465,7 @@ export default async function PageEspace({
                         <td className="px-4 py-3">
                           <span
                             className={cn(
-                              'border-ink inline-block rounded-full border-2 px-3 py-1 text-[12px] font-bold',
+                              'inline-block rounded-full px-3 py-1 text-xs font-bold',
                               tons[statut.ton],
                             )}
                           >

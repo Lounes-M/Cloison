@@ -159,6 +159,29 @@ export async function parcourirInterface(
     await page.emulateMedia({ reducedMotion: 'no-preference' })
   }
   await visiter('/espace', 'tableau')
+  const filtresAvances = page.locator('form[method="get"] details')
+  assert.equal(
+    await filtresAvances.getAttribute('open'),
+    null,
+    'Filtres avances ouverts sans critere actif',
+  )
+  await filtresAvances.locator('summary').focus()
+  await page.keyboard.press('Enter')
+  assert.notEqual(
+    await filtresAvances.getAttribute('open'),
+    null,
+    'Filtres inaccessibles au clavier',
+  )
+  await page.getByLabel('Trier les dossiers').waitFor({ state: 'visible' })
+  await verifierCommandes(page, 'filtres avances ouverts')
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+  if (repertoire && moteur.name() === 'chromium')
+    await page.screenshot({
+      path: join(repertoire, `tableau-filtres-${largeur}.png`),
+      fullPage: true,
+    })
+  await filtresAvances.locator('summary').focus()
+  await page.keyboard.press('Enter')
   const dossiers = page.getByRole('list', { name: 'Vos dossiers', exact: true })
   const recherche = page.locator('form[method="get"] input')
   assert.deepEqual(

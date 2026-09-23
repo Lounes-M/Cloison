@@ -22,6 +22,7 @@ export const tableau = {
   rechercheReference: 'Référence du dossier',
   rechercheEmail: 'E-mail du locataire',
   rechercher: 'Rechercher',
+  filtresAvances: 'Statut, responsable et échéance',
   effacer: 'Effacer les filtres',
   aucunResultat:
     'Aucun dossier sur cette page. Modifiez les filtres ou revenez à la page précédente.',
