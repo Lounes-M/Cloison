@@ -26,7 +26,13 @@ export async function parcourirProduit(page, site, moteur, largeur, repertoire) 
   const sansScript = await page
     .context()
     .browser()
-    .newContext({ javaScriptEnabled: false, viewport: { width: largeur, height: 900 } })
+    .newContext({
+      javaScriptEnabled: false,
+      // Certificat ephemere du relais local, comme le contexte principal.
+      ignoreHTTPSErrors: true,
+      serviceWorkers: 'block',
+      viewport: { width: largeur, height: 900 },
+    })
   try {
     await sansScript.route('**/*', (route) =>
       new URL(route.request().url()).origin === new URL(site).origin
