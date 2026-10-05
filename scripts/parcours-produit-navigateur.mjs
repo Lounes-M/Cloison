@@ -22,11 +22,17 @@ export async function parcourirProduit(page, site, moteur, largeur, repertoire) 
   await section.locator('label[for="vue-garant"]').click()
   assert(await section.locator('[data-vue-produit="garant"]').isVisible())
   await page.emulateMedia({ reducedMotion: 'no-preference' })
+  assert.equal(new URL(site).hostname, '127.0.0.1')
   const sansScript = await page
     .context()
     .browser()
     .newContext({ javaScriptEnabled: false, viewport: { width: largeur, height: 900 } })
   try {
+    await sansScript.route('**/*', (route) =>
+      new URL(route.request().url()).origin === new URL(site).origin
+        ? route.continue()
+        : route.abort(),
+    )
     const autre = await sansScript.newPage()
     await autre.goto(site)
     await autre.locator('label[for="vue-agence"]').click()
