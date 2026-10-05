@@ -20,6 +20,7 @@ jobs:
   verify:
     name: Typecheck · Lint · Format · Typo · Tests · Build · Secrets
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -32,6 +33,9 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - name: Avis de securite des dependances
+        run: npm run check:dependencies
 
       - name: Memoire native et rasterisation Linux
         run: npx vitest run tests/memoire-processus.test.ts tests/lecture-memoire.test.ts tests/rasterisation.test.ts

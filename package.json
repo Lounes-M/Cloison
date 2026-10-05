@@ -21,13 +21,13 @@
     "check:env": "node scripts/verifie-variables-publiques.mjs",
     "check:typo": "node scripts/verifie-typographie.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check:dependencies": "node scripts/verifier-dependances.mjs"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.9",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
-    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "jose": "^6.2.12",
     "next": "^16.3.5",
