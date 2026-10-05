@@ -1,4 +1,5 @@
 'use client'
+import { PAGES_ACTE_MAX } from '@/lib/signature/position'
 import { useActionState } from 'react'
 import { preparerActe, validerActe, reprendreDepotActe } from '@/lib/signature/actions'
 import { signature as t } from '@/lib/content/signature'
@@ -31,6 +32,7 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
           disabled={attente}
         />
       </label>
+      <p className="text-muted text-sm">{t.placement}</p>
       <div className="grid gap-4 sm:grid-cols-3">
         {(['page', 'x', 'y'] as const).map((n) => (
           <label key={n}>
@@ -40,7 +42,7 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
               name={n}
               type="number"
               min={n === 'page' ? 1 : 0}
-              max={n === 'page' ? 1000 : 10000}
+              max={n === 'page' ? PAGES_ACTE_MAX : 10000}
               defaultValue={n === 'page' ? 1 : 40}
               required
               disabled={attente}

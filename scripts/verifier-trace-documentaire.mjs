@@ -14,6 +14,7 @@ const contenu = Buffer.from(await document.save()).toString('base64')
 for (const route of [
   '(agence)/espace/pieces/[id]/route.js.nft.json',
   '(porteur)/garant/page.js.nft.json',
+  '(agence)/espace/dossiers/[id]/page.js.nft.json',
 ]) {
   const trace = join(racine, '.next/server/app', route)
   const fichiers = JSON.parse(await readFile(trace, 'utf8')).files
@@ -24,7 +25,7 @@ for (const route of [
       const source = resolve(dirname(trace), fichier)
       const chemin = relative(racine, source).split(sep).join('/')
       if (
-        !/^(workers\/|node_modules\/(pdfjs-dist|pdf-lib|@pdf-lib|pako|tslib|@napi-rs)\/)/.test(
+        !/^(workers\/|lib\/signature\/position\.ts$|node_modules\/(pdfjs-dist|pdf-lib|@pdf-lib|pako|tslib|@napi-rs)\/)/.test(
           chemin,
         )
       )
@@ -87,6 +88,20 @@ for (const route of [
         }
       }
     }
+    const acte = spawnSync(process.execPath, ['--max-old-space-size=128', 'workers/acte.mjs'], {
+      cwd: temporaire,
+      env: { NODE_ENV: 'production', LANG: 'C.UTF-8', TZ: 'UTC' },
+      input: JSON.stringify({ contenu, position: { page: 1, x: 40, y: 40 } }),
+      encoding: 'utf8',
+      timeout: 20000,
+      maxBuffer: 1024,
+    })
+    assert.equal(acte.status, 0, 'Validation acte inaccessible dans la trace')
+    assert.deepEqual(
+      JSON.parse(acte.stdout),
+      { ok: true },
+      'Validation acte absente du paquet deploye',
+    )
     console.log(`Trace documentaire executee : ${route}`)
   } finally {
     await rm(temporaire, { recursive: true, force: true })

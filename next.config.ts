@@ -122,6 +122,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/*': [
       './workers/**',
+      './lib/signature/position.ts',
       './node_modules/pdfjs-dist/**',
       './node_modules/pdf-lib/**',
       './node_modules/@pdf-lib/**',

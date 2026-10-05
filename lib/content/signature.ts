@@ -5,11 +5,15 @@ export const signature = {
   preparation: 'Préparer l’acte',
   explication:
     'Déposez le PDF issu de votre modèle validé, avec les informations du dossier et la mention personnelle saisie par le garant. Le garant devra le consulter et l’accepter avant l’envoi en signature.',
-  fichier: 'Acte PDF, 4 Mio maximum',
+  fichier: 'Acte PDF, 4 Mio et 40 pages maximum',
+  pdfInvalide:
+    'PDF non accepté. Vérifiez qu’il est lisible, non protégé, sans formulaire ni pièce jointe, avec au plus 40 pages non pivotées. Le champ de signature doit tenir entièrement dans la page choisie.',
+  placement:
+    'Le champ mesure 85 × 37 points. Mesurez sa position depuis le coin supérieur gauche de la page.',
   telephone: 'Téléphone du garant, au format international',
   page: 'Page du champ de signature',
-  x: 'Position horizontale du champ (points)',
-  y: 'Position verticale du champ (points)',
+  x: 'Position depuis la gauche (points)',
+  y: 'Position depuis le haut (points)',
   accordAgence:
     'J’ai vérifié que ce PDF reprend le modèle indiqué, les bonnes parties, les conditions et la mention personnelle du garant.',
   envoyer: 'Soumettre au garant',

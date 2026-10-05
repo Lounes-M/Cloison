@@ -1,4 +1,6 @@
 'use server'
+import { verifierProjetActe } from './validation-projet'
+import { PAGES_ACTE_MAX } from './position'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -19,7 +21,7 @@ const bytea = (b: Buffer) => `\\x${b.toString('hex')}`
 const saisie = z.object({
   dossier: z.uuid(),
   telephone: z.string().regex(/^\+[1-9]\d{7,14}$/),
-  page: z.coerce.number().int().min(1).max(1000),
+  page: z.coerce.number().int().min(1).max(PAGES_ACTE_MAX),
   x: z.coerce.number().int().min(0).max(10000),
   y: z.coerce.number().int().min(0).max(10000),
   accord: z.literal('on'),
@@ -62,7 +64,11 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
     )
       throw new Error()
     const pdf = Buffer.from(await fichier.arrayBuffer())
-    if (pdf.subarray(0, 5).toString() !== '%PDF-') throw new Error()
+    try {
+      await verifierProjetActe(pdf, { page: p.page, x: p.x, y: p.y })
+    } catch {
+      return { message: signature.pdfInvalide }
+    }
     const id = randomUUID()
     const contexte = contexteActe.parse({
       version: 1,
@@ -150,7 +156,9 @@ export async function reprendreDepotActe(_etat: EtatActe, form: FormData): Promi
       throw new Error()
     const pdf = Buffer.from(await fichier.arrayBuffer())
     if (empreintePdf(pdf) !== d.demande.empreinte_acte) throw new Error()
-    cle = ouvrirContexteActe(d).cle
+    const ouvert = ouvrirContexteActe(d)
+    cle = ouvert.cle
+    await verifierProjetActe(pdf, ouvert.contexte)
     const signal = AbortSignal.timeout(25000)
     await archiverFichier(await clientServeur(signal), id, 'projet', pdf, cle, signal)
     revalidatePath(`/espace/actes/${id}`)

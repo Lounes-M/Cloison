@@ -1,4 +1,5 @@
 import 'server-only'
+import { CHAMP_SIGNATURE } from './position'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import { environnementYoutrust, etatYoutrust, identifiantYoutrust } from './youtrust'
@@ -245,7 +246,15 @@ export function creerClientYoutrust(
               signature_level: 'advanced_electronic_signature',
               signature_authentication_mode: 'otp_sms',
               fields: [
-                { type: 'signature', document_id: p.document, page: p.page, x: p.x, y: p.y },
+                {
+                  type: 'signature',
+                  document_id: p.document,
+                  page: p.page,
+                  x: p.x,
+                  y: p.y,
+                  width: CHAMP_SIGNATURE.largeur,
+                  height: CHAMP_SIGNATURE.hauteur,
+                },
               ],
             }),
           )
