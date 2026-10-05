@@ -1,3 +1,5 @@
+import { surveillerAudience, verifierDetectionAudience } from './verifier-absence-audience.mjs'
+import { parcourirProduit } from './parcours-produit-navigateur.mjs'
 import { parcourirActes } from './parcours-actes-navigateur.mjs'
 import assert from 'node:assert/strict'
 import { mkdir, readdir } from 'node:fs/promises'
@@ -90,9 +92,13 @@ export async function parcourirInterface(
   simulerPanne,
   actes,
 ) {
+  const audience = surveillerAudience(page)
   const routesVues = new Set()
   const contexte = page.context()
-  if (moteur.name() === 'chromium' && largeur === 320) await verifierPrecisionTactile(contexte)
+  if (moteur.name() === 'chromium' && largeur === 320) {
+    await verifierPrecisionTactile(contexte)
+    await verifierDetectionAudience(contexte, site)
+  }
   const repertoire = process.env.CLOISON_CAPTURE_INTERFACE_DIR
   if (repertoire) await mkdir(repertoire, { recursive: true })
   const visiter = async (chemin, nom, shell = true) => {
@@ -103,6 +109,7 @@ export async function parcourirInterface(
     await page.locator('h1').first().waitFor()
     assert.equal(new URL(page.url()).pathname, chemin, `Route non rendue ${nom}`)
     await page.evaluate(() => document.fonts.ready)
+    audience.verifier()
     assert.equal(await page.locator('h1').count(), 1, 'Titre de page unique')
     const ancresAbsentes = await page
       .locator('.navigation-sections a[href^="#"]')
@@ -321,6 +328,7 @@ export async function parcourirInterface(
     'Action principale repoussee sous le premier ecran',
   )
   await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await parcourirProduit(page, site, moteur, largeur, repertoire)
   if (largeur < 768) {
     const menu = page.getByRole('navigation', { name: 'Navigation principale' }).locator('details')
     await menu.locator('summary').focus()
@@ -356,6 +364,8 @@ export async function parcourirInterface(
     .getByRole('link', { name: 'Connexion agence', exact: true })
     .click()
   await page.waitForURL((u) => u.pathname === '/connexion')
+  audience.verifier()
+  audience.terminer()
   const pages = (await readdir('app', { recursive: true }))
     .filter((p) => p.endsWith('/page.tsx'))
     .map(

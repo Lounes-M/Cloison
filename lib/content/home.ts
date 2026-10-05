@@ -215,3 +215,49 @@ export const vision = {
   ],
   cta: 'Créer mon dossier',
 } as const
+
+export const productViews = {
+  choisir: 'Change de point de vue',
+  exemple: 'Illustration',
+  separation: 'Un même dossier. Des accès distincts, pour que chaque personne garde sa place.',
+  roles: [
+    'Suivre, sans tout voir.',
+    'S’engager, en connaissance de cause.',
+    'Examiner, avec les bons éléments.',
+  ],
+  apercus: {
+    locataire: {
+      espace: 'Espace locataire',
+      repere: 'Le suivi, simplement',
+      titre: 'Ton dossier avance.',
+      lignes: [
+        { label: 'Ton dossier', valeur: 'Créé' },
+        { label: 'Ton garant', valeur: 'Invité' },
+        { label: 'L’agence', valeur: 'Examen à venir' },
+      ],
+      frontiere: 'Les pièces et les montants du garant restent hors de ta vue.',
+    },
+    garant: {
+      espace: 'Espace garant',
+      repere: 'Un espace à toi',
+      titre: 'Ton engagement, en clair.',
+      lignes: [
+        { label: 'Ce que tu couvres', valeur: 'Loyer + charges' },
+        { label: 'Montant maximum', valeur: 'Défini dans ton engagement' },
+        { label: 'Date de fin', valeur: 'Fixée dans ton engagement' },
+      ],
+      frontiere: 'Tu déposes tes pièces directement, sans passer par le locataire.',
+    },
+    agence: {
+      espace: 'Espace agence',
+      repere: 'Les éléments pour examiner',
+      titre: 'Vous gardez la décision.',
+      lignes: [
+        { label: 'Justificatifs', valeur: 'Consultation filigranée' },
+        { label: 'Ratio', valeur: 'Revenu déclaré / loyer' },
+        { label: 'Examen', valeur: 'Décision humaine' },
+      ],
+      frontiere: 'Un accès autorisé et une trace de chaque consultation documentaire.',
+    },
+  },
+} as const

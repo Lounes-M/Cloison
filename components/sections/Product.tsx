@@ -1,15 +1,10 @@
+import { Fragment } from 'react'
 import { Icone } from '@/components/ui/Icone'
 import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
-import { product, spaces } from '@/lib/content/home'
-import { cn } from '@/lib/utils'
+import { product, spaces, productViews } from '@/lib/content/home'
 
-const spaceTones = {
-  sun: { card: 'bg-sun', step: 'bg-ink text-sun' },
-  mint: { card: 'bg-mint', step: 'bg-ink text-mint' },
-  sky: { card: 'bg-sky', step: 'bg-ink text-sky' },
-} as const
-
+/** Une seule scene, trois perspectives. Les radios restent utilisables sans JavaScript. */
 export function Product() {
   return (
     <Section id="produit" className="border-ink/15 bg-paper border-y py-16 md:py-22">
@@ -21,64 +16,94 @@ export function Product() {
         </h2>
         <p className="max-w-[380px] text-base leading-relaxed font-semibold">{product.intro}</p>
       </Reveal>
-
-      <ul className="grid gap-5 md:grid-cols-3">
-        {spaces.map((space, index) => {
-          const tone = spaceTones[space.tone]
-          return (
-            <li key={space.id}>
-              <Reveal delay={index * 0.08} className="h-full">
-                <article className="border-ink/20 bg-paper flex h-full flex-col overflow-hidden rounded-[18px] border">
-                  <div
-                    className={cn(
-                      'border-ink/15 flex items-center justify-between border-b p-6',
-                      tone.card,
-                    )}
-                  >
-                    <Icone nom={space.icone} className="size-10" />
-                    <span
-                      className={cn(
-                        'font-display grid size-8.5 place-items-center rounded-full text-[15px]',
-                        tone.step,
-                      )}
-                    >
-                      {space.step}
+      <div className="vues-produit">
+        <fieldset className="min-w-0">
+          <legend className="text-muted mb-5 text-xs font-bold tracking-widest uppercase">
+            {productViews.choisir}
+          </legend>
+          <div className="vues-produit-choix">
+            {spaces.map((space, index) => (
+              <Fragment key={space.id}>
+                <input
+                  type="radio"
+                  name="vue-produit"
+                  id={`vue-${space.id}`}
+                  value={space.id}
+                  defaultChecked={index === 0}
+                  className="sr-only"
+                  aria-controls={`apercu-${space.id}`}
+                />
+                <label htmlFor={`vue-${space.id}`}>
+                  <span className="vue-produit-numero" aria-hidden>
+                    {String(space.step).padStart(2, '0')}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-lg font-bold md:text-2xl">{space.title}</span>
+                    <span className="mt-1 hidden text-sm sm:block">
+                      {productViews.roles[index]}
                     </span>
+                  </span>
+                  <span className="vue-produit-fleche" aria-hidden>
+                    <Icone nom="direction" />
+                  </span>
+                </label>
+              </Fragment>
+            ))}
+          </div>
+          <p className="text-muted mt-6 hidden max-w-[280px] text-sm leading-relaxed md:block">
+            {productViews.separation}
+          </p>
+        </fieldset>
+        <div className="vue-produit-scene">
+          {spaces.map((space) => {
+            const vue = productViews.apercus[space.id]
+            return (
+              <div
+                key={space.id}
+                id={`apercu-${space.id}`}
+                data-vue-produit={space.id}
+                role="region"
+                aria-label={space.title}
+              >
+                <div className="vue-produit-fenetre">
+                  <div className="vue-produit-barre">
+                    <span className="inline-flex items-center gap-2">
+                      <Icone nom="cadenas" />
+                      {vue.espace}
+                    </span>
+                    <span>{productViews.exemple}</span>
                   </div>
-
-                  <div className="flex flex-1 flex-col p-6">
-                    <h3 className="font-display mb-3 text-xl uppercase">{space.title}</h3>
-                    <p className="text-muted text-[15px] leading-relaxed font-medium">
-                      {space.body}
+                  <div className="vue-produit-ecran">
+                    <p className="vue-produit-repere">{vue.repere}</p>
+                    <h3 className="font-display mt-3 max-w-[420px] text-[clamp(1.6rem,3vw,2.3rem)] leading-tight">
+                      {vue.titre}
+                    </h3>
+                    <dl className="vue-produit-donnees">
+                      {vue.lignes.map((ligne) => (
+                        <div key={ligne.label}>
+                          <dt>
+                            <Icone nom={space.icone} />
+                            {ligne.label}
+                          </dt>
+                          <dd>{ligne.valeur}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p className="vue-produit-frontiere">
+                      <Icone nom="cadenas" />
+                      {vue.frontiere}
                     </p>
-
-                    <div className="mt-auto pt-6">
-                      <div className="border-ink/15 flex flex-wrap items-center justify-between gap-2.5 border-t pt-4 text-xs font-bold">
-                        <span className="flex items-center gap-2.5">{space.footnote.left}</span>
-                        <span className="flex items-center gap-1.5">
-                          {'right' in space.footnote ? space.footnote.right : null}
-                          {'iconeDroite' in space.footnote ? (
-                            <Icone nom={space.footnote.iconeDroite} />
-                          ) : null}
-                        </span>
-                      </div>
-                    </div>
                   </div>
-                </article>
-              </Reveal>
-            </li>
-          )
-        })}
-      </ul>
-
-      <Reveal>
-        <p className="mx-auto mt-8 max-w-[800px] text-center text-sm leading-loose font-medium">
-          {product.outro}{' '}
-          <span className="border-ink bg-sun rounded-lg border-[1.5px] px-2.5 py-0.5">
-            {product.outroHighlight}
-          </span>
-        </p>
-      </Reveal>
+                </div>
+                <p className="vue-produit-description">{space.body}</p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      <p className="text-muted mt-10 max-w-[850px] text-sm leading-relaxed">
+        {product.outro} <span className="text-ink font-bold">{product.outroHighlight}</span>
+      </p>
     </Section>
   )
 }
