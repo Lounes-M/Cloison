@@ -116,6 +116,9 @@ describe('Client API Youtrust', () => {
       signature_level: 'advanced_electronic_signature',
       signature_authentication_mode: 'otp_sms',
       info: { locale: 'fr' },
+      fields: [
+        { type: 'signature', page: entree.page, x: entree.x, y: entree.y, width: 85, height: 37 },
+      ],
     })
     expect(transport.mock.calls.every(([, options]) => options?.method === 'POST')).toBe(true)
   })

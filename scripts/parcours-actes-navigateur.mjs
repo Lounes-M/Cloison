@@ -1,3 +1,4 @@
+import { PDFDocument } from 'pdf-lib'
 import assert from 'node:assert/strict'
 import { parcourirExport } from './parcours-exports-navigateur.mjs'
 import { randomUUID } from 'node:crypto'
@@ -182,7 +183,7 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
     await page.locator('input[name="pdf"]').setInputFiles({
       name: 'acte-recette.pdf',
       mimeType: 'application/pdf',
-      buffer: Buffer.from('%PDF-1.7\nRecette sans engagement\n%%EOF'),
+      buffer: await pdfRecette(),
     })
     await page.locator('input[name="telephone"]').fill('+33600000000')
     await page.locator('input[name="accord"]').check()
@@ -230,4 +231,10 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
   } finally {
     fixture.desactiver()
   }
+}
+
+async function pdfRecette() {
+  const pdf = await PDFDocument.create()
+  pdf.addPage([595, 842]).drawText('Recette sans engagement', { x: 40, y: 740 })
+  return Buffer.from(await pdf.save())
 }
