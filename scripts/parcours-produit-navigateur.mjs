@@ -16,7 +16,10 @@ export async function parcourirProduit(page, site, moteur, largeur, repertoire) 
     if (repertoire)
       await section.screenshot({ path: join(repertoire, `produit-${role}-${largeur}.png`) })
   }
-  await page.keyboard.press('ArrowRight')
+  // WebKit ne boucle pas en fin de groupe : verifier le retour natif par la gauche.
+  await page.keyboard.press('ArrowLeft')
+  assert(await radios.nth(1).isChecked())
+  await page.keyboard.press('ArrowLeft')
   assert(await radios.nth(0).isChecked(), 'Le clavier revient au premier role')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await section.locator('label[for="vue-garant"]').click()
