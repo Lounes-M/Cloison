@@ -44,7 +44,7 @@ export function Product() {
                     </span>
                   </span>
                   <span className="vue-produit-fleche" aria-hidden>
-                    ↗
+                    <Icone nom="direction" />
                   </span>
                 </label>
               </Fragment>

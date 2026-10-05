@@ -14,6 +14,9 @@ import { cn } from '@/lib/utils'
  */
 
 const traces = {
+  /** Passage vers une autre perspective. */
+  direction: <path d="M5 19 19 5M5 5h14v14" />,
+
   /** Validation, etat verifie. */
   coche: <path d="M4 12.5 10 19 20 5" />,
 
