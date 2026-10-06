@@ -42,6 +42,7 @@ export async function clientAgence() {
   const magasin = await cookies()
 
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+    auth: { experimental: { recoveryCodes: true } },
     global: { fetch: fetchAgence },
     cookies: {
       getAll: () => magasin.getAll(),

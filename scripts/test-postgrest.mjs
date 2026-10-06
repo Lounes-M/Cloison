@@ -1,3 +1,4 @@
+import { verifierSessionsRecuperation } from './verifier-sessions-recuperation.mjs'
 import { verifierConcurrenceActes } from './verifier-concurrence-actes.mjs'
 import { verifierReutilisationPieces } from './verifier-reutilisation-pieces.mjs'
 import { verifierBrouillonsEngagement } from './verifier-brouillons-engagement.mjs'
@@ -193,6 +194,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierConcurrenceConnecteurs(db, connexion)
       await verifierConcurrenceExamen(db, connexion)
       await verifierConcurrenceActes(db, connexion)
+      await verifierSessionsRecuperation(db, adresse, secret)
       await verifierResponsables(db, connexion, adresse, secret)
       await verifierPreferences(db, connexion, adresse, secret)
       await verifierRappels(db, connexion)

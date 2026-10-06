@@ -7,10 +7,16 @@ import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { FormulaireApplicationSecours } from '@/components/forms/FormulaireApplicationSecours'
 import { contexteApplicationSecours } from '@/lib/agences/application-secours'
 import { applicationSecours as t } from '@/lib/content/application-secours'
+import { codesSecours as codes } from '@/lib/content/codes-secours'
+import { lireCodesSecours, codesSecoursActifs } from '@/lib/agences/codes-secours'
+import { FormulaireCodesSecours } from '@/components/forms/FormulaireCodesSecours'
 
 export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
 export default async function PageApplicationSecours() {
   const c = await contexteApplicationSecours().catch(() => null)
+  const secours = codesSecoursActifs()
+    ? await lireCodesSecours().catch(() => ({ etat: 'indisponible' as const }))
+    : null
   return (
     <div className="page-espace w-full max-w-[600px]">
       <Link href="/espace" className="lien-espace mb-6">
@@ -20,6 +26,24 @@ export default async function PageApplicationSecours() {
         <p>{t.aide}</p>
       </EnteteEspace>
       <NavigationReglages courant="/espace/securite" />
+      {secours && (
+        <section className="panneau-espace mb-6" aria-labelledby="codes-recuperation">
+          <h2 id="codes-recuperation" className="mb-3 text-xl font-bold">
+            {codes.titre}
+          </h2>
+          <p className="mb-4">{codes.aide}</p>
+          {secours.etat === 'indisponible' ? (
+            <p role="status">{codes.indisponible}</p>
+          ) : (
+            <>
+              <p className="mb-4">
+                {secours.etat === 'pret' ? codes.restant(secours.restant) : codes.aucun}
+              </p>
+              <FormulaireCodesSecours facteur={secours.etat === 'pret' ? secours.id : undefined} />
+            </>
+          )}
+        </section>
+      )}
       {c ? (
         <section className="panneau-espace mb-6" aria-labelledby="applications-verifiees">
           <h2 id="applications-verifiees" className="mb-3 text-xl font-bold">
