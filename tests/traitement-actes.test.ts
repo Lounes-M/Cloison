@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 const h = vi.hoisted(() => ({
   client: vi.fn(),
   rpc: vi.fn(),
+  confirmer: vi.fn(),
   traiter: vi.fn(),
   charger: vi.fn(),
   rapprocher: vi.fn(),
@@ -20,9 +21,15 @@ const requete = (secret = 'fictif') =>
 beforeEach(() => {
   vi.resetAllMocks()
   vi.stubEnv('CRON_SECRET', 'fictif')
+  vi.stubEnv('CRON_ACTES_SECRET', 'dedie')
+  h.confirmer.mockResolvedValue({ data: true, error: null })
   vi.stubEnv('SIGNATURE_PARCOURS_ENABLED', 'false')
   vi.stubEnv('FACTURATION_ACTES_ENABLED', 'false')
-  h.client.mockResolvedValue({ rpc: h.rpc, storage: { from: () => ({ remove: h.retirer }) } })
+  h.client.mockResolvedValue({
+    rpc: (nom: string, ...args: unknown[]) =>
+      nom === 'confirmer_traitement_actes' ? h.confirmer(nom, ...args) : h.rpc(nom, ...args),
+    storage: { from: () => ({ remove: h.retirer }) },
+  })
   h.rpc.mockImplementation(async (n) => ({
     data:
       n === 'expirer_archives_signature' ? 0 : n === 'fichiers_archives_a_supprimer' ? [] : null,
@@ -56,7 +63,11 @@ test('la conservation continue quand les nouveaux parcours sont fermes', async (
 test('la fermeture de facturation interdit les appels Stripe', async () => {
   expect(await (await paiement(requete())).json()).toEqual({ actif: false, traites: 0, echecs: 0 })
   expect(h.rapprocher).not.toHaveBeenCalled()
-  expect(h.client).not.toHaveBeenCalled()
+  expect(h.rpc).not.toHaveBeenCalled()
+  expect(h.confirmer).toHaveBeenCalledWith('confirmer_traitement_actes', {
+    le_nom: 'reglements',
+    reussite: true,
+  })
 })
 test('une erreur de conservation reste un echec sans detail prive', async () => {
   h.rpc.mockRejectedValue(new Error('DOCUMENT_PRIVE'))

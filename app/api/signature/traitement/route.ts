@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
-import { secretCorrect } from '@/lib/exploitation/autorisation-cron'
+import { suivreTraitementActes } from '@/lib/exploitation/suivi-actes'
 import { clientYoutrustConfigure } from '@/lib/signature/configuration-youtrust'
 import { configurationParcours } from '@/lib/signature/configuration-parcours'
 import { chargerActe, traiterActe } from '@/lib/signature/parcours'
@@ -9,8 +9,9 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 const headers = { 'Cache-Control': 'no-store' }
 export async function POST(requete: Request) {
-  if (!secretCorrect(requete.headers.get('authorization'), process.env.CRON_SECRET))
-    return new NextResponse(null, { status: 401, headers })
+  return suivreTraitementActes('archives', requete, executer)
+}
+async function executer(requete: Request) {
   let traites = 0,
     echecs = 0,
     effaces = 0

@@ -38,8 +38,8 @@ test('controle les pages et les refus sur une origine fixe sans identifiants', a
   const transport = vi.fn<typeof fetch>().mockImplementation(async (url) => fixture(String(url)))
   const rapport = await verifierProduction(transport)
   expect(rapport.conforme).toBe(true)
-  expect(rapport.controles).toHaveLength(12)
-  expect(transport).toHaveBeenCalledTimes(12)
+  expect(rapport.controles).toHaveLength(13)
+  expect(transport).toHaveBeenCalledTimes(13)
   for (const [url, options] of transport.mock.calls) {
     expect(new URL(String(url)).origin).toBe('https://www.cloison.immo')
     expect(options).toMatchObject({
@@ -142,7 +142,7 @@ test('ne suit jamais une redirection distante et nettoie le corps refuse', async
   )
   const rapport = await verifierProduction(transport)
   expect(rapport.conforme).toBe(false)
-  expect(annuler).toHaveBeenCalledTimes(12)
+  expect(annuler).toHaveBeenCalledTimes(13)
   expect(
     transport.mock.calls.every(([url]) => String(url).startsWith('https://www.cloison.immo/')),
   ).toBe(true)

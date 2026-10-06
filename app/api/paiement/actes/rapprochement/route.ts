@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { secretCorrect } from '@/lib/exploitation/autorisation-cron'
+import { suivreTraitementActes } from '@/lib/exploitation/suivi-actes'
 import { clientServeur } from '@/lib/acces/serveur'
 import { rapprocherSessionActe } from '@/lib/paiement/stripe'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 const headers = { 'Cache-Control': 'no-store' }
 export async function POST(request: Request) {
-  if (!secretCorrect(request.headers.get('authorization'), process.env.CRON_SECRET))
-    return new NextResponse(null, { status: 401, headers })
+  return suivreTraitementActes('reglements', request, executer)
+}
+async function executer(request: Request) {
   const actif = process.env.FACTURATION_ACTES_ENABLED === 'true'
   let traites = 0,
     echecs = 0

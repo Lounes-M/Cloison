@@ -11,6 +11,7 @@ const controles = [
   { id: 'garant-anonyme', chemin: '/garant', destination: '/lien-invalide', prive: true },
   { id: 'locataire-anonyme', chemin: '/locataire', destination: '/lien-invalide', prive: true },
   { id: 'supervision-privee', chemin: '/api/supervision', api: true },
+  { id: 'cadence-actes-privee', chemin: '/api/actes/etat', api: true },
   { id: 'schema-prive', chemin: '/api/schema', api: true },
   { id: 'maintenance-privee', chemin: '/api/maintenance/etat', api: true },
   { id: 'paiements-prives', chemin: '/api/paiement/etat', api: true },
