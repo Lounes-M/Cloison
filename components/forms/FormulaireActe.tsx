@@ -1,5 +1,5 @@
 'use client'
-import { PAGES_ACTE_MAX } from '@/lib/signature/position'
+import { PlacementActe } from './PlacementActe'
 import { useActionState } from 'react'
 import { preparerActe, validerActe, reprendreDepotActe } from '@/lib/signature/actions'
 import { signature as t } from '@/lib/content/signature'
@@ -9,17 +9,7 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
   return (
     <form action={action} className="grid gap-5">
       <input type="hidden" name="dossier" value={dossier} />
-      <label>
-        {t.fichier}
-        <input
-          className="mt-2 block w-full"
-          name="pdf"
-          type="file"
-          accept="application/pdf"
-          required
-          disabled={attente}
-        />
-      </label>
+      <PlacementActe dossier={dossier} disabled={attente} />
       <label>
         {t.telephone}
         <input
@@ -32,24 +22,6 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
           disabled={attente}
         />
       </label>
-      <p className="text-muted text-sm">{t.placement}</p>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {(['page', 'x', 'y'] as const).map((n) => (
-          <label key={n}>
-            {t[n]}
-            <input
-              className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3"
-              name={n}
-              type="number"
-              min={n === 'page' ? 1 : 0}
-              max={n === 'page' ? PAGES_ACTE_MAX : 10000}
-              defaultValue={n === 'page' ? 1 : 40}
-              required
-              disabled={attente}
-            />
-          </label>
-        ))}
-      </div>
       <label className="flex items-start gap-3">
         <input type="checkbox" name="accord" required disabled={attente} />
         {t.accordAgence}
