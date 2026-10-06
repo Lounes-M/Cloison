@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
 import { FormulaireSecurite } from '@/components/forms/FormulaireSecurite'
 import { securite } from '@/lib/content/securite'
+import { ConnexionCodeSecours } from '@/components/forms/FormulaireCodesSecours'
+import { codesSecoursActifs } from '@/lib/agences/codes-secours'
 export default async function PageSecurite() {
   if (!(await utilisateurCourant())) redirect('/connexion')
   const db = await clientAgence()
@@ -35,6 +37,7 @@ export default async function PageSecurite() {
           </div>
         )}
       </div>
+      {codesSecoursActifs() && disponible && <ConnexionCodeSecours />}
     </div>
   )
 }

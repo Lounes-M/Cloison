@@ -42,6 +42,12 @@ create table auth.users (
   email_confirmed_at timestamptz
 );
 
+-- Colonnes de session relues apres une recuperation. Ne simule pas l API Auth.
+create table auth.sessions (
+ id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
+ aal text not null default 'aal1', created_at timestamptz not null default clock_timestamp()
+);
+
 -- Chez Supabase, `auth.uid()` lit le claim `sub` du jeton verifie. En local on
 -- pose ce claim a la main avec `set request.jwt.claim.sub = '...'`.
 create or replace function auth.uid() returns uuid
