@@ -1,3 +1,4 @@
+import { verifierConcurrenceActes } from './verifier-concurrence-actes.mjs'
 import { verifierReutilisationPieces } from './verifier-reutilisation-pieces.mjs'
 import { verifierBrouillonsEngagement } from './verifier-brouillons-engagement.mjs'
 import assert from 'node:assert/strict'
@@ -191,6 +192,7 @@ if (import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
       await verifierConcurrenceOcr(db, connexion)
       await verifierConcurrenceConnecteurs(db, connexion)
       await verifierConcurrenceExamen(db, connexion)
+      await verifierConcurrenceActes(db, connexion)
       await verifierResponsables(db, connexion, adresse, secret)
       await verifierPreferences(db, connexion, adresse, secret)
       await verifierRappels(db, connexion)
