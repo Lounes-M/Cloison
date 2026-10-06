@@ -84,4 +84,5 @@ export async function verifierActe(contenu: Buffer, position: PositionSignature)
   const { width, height } = pages[position.page - 1]!.getSize()
   if (position.x + CHAMP_SIGNATURE.largeur > width || position.y + CHAMP_SIGNATURE.hauteur > height)
     throw new Error('Champ hors page')
+  return pages.map((page) => ({ largeur: page.getWidth(), hauteur: page.getHeight() }))
 }

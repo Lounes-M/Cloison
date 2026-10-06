@@ -97,6 +97,44 @@ async function moteurPdf() {
   return import('pdfjs-dist/legacy/build/pdf.mjs')
 }
 
+/** Apercu temporaire du projet original, une seule page et au plus 1200 pixels de cote. */
+export async function apercuPageActe(contenu: Buffer, numero: number) {
+  const pdfjs = await moteurPdf()
+  const chargement = pdfjs.getDocument({
+    data: new Uint8Array(contenu),
+    standardFontDataUrl: racineDesPolices(),
+    maxImageSize: 12_000_000,
+  })
+  try {
+    const document = await chargement.promise
+    if (!Number.isSafeInteger(numero) || numero < 1 || numero > document.numPages)
+      throw new Error('Page invalide')
+    const page = await document.getPage(numero)
+    const origine = page.getViewport({ scale: 1 })
+    verifierDimensions(origine.width, origine.height)
+    const vue = page.getViewport({
+      scale: Math.min(1.5, 1200 / Math.max(origine.width, origine.height)),
+    })
+    const { toile, ctx } = toileBlanche(vue.width, vue.height)
+    try {
+      await page.render({
+        canvas: enToileDom(toile),
+        canvasContext: enContexteDom(ctx),
+        viewport: vue,
+      }).promise
+      const png = toile.toBuffer('image/png')
+      if (png.length > 2 * 1024 * 1024) throw new Error('Apercu trop volumineux')
+      return png
+    } finally {
+      toile.width = 1
+      toile.height = 1
+      page.cleanup()
+    }
+  } finally {
+    await chargement.destroy()
+  }
+}
+
 /**
  * Le filigrane, en diagonale et repete.
  *

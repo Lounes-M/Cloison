@@ -2,6 +2,8 @@ import { PDFDocument } from 'pdf-lib'
 import assert from 'node:assert/strict'
 import { parcourirExport } from './parcours-exports-navigateur.mjs'
 import { randomUUID } from 'node:crypto'
+import { mkdir } from 'node:fs/promises'
+import { join } from 'node:path'
 export function fixtureActes(dossier) {
   let active = false,
     listesRemplies = false,
@@ -63,6 +65,7 @@ export function fixtureActes(dossier) {
             demonstration: false,
           },
         ]
+      else if (chemin.endsWith('/rpc/consommer_debit')) resultat = true
       else if (chemin.endsWith('/engagements'))
         resultat = [
           {
@@ -186,6 +189,35 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
       buffer: await pdfRecette(),
     })
     await page.locator('input[name="telephone"]').fill('+33600000000')
+    await page.getByRole('button', { name: 'Afficher la page', exact: true }).click()
+    const apercu = page.getByRole('button', {
+      name: 'Page de l’acte : placement du champ de signature',
+      exact: true,
+    })
+    await apercu.waitFor()
+    await apercu.focus()
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('Shift+ArrowDown')
+    assert.equal(await page.locator('input[name="x"]').inputValue(), '41')
+    assert.equal(await page.locator('input[name="y"]').inputValue(), '50')
+    const boite = await apercu.boundingBox()
+    assert(boite)
+    await apercu.click({ position: { x: boite.width - 5, y: boite.height - 5 } })
+    assert.equal(await page.locator('input[name="x"]').inputValue(), '510')
+    assert.equal(await page.locator('input[name="y"]').inputValue(), '805')
+    await page.locator('input[name="page"]').fill('2')
+    assert.equal(await apercu.count(), 0, 'Une autre page ne conserve pas l ancien apercu')
+    await page.locator('input[name="page"]').fill('1')
+    await page.getByRole('button', { name: 'Afficher la page', exact: true }).click()
+    await apercu.waitFor()
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    if (process.env.CLOISON_CAPTURE_INTERFACE_DIR) {
+      await mkdir(process.env.CLOISON_CAPTURE_INTERFACE_DIR, { recursive: true })
+      await page.screenshot({
+        path: join(process.env.CLOISON_CAPTURE_INTERFACE_DIR, `placement-acte-${largeur}.png`),
+        fullPage: true,
+      })
+    }
     await page.locator('input[name="accord"]').check()
     await page.getByRole('button', { name: 'Soumettre au garant', exact: true }).focus()
     await page.keyboard.press('Enter')

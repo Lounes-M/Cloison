@@ -15,6 +15,7 @@ for (const route of [
   '(agence)/espace/pieces/[id]/route.js.nft.json',
   '(porteur)/garant/page.js.nft.json',
   '(agence)/espace/dossiers/[id]/page.js.nft.json',
+  '(agence)/espace/dossiers/[id]/signature/page.js.nft.json',
 ]) {
   const trace = join(racine, '.next/server/app', route)
   const fichiers = JSON.parse(await readFile(trace, 'utf8')).files
@@ -101,6 +102,25 @@ for (const route of [
       JSON.parse(acte.stdout),
       { ok: true },
       'Validation acte absente du paquet deploye',
+    )
+    const apercu = spawnSync(
+      process.execPath,
+      ['--max-old-space-size=128', 'workers/apercu-acte.mjs'],
+      {
+        cwd: temporaire,
+        env: { NODE_ENV: 'production', LANG: 'C.UTF-8', TZ: 'UTC' },
+        input: JSON.stringify({ contenu, page: 1 }),
+        encoding: 'utf8',
+        timeout: 20000,
+        maxBuffer: 3 * 1024 * 1024,
+      },
+    )
+    assert.equal(apercu.status, 0, 'Apercu inaccessible dans la trace')
+    const image = JSON.parse(apercu.stdout)
+    assert.deepEqual(image.pages, [{ largeur: 200, hauteur: 200 }])
+    assert.equal(
+      Buffer.from(image.png, 'base64').subarray(0, 8).toString('hex'),
+      '89504e470d0a1a0a',
     )
     console.log(`Trace documentaire executee : ${route}`)
   } finally {

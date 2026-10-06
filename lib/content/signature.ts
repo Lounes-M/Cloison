@@ -10,6 +10,19 @@ export const signature = {
     'PDF non accepté. Vérifiez qu’il est lisible, non protégé, sans formulaire ni pièce jointe, avec au plus 40 pages non pivotées. Le champ de signature doit tenir entièrement dans la page choisie.',
   placement:
     'Le champ mesure 85 × 37 points. Mesurez sa position depuis le coin supérieur gauche de la page.',
+  apercu: 'Afficher la page',
+  apercuAttente: 'Préparation de l’aperçu…',
+  apercuPret: 'Aperçu prêt. Vérifiez le texte et la position du champ avant de soumettre.',
+  apercuErreur: 'Aperçu indisponible. Vérifiez le fichier et la page, puis réessayez.',
+  apercuLimite: 'Limite de prévisualisation atteinte. Réessayez plus tard.',
+  apercuAide:
+    'Cliquez dans la page pour centrer le champ. Au clavier, utilisez les flèches pour le déplacer d’un point, ou Maj avec une flèche pour dix points. Les coordonnées restent modifiables ci-dessous.',
+  apercuZone: 'Page de l’acte : placement du champ de signature',
+  apercuImage: 'Aperçu visuel de la page choisie du projet',
+  apercuChamp: 'Signature',
+  apercuHorsPage: 'Le champ dépasse la page. Corrigez ses coordonnées avant de soumettre.',
+  apercuConfidentialite:
+    'L’aperçu est temporaire et ne modifie pas votre PDF. Consultez aussi l’original pour vérifier son contenu complet.',
   telephone: 'Téléphone du garant, au format international',
   page: 'Page du champ de signature',
   x: 'Position depuis la gauche (points)',
