@@ -1,5 +1,10 @@
 import { beforeEach, afterEach, expect, test, vi } from 'vitest'
-const h = vi.hoisted(() => ({ client: vi.fn(), rpc: vi.fn(), distant: vi.fn() }))
+const h = vi.hoisted(() => ({
+  client: vi.fn(),
+  rpc: vi.fn(),
+  confirmer: vi.fn(),
+  distant: vi.fn(),
+}))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: h.client }))
 vi.mock('@/lib/signature/configuration-youtrust', () => ({
   clientYoutrustConfigure: () => ({ lirePourRapprochement: h.distant }),
@@ -17,9 +22,14 @@ const requete = (secret = 'fictif') =>
 beforeEach(() => {
   vi.clearAllMocks()
   vi.stubEnv('CRON_SECRET', 'fictif')
+  vi.stubEnv('CRON_ACTES_SECRET', 'dedie')
+  h.confirmer.mockResolvedValue({ data: true, error: null })
   vi.stubEnv('YOUTRUST_REGISTRY_ENABLED', 'true')
   vi.stubEnv('YOUTRUST_ENVIRONMENT', 'sandbox')
-  h.client.mockResolvedValue({ rpc: h.rpc })
+  h.client.mockResolvedValue({
+    rpc: (nom: string, ...args: unknown[]) =>
+      nom === 'confirmer_traitement_actes' ? h.confirmer(nom, ...args) : h.rpc(nom, ...args),
+  })
   h.distant.mockResolvedValue({ id: reference, external_id: id, status: 'done' })
   h.rpc.mockImplementation(async (nom: string) => ({
     data:
@@ -40,10 +50,15 @@ test('exige le secret cron avant toute configuration', async () => {
   expect((await POST(requete('autre'))).status).toBe(401)
   expect(h.client).not.toHaveBeenCalled()
 })
-test('un registre desactive ne touche ni SQL ni fournisseur', async () => {
+test('un registre desactive confirme uniquement son passage', async () => {
   vi.stubEnv('YOUTRUST_REGISTRY_ENABLED', 'false')
   expect(await (await POST(requete())).json()).toEqual({ actif: false, traites: 0, echecs: 0 })
-  expect(h.client).not.toHaveBeenCalled()
+  expect(h.rpc).not.toHaveBeenCalled()
+  expect(h.distant).not.toHaveBeenCalled()
+  expect(h.confirmer).toHaveBeenCalledWith('confirmer_traitement_actes', {
+    le_nom: 'signature',
+    reussite: true,
+  })
 })
 test('le bail et la reference externe sont confirmes avant le succes', async () => {
   expect(await (await POST(requete())).json()).toEqual({ actif: true, traites: 1, echecs: 0 })

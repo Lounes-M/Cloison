@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
-import { secretCorrect } from '@/lib/exploitation/autorisation-cron'
+import { suivreTraitementActes } from '@/lib/exploitation/suivi-actes'
 import { clientYoutrustConfigure } from '@/lib/signature/configuration-youtrust'
 import { environnementYoutrust, identifiantYoutrust } from '@/lib/signature/youtrust'
 
@@ -16,8 +16,9 @@ const reservation = z.strictObject({
 })
 
 export async function POST(requete: Request) {
-  if (!secretCorrect(requete.headers.get('authorization'), process.env.CRON_SECRET))
-    return new NextResponse(null, { status: 401, headers })
+  return suivreTraitementActes('signature', requete, executer)
+}
+async function executer(requete: Request) {
   if (process.env.YOUTRUST_REGISTRY_ENABLED !== 'true')
     return NextResponse.json({ actif: false, traites: 0, echecs: 0 }, { headers })
   let traites = 0,
