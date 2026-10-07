@@ -43,6 +43,7 @@ export const SEGMENTS_APPLICATIFS = [
   'garant',
   'lien',
   'lien-invalide',
+  'remise-donnees',
 ] as const
 
 /**

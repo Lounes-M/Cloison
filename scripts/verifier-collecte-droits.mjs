@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process'
 import { fixtureCollecteDroits } from './fixture-collecte-droits.mjs'
 import { collecterDonneesDroits } from '../lib/droits/collecte.ts'
 import { verifierPiecesDroits } from './verifier-pieces-droits.mjs'
+import { verifierExportApprouve } from './verifier-export-approuve.mjs'
 import { verifierCollecteBrouillons } from './verifier-collecte-brouillons.mjs'
 
 export async function verifierCollecteDroits(db, connexion) {
@@ -17,6 +18,7 @@ export async function verifierCollecteDroits(db, connexion) {
   assert(
     ['127.0.0.1', 'localhost'].includes(url.hostname) && url.pathname === '/cloison_audit_test',
   )
+  if (['linux', 'darwin'].includes(process.platform)) await verifierExportApprouve(db, connexion)
   const f = await fixtureCollecteDroits(db)
   const r = await collecterDonneesDroits(db, f.brut)
   assert.equal(r.dossiers.length, 2)

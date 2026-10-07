@@ -33,23 +33,37 @@ export async function repertoirePrive(chemin) {
 export async function lireBorne(chemin, maximum) {
   await parentsDirects(dirname(resolve(chemin)))
   const f = await open(chemin, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK)
+  const blocs = []
+  const morceaux = []
+  let resultat
   try {
     const stat = await f.stat()
     if (!stat.isFile() || stat.size > maximum || (stat.mode & 0o077) !== 0) refuser()
     // Lecture bornee meme si le fichier grossit apres stat(). Pas de readFile illimite.
-    const blocs = []
     let position = 0
     while (position <= maximum) {
       const bloc = Buffer.alloc(Math.min(64 * 1024, maximum + 1 - position))
+      blocs.push(bloc)
       const { bytesRead } = await f.read(bloc, 0, bloc.length, position)
-      if (!bytesRead) break
+      if (!bytesRead) {
+        bloc.fill(0)
+        blocs.pop()
+        break
+      }
       position += bytesRead
       if (position > maximum) refuser()
-      blocs.push(bloc.subarray(0, bytesRead))
+      morceaux.push(bloc.subarray(0, bytesRead))
     }
-    return Buffer.concat(blocs)
+    resultat = Buffer.concat(morceaux)
+    return resultat
   } finally {
-    await f.close()
+    for (const bloc of blocs) bloc.fill(0)
+    try {
+      await f.close()
+    } catch (erreur) {
+      resultat?.fill(0)
+      throw erreur
+    }
   }
 }
 export async function ecrireNeuf(chemin, octets) {

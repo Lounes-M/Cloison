@@ -34,6 +34,7 @@ import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
  */
 export async function proxy(requete: NextRequest) {
   const nonce = nouveauNonce()
+  const remise = requete.nextUrl.pathname === '/remise-donnees'
   const politique = politiqueAvecNonce(nonce)
 
   // La requete transmise a Next porte la politique, donc le nonce. `x-nonce`
@@ -70,6 +71,10 @@ export async function proxy(requete: NextRequest) {
   }
 
   reponse.headers.set('Content-Security-Policy', politique)
+  if (remise) {
+    reponse.headers.set('Cache-Control', 'no-store')
+    reponse.headers.set('Referrer-Policy', 'no-referrer')
+  }
   return reponse
 }
 
@@ -93,5 +98,6 @@ export const config = {
     '/garant/:path*',
     '/lien/:path*',
     '/lien-invalide/:path*',
+    '/remise-donnees/:path*',
   ],
 }

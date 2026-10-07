@@ -280,6 +280,7 @@ export async function parcourirInterface(
   await page.keyboard.press('Enter')
   assert(await page.locator('#email-retour').isVisible(), 'Recuperation inaccessible au clavier')
   await retrouver.locator('summary').press('Enter')
+  await visiter('/remise-donnees', 'remise-donnees')
   await visiter('/lien-invalide', 'lien-invalide')
   // Le lien de saut doit rendre le contenu atteignable au clavier.
   await page.keyboard.press(
@@ -382,6 +383,6 @@ export async function parcourirInterface(
     'Page absente de la revue responsive',
   )
   console.log(
-    `OK : interface ${moteur.name()} ${largeur}, quinze pages et page introuvable, palette, clavier et mouvement reduit`,
+    `OK : interface ${moteur.name()} ${largeur}, pages applicatives et page introuvable, palette, clavier et mouvement reduit`,
   )
 }

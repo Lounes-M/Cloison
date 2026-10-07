@@ -11,6 +11,7 @@ import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { creerPaquetDroits, ouvrirPaquetDroits, verifierDecisionPaquet } from './paquet-droits.mjs'
+import { lireApprobationExport } from './approbation-export-droits.mjs'
 import { avecSuiviExport } from './suivi-export-droits.mjs'
 
 const refuser = () => {
@@ -27,50 +28,63 @@ export async function exporterDroits(
 ) {
   verifierSysteme()
   if (!['creer', 'extraire'].includes(commande)) refuser()
-  const decision = verifierDecisionPaquet(
-    JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
-  )
-  await verifierSuivi?.(decision)
+  const lireDecision = async () => {
+    const octets = await lireBorne(decisionPath, 256 * 1024)
+    try {
+      const brut = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(octets)
+      const decision = verifierSuivi
+        ? lireApprobationExport(brut).decision
+        : verifierDecisionPaquet(JSON.parse(brut))
+      return { brut, decision }
+    } finally {
+      octets.fill(0)
+    }
+  }
+  const initiale = await lireDecision()
+  const { decision } = initiale
+  await verifierSuivi?.(decision, initiale.brut)
   await repertoirePrive(dirname(resolve(destination)))
   const reverifier = async () => {
-    const actuelle = verifierDecisionPaquet(
-      JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
-    )
-    if (JSON.stringify(actuelle) !== JSON.stringify(decision)) refuser()
-    await verifierSuivi?.(actuelle)
+    const actuelle = await lireDecision()
+    if (actuelle.brut !== initiale.brut) refuser()
+    await verifierSuivi?.(actuelle.decision, actuelle.brut)
   }
-  if (commande === 'creer') {
-    await repertoirePrive(source)
-    const fichiers = new Map()
-    for (const f of decision.fichiers)
-      fichiers.set(f.nom, await lireBorne(join(source, f.nom), f.taille))
-    const archive = creerPaquetDroits(decision, fichiers, cle)
+  let fichiers = new Map()
+  try {
+    if (commande === 'creer') {
+      await repertoirePrive(source)
+      for (const f of decision.fichiers)
+        fichiers.set(f.nom, await lireBorne(join(source, f.nom), f.taille))
+      const archive = creerPaquetDroits(decision, fichiers, cle)
+      await reverifier()
+      await ecrireNeuf(destination, archive)
+      try {
+        await reverifier()
+      } catch (erreur) {
+        await rm(destination, { force: true })
+        throw erreur
+      }
+      return {
+        fichiers: fichiers.size,
+        sha256: createHash('sha256').update(archive).digest('hex'),
+      }
+    }
+    fichiers = ouvrirPaquetDroits(await lireBorne(source, 90 * 1024 * 1024), cle, decision).fichiers
     await reverifier()
-    await ecrireNeuf(destination, archive)
+    // Aucune destination n'existe avant la validation de tous les contenus.
+    await mkdir(destination, { mode: 0o700 })
     try {
+      for (const [nom, contenu] of fichiers) await ecrireNeuf(join(destination, nom), contenu)
+      await ecrireNeuf(join(destination, 'manifeste.json'), Buffer.from(JSON.stringify(decision)))
       await reverifier()
     } catch (erreur) {
-      await rm(destination, { force: true })
+      await rm(destination, { recursive: true, force: true })
       throw erreur
     }
-    return {
-      fichiers: fichiers.size,
-      sha256: createHash('sha256').update(archive).digest('hex'),
-    }
+    return { fichiers: fichiers.size }
+  } finally {
+    for (const contenu of fichiers.values()) contenu.fill(0)
   }
-  const { fichiers } = ouvrirPaquetDroits(await lireBorne(source, 90 * 1024 * 1024), cle, decision)
-  await reverifier()
-  // Aucune destination n'existe avant la validation de tous les contenus.
-  await mkdir(destination, { mode: 0o700 })
-  try {
-    for (const [nom, contenu] of fichiers) await ecrireNeuf(join(destination, nom), contenu)
-    await ecrireNeuf(join(destination, 'manifeste.json'), Buffer.from(JSON.stringify(decision)))
-    await reverifier()
-  } catch (erreur) {
-    await rm(destination, { recursive: true, force: true })
-    throw erreur
-  }
-  return { fichiers: fichiers.size }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

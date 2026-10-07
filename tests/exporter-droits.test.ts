@@ -16,6 +16,8 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { approbationFictive } from './approbation-export-fixture'
+import { lireApprobationExport } from '../scripts/approbation-export-droits.mjs'
 import { exporterDroits } from '../scripts/exporter-droits.mjs'
 import type { DecisionPaquet } from '../scripts/paquet-droits.mjs'
 
@@ -65,6 +67,10 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
     it.each(['creer', 'extraire'])(
       'retire le resultat si le suivi change apres ecriture (%s)',
       async (commande) => {
+        const brut = JSON.stringify(approbationFictive(decision))
+        decision = lireApprobationExport(brut).decision
+        await sauverDecision()
+        await writeFile(chemin('approbation.json'), brut, { mode: 0o600 })
         if (commande === 'extraire') await creer()
         const verifier = vi
           .fn()
@@ -76,7 +82,7 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
         await expect(
           exporterDroits(
             commande,
-            chemin('decision.json'),
+            chemin('approbation.json'),
             chemin(commande === 'creer' ? 'source' : 'paquet'),
             destination,
             cle,
@@ -88,11 +94,14 @@ describe.skipIf(!['linux', 'darwin'].includes(process.platform))(
       },
     )
     it('refuse avant lecture des fichiers lorsque le suivi est indisponible', async () => {
+      await writeFile(chemin('approbation.json'), JSON.stringify(approbationFictive(decision)), {
+        mode: 0o600,
+      })
       const verifier = vi.fn().mockRejectedValue(new Error('Suivi indisponible'))
       await expect(
         exporterDroits(
           'creer',
-          chemin('decision.json'),
+          chemin('approbation.json'),
           chemin('source-inexistante'),
           chemin('paquet'),
           cle,
