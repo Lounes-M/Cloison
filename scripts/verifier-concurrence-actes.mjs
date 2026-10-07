@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { Client } from 'pg'
+import { verifierFileActes } from './verifier-file-actes.mjs'
 
 export async function verifierConcurrenceActes(db, connexion) {
   assert.equal((await db.query('select current_database() nom')).rows[0].nom, 'cloison_audit_test')
@@ -36,6 +37,7 @@ export async function verifierConcurrenceActes(db, connexion) {
       )
     }
     await db.query('commit')
+    if (['linux', 'darwin'].includes(process.platform)) await verifierFileActes(db, connexion)
     const ouvertures = await Promise.allSettled(
       clients.map(async (c) => {
         await c.connect()
