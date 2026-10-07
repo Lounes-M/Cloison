@@ -105,14 +105,19 @@ export function ouvrirPaquetDroits(archive, cle, attendue, maintenant = Date.now
   )
     refuser()
   const fichiers = new Map()
-  for (let i = 0; i < decision.fichiers.length; i++) {
-    const f = decision.fichiers[i]
-    const texte = p.data.contenus[i]
-    if (texte.length !== 4 * Math.ceil(f.taille / 3)) refuser()
-    const contenu = Buffer.from(texte, 'base64')
-    if (contenu.toString('base64') !== texte) refuser()
-    fichiers.set(f.nom, contenu)
+  try {
+    for (let i = 0; i < decision.fichiers.length; i++) {
+      const f = decision.fichiers[i]
+      const texte = p.data.contenus[i]
+      if (texte.length !== 4 * Math.ceil(f.taille / 3)) refuser()
+      const contenu = Buffer.from(texte, 'base64')
+      fichiers.set(f.nom, contenu)
+      if (contenu.toString('base64') !== texte) refuser()
+    }
+    verifierContenu(decision, fichiers)
+    return { decision, fichiers }
+  } catch (erreur) {
+    for (const contenu of fichiers.values()) contenu.fill(0)
+    throw erreur
   }
-  verifierContenu(decision, fichiers)
-  return { decision, fichiers }
 }

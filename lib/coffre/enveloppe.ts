@@ -94,7 +94,16 @@ export function ouvrir(scelle: Buffer, cle: Buffer): Buffer {
   // `final()` leve si la marque ne correspond pas. On laisse passer l'erreur
   // telle quelle : elle ne dit rien d'exploitable, et l'attraper pour renvoyer
   // un contenu vide serait pire que tout.
-  return Buffer.concat([dechiffreur.update(chiffre), dechiffreur.final()])
+  const provisoire = dechiffreur.update(chiffre)
+  let fin: Buffer | undefined
+  try {
+    fin = dechiffreur.final()
+    return Buffer.concat([provisoire, fin])
+  } finally {
+    // update() produit deja du clair, meme lorsque final() refuse la marque.
+    provisoire.fill(0)
+    fin?.fill(0)
+  }
 }
 
 /**

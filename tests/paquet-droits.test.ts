@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { sceller, ouvrir } from '../lib/coffre/enveloppe'
 import {
   creerPaquetDroits,
@@ -209,3 +209,41 @@ describe('Paquet personnel lie a une decision explicite', () => {
     ).toThrow()
   })
 })
+
+it.each(['empreinte', 'base64', 'second-fichier'])(
+  'efface tous les buffers decodes lorsque le paquet est refuse : %s',
+  (cas) => {
+    const d = decision()
+    const second = { ...d.fichiers[0]!, nom: 'piece-0002.txt' }
+    d.fichiers.push(second)
+    const archive = creerPaquetDroits(
+      d,
+      new Map([...fichiers, [second.nom, contenu]]),
+      cle,
+      maintenant,
+    )
+    const invalide = alterer(archive, (p) => {
+      const contenus = p.contenus as string[]
+      if (cas === 'empreinte') contenus[1] = Buffer.alloc(contenu.length, 120).toString('base64')
+      if (cas === 'base64') contenus[1] = '!'.repeat(contenus[1]!.length)
+      if (cas === 'second-fichier') contenus[1] = ''
+    })
+    const from = Buffer.from.bind(Buffer)
+    const decodes: Buffer[] = []
+    const espion = vi.spyOn(Buffer, 'from').mockImplementation(((...args: unknown[]) => {
+      const resultat: Buffer = Reflect.apply(from, Buffer, args)
+      if (args[1] === 'base64') decodes.push(resultat)
+      return resultat
+    }) as typeof Buffer.from)
+    try {
+      expect(() => ouvrirPaquetDroits(invalide, cle, d, maintenant)).toThrow(
+        'Paquet de droits refuse.',
+      )
+      expect(decodes.length).toBeGreaterThan(0)
+      for (const bloc of decodes) expect(bloc).toEqual(Buffer.alloc(bloc.length))
+      expect(contenu.toString()).toBe('Contenu fictif reserve au demandeur')
+    } finally {
+      espion.mockRestore()
+    }
+  },
+)
