@@ -39,38 +39,42 @@ export async function exporterDroits(
     if (JSON.stringify(actuelle) !== JSON.stringify(decision)) refuser()
     await verifierSuivi?.(actuelle)
   }
-  if (commande === 'creer') {
-    await repertoirePrive(source)
-    const fichiers = new Map()
-    for (const f of decision.fichiers)
-      fichiers.set(f.nom, await lireBorne(join(source, f.nom), f.taille))
-    const archive = creerPaquetDroits(decision, fichiers, cle)
+  let fichiers = new Map()
+  try {
+    if (commande === 'creer') {
+      await repertoirePrive(source)
+      for (const f of decision.fichiers)
+        fichiers.set(f.nom, await lireBorne(join(source, f.nom), f.taille))
+      const archive = creerPaquetDroits(decision, fichiers, cle)
+      await reverifier()
+      await ecrireNeuf(destination, archive)
+      try {
+        await reverifier()
+      } catch (erreur) {
+        await rm(destination, { force: true })
+        throw erreur
+      }
+      return {
+        fichiers: fichiers.size,
+        sha256: createHash('sha256').update(archive).digest('hex'),
+      }
+    }
+    fichiers = ouvrirPaquetDroits(await lireBorne(source, 90 * 1024 * 1024), cle, decision).fichiers
     await reverifier()
-    await ecrireNeuf(destination, archive)
+    // Aucune destination n'existe avant la validation de tous les contenus.
+    await mkdir(destination, { mode: 0o700 })
     try {
+      for (const [nom, contenu] of fichiers) await ecrireNeuf(join(destination, nom), contenu)
+      await ecrireNeuf(join(destination, 'manifeste.json'), Buffer.from(JSON.stringify(decision)))
       await reverifier()
     } catch (erreur) {
-      await rm(destination, { force: true })
+      await rm(destination, { recursive: true, force: true })
       throw erreur
     }
-    return {
-      fichiers: fichiers.size,
-      sha256: createHash('sha256').update(archive).digest('hex'),
-    }
+    return { fichiers: fichiers.size }
+  } finally {
+    for (const contenu of fichiers.values()) contenu.fill(0)
   }
-  const { fichiers } = ouvrirPaquetDroits(await lireBorne(source, 90 * 1024 * 1024), cle, decision)
-  await reverifier()
-  // Aucune destination n'existe avant la validation de tous les contenus.
-  await mkdir(destination, { mode: 0o700 })
-  try {
-    for (const [nom, contenu] of fichiers) await ecrireNeuf(join(destination, nom), contenu)
-    await ecrireNeuf(join(destination, 'manifeste.json'), Buffer.from(JSON.stringify(decision)))
-    await reverifier()
-  } catch (erreur) {
-    await rm(destination, { recursive: true, force: true })
-    throw erreur
-  }
-  return { fichiers: fichiers.size }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
