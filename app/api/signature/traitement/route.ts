@@ -64,21 +64,38 @@ async function executer(requete: Request) {
     etape = 'actes_configuration'
     try {
       const config = configurationParcours()!
+      const debut = performance.now()
       const signal = AbortSignal.any([requete.signal, AbortSignal.timeout(45000)])
       etape = 'actes_connexion'
       const db = await clientServeur(signal)
-      etape = 'actes_file'
-      const file = await db.rpc('actes_a_traiter', { le_mode: config.mode })
-      const ids = z.array(z.uuid()).max(1).parse(file.data)
-      if (file.error) throw new Error()
-      for (const id of ids) {
-        etape = 'actes_lecture'
-        const d = await chargerActe(db, id)
-        if (d.acte.etape !== 'en_cours' && process.env.YOUTRUST_MUTATIONS_ENABLED !== 'true')
-          continue
-        etape = 'actes_traitement'
-        await traiterActe(db, id, config.mode, clientYoutrustConfigure(signal), signal)
-        traites++
+      const visites = new Set<string>()
+      for (let tour = 0; tour < 5; tour++) {
+        etape = 'actes_file'
+        signal.throwIfAborted()
+        // Garder au moins quinze secondes pour un nouvel acte et le controle final.
+        if (performance.now() - debut >= 30000) break
+        const file = await db.rpc('actes_a_traiter', { le_mode: config.mode })
+        if (file.error) throw new Error()
+        const ids = z.array(z.uuid()).max(1).parse(file.data)
+        const id = ids[0]
+        if (!id || visites.has(id)) break
+        visites.add(id)
+        try {
+          signal.throwIfAborted()
+          etape = 'actes_lecture'
+          const d = await chargerActe(db, id)
+          if (d.acte.etape !== 'en_cours' && process.env.YOUTRUST_MUTATIONS_ENABLED !== 'true')
+            continue
+          etape = 'actes_traitement'
+          signal.throwIfAborted()
+          await traiterActe(db, id, config.mode, clientYoutrustConfigure(signal), signal)
+          traites++
+        } catch {
+          signaler(etape)
+          echecs++
+          // La reservation SQL persiste ; poursuivre uniquement les autres actes.
+          if (signal.aborted) break
+        }
       }
       etape = 'actes_anomalies'
       const anomalies = await db.rpc('operations_actes_a_examiner')
