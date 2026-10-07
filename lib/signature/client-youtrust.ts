@@ -118,15 +118,16 @@ export function creerClientYoutrust(
       signal.throwIfAborted()
       for (;;) {
         const { value, done } = await lecteur.read()
+        if (value) blocs.push(value)
         signal.throwIfAborted()
         if (done) break
         taille += value.byteLength
         if (taille > limite) throw indisponible()
-        blocs.push(value)
       }
       if (!taille) throw indisponible()
       return Buffer.concat(blocs, taille)
     } finally {
+      for (const bloc of blocs) bloc.fill(0)
       signal.removeEventListener('abort', annuler)
       annuler()
       lecteur.releaseLock()
@@ -144,7 +145,11 @@ export function creerClientYoutrust(
             corps: JSON.stringify(corps),
           },
     )
-    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(octets)) as unknown
+    try {
+      return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(octets)) as unknown
+    } finally {
+      octets.fill(0)
+    }
   }
   const chemin = (id: string) => `/signature_requests/${identifiantYoutrust.parse(id)}`
   async function lire(id: string) {
@@ -297,23 +302,32 @@ export function creerClientYoutrust(
           !attendus.every((s) => etat.signers.some((r) => r.id === s && r.status === 'signed'))
         )
           throw indisponible()
-        const telecharger = async (suffixe: string) => {
-          signal.throwIfAborted()
-          if (restant < 8) throw indisponible()
-          const pdf = await requete(`${cible}${suffixe}`, { pdf: true, signal, limite: restant })
-          restant -= pdf.byteLength
-          verifierPdf(pdf)
-          return { pdf, sha256: createHash('sha256').update(pdf).digest('hex') }
+        const recus: Buffer[] = []
+        let complet = false
+        try {
+          const telecharger = async (suffixe: string) => {
+            signal.throwIfAborted()
+            if (restant < 8) throw indisponible()
+            const pdf = await requete(`${cible}${suffixe}`, { pdf: true, signal, limite: restant })
+            recus.push(pdf)
+            restant -= pdf.byteLength
+            verifierPdf(pdf)
+            return { pdf, sha256: createHash('sha256').update(pdf).digest('hex') }
+          }
+          const acte = await telecharger(`/documents/${document}/download`)
+          const preuves = []
+          for (const signataire of attendus) {
+            preuves.push({
+              signataire,
+              ...(await telecharger(`/signers/${signataire}/audit_trails/download`)),
+            })
+          }
+          complet = true
+          return { acte, preuves }
+        } finally {
+          // En cas de succes, l'appelant prend possession des PDF et les efface.
+          if (!complet) for (const pdf of recus) pdf.fill(0)
         }
-        const acte = await telecharger(`/documents/${document}/download`)
-        const preuves = []
-        for (const signataire of attendus) {
-          preuves.push({
-            signataire,
-            ...(await telecharger(`/signers/${signataire}/audit_trails/download`)),
-          })
-        }
-        return { acte, preuves }
       }),
   }
 }
