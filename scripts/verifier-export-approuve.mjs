@@ -1,3 +1,4 @@
+import { verifierRemiseDroits } from './verifier-remise-droits.mjs'
 import assert from 'node:assert/strict'
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { openSync, closeSync } from 'node:fs'
@@ -101,6 +102,7 @@ export async function verifierExportApprouve(db, connexion) {
       JSON.parse(await readFile(join(racine, 'sortie', 'manifeste.json'), 'utf8')),
       d,
     )
+    await verifierRemiseDroits(db, connexion, brut, await readFile(join(racine, 'paquet')), cle)
     for (const role of [
       'anon',
       'authenticated',

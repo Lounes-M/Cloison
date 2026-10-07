@@ -130,3 +130,8 @@ test('une interruption conserve les acquittements deja obtenus dans le bilan', a
   expect(await purgerCoffres(db, controleur.signal)).toEqual({ traites: 1, echecs: 4 })
   expect(appels.at(-1)).toBe('acquitter:fictif/a')
 })
+
+// La retention des remises a ses tests de panne et son integration maintenance.
+vi.mock('@/lib/exploitation/purge-remises', () => ({
+  purgerRemises: async () => ({ traites: 0, echecs: 0 }),
+}))

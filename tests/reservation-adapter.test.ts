@@ -71,3 +71,8 @@ test('les metadonnees utilisent le client serveur de depot et jamais le client n
   expect(navigateur.from).not.toHaveBeenCalled()
   expect(stockage.from).toHaveBeenCalledExactlyOnceWith('pieces')
 })
+
+// La retention des remises a ses tests de panne et son integration maintenance.
+vi.mock('@/lib/exploitation/purge-remises', () => ({
+  purgerRemises: async () => ({ traites: 0, echecs: 0 }),
+}))

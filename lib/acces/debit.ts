@@ -35,6 +35,8 @@ export const SUJETS = [
   'depot_dossier',
   'depot_ip',
   'depot_global',
+  'remise_ip',
+  'remise_global',
 ] as const
 
 export type SujetDeDebit = (typeof SUJETS)[number]
