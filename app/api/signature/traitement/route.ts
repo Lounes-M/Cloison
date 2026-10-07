@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
 import { suivreTraitementActes } from '@/lib/exploitation/suivi-actes'
 import { diagnosticActes, type EtapeDiagnosticActes } from '@/lib/exploitation/diagnostic-actes'
+import { creerEntretienActes } from '@/lib/exploitation/entretien-actes'
 import { clientYoutrustConfigure } from '@/lib/signature/configuration-youtrust'
 import { configurationParcours } from '@/lib/signature/configuration-parcours'
 import { chargerActe, traiterActe } from '@/lib/signature/parcours'
@@ -23,11 +24,12 @@ async function executer(requete: Request) {
   try {
     const signal = AbortSignal.any([requete.signal, AbortSignal.timeout(10000)])
     const db = await clientServeur(signal)
+    const entretien = creerEntretienActes(db, signal)
     etape = 'archives_expiration'
-    const expiration = await db.rpc('expirer_archives_signature')
+    const expiration = await entretien.expirer()
     if (expiration.error) throw new Error()
     etape = 'archives_file_suppression'
-    const file = await db.rpc('fichiers_archives_a_supprimer')
+    const file = await entretien.lireFile()
     const chemins = z
       .array(
         z.string().refine((v) => {

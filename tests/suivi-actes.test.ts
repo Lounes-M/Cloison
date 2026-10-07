@@ -69,6 +69,20 @@ test.each(['signature', 'archives', 'reglements'] as const)(
   async (nom) => {
     h.rpc.mockResolvedValue({ data: false, error: { message: 'SECRET' } })
     expect((await suivreTraitementActes(nom, requete(), h.executer)).status).toBe(503)
-    expect(vi.mocked(console.error).mock.calls).toEqual([[`[actes] echec ${nom}_confirmation`]])
+    expect(vi.mocked(console.error).mock.calls).toEqual([
+      ['[actes] transport en echec', 'confirmation', 'appel_indisponible'],
+      [`[actes] echec ${nom}_confirmation`],
+    ])
   },
 )
+
+test('une confirmation reprise ne rejoue pas le traitement et conserve son echec', async () => {
+  h.executer.mockResolvedValue(new Response('{}', { status: 503 }))
+  h.rpc.mockResolvedValueOnce({ data: null, error: { message: 'SECRET' }, status: 504 })
+  expect((await suivreTraitementActes('archives', requete(), h.executer)).status).toBe(503)
+  expect(h.executer).toHaveBeenCalledTimes(1)
+  expect(h.rpc.mock.calls).toEqual([
+    ['confirmer_traitement_actes', { le_nom: 'archives', reussite: false }],
+    ['confirmer_traitement_actes', { le_nom: 'archives', reussite: false }],
+  ])
+})
