@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { verifierComptesDroits } from './verifier-comptes-droits.mjs'
+import { verifierEffacementPieces } from './verifier-effacement-pieces.mjs'
 import { randomUUID } from 'node:crypto'
 import { Client } from 'pg'
 import { mkdtemp, realpath, writeFile, readFile, stat, rm } from 'node:fs/promises'
@@ -22,6 +23,7 @@ export async function verifierCollecteDroits(db, connexion) {
   if (['linux', 'darwin'].includes(process.platform)) {
     await verifierExportApprouve(db, connexion)
     await verifierComptesDroits(db, connexion)
+    await verifierEffacementPieces(db, connexion)
   }
   const f = await fixtureCollecteDroits(db)
   const r = await collecterDonneesDroits(db, f.brut)
