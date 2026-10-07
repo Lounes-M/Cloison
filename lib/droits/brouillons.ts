@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { collecterComptesDroits } from './comptes.ts'
 import { z } from 'zod'
 import {
   collecterDonneesDroits,
@@ -125,6 +126,18 @@ export async function collecterCopiePersonnelle(
   const verifier = async () => {
     await verifierSuiviCollecte(db, brut)
     await complement?.verifier()
+    if (
+      decision.comptes &&
+      hash(
+        await collecterComptesDroits(
+          db,
+          decision.comptes,
+          decision.destinataire.email,
+          decision.nature,
+        ),
+      ) !== hash(donnees.comptes)
+    )
+      return refuser()
   }
   await verifier()
   return {

@@ -4,7 +4,7 @@
 -- vers Supabase : la-bas, tout ce qu'il cree existe deja.
 --
 -- Il n'imite que ce dont les migrations dependent reellement : les quatre
--- roles, le schema `auth`, la table `auth.users` reduite a trois colonnes, et
+-- roles, le schema `auth`, la table `auth.users` reduite aux colonnes lues, et
 -- `auth.uid()`. Rien de plus : un faux qui en fait trop finit par tester le
 -- faux plutot que le vrai.
 
@@ -39,7 +39,13 @@ grant usage on schema auth to anon, authenticated, service_role;
 create table auth.users (
   id                 uuid primary key default gen_random_uuid(),
   email              text unique,
-  email_confirmed_at timestamptz
+  email_confirmed_at timestamptz,
+  phone text,
+  phone_confirmed_at timestamptz,
+  created_at timestamptz,
+  updated_at timestamptz,
+  last_sign_in_at timestamptz,
+  deleted_at timestamptz
 );
 
 -- Chez Supabase, `auth.uid()` lit le claim `sub` du jeton verifie. En local on
