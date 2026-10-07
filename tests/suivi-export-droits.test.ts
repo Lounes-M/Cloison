@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs'
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import { verifierSuiviExport } from '../scripts/suivi-export-droits.mjs'
-import type { DecisionPaquet } from '../scripts/paquet-droits.mjs'
-import { verifierDecisionPaquet } from '../scripts/paquet-droits.mjs'
+import { lireApprobationExport } from '../scripts/approbation-export-droits.mjs'
+import { approbationFictive } from './approbation-export-fixture'
 
 let db: PGlite
 beforeAll(async () => {
@@ -23,92 +23,131 @@ afterAll(async () => {
   await db.close()
 })
 
-async function decision(
-  nature = 'acces',
-  etat = 'en_cours',
-  conservationJours = 2,
-): Promise<DecisionPaquet> {
-  const demande = randomUUID(),
-    premiere = randomUUID(),
-    revision = randomUUID()
+async function approuver(
+  options: {
+    nature?: string
+    etat?: string
+    operateur?: string
+    age?: number
+    conservationJours?: number
+    duree?: number
+  } = {},
+) {
+  const a = approbationFictive({
+    demande: randomUUID(),
+    revision: randomUUID(),
+    creeLe: new Date(Date.now() - (options.age ?? 100)).toISOString(),
+    expireLe: new Date(Date.now() + (options.duree ?? 60000)).toISOString(),
+    exclusions: ['tiers'],
+    fichiers: [{ nom: 'donnees-0001.txt', taille: 0, sha256: 'c'.repeat(64) }],
+  })
+  if (options.nature === 'portabilite') a.nature = 'portabilite'
+  const brut = JSON.stringify(a)
+  const debut = randomUUID()
   await db.query(
     `insert into suivi_demandes_droits(operation,demande,operateur,nature,etat,recu_le,repondre_avant,effacer_le,preuve_sha256)
-    values($1,$2,$1,$3,'recue',clock_timestamp()-interval '1 day',clock_timestamp()+interval '1 day',clock_timestamp()+$4::int*interval '1 day',repeat('a',64))`,
-    [premiere, demande, nature, conservationJours],
+    values($1,$2,$3,$4,'recue',clock_timestamp()-interval '1 day',clock_timestamp()+interval '1 day',clock_timestamp()+$5::int*interval '1 day',repeat('a',64))`,
+    [
+      debut,
+      a.demande,
+      options.operateur ?? a.operateur,
+      options.nature ?? a.nature,
+      options.conservationJours ?? 2,
+    ],
   )
   await db.query(
     `insert into suivi_demandes_droits(operation,demande,precedente,operateur,nature,etat,recu_le,repondre_avant,effacer_le,preuve_sha256)
-    select $1,demande,operation,operateur,nature,$2,recu_le,repondre_avant,effacer_le,preuve_sha256 from suivi_demandes_droits where operation=$3`,
-    [revision, etat, premiere],
+    select $1,demande,operation,operateur,nature,$2,recu_le,repondre_avant,effacer_le,$3 from suivi_demandes_droits where operation=$4`,
+    [
+      a.revision,
+      options.etat ?? 'en_cours',
+      createHash('sha256').update(brut).digest('hex'),
+      debut,
+    ],
   )
-  await new Promise((resolve) => setTimeout(resolve, 10))
-  return {
-    version: 1,
-    demande,
-    revision,
-    decisionSha256: 'a'.repeat(64),
-    destinataireSha256: 'b'.repeat(64),
-    creeLe: new Date().toISOString(),
-    expireLe: new Date(Date.now() + 60000).toISOString(),
-    exclusions: [],
-    fichiers: [{ nom: 'donnees-0001.txt', taille: 0, sha256: 'c'.repeat(64) }],
-  }
+  return { a, brut, d: lireApprobationExport(brut).decision }
 }
 
-test('la fenetre ne repart pas a zero en recreant le paquet plus tard', async () => {
-  const d = await decision('acces', 'en_cours', 4)
-  const r = await db.query<{ debut: string }>(
-    `select to_char(inscrit_le at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') debut from suivi_demandes_droits where operation=$1`,
-    [d.revision],
-  )
-  const fin = Date.parse(r.rows[0]!.debut) + 72 * 3600000
-  d.expireLe = new Date(fin).toISOString()
-  await expect(verifierSuiviExport(db, d)).resolves.toBeUndefined()
-  const tropLongue = { ...d, expireLe: new Date(fin + 1).toISOString() }
-  expect(() => verifierDecisionPaquet(tropLongue)).not.toThrow()
-  await expect(verifierSuiviExport(db, tropLongue)).rejects.toThrow()
-})
-
-test.each(['acces', 'portabilite'])('accepte la decision courante pour %s', async (nature) => {
-  await expect(verifierSuiviExport(db, await decision(nature))).resolves.toBeUndefined()
-})
-test.each(['effacement', 'rectification', 'opposition', 'limitation'])(
-  'refuse une demande de %s',
+test.each(['acces', 'portabilite'])(
+  'accepte le paquet derive de l approbation courante pour %s',
   async (nature) => {
-    await expect(verifierSuiviExport(db, await decision(nature))).rejects.toThrow(
-      'Decision export indisponible',
-    )
+    const { d, brut } = await approuver({ nature })
+    await expect(verifierSuiviExport(db, d, brut)).resolves.toBeUndefined()
   },
 )
-test.each(['identite_a_verifier', 'repondu'])('refuse un suivi %s', async (etat) => {
-  await expect(verifierSuiviExport(db, await decision('acces', etat))).rejects.toThrow()
+test.each(['effacement', 'rectification', 'opposition', 'limitation'])(
+  'refuse un registre de nature %s',
+  async (nature) => {
+    const { d, brut } = await approuver({ nature })
+    await expect(verifierSuiviExport(db, d, brut)).rejects.toThrow('Decision export indisponible')
+  },
+)
+test.each(['identite_a_verifier', 'repondu'])('refuse le suivi %s', async (etat) => {
+  const { d, brut } = await approuver({ etat })
+  await expect(verifierSuiviExport(db, d, brut)).rejects.toThrow()
 })
-test.each(['demande', 'revision', 'decisionSha256', 'creeLe', 'expireLe'] as const)(
-  'refuse une divergence de %s',
+test('refuse un operateur different de celui de l approbation inscrite', async () => {
+  const { d, brut } = await approuver({ operateur: randomUUID() })
+  await expect(verifierSuiviExport(db, d, brut)).rejects.toThrow()
+})
+test('refuse une approbation preparee plus de cinq minutes avant son inscription', async () => {
+  const { d, brut } = await approuver({ age: 301000 })
+  await expect(verifierSuiviExport(db, d, brut)).rejects.toThrow()
+})
+test('refuse une expiration depassant la conservation du registre', async () => {
+  const { d, brut } = await approuver({ conservationJours: 1, duree: 2 * 86400000 })
+  await expect(verifierSuiviExport(db, d, brut)).rejects.toThrow()
+})
+test.each([
+  'demande',
+  'revision',
+  'decisionSha256',
+  'destinataireSha256',
+  'creeLe',
+  'expireLe',
+  'exclusions',
+  'fichiers',
+] as const)('une preuve valable ne permet pas de changer %s dans le manifeste', async (champ) => {
+  const { d, brut } = await approuver()
+  const valeurs = {
+    demande: randomUUID(),
+    revision: randomUUID(),
+    decisionSha256: 'd'.repeat(64),
+    destinataireSha256: 'd'.repeat(64),
+    creeLe: new Date(Date.parse(d.creeLe) - 1000).toISOString(),
+    expireLe: new Date(Date.parse(d.expireLe) + 1000).toISOString(),
+    exclusions: [],
+    fichiers: [{ ...d.fichiers[0]!, sha256: 'e'.repeat(64) }],
+  }
+  await expect(verifierSuiviExport(db, { ...d, [champ]: valeurs[champ] }, brut)).rejects.toThrow()
+})
+test.each(['destinataire', 'fichiers', 'revue', 'espaces'])(
+  'modifier la preuve et recalculer le manifeste ne remplace pas le registre : %s',
   async (champ) => {
-    const d = await decision()
-    const valeurs = {
-      demande: randomUUID(),
-      revision: randomUUID(),
-      decisionSha256: 'd'.repeat(64),
-      creeLe: new Date(Date.now() - 60000).toISOString(),
-      expireLe: new Date(Date.now() + 86400000 * 3).toISOString(),
-    }
-    await expect(verifierSuiviExport(db, { ...d, [champ]: valeurs[champ] })).rejects.toThrow()
+    const { a, brut } = await approuver()
+    if (champ === 'destinataire') a.destinataire.reference = randomUUID()
+    if (champ === 'fichiers') a.fichiers[0]!.sha256 = 'e'.repeat(64)
+    if (champ === 'revue') a.destinataire.identiteSha256 = 'e'.repeat(64)
+    const autre = champ === 'espaces' ? brut + ' ' : JSON.stringify(a)
+    const d = lireApprobationExport(autre).decision
+    await expect(verifierSuiviExport(db, d, autre)).rejects.toThrow()
   },
 )
-test('une nouvelle etape invalide immediatement la revision precedente', async () => {
-  const d = await decision()
-  await verifierSuiviExport(db, d)
+test('une nouvelle etape revoque la preparation precedente', async () => {
+  const { d, brut } = await approuver()
+  await verifierSuiviExport(db, d, brut)
   await db.query(
     `insert into suivi_demandes_droits(operation,demande,precedente,operateur,nature,etat,recu_le,repondre_avant,effacer_le,preuve_sha256)
     select $1,demande,operation,operateur,nature,'identite_a_verifier',recu_le,repondre_avant,effacer_le,preuve_sha256 from suivi_demandes_droits where operation=$2`,
     [randomUUID(), d.revision],
   )
-  await expect(verifierSuiviExport(db, d)).rejects.toThrow()
+  await expect(verifierSuiviExport(db, d, brut)).rejects.toThrow()
 })
-test('une panne SQL ne divulgue pas son message et refuse le controle', async () => {
-  const d = await decision()
+test('refuse une preuve absente et masque les erreurs SQL', async () => {
+  const { d, brut } = await approuver()
+  await expect(verifierSuiviExport(db, d, '')).rejects.toThrow(
+    /^Decision export indisponible dans le suivi courant\.$/,
+  )
   await expect(
     verifierSuiviExport(
       {
@@ -117,6 +156,7 @@ test('une panne SQL ne divulgue pas son message et refuse le controle', async ()
         },
       },
       d,
+      brut,
     ),
   ).rejects.toThrow(/^Decision export indisponible dans le suivi courant\.$/)
 })

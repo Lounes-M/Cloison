@@ -11,6 +11,7 @@ import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { creerPaquetDroits, ouvrirPaquetDroits, verifierDecisionPaquet } from './paquet-droits.mjs'
+import { lireApprobationExport } from './approbation-export-droits.mjs'
 import { avecSuiviExport } from './suivi-export-droits.mjs'
 
 const refuser = () => {
@@ -27,17 +28,26 @@ export async function exporterDroits(
 ) {
   verifierSysteme()
   if (!['creer', 'extraire'].includes(commande)) refuser()
-  const decision = verifierDecisionPaquet(
-    JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
-  )
-  await verifierSuivi?.(decision)
+  const lireDecision = async () => {
+    const octets = await lireBorne(decisionPath, 256 * 1024)
+    try {
+      const brut = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(octets)
+      const decision = verifierSuivi
+        ? lireApprobationExport(brut).decision
+        : verifierDecisionPaquet(JSON.parse(brut))
+      return { brut, decision }
+    } finally {
+      octets.fill(0)
+    }
+  }
+  const initiale = await lireDecision()
+  const { decision } = initiale
+  await verifierSuivi?.(decision, initiale.brut)
   await repertoirePrive(dirname(resolve(destination)))
   const reverifier = async () => {
-    const actuelle = verifierDecisionPaquet(
-      JSON.parse((await lireBorne(decisionPath, 256 * 1024)).toString('utf8')),
-    )
-    if (JSON.stringify(actuelle) !== JSON.stringify(decision)) refuser()
-    await verifierSuivi?.(actuelle)
+    const actuelle = await lireDecision()
+    if (actuelle.brut !== initiale.brut) refuser()
+    await verifierSuivi?.(actuelle.decision, actuelle.brut)
   }
   let fichiers = new Map()
   try {
