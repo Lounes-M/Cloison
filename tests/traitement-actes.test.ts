@@ -181,7 +181,18 @@ test.each(['archives_connexion', 'archives_expiration', 'archives_file_suppressi
         return { data: 0, error: null }
       })
     expect((await signature(requete())).status).toBe(503)
-    expect(vi.mocked(console.error).mock.calls).toEqual([[`[actes] echec ${etape}`]])
+    expect(vi.mocked(console.error).mock.calls).toEqual(
+      etape === 'archives_connexion'
+        ? [[`[actes] echec ${etape}`]]
+        : [
+            [
+              '[actes] transport en echec',
+              etape === 'archives_expiration' ? 'expiration' : 'file',
+              'appel_indisponible',
+            ],
+            [`[actes] echec ${etape}`],
+          ],
+    )
     expect(h.retirer).not.toHaveBeenCalled()
   },
 )
@@ -393,4 +404,18 @@ test('tous les actes partagent le meme signal de delai et le meme mode', async (
     expect(appel[2]).toBe('sandbox')
     expect(appel[4]).toBe(signal)
   }
+})
+
+test('une retention reprise ne rejoue aucun acte ni suppression Storage', async () => {
+  h.rpc.mockResolvedValueOnce({ data: null, error: { message: 'SECRET' }, status: 504 })
+  const r = await signature(requete())
+  expect(r.status).toBe(200)
+  expect(await r.json()).toEqual({ actif: false, traites: 0, effaces: 0, echecs: 0 })
+  expect(h.rpc.mock.calls).toEqual([
+    ['expirer_archives_signature'],
+    ['expirer_archives_signature'],
+    ['fichiers_archives_a_supprimer'],
+  ])
+  expect(h.traiter).not.toHaveBeenCalled()
+  expect(h.retirer).not.toHaveBeenCalled()
 })
