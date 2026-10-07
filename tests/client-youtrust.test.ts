@@ -475,3 +475,60 @@ describe('Client API Youtrust', () => {
     expect(() => verificateurYoutrustConfigure()).toThrow()
   })
 })
+
+it.each(['succes', 'preuve_absente', 'pdf_invalide', 'interruption'])(
+  'efface les copies de transport et les PDF refuses : %s',
+  async (cas) => {
+    const blocs: Buffer[] = []
+    const assembles: Buffer[] = []
+    const concat = Buffer.concat.bind(Buffer)
+    vi.spyOn(Buffer, 'concat').mockImplementation((liste, taille) => {
+      const resultat = concat(liste, taille)
+      if (resultat.subarray(0, 1).toString() !== '{') assembles.push(resultat)
+      return resultat
+    })
+    const controle = new AbortController()
+    let numero = 0
+    const transport = vi.fn<typeof fetch>().mockImplementation(async () => {
+      if (numero++ === 0)
+        return reponse({
+          id,
+          status: 'done',
+          documents: [{ id: document, nature: 'signable_document' }],
+          signers: [{ id: signataire, status: 'signed' }],
+        })
+      if (numero === 3 && cas === 'preuve_absente') throw new Error('Indisponible')
+      const bloc = Buffer.from(numero === 3 && cas === 'pdf_invalide' ? 'invalide fixture' : pdf)
+      blocs.push(bloc)
+      return new Response(
+        new ReadableStream({
+          start(c) {
+            c.enqueue(bloc)
+            if (numero === 3 && cas === 'interruption') controle.abort()
+            c.close()
+          },
+        }),
+        { headers: { 'content-type': 'application/pdf' } },
+      )
+    })
+    const operation = creerClientYoutrust(config, transport).recupererPieces(
+      id,
+      document,
+      [signataire],
+      controle.signal,
+    )
+    if (cas === 'succes') {
+      const resultat = await operation
+      expect(resultat.acte.pdf).toEqual(pdf)
+      expect(resultat.preuves[0]!.pdf).toEqual(pdf)
+    } else {
+      await expect(operation).rejects.toThrow('Operation Youtrust indisponible')
+      expect(assembles.length).toBeGreaterThan(0)
+      for (const tampon of assembles) expect(tampon).toEqual(Buffer.alloc(tampon.length))
+    }
+    // Un bloc annule avant lecture appartient encore au transport ; seule la copie lue est visee.
+    for (const bloc of cas === 'interruption' ? blocs.slice(0, 1) : blocs)
+      expect(bloc).toEqual(Buffer.alloc(bloc.length))
+    expect(pdf.subarray(0, 5).toString()).toBe('%PDF-')
+  },
+)

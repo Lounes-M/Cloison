@@ -61,7 +61,10 @@ function fournisseur() {
     ajouterDocument: vi.fn(async () => ({ id: document })),
     ajouterSignataire: vi.fn(async () => ({ id: signataire })),
     activer: vi.fn(async () => ({ id: distante, status: 'ongoing' })),
-    recupererPieces: vi.fn(async () => ({ acte: { pdf }, preuves: [{ signataire, pdf }] })),
+    recupererPieces: vi.fn(async () => ({
+      acte: { pdf: Buffer.from(pdf) },
+      preuves: [{ signataire, pdf: Buffer.from(pdf) }],
+    })),
   } as unknown as Parameters<typeof traiterActe>[3]
 }
 beforeAll(async () => {
@@ -600,3 +603,40 @@ test('une suspension entre deux etapes empeche le depot du document suivant', as
   expect(f.creer).toHaveBeenCalledTimes(1)
   expect(f.ajouterDocument).not.toHaveBeenCalled()
 })
+
+test.each(['succes', 'stockage', 'preuve_invalide', 'publication'])(
+  'les PDF recus sont effaces apres archivage : %s',
+  async (cas) => {
+    const f = await demarrer()
+    await etatDistant()
+    const telecharger = f.recupererPieces
+    let recus: Awaited<ReturnType<typeof telecharger>> | undefined
+    vi.mocked(f.recupererPieces).mockImplementationOnce(async (...args) => {
+      recus = await telecharger(...args)
+      if (cas === 'preuve_invalide') recus.preuves[0]!.signataire = randomUUID()
+      if (cas === 'publication') {
+        await db.exec('reset role')
+        await db.exec('update demandes_signature set revision=revision+1')
+        await devenir(db, 'serveur')
+      }
+      return recus
+    })
+    const cible: typeof stockage =
+      cas === 'stockage'
+        ? async () => {
+            throw new Error('Fixture indisponible')
+          }
+        : stockage
+    const execution = traiterActe(serveur, id, 'production', f, signal(), cible)
+    if (cas === 'succes') await execution
+    else await expect(execution).rejects.toThrow()
+    expect(recus).toBeDefined()
+    expect(recus!.acte.pdf).toEqual(Buffer.alloc(pdf.length))
+    expect(recus!.preuves[0]!.pdf).toEqual(Buffer.alloc(pdf.length))
+    expect(pdf.subarray(0, 5).toString()).toBe('%PDF-')
+    if (cas === 'succes') {
+      await redevenirProprietaire(db)
+      expect((await db.query('select * from factures_actes')).rows).toHaveLength(1)
+    }
+  },
+)

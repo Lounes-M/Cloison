@@ -166,16 +166,21 @@ export async function traiterActe(
     const { document_fournisseur: document, signataire_fournisseur: signataire } = d.acte
     if (!distante || !document || !signataire) throw new Error('References incompletes')
     const pieces = await fournisseur.recupererPieces(distante, document, [signataire], signal)
-    if (pieces.preuves.length !== 1 || pieces.preuves[0]?.signataire !== signataire)
-      throw new Error('Preuve absente')
-    await archiverFichier(db, id, 'acte', pieces.acte.pdf, cle, signal, stockage)
-    await archiverFichier(db, id, 'preuve', pieces.preuves[0].pdf, cle, signal, stockage)
-    signal.throwIfAborted()
-    const publication = await db.rpc('publier_archive_signature', {
-      le_id: id,
-      la_revision: d.demande.revision,
-    })
-    if (publication.error || publication.data !== true) throw new Error('Archive non publiee')
+    try {
+      if (pieces.preuves.length !== 1 || pieces.preuves[0]?.signataire !== signataire)
+        throw new Error('Preuve absente')
+      await archiverFichier(db, id, 'acte', pieces.acte.pdf, cle, signal, stockage)
+      await archiverFichier(db, id, 'preuve', pieces.preuves[0].pdf, cle, signal, stockage)
+      signal.throwIfAborted()
+      const publication = await db.rpc('publier_archive_signature', {
+        le_id: id,
+        la_revision: d.demande.revision,
+      })
+      if (publication.error || publication.data !== true) throw new Error('Archive non publiee')
+    } finally {
+      pieces.acte.pdf.fill(0)
+      for (const preuve of pieces.preuves) preuve.pdf.fill(0)
+    }
   } finally {
     cle.fill(0)
   }
