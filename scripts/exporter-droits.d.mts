@@ -5,5 +5,5 @@ export function exporterDroits(
   source: string,
   destination: string,
   cle: Buffer,
-  verifierSuivi?: (decision: DecisionPaquet) => Promise<void>,
+  verifierSuivi?: (decision: DecisionPaquet, approbation: string) => Promise<void>,
 ): Promise<{ fichiers: number; sha256?: string }>

@@ -15,6 +15,8 @@ vi.mock('../scripts/fichiers-export-prives.mjs', () => ({
 }))
 vi.mock('node:fs/promises', () => ({ mkdir: io.mkdir, rm: io.rm }))
 import { exporterDroits } from '../scripts/exporter-droits.mjs'
+import { approbationFictive } from './approbation-export-fixture'
+import { lireApprobationExport } from '../scripts/approbation-export-droits.mjs'
 import { creerPaquetDroits } from '../scripts/paquet-droits.mjs'
 
 const cle = randomBytes(32)
@@ -49,8 +51,9 @@ it.each(['succes', 'lecture', 'chiffrement', 'suivi', 'ecriture'])(
     const contenu = Buffer.from(texte)
     if (cas === 'lecture') d.fichiers.push({ ...d.fichiers[0]!, nom: 'piece-0002.txt' })
     if (cas === 'chiffrement') d.fichiers[0]!.sha256 = '0'.repeat(64)
+    const brut = JSON.stringify(approbationFictive(d))
     io.lireBorne.mockImplementation(async (chemin: string) => {
-      if (chemin === 'decision') return Buffer.from(JSON.stringify(d))
+      if (chemin === 'decision') return Buffer.from(brut)
       if (chemin.endsWith('piece-0002.txt')) throw new Error('Lecture refusee')
       return contenu
     })
@@ -66,10 +69,11 @@ it.each(['succes', 'lecture', 'chiffrement', 'suivi', 'ecriture'])(
   },
 )
 it.each(['succes', 'mkdir', 'ecriture', 'suivi'])('efface le clair extrait : %s', async (cas) => {
-  const d = decision()
+  const brut = JSON.stringify(approbationFictive(decision()))
+  const d = lireApprobationExport(brut).decision
   const archive = creerPaquetDroits(d, new Map([['donnees-0001.txt', Buffer.from(texte)]]), cle)
   io.lireBorne.mockImplementation(async (chemin: string) =>
-    chemin === 'decision' ? Buffer.from(JSON.stringify(d)) : archive,
+    chemin === 'decision' ? Buffer.from(brut) : archive,
   )
   const from = Buffer.from.bind(Buffer)
   const decodes: Buffer[] = []
@@ -89,3 +93,39 @@ it.each(['succes', 'mkdir', 'ecriture', 'suivi'])('efface le clair extrait : %s'
   expect(decodes).toHaveLength(1)
   expect(decodes[0]).toEqual(Buffer.alloc(Buffer.byteLength(texte)))
 })
+
+it('refuse un ancien manifeste en mode suivi avant de consulter le registre ou les pieces', async () => {
+  io.lireBorne.mockResolvedValue(Buffer.from(JSON.stringify(decision())))
+  const suivi = vi.fn()
+  await expect(
+    exporterDroits('creer', 'decision', 'source', 'destination', cle, suivi),
+  ).rejects.toThrow('Approbation export invalide')
+  expect(suivi).not.toHaveBeenCalled()
+  expect(io.lireBorne).toHaveBeenCalledTimes(1)
+  expect(io.ecrireNeuf).not.toHaveBeenCalled()
+})
+it.each(['creer', 'extraire'])(
+  'retire la destination si les octets de la preuve changent apres le controle avant ecriture : %s',
+  async (commande) => {
+    const brut = JSON.stringify(approbationFictive(decision()))
+    const d = lireApprobationExport(brut).decision
+    const contenu = Buffer.from(texte)
+    const archive = creerPaquetDroits(d, new Map([['donnees-0001.txt', contenu]]), cle)
+    let lectures = 0
+    io.lireBorne.mockImplementation(async (chemin: string) => {
+      if (chemin === 'decision') return Buffer.from(++lectures === 3 ? brut + ' ' : brut)
+      return commande === 'creer' ? contenu : archive
+    })
+    const suivi = vi.fn().mockResolvedValue(undefined)
+    await expect(
+      exporterDroits(commande, 'decision', 'source', 'destination', cle, suivi),
+    ).rejects.toThrow('Export personnel refuse')
+    expect(suivi).toHaveBeenCalledTimes(2)
+    expect(suivi).toHaveBeenNthCalledWith(1, d, brut)
+    expect(io.ecrireNeuf).toHaveBeenCalled()
+    expect(io.rm).toHaveBeenCalledWith(
+      'destination',
+      commande === 'creer' ? { force: true } : { recursive: true, force: true },
+    )
+  },
+)
