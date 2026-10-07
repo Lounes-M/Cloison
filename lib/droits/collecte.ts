@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
+import { collecterComptesDroits } from './comptes.ts'
 
 const uuid = z.uuid().transform((v) => v.toLowerCase())
 const schema = z
@@ -26,12 +27,16 @@ const schema = z
       .min(1)
       .max(100)
       .optional(),
+    comptes: z.array(uuid).min(1).max(10).optional(),
     dossiers: z
       .array(z.strictObject({ id: uuid, partie: z.enum(['locataire', 'garant']) }))
-      .min(1)
       .max(50),
   })
   .superRefine((d, ctx) => {
+    if (!d.dossiers.length && !d.comptes?.length)
+      ctx.addIssue({ code: 'custom', message: 'Selection vide.' })
+    if (d.comptes && new Set(d.comptes).size !== d.comptes.length)
+      ctx.addIssue({ code: 'custom', message: 'Compte duplique.' })
     if (
       d.brouillons &&
       (new Set(d.brouillons.map((b) => b.dossier)).size !== d.brouillons.length ||
@@ -205,6 +210,9 @@ export async function collecterDonneesDroits(db: BaseCollecte, brut: string) {
         if (l.partie === 'garant' && l.nom_locataire !== null) return refuser()
         return l
       })
+      const comptes = d.comptes
+        ? await collecterComptesDroits(db, d.comptes, d.destinataire.email, d.nature)
+        : undefined
       resultat = {
         version: 1,
         usage: 'copie_de_travail_a_relire',
@@ -218,13 +226,26 @@ export async function collecterDonneesDroits(db: BaseCollecte, brut: string) {
         destinataireReference: d.destinataire.reference,
         nature: d.nature,
         dossiers,
+        ...(comptes ? { comptes } : {}),
         exclusionsTechniques:
-          d.nature === 'portabilite' ? ['ratio_calcule', 'date_calcul_ratio'] : [],
+          d.nature === 'portabilite'
+            ? [
+                'ratio_calcule',
+                'date_calcul_ratio',
+                ...(comptes ? ['evenements_auth', 'rattachement_attribue'] : []),
+              ]
+            : [],
         sourcesNonCouvertes: [
           'contenu_pieces_storage',
           'brouillons_chiffres',
           'actes_signes',
-          'comptes_agence_auth',
+          ...(comptes
+            ? [
+                'comptes_non_selectionnes',
+                'metadonnees_auth_et_identites_fournisseur',
+                'preferences_et_journaux_compte',
+              ]
+            : ['comptes_agence_auth']),
           'paiements_et_prestataires',
           'correspondances',
           'journaux',

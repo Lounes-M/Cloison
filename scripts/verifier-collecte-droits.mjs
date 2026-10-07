@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { verifierComptesDroits } from './verifier-comptes-droits.mjs'
 import { randomUUID } from 'node:crypto'
 import { Client } from 'pg'
 import { mkdtemp, realpath, writeFile, readFile, stat, rm } from 'node:fs/promises'
@@ -18,7 +19,10 @@ export async function verifierCollecteDroits(db, connexion) {
   assert(
     ['127.0.0.1', 'localhost'].includes(url.hostname) && url.pathname === '/cloison_audit_test',
   )
-  if (['linux', 'darwin'].includes(process.platform)) await verifierExportApprouve(db, connexion)
+  if (['linux', 'darwin'].includes(process.platform)) {
+    await verifierExportApprouve(db, connexion)
+    await verifierComptesDroits(db, connexion)
+  }
   const f = await fixtureCollecteDroits(db)
   const r = await collecterDonneesDroits(db, f.brut)
   assert.equal(r.dossiers.length, 2)
