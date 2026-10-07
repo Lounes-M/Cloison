@@ -116,3 +116,8 @@ test('le code de saturation precise un HTTP 504', async () => {
     'connexions_saturees',
   )
 })
+
+// La retention des remises a ses tests de panne et son integration maintenance.
+vi.mock('@/lib/exploitation/purge-remises', () => ({
+  purgerRemises: async () => ({ traites: 0, echecs: 0 }),
+}))

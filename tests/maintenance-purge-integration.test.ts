@@ -37,7 +37,7 @@ test.each(['refus', 'exception'])(
         if (cas === 'exception') throw new Error('DETAIL_PRIVE')
         return { error: { message: 'DETAIL_PRIVE' }, status: 504 }
       }
-      return { data: 0, error: null }
+      return { data: nom === 'remises_droits_a_purger' ? [] : 0, error: null }
     })
     const reponse = await GET(
       new Request('https://example.test/api/maintenance', {
@@ -56,6 +56,7 @@ test.each(['refus', 'exception'])(
       'purger_suivis_droits',
       'purger_historique_responsables',
       'purger_brouillons_engagement',
+      'remises_droits_a_purger',
     ])
     expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain('DETAIL_PRIVE')
   },
@@ -64,7 +65,7 @@ test.each(['refus', 'exception'])(
 test('une reprise effective permet la confirmation HTTP sans effacer le diagnostic initial', async () => {
   rpc.mockResolvedValueOnce({ error: { message: 'DETAIL_PRIVE' }, status: 504 })
   rpc.mockImplementation(async (nom: string) => ({
-    data: nom === 'confirmer_maintenance' ? true : 0,
+    data: nom === 'confirmer_maintenance' ? true : nom === 'remises_droits_a_purger' ? [] : 0,
     error: null,
   }))
   const reponse = await GET(

@@ -89,6 +89,8 @@ jobs:
         run: npx playwright install --with-deps chromium firefox webkit
       - name: Parcours des interfaces sur donnees fictives
         run: node scripts/verifier-navigateur-ocr.mjs
+      - name: Remise chiffree mobile et ordinateur
+        run: node scripts/verifier-navigateur-remise.mjs
 
   isolation:
     name: Isolation documentaire Linux

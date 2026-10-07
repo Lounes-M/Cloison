@@ -31,3 +31,8 @@ test.each([0, 1000, null, -1, 1001, 0.5, '0', 'erreur', 'exception'])(
     ])
   },
 )
+
+// La retention des remises a ses tests de panne et son integration maintenance.
+vi.mock('@/lib/exploitation/purge-remises', () => ({
+  purgerRemises: async () => ({ traites: 0, echecs: 0 }),
+}))

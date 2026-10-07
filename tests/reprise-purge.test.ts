@@ -102,3 +102,8 @@ test('une exception inconnue nest pas rejouee', async () => {
   ).rejects.toThrow()
   expect(appel).toHaveBeenCalledTimes(1)
 })
+
+// La retention des remises a ses tests de panne et son integration maintenance.
+vi.mock('@/lib/exploitation/purge-remises', () => ({
+  purgerRemises: async () => ({ traites: 0, echecs: 0 }),
+}))
