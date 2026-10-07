@@ -177,7 +177,11 @@ export function Remise() {
           <ul className="space-y-3">
             {fichiers.map((f) => (
               <li key={f.nom}>
-                <a className="underline" href={f.url} download={f.nom}>
+                <a
+                  className="inline-flex min-h-11 items-center py-2 underline"
+                  href={f.url}
+                  download={f.nom}
+                >
                   {texte.telecharger} {f.nom}
                 </a>
               </li>
@@ -197,7 +201,10 @@ export function Remise() {
       </p>
       <p className="text-sm">{texte.confidentialite}</p>
       <p className="text-sm">{texte.limite}</p>
-      <button className="underline" onClick={() => location.replace('/remise-donnees')}>
+      <button
+        className="inline-flex min-h-11 items-center py-2 underline"
+        onClick={() => location.replace('/remise-donnees')}
+      >
         {texte.effacer}
       </button>
     </section>
