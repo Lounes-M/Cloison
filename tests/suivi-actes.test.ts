@@ -63,3 +63,12 @@ test('la supervision refuse un rapport incomplet', async () => {
   expect(r.status).toBe(503)
   expect(r.headers.get('cache-control')).toBe('no-store')
 })
+
+test.each(['signature', 'archives', 'reglements'] as const)(
+  'la confirmation est identifiable pour %s',
+  async (nom) => {
+    h.rpc.mockResolvedValue({ data: false, error: { message: 'SECRET' } })
+    expect((await suivreTraitementActes(nom, requete(), h.executer)).status).toBe(503)
+    expect(vi.mocked(console.error).mock.calls).toEqual([[`[actes] echec ${nom}_confirmation`]])
+  },
+)
