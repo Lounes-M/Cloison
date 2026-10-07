@@ -245,3 +245,152 @@ test.each([
   expect(vi.mocked(console.error).mock.calls).toEqual([[`[actes] echec ${etape}`]])
   expect(JSON.stringify(await r.json())).not.toMatch(/PRIVE|11111111/)
 })
+
+const actes = Array.from(
+  { length: 6 },
+  (_, i) => `11111111-1111-4111-8111-${String(i + 1).padStart(12, '0')}`,
+)
+function fileActes(ids = actes) {
+  vi.stubEnv('SIGNATURE_PARCOURS_ENABLED', 'true')
+  vi.stubEnv('YOUTRUST_MUTATIONS_ENABLED', 'true')
+  const attente = [...ids]
+  h.rpc.mockImplementation(async (nom) => ({
+    data:
+      nom === 'fichiers_archives_a_supprimer'
+        ? []
+        : nom === 'actes_a_traiter'
+          ? attente.splice(0, 1)
+          : 0,
+    error: null,
+  }))
+  h.charger.mockResolvedValue({ acte: { etape: 'en_cours' } })
+  h.traiter.mockResolvedValue(undefined)
+}
+const selections = () => h.rpc.mock.calls.filter(([nom]) => nom === 'actes_a_traiter')
+
+test('un lot avance cinq actes distincts sans reserver le sixieme', async () => {
+  fileActes()
+  const r = await signature(requete())
+  expect(r.status).toBe(200)
+  expect(await r.json()).toEqual({ actif: true, traites: 5, effaces: 0, echecs: 0 })
+  expect(h.traiter.mock.calls.map((c) => c[1])).toEqual(actes.slice(0, 5))
+  expect(selections()).toHaveLength(5)
+  expect(h.rpc).toHaveBeenCalledWith('operations_actes_a_examiner')
+})
+
+test.each(['lecture', 'traitement'])(
+  'un echec de %s laisse avancer les actes suivants',
+  async (etape) => {
+    fileActes(actes.slice(0, 3))
+    ;(etape === 'lecture' ? h.charger : h.traiter).mockRejectedValueOnce(new Error('PRIVE'))
+    const r = await signature(requete())
+    expect(r.status).toBe(503)
+    expect(await r.json()).toEqual({ actif: true, traites: 2, effaces: 0, echecs: 1 })
+    expect(h.traiter.mock.calls.map((c) => c[1])).toContain(actes[2])
+    expect(h.rpc).toHaveBeenCalledWith('operations_actes_a_examiner')
+    expect(h.confirmer).toHaveBeenCalledWith('confirmer_traitement_actes', {
+      le_nom: 'archives',
+      reussite: false,
+    })
+  },
+)
+
+test('une selection vide termine le lot sans appel fournisseur', async () => {
+  fileActes([])
+  expect((await signature(requete())).status).toBe(200)
+  expect(h.traiter).not.toHaveBeenCalled()
+  expect(selections()).toHaveLength(1)
+})
+
+test('un acte reeligible dans le meme passage ne se rejoue pas', async () => {
+  fileActes([actes[0]!, actes[0]!])
+  const r = await signature(requete())
+  expect(r.status).toBe(200)
+  expect((await r.json()).traites).toBe(1)
+  expect(h.traiter).toHaveBeenCalledTimes(1)
+})
+
+test('le budget ne reserve pas de nouvel acte apres trente secondes', async () => {
+  fileActes()
+  let temps = 0
+  vi.spyOn(performance, 'now').mockImplementation(() => temps)
+  h.traiter.mockImplementation(async () => {
+    temps = 30000
+  })
+  const r = await signature(requete())
+  expect(r.status).toBe(200)
+  expect((await r.json()).traites).toBe(1)
+  expect(selections()).toHaveLength(1)
+  expect(h.rpc).toHaveBeenCalledWith('operations_actes_a_examiner')
+})
+
+test('une coupure pendant un acte interdit toute nouvelle reservation', async () => {
+  fileActes()
+  const controle = new AbortController()
+  h.traiter.mockImplementationOnce(async () => {
+    controle.abort()
+    throw new Error('PRIVE')
+  })
+  const r = await signature(
+    new Request('https://example.invalid', {
+      method: 'POST',
+      headers: { authorization: 'Bearer fictif' },
+      signal: controle.signal,
+    }),
+  )
+  expect(r.status).toBe(503)
+  expect(selections()).toHaveLength(1)
+  expect(h.traiter).toHaveBeenCalledTimes(1)
+})
+
+test('fermer les mutations laisse archiver les autres actes signes', async () => {
+  fileActes(actes.slice(0, 2))
+  vi.stubEnv('YOUTRUST_MUTATIONS_ENABLED', 'false')
+  h.charger.mockResolvedValueOnce({ acte: { etape: 'valide' } })
+  const r = await signature(requete())
+  expect(r.status).toBe(200)
+  expect(h.traiter.mock.calls.map((c) => c[1])).toEqual([actes[1]])
+})
+
+test('une panne de selection apres un succes arrete le lot et garde son compteur', async () => {
+  fileActes()
+  const implementation = h.rpc.getMockImplementation()!
+  let passages = 0
+  h.rpc.mockImplementation(async (nom, ...args) => {
+    if (nom === 'actes_a_traiter' && ++passages === 2) throw new Error('PRIVE')
+    return implementation(nom, ...args)
+  })
+  const r = await signature(requete())
+  expect(r.status).toBe(503)
+  expect(await r.json()).toEqual({ actif: true, traites: 1, effaces: 0, echecs: 1 })
+  expect(h.traiter).toHaveBeenCalledTimes(1)
+})
+
+test('une coupure pendant la lecture interdit tout appel fournisseur', async () => {
+  fileActes()
+  const controle = new AbortController()
+  h.charger.mockImplementationOnce(async () => {
+    controle.abort()
+    return { acte: { etape: 'en_cours' } }
+  })
+  const r = await signature(
+    new Request('https://example.invalid', {
+      method: 'POST',
+      headers: { authorization: 'Bearer fictif' },
+      signal: controle.signal,
+    }),
+  )
+  expect(r.status).toBe(503)
+  expect(h.traiter).not.toHaveBeenCalled()
+  expect(selections()).toHaveLength(1)
+})
+
+test('tous les actes partagent le meme signal de delai et le meme mode', async () => {
+  fileActes(actes.slice(0, 3))
+  expect((await signature(requete())).status).toBe(200)
+  const signal = h.client.mock.calls[1]![0]
+  for (const appel of h.traiter.mock.calls) {
+    expect(appel[2]).toBe('sandbox')
+    expect(appel[4]).toBe(signal)
+  }
+})
