@@ -80,8 +80,8 @@ Choix de fonctionnement : validite de remise de 72 heures au maximum, raccourcie
 si le registre ou la decision expire plus tot. Une nouvelle remise exige une
 nouvelle verification de la decision. Effacer les copies de travail apres controle
 de la remise, au plus tard a cette echeance. Une copie deja telechargee ne peut
-pas etre rappelee par l'expiration du paquet. Le canal de remise et sa purge
-automatisee restent a raccorder ; ces controles sont pour l'instant operatoires.
+pas etre rappelee par l'expiration du paquet. Le [canal de remise chiffre](../exploitation/remise-droits.md)
+et sa purge automatisee sont disponibles ; la revue humaine reste obligatoire.
 
 ## Effacement et conservation
 
@@ -102,8 +102,10 @@ Recontroler la revision et les dependances juste avant execution. Verifier cles,
 Storage, files de suppression et prestataires avant de confirmer les operations
 realisees. Expliquer les elements conserves et les delais techniques restants.
 Une sauvegarde restauree doit rejouer les effacements intervenus apres sa capture.
-Ne pas annoncer l'effacement individuel automatique : cet executeur reste a
-implementer. La purge ordinaire des coffres continue selon son propre calendrier.
+Un [executeur prive de retrait des pieces selectionnees](../exploitation/effacement-pieces.md)
+est disponible sous approbation explicite. Il ne cloture pas une demande globale
+et distingue le retrait des metadonnees de la suppression physique encore a verifier.
+La purge ordinaire des coffres continue selon son propre calendrier.
 
 Pour la correspondance du support et les preuves minimales de traitement, choix
 interne : purge 90 jours apres cloture, sauf litige documente imposant une
