@@ -1,0 +1,259 @@
+# Historique de la feuille de route
+
+Mises a jour datees de septembre 2026, retirees de la [feuille de route](feuille-de-route.md)
+le 20 octobre 2026 sans modification de leur contenu. Elles decrivent l'etat a leur date ;
+l'etat courant est dans la feuille de route et le [suivi d'audit](audit-suivi.md).
+
+## Introduction de la version du 10 septembre
+
+De la landing au premier dossier reel allant jusqu'a un acte signe.
+Version actualisee au 10 septembre 2026, apres PR104. Le
+[suivi d'audit](audit-suivi.md) conserve les preuves et la chronologie.
+
+Les responsables et filtres agence sont livres, 0050 appliquee apres repetition
+et verification des droits. Une harmonisation des espaces avec la home est
+preparee sur ce socle : dix pages, composants partages, boutons, couleurs,
+animations et controles navigateur sur trois moteurs. Voir le
+[guide de l'interface](exploitation/interface-espaces.md) et la PR de livraison.
+
+La maintenance des dependances de septembre est detaillee dans
+[son suivi](exploitation/dependances-septembre.md). Le passage a Vitest 5,
+Supabase JS et Resend actualises conserve les controles d'acces existants et
+exige une CI complete avant fusion.
+
+Une case cochee signifie que l'element decrit est realise selon la preuve indiquee.
+Une implementation seule ne termine pas une tache exigeant une livraison ou un
+parcours reel. Aucun total de cases ne mesure la preparation au lancement.
+Youtrust et le modele contractuel sont pris en charge par Lounes ; le reste
+avance techniquement sans attendre cette dependance.
+
+La remise a niveau demandee le 8 septembre est suivie dans
+[Implementation de l'audit](implementation-audit-septembre.md), avec preuves et
+etat de livraison distincts pour chaque lot.
+
+L'expiration des acces agence est corrigee dans la migration 0033, repetee puis
+annulee avant livraison. Application et preuves effectives dans
+[le suivi du deploiement](exploitation/expiration-acces.md).
+
+Les budgets reseau et la detection de maintenance retardee sont decrits dans
+[Budgets de maintenance](exploitation/budgets-maintenance.md).
+
+## Mise a jour du 8 septembre, apres PR78
+
+Les migrations jusqu'a 0040 sont appliquees. Le calendrier independant de maintenance
+fonctionne et deux executions planifiees ont ete verifiees. Le suivi des courriels
+est livre, avec activation Resend externe encore ouverte. Les listes de dossiers
+et la gestion des collaborateurs sont livrees. La pagination des historiques est
+preparee dans 0041, avec repetition SQL reussie, avant application et fusion.
+Les parcours navigateur automatises, les profils documentaires, la rotation des
+cles, le rapprochement des paiements et la chaine contractuelle restent ouverts.
+Les preuves actualisees sont dans [le suivi des lots](implementation-audit-septembre.md).
+
+La lecture d'enveloppes versionnees et le trousseau de rotation sont prepares,
+avec activation distincte de la livraison des lecteurs. Le depot et les courriels
+utilisent les memes formats. Le rescellement en masse et la disponibilite des cles
+de secours restent ouverts ; voir [Rotation des cles](exploitation/rotation-cles.md).
+
+Le marquage d'un paiement refuse maintenant les confirmations SQL ambigues :
+seuls true et false sont des resultats interpretes, toute autre valeur demande
+un rejeu HTTP 503. Quatre contre-preuves observees rouges, puis 19 tests du
+marquage et de sa route passes. Aucun changement de montant ni remboursement.
+
+Au 8 septembre a 17 h 20, les migrations jusqu'a 0041 sont appliquees et les PR
+jusqu'a 82 sont fusionnees, avec CI main verte. Le lot 0042 du registre financier
+est prepare et repete sans application ; son etat et ses limites sont detailles
+dans le suivi des lots. Les formats de rotation sont livres, mais le rescellement
+de masse et la disponibilite des cles de secours restent ouverts.
+
+PR83 est fusionnee et 0042 appliquee, avec CI finale et droits reels verifies.
+Le rescellement administratif de masse est prepare avec inventaire, comparaison
+atomique et reprise bornee ; sa livraison reste soumise aux controles complets.
+La disponibilite effective des cles de secours demeure une condition externe.
+
+PR84 (dependances) et PR85 (rescellement administratif) sont fusionnees. L'outil
+permet l'inventaire et le traitement borne avec comparaison atomique ; aucune
+rotation reelle ni disponibilite de cle externe n'est declaree prouvee.
+Le lot 0043 prepare les profils documentaires et le comptage explicite des
+justificatifs dans un fichier. Les repetitions SQL sont passees sans application.
+L'examen humain des pieces et les demandes de complement restent a implementer.
+Les preuves de livraison actualisees sont dans le suivi des lots.
+
+## Reprise du 9 septembre
+
+Reference distante : main 7b51df4 (PR86). La PR87 est reprise sur ce socle ;
+0043 est appliquee, 0044 uniquement repetee avec annulation. La facturation GitHub
+bloque le demarrage des workflows et doit etre retablie avant une nouvelle CI de
+livraison. Le calendrier Supabase confirme encore la maintenance independamment.
+Voir la derniere section du suivi d'implementation et la PR87 pour les preuves.
+
+Le lot 0045 prepare les demandes de complements tracees, leur fourniture par le
+garant et leur examen par l'agence. La notification est durable et le locataire
+ne lit aucun detail documentaire. La livraison depend de 0044 puis d'une CI verte ;
+aucun lot n'est declare applique sur la seule repetition annulee.
+Voir [le parcours et ses limites](exploitation/complements-documentaires.md).
+
+Les interactions navigateur des porteurs sont automatisees dans le harnais local :
+profil, nombre de documents, falsification du dossier et proposition de complement.
+Les controles SQL confirment les mutations sur deux largeurs. Les parcours agence,
+upload Storage et fournisseurs reels restent ouverts ; voir le runbook des
+[parcours navigateur locaux](exploitation/parcours-navigateur-locaux.md).
+
+Un diagnostic financier administratif par session est prepare : instantane en
+lecture seule, rapport prive avec empreinte et refus des extractions excessives.
+Il n'effectue aucun mouvement de fonds ni acquittement ; le suivi durable des
+decisions reste ouvert. Voir [la procedure](exploitation/diagnostic-paiement.md).
+
+PR87 est fusionnee et 0044 appliquee avec empreinte et droits reels verifies.
+Le lot 0045 reste a livrer apres repetition et CI verte de sa revision finale.
+
+Le controle du devis d'une session Stripe ouverte est prepare independamment de
+la PR87 : reference, dossier et tarif sont compares avant reprise. Huit refus
+vus rouges avant correction, 38 tests cibles verts ; livraison soumise a la CI.
+Voir [Reprise de session ouverte](exploitation/reprise-session-ouverte.md).
+
+## Refus borne des webhooks, 9 septembre 2026
+
+Le lecteur commun Stripe et Resend refuse les corps excessifs sans attendre
+une annulation de flux potentiellement bloquee ou rejetee. Trois regressions
+observees rouges avant correction. Aucune migration ni appel fournisseur.
+Voir [les preuves et limites](exploitation/refus-webhooks.md). Livraison en PR
+independante, soumise aux controles complets et a une CI verte.
+
+Les lots des PR88 a PR93 sont livres ensemble par la PR94, apres CI verte
+de leur combinaison (940 tests, 107 suites, Chromium et PostgreSQL natif).
+Les migrations 0044 et 0045 sont appliquees et verifiees avec les roles reels
+et leurs empreintes exactes. Elles sont immuables et ne doivent pas etre rejouees.
+Le depot public dispose du scan de secrets, de la protection des pushs et du
+signalement prive ; le workflow d'historique est inclus dans cette integration.
+
+La validation locale Windows a revele trois tests de diagnostic financier
+supposant des droits POSIX. Ces cas restent executes en CI Linux ; le test
+commun verifie le refus d'ecriture sans uid POSIX, y compris pour un fichier
+existant. Le diagnostic reste volontairement indisponible sur cette plateforme.
+
+Le scanner obligatoire porte sur l'historique complet du candidat. Les anciennes
+PR externes sont reservees a l'audit manuel elargi pour ne pas permettre a une
+PR independante de bloquer les livraisons. Une contre-preuve avec des cles
+fictives confirme l'isolation et la detection d'un secret retire du candidat.
+
+La surveillance memoire des decodeurs Linux est preparee en PR97 : RSS par
+processus, budget cumule et refus en cas de panne de mesure. Les limites du tas
+V8 sont ainsi completees, sans revendiquer une sandbox ou une limite OS stricte.
+Voir [la surveillance documentaire](exploitation/memoire-documentaire.md).
+
+Le socle d'authentification Youtrust verifie les notifications HMAC SHA-256 et borne
+la taille des messages, sans lecture de clefs publiques. Aucun parcours de signature n'est active.
+Les acces developpeur sont en attente ; registre durable, rattachement local,
+reconciliation, acte et preuve archives restent a implementer. Voir
+[les preuves et limites](exploitation/youtrust-authentification.md).
+
+Le harnais navigateur est etendu a Chromium, Firefox et WebKit, a 390 et
+1280 pixels. Les passages exigent une mutation fraiche, le parcours clavier
+et le refus apres expiration SQL. F20 reste ouvert pour les fournisseurs,
+les ecrans agence complets et l'audit d'accessibilite. Voir
+[le harnais navigateur](exploitation/parcours-navigateur-locaux.md).
+
+Le journal administratif 0046 conserve les decisions de support et l'empreinte
+du diagnostic examine, avec rejeu controle et historique prive. Une decision
+ne corrige ni n'acquitte automatiquement une anomalie financiere. La resolution
+et la facturation agence restent ouvertes. Voir
+[le journal des decisions](exploitation/decisions-paiements.md).
+
+## Nouvelles fonctionnalites demandees, 10 septembre
+
+Lounes demande les ajouts produit de l'audit, dont l'OCR, avec OpenRouter pour
+l'IA. Le lot OCR prepare 0047, une transcription temporaire sur action explicite
+de l'agence et des quotas partages. Aucun score ou changement de revenu/decision.
+Les roles et empreintes sont repetes sur Supabase sous ROLLBACK ; la PR precise
+l'application effective et les controles finaux. Voir
+[l'aide a la lecture](exploitation/ocr-openrouter.md) et ADR 0007.
+
+Les connecteurs seront fondes sur un contrat limite aux references et statuts,
+avec acces revocables par agence, puis adaptes aux API des editeurs. Lounes a
+delegue ce choix technique ; aucun acces partenaire ou connecteur reel n'est
+encore active. La validation humaine documentaire, l'affectation des dossiers,
+les notifications configurables et les extensions multi-etablissements restent
+des lots distincts a implementer et verifier, pas des fonctionnalites livrees ici.
+
+La PR101 est fusionnee sur main 7dc41cd ; 0047 appliquee, CI main et supervision
+vertes, 1069 tests Linux. Le lot suivant prepare l'API v1 de statuts et la gestion
+des cles administrateur avec 0048. Il ne livre pas d'adaptateur editeur ni de
+synchronisation partenaire active. Voir [le guide](exploitation/connecteurs-statuts.md)
+et ADR 0008 ; sa PR consigne les validations et le deploiement effectifs.
+
+La PR102 est fusionnee en c0ceb89, 0048 appliquee et droits reels verifies. CI de
+PR verte avec 1113 tests Linux et six parcours connecteur. Le lot suivant prepare
+l'examen humain par fichier, avec historique prive, revision et controle des
+remplacements dans 0049. Voir [le guide](exploitation/examen-documentaire.md) et
+ADR 0009. L'appreciation ne certifie pas l'authenticite et ne decide pas du dossier.
+
+La PR103 est fusionnee en 7b186b7, 0049 appliquee et droits reels verifies.
+CI main 34505756072 et supervision 34506073940 vertes, 1142 tests Linux.
+Le lot suivant prepare les responsables de dossiers, les vues Mes dossiers et
+Sans responsable et le filtre par etat, avec 0050. Voir
+[le guide](exploitation/responsables-dossiers.md) et ADR 0010. L'affectation
+organise le suivi sans modifier les droits de consultation ni le statut.
+
+La PR104 est livree avec 0050 appliquee, puis la PR105 harmonise les espaces
+sur main 6a937c4 : CI main 34523159070 verte, 1176 tests Linux. La reprise du
+11 septembre conserve ces changements. Le lot 0051 prepare les preferences
+personnelles de notifications, avec choix Tous, Mes dossiers ou Aucun suivi.
+Voir [le guide](exploitation/preferences-notifications.md) et ADR 0011.
+Les relances automatiques et les rappels d'echeance restent des lots distincts.
+
+La PR106 est livree sur main 423829b avec 0051 appliquee, 1202 tests Linux et
+CI main 34578597259 verte. Le lot 0052 prepare les relances facultatives du
+garant et les alertes d'echeance agence, avec quotas et annulation des rappels
+obsoletes. Voir [le guide](exploitation/rappels-dossiers.md) et ADR 0012 ;
+sa PR consigne les verifications et l'application effective. Aucun reglage
+n'est active automatiquement et aucun courriel fournisseur reel n'est teste.
+
+La PR107 est fusionnee sur main 8cfefbd : 0052 appliquee et droits reels verifies,
+1285 tests Linux et sept parcours navigateur verts sur la PR. Les relances et
+alertes restent desactivees par defaut. Le lot suivant ajoute le support
+contextuel aux trois espaces, sans envoi automatique ni collecte de document.
+Voir [le guide](exploitation/support-contextuel.md).
+
+Les PR108 et PR109 sont livrees : support contextuel puis proxy Next.js sur main
+17a8f6d, CI main 34587146784 et supervision 34587664479 vertes, 1316 tests Linux.
+Le lot 0053 prepare le suivi prive des demandes de droits avec revisions, outils
+operateur et retention bornee. Voir ADR0013 et le guide de suivi des demandes.
+Il ne realise ni export personnel ni effacement individuel de coffre ; la PR
+consigne les repetitions, l'application SQL et les validations effectives.
+
+La PR110 est fusionnee sur main 3fb8f1e : 0053 appliquee, 1393 tests Linux dans
+la CI de PR et supervision de production verte. Le lot 0054 ajoute l'historique
+des affectations, reserve a l'agence et purge a l'echeance du dossier, meme
+signe. Voir le [guide](exploitation/historique-responsables.md) et ADR0014 ; sa PR
+consigne les repetitions, l'application SQL et les validations effectives.
+L'export personnel et l'effacement individuel de coffre restent distincts du
+registre prive des demandes de droits.
+
+Le correctif des identifiants refuse les chaines de 36 caracteres qui ne
+respectent pas les groupes UUID 8-4-4-4-12. Les routes dossier et piece, les
+decisions agence, le retrait garant, le facteur MFA et la confirmation de
+paiement les rejettent avant de solliciter leurs donnees ou fournisseur.
+Les UUID minuscules existants restent acceptes sans restriction de version.
+Les controles de session, de role et SQL restent necessaires (ADR 0002).
+Les tests ont reproduit 21 echecs avec les anciennes validations ; la PR
+consigne les regressions, la CI et le deploiement du correctif.
+
+Le choix MFA permet d utiliser un facteur secondaire deja verifie et conserve
+le choix apres un code refuse. Les pannes de lecture des facteurs ferment la
+configuration. Voir [le guide](exploitation/choix-facteur-mfa.md).
+
+La verification de main apres PR114 a revele une hypothese de test invalide :
+des affectations rapides peuvent partager la meme date. Les essais d'historique
+imposent maintenant cette egalite, verifient chaque changement independamment
+de sa position et controlent separement le tri et la pagination. Aucun changement
+du schema deploye ; les defaults des fixtures sont annules par ROLLBACK.
+
+Le lot suivant ajoute une application de secours depuis une session AAL2,
+avec confirmation du code et reprise des preparations interrompues. Voir le
+[guide](exploitation/application-secours.md) et la PR pour les validations.
+La perte de tous les facteurs et leur suppression restent distinctes.
+
+Les echanges HTTP du client agence et du renouvellement de session ont une
+borne de dix secondes, sans reprise ajoutee ni perte du signal d'annulation.
+Voir [le guide](exploitation/delais-agence.md) ; il ne s'agit pas d'un budget
+global de page et les garanties d'idempotence restent necessaires.
