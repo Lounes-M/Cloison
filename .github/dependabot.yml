@@ -23,7 +23,7 @@ updates:
       #   typescript 7 -> typescript-eslint refuse explicitement TS 7.0
       #
       # A lever des que `eslint-config-next` les prend en charge. Sans cette
-      # pause, Dependabot rouvre les memes PR chaque lundi. Voir docs/dettes.md.
+      # pause, Dependabot rouvre les memes PR chaque lundi.
       - dependency-name: eslint
         update-types: [version-update:semver-major]
       - dependency-name: typescript
