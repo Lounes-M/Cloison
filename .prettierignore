@@ -1,5 +1,4 @@
 .next
 node_modules
-design
 public
 package-lock.json

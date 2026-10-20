@@ -24,9 +24,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     verifierAudit(JSON.parse(resultat.stdout))
     console.log('Aucun avis high ou critical.')
   } catch {
-    console.error(
-      'Controle des dependances refuse. Consulter npm audit et docs/exploitation/dependances.md.',
-    )
+    console.error('Controle des dependances refuse. Consulter npm audit.')
     process.exitCode = 1
   }
 }

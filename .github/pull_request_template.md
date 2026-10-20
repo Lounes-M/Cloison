@@ -15,7 +15,6 @@
 
 - [ ] La migration est versionnée dans `supabase/migrations/`, jamais modifiée après application
 - [ ] RLS activée dès la création de la table, et refus par défaut
-- [ ] La décision structurante est écrite dans `docs/adr/`, ou une ADR existante est citée
 
 ## Captures
 
