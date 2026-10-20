@@ -4,7 +4,7 @@ import nextTypescript from 'eslint-config-next/typescript'
 // `eslint-config-next` 16 expose directement du flat config : pas de FlatCompat.
 const config = [
   {
-    ignores: ['.next/**', 'node_modules/**', 'design/**', 'next-env.d.ts'],
+    ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts'],
   },
   ...coreWebVitals,
   ...nextTypescript,
