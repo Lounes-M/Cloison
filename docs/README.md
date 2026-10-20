@@ -31,3 +31,4 @@ Les guides datés et comptes rendus historiques décrivent leur révision de ré
 - [Réutilisation volontaire des pièces](exploitation/reutilisation-pieces.md)
 
 - [Registre durable des signatures et rapprochement](exploitation/registre-signatures.md).
+- [Recette de la chaine de l'acte et ouverture en production](exploitation/recette-signature.md).

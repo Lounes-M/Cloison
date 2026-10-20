@@ -78,10 +78,10 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 - [x] **28** Implementer l'espace locataire, le rattachement agence et le suivi sans pieces ni montants.
 - [x] **29** Implementer l'espace garant, depot et retrait. PDF fictif depose, restitue identique et retire en production ; journal verifie.
 - [x] **30** Implementer le calcul du ratio et figer les donnees qui le determinent selon le cycle du dossier.
-- [ ] **31** Terminer l'espace agence jusqu'a l'acte. Consultation et ratio implementes ; generation de l'acte et chaine contractuelle non terminees.
+- [ ] **31** Terminer l'espace agence jusqu'a l'acte. Consultation, ratio, preparation de l'acte depuis le modele valide, validation du garant, suivi et archives livres (PR159 a PR191, ADR 0016), parcours ferme par defaut. Cloison ne genere pas l'acte : l'agence depose le PDF de son modele. Reste la [recette sandbox](exploitation/recette-signature.md).
 - [x] **32** Implementer la demonstration fictive pour les comptes non actives.
 - [x] **33** Implementer demande d'activation et traitement agence, avec refus sur comptes suspendus et membres exclus.
-- [ ] **34** Valider modele, generation d'acte, mention, Youtrust, retour signe, preuve et archivage ensemble. Le compte connecte ne suffit pas. Lounes gere Youtrust et le modele ; integration et essais techniques dependent de ces elements.
+- [ ] **34** Valider modele, generation d'acte, mention, Youtrust, retour signe, preuve et archivage ensemble. Integration, registre, reprises et archivage chiffre livres et testes sur transport simule ; controle de configuration hors ligne prepare. Le compte connecte ne suffit pas. Lounes fournit le compte Youtrust avec AES activee, le modele valide et la duree de conservation ; la [recette](exploitation/recette-signature.md) en depend.
 - [ ] **35** Prouver la reception effective des courriels et des liens. Files chiffrees, reprise et transport testes ; expediteur configure, livraison destinataire non prouvee.
 
 ## Phase 5. Prerequis avant les justificatifs reels
@@ -96,7 +96,7 @@ Les ADR consignent les decisions ; elles ne prouvent pas a elles seules leur exe
 ## Phase 6. Paiement et facturation
 
 - [x] **42** Exercer le parcours de paiement locataire en mode Stripe test. PR50 : navigateur, Next et PostgreSQL/PostgREST locaux, Checkout et webhook fournisseur ; succes nominal, refus de fonds, annulation, echec puis succes 3D Secure verifies. Aucun encaissement reel. Identite commerciale et configuration du compte de production restent a confirmer avant lancement.
-- [ ] **43** Terminer la facturation agence liee a une signature reelle verifiee.
+- [ ] **43** Terminer la facturation agence liee a une signature reelle verifiee. Creance unique a la publication, paiement carte Checkout et rapprochement livres (PR159, PR164), fermes par defaut. Restent l'identite Stripe de production et une premiere signature reelle, selon [l'ouverture en production](exploitation/recette-signature.md#5-ouverture-en-production).
 - [x] **44** Tester l'interdiction des chemins de paiement pour le garant.
 - [ ] **45** Finaliser et faire valider CGU et CGV. Les brouillons du depot ne valent pas validation.
 
