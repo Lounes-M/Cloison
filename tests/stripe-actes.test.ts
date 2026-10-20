@@ -1,12 +1,17 @@
 import { beforeEach, afterEach, expect, test, vi } from 'vitest'
 import { creerSessionActe, rapprocherSessionActe } from '@/lib/paiement/stripe'
-const h = vi.hoisted(() => ({ create: vi.fn(), retrieve: vi.fn(), rpc: vi.fn() }))
+const h = vi.hoisted(() => ({
+  create: vi.fn(),
+  retrieve: vi.fn(),
+  rpc: vi.fn(),
+  env: { stripeSecretKey: 'sk_live_fixture' },
+}))
 vi.mock('stripe', () => ({
   default: class {
     checkout = { sessions: { create: h.create, retrieve: h.retrieve } }
   },
 }))
-vi.mock('@/lib/env', () => ({ env: { stripeSecretKey: 'fixture' } }))
+vi.mock('@/lib/env', () => ({ env: h.env }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: async () => ({ rpc: h.rpc }) }))
 const id = '11111111-1111-4111-8111-111111111111',
   facture = '22222222-2222-4222-8222-222222222222'
@@ -64,11 +69,15 @@ const sessionPayee = () => ({
 })
 beforeEach(() => {
   vi.resetAllMocks()
+  h.env.stripeSecretKey = 'sk_live_fixture'
   h.rpc.mockResolvedValue({ data: true, error: null })
   h.create.mockResolvedValue(session())
   h.retrieve.mockResolvedValue(session())
 })
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 test('une reponse perdue conserve la meme cle et les memes parametres de paiement', async () => {
   const p = r()
   h.create.mockRejectedValueOnce(new Error('Reponse perdue'))
@@ -242,5 +251,62 @@ test.each([null, 'true', 1])(
     h.rpc.mockResolvedValue({ data, error: null })
     await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow('Reglement indisponible')
     expect(h.rpc).not.toHaveBeenCalledWith('rapprocher_reglement_acte', expect.anything())
+  },
+)
+
+/** Les objets d'une cle test sont tous en mode test, sans aucun objet live. */
+const enModeTest = <T extends { livemode: boolean }>(s: T) => {
+  const t = structuredClone(s) as T & {
+    payment_intent?: { livemode: boolean; latest_charge: { livemode: boolean } }
+  }
+  t.livemode = false
+  if (t.payment_intent) {
+    t.payment_intent.livemode = false
+    t.payment_intent.latest_charge.livemode = false
+  }
+  return t
+}
+test('une cle test regle une session test de bout en bout', async () => {
+  h.env.stripeSecretKey = 'sk_test_fixture'
+  h.create.mockResolvedValue(enModeTest(session()))
+  expect(await creerSessionActe(r(), 'https://example.invalid')).toBe(session().url)
+  h.retrieve.mockResolvedValue(enModeTest(sessionPayee()))
+  await rapprocherSessionActe('cs_fixture', id)
+  expect(h.rpc).toHaveBeenCalledWith(
+    'rapprocher_reglement_acte',
+    expect.objectContaining({ statut: 'paye', le_paiement: 'pi_fixture' }),
+  )
+})
+test.each(['session', 'paiement', 'charge'])(
+  'une cle test refuse tout objet live : %s',
+  async (objet) => {
+    h.env.stripeSecretKey = 'sk_test_fixture'
+    const s = enModeTest(sessionPayee())
+    if (objet === 'session') s.livemode = true
+    if (objet === 'paiement') s.payment_intent.livemode = true
+    if (objet === 'charge') s.payment_intent.latest_charge.livemode = true
+    h.retrieve.mockResolvedValue(s)
+    await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow()
+    expect(h.rpc).not.toHaveBeenCalled()
+  },
+)
+test('une cle test ne cree aucune session sur le deploiement de production', async () => {
+  h.env.stripeSecretKey = 'sk_test_fixture'
+  vi.stubEnv('VERCEL_ENV', 'production')
+  await expect(creerSessionActe(r(), 'https://example.invalid')).rejects.toThrow(
+    'Mode Stripe refuse',
+  )
+  await expect(rapprocherSessionActe('cs_fixture', id)).rejects.toThrow('Mode Stripe refuse')
+  expect(h.create).not.toHaveBeenCalled()
+  expect(h.retrieve).not.toHaveBeenCalled()
+})
+test.each(['fixture', 'pk_test_fixture', 'pk_live_fixture'])(
+  'une cle de forme inconnue ne sollicite pas Stripe : %s',
+  async (cle) => {
+    h.env.stripeSecretKey = cle
+    await expect(creerSessionActe(r(), 'https://example.invalid')).rejects.toThrow(
+      'Mode Stripe refuse',
+    )
+    expect(h.create).not.toHaveBeenCalled()
   },
 )
