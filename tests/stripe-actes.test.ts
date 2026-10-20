@@ -310,3 +310,9 @@ test.each(['fixture', 'pk_test_fixture', 'pk_live_fixture'])(
     expect(h.create).not.toHaveBeenCalled()
   },
 )
+test('la session agence ne propose que la carte, sans payment_method_types retire en Stripe 23', async () => {
+  await creerSessionActe(r(), 'https://example.invalid')
+  const parametres = h.create.mock.calls[0]?.[0]
+  expect(parametres.allowed_payment_method_types).toEqual(['card'])
+  expect(parametres).not.toHaveProperty('payment_method_types')
+})

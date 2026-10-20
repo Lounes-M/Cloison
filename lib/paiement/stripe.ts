@@ -20,8 +20,15 @@ import { env } from '@/lib/env'
  * ce qu'il n'a pas a voir.
  */
 
+/** Version d'API figee : une montee du SDK ne la change jamais en silence. */
+const VERSION_API = '2026-09-30.endive'
+
 function stripe(): Stripe {
-  return new Stripe(env.stripeSecretKey, { timeout: 5000, maxNetworkRetries: 0 })
+  return new Stripe(env.stripeSecretKey, {
+    apiVersion: VERSION_API,
+    timeout: 5000,
+    maxNetworkRetries: 0,
+  })
 }
 
 /**
@@ -130,7 +137,8 @@ export async function creerSessionLocataire(options: {
     const session = await api.checkout.sessions.create(
       {
         mode: 'payment',
-        payment_method_types: ['card'],
+        // Filtre Stripe 23 : la carte seule, aucun moyen differe que le webhook ne crediterait pas.
+        allowed_payment_method_types: ['card'],
         customer_email: options.email,
         client_reference_id: options.dossierId,
         metadata: {
@@ -312,7 +320,8 @@ export async function creerSessionActe(
     session = await api.checkout.sessions.create(
       {
         mode: 'payment',
-        payment_method_types: ['card'],
+        // Filtre Stripe 23 : la carte seule, aucun moyen differe que le webhook ne crediterait pas.
+        allowed_payment_method_types: ['card'],
         client_reference_id: r.facture,
         metadata: {
           produit: 'cloison_acte',
