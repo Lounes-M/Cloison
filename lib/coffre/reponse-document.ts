@@ -1,5 +1,8 @@
 const PDF_MAX = 20 * 1024 * 1024
 
+/** Refus bien forme du moteur ({ ok: false }), distinct d'une reponse invalide. */
+export class RefusDocumentaire extends Error {}
+
 export function lireReponseDocumentaire(
   sortie: Buffer,
   operation: 'verifier' | 'rasteriser',
@@ -47,8 +50,10 @@ export function lireReponseDocumentaire(
     )
       throw new Error('Reponse du moteur documentaire invalide')
     if (typeof resultat.pages === 'number' && resultat.pages > 40)
-      throw new Error(`Ce document compte ${resultat.pages} pages, au-dela des 40 traitees`)
-    throw new Error('Document invalide ou trop volumineux a traiter')
+      throw new RefusDocumentaire(
+        `Ce document compte ${resultat.pages} pages, au-dela des 40 traitees`,
+      )
+    throw new RefusDocumentaire('Document invalide ou trop volumineux a traiter')
   }
   if (operation === 'verifier') return Buffer.alloc(0)
   // Borne la representation avant allocation. Buffer.from(base64) ignore sinon
