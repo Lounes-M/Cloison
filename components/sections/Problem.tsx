@@ -34,7 +34,7 @@ export function Problem() {
         </Reveal>
 
         <Reveal>
-          <p className="font-display text-flame mb-4 text-[15px] tracking-[0.06em] uppercase">
+          <p className="font-display text-flame-texte mb-4 text-[15px] tracking-[0.06em] uppercase">
             {problem.eyebrow}
           </p>
           <h2 className="font-display max-w-[600px] text-[clamp(1.65rem,3vw,36px)] leading-tight text-balance uppercase">
