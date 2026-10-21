@@ -19,14 +19,17 @@ export async function modifierCollaborateur(
   if (
     !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(cible) ||
     !['admin', 'membre', 'exclu', 'en_attente'].includes(avant) ||
-    !['admin', 'membre', 'exclure', 'readmettre', 'accepter', 'refuser'].includes(operation) ||
+    !['admin', 'membre', 'exclure', 'readmettre', 'accepter', 'refuser', 'mfa'].includes(
+      operation,
+    ) ||
     form.get('confirmation') !== 'on'
   )
     return { erreur: true, message: textes.invalide }
   if (
     (avant === 'exclu') !== (operation === 'readmettre') ||
     (avant === 'en_attente') !== (operation === 'accepter' || operation === 'refuser') ||
-    (operation === 'exclure' && cible === contexte.utilisateurId)
+    ((operation === 'exclure' || operation === 'mfa') && cible === contexte.utilisateurId) ||
+    (operation === 'mfa' && avant !== 'admin' && avant !== 'membre')
   )
     return { erreur: true, message: textes.invalide }
   try {
@@ -38,6 +41,11 @@ export async function modifierCollaborateur(
         le_demandeur: cible,
         accepter: operation === 'accepter',
       })
+      if (error || data !== true) return { erreur: true, message: textes.echec }
+    } else if (operation === 'mfa') {
+      // Retire les facteurs et ferme les sessions de la cible. La base refuse
+      // sur soi, hors de l'agence, ou sans aal2 ; tout refus reste un echec.
+      const { data, error } = await db.rpc('reinitialiser_mfa_collaborateur', { cible })
       if (error || data !== true) return { erreur: true, message: textes.echec }
     } else if (operation === 'readmettre') {
       const { data, error } = await db.rpc('readmettre_collaborateur', { cible })

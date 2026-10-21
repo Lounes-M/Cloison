@@ -102,3 +102,17 @@ export function traitementsFacultatifs() {
     signature: process.env.SIGNATURE_PARCOURS_ENABLED === 'true',
   }
 }
+
+/**
+ * La duree de conservation des sauvegardes, en jours, telle que configuree
+ * chez Supabase (sauvegardes quotidiennes et PITR). La politique doit la
+ * dire : detruire la cle d'un dossier ne neutralise pas une sauvegarde qui la
+ * contient encore. Absente ou hors bornes, elle vaut inconnue et la page de
+ * confidentialite reste marquee incomplete.
+ */
+export function retentionSauvegardes(): number | null {
+  const valeur = lire('SAUVEGARDE_RETENTION_JOURS')
+  if (!valeur || !/^\d{1,3}$/.test(valeur)) return null
+  const jours = Number(valeur)
+  return jours >= 1 && jours <= 365 ? jours : null
+}

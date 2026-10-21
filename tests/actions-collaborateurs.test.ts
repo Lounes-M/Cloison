@@ -109,3 +109,34 @@ test('une decision deja prise ailleurs reste un echec', async () => {
   f.set('operation', 'accepter')
   expect((await modifierCollaborateur({}, f)).erreur).toBe(true)
 })
+test.each(['membre', 'admin'])(
+  'la reinitialisation MFA d un %s passe par la base',
+  async (avant) => {
+    const f = formulaire()
+    f.set('avant', avant)
+    f.set('operation', 'mfa')
+    expect(await modifierCollaborateur({}, f)).toEqual({ message: 'Modification enregistrée.' })
+    expect(h.rpc).toHaveBeenCalledWith('reinitialiser_mfa_collaborateur', { cible })
+    expect(h.from).not.toHaveBeenCalled()
+    h.rpc.mockResolvedValue({ data: false, error: null })
+    expect((await modifierCollaborateur({}, f)).erreur).toBe(true)
+  },
+)
+test.each([
+  ['exclu', cible],
+  ['en_attente', cible],
+  ['membre', 'administrateur'],
+])('la reinitialisation MFA est refusee avant la base (%s, %s)', async (avant, qui) => {
+  const f = formulaire()
+  f.set('avant', avant)
+  f.set('operation', 'mfa')
+  h.contexte.mockResolvedValue({
+    etat: 'rattache',
+    role: 'admin',
+    utilisateurId: qui === cible ? 'administrateur' : cible,
+    agence: { id: 'agence' },
+    supabase: { from: h.from, rpc: h.rpc },
+  })
+  expect((await modifierCollaborateur({}, f)).erreur).toBe(true)
+  expect(h.rpc).not.toHaveBeenCalled()
+})

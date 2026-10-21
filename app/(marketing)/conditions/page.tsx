@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { PageJuridique, SectionJuridique } from '@/components/juridique/PageJuridique'
-import { conditions as textes } from '@/lib/content/juridique'
+import { conditions as textes, mentionTva } from '@/lib/content/juridique'
 import { editeur } from '@/lib/juridique/editeur'
 
 export const metadata: Metadata = {
@@ -19,6 +19,9 @@ export default function PageConditions() {
       <p>{textes.introduction}</p>
       {textes.sections.map((section) => (
         <SectionJuridique key={section.id} titre={section.titre} paragraphes={section.paragraphes}>
+          {section.id === 'locataire' ? (
+            <p>{e.tva ? mentionTva.ttc : mentionTva.franchise}</p>
+          ) : null}
           {section.id === 'litiges' ? (
             <>
               {e.mediateur ? (

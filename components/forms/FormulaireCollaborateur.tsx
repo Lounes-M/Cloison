@@ -58,6 +58,7 @@ export function FormulaireCollaborateur({
             ) : null}
             {avant === 'admin' ? <option value="membre">{textes.retrograder}</option> : null}
             {!soi ? <option value="exclure">{textes.exclure}</option> : null}
+            {!soi ? <option value="mfa">{textes.mfa}</option> : null}
           </>
         )}
       </select>

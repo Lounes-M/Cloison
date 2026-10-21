@@ -48,6 +48,23 @@ create table auth.users (
   deleted_at timestamptz
 );
 
+-- Les facteurs MFA et les sessions, reduits aux colonnes que la
+-- reinitialisation par un administrateur (0065) touche. Chez Supabase, les
+-- jetons de rafraichissement suivent la session par une cle etrangere en
+-- cascade : supprimer la session suffit.
+create table auth.mfa_factors (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  factor_type text not null default 'totp',
+  status      text not null default 'verified'
+);
+create table auth.sessions (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  aal        text,
+  created_at timestamptz default now()
+);
+
 -- Chez Supabase, `auth.uid()` lit le claim `sub` du jeton verifie. En local on
 -- pose ce claim a la main avec `set request.jwt.claim.sub = '...'`.
 create or replace function auth.uid() returns uuid
