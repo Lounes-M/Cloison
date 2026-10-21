@@ -15,7 +15,7 @@ const champBase =
 function Erreur({ id, message }: { id: string; message?: string }) {
   if (!message) return null
   return (
-    <p id={id} className="text-flame mt-1.5 text-[13px] font-semibold">
+    <p id={id} className="text-flame-texte mt-1.5 text-[13px] font-semibold">
       {message}
     </p>
   )

@@ -1,0 +1,47 @@
+# Service documentaire confine. Installe par mettre-en-service.sh.
+# Le groupe docker equivaut a root sur l'hote : cette machine ne porte que ce
+# service et son proxy TLS, sans autre application, secret ni donnee.
+[Unit]
+Description=Cloison - moteur documentaire confine
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=simple
+User=cloison-documentaire
+Group=cloison-documentaire
+SupplementaryGroups=docker
+WorkingDirectory=/opt/cloison-documentaire
+EnvironmentFile=/etc/cloison-documentaire/service.env
+LoadCredential=documentaire-secret:/etc/cloison-documentaire/secret
+Environment=HOME=/var/lib/cloison-documentaire NODE_ENV=production
+ExecStart=/usr/bin/node scripts/service-documentaire.mjs
+StateDirectory=cloison-documentaire
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+UMask=0077
+MemoryMax=1G
+TasksMax=256
+NoNewPrivileges=true
+CapabilityBoundingSet=
+ProtectSystem=strict
+ReadWritePaths=/run/docker.sock
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

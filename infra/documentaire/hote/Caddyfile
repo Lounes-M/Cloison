@@ -1,0 +1,20 @@
+# Proxy TLS de la meme machine. Seules la route signee et la sante sortent ;
+# le service lui-meme n'ecoute qu'en boucle locale. Aucun journal d'acces.
+{$DOCUMENTAIRE_DOMAINE} {
+	@service path /v1/traiter /sante
+	handle @service {
+		request_body {
+			max_size 31MB
+		}
+		reverse_proxy 127.0.0.1:8787 {
+			transport http {
+				read_timeout 60s
+				write_timeout 60s
+			}
+		}
+	}
+	handle {
+		respond 404
+	}
+	header -Server
+}
