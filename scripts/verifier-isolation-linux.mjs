@@ -80,12 +80,24 @@ s.on('error', e => { assert(['ENETUNREACH','EHOSTUNREACH'].includes(e.code)); s.
 )
 console.log('OK : compte, fichiers, absence de montage et de secret, reseau et contraintes noyau')
 
+// Le drapeau OOMKilled de Docker n'est pas fiable ici : node tourne sous `timeout`, pas en
+// PID 1, et Docker peut ne pas relier l'arret au cgroup. La preuve est lue dans
+// le cgroup lui-meme : l'enfant qui alloue est tue par SIGKILL et le noyau
+// compte un oom_kill de plus.
 await sonde(
-  `const blocs=[]; for(let i=0;i<20;i++) blocs.push(Buffer.alloc(32*1024*1024,7));`,
+  `
+const {spawnSync}=require('node:child_process');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const tues=()=>Number(/^oom_kill\\s+(\\d+)$/m.exec(fs.readFileSync('/sys/fs/cgroup/memory.events','utf8'))[1]);
+const avant=tues();
+const r=spawnSync(process.execPath,['-e','const blocs=[]; for(let i=0;i<20;i++) blocs.push(Buffer.alloc(32*1024*1024,7));'],{stdio:'ignore'});
+assert.equal(r.signal,'SIGKILL','Le noyau doit refuser la memoire native');
+assert(tues()>avant,'Arret sans oom_kill du cgroup');
+`,
   async (state, resultat) => {
-    assert.equal(resultat, null)
-    assert.equal(state.OOMKilled, true, 'Le noyau doit refuser la memoire native')
-    assert.equal(state.ExitCode, 137)
+    assert.equal(state.ExitCode, 0, 'Le noyau doit refuser la memoire native')
+    assert.notEqual(resultat, null)
   },
 )
 console.log('OK : depassement natif effectivement interrompu par le noyau')
