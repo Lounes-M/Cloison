@@ -20,8 +20,29 @@ import { env } from '@/lib/env'
  * ce qu'il n'a pas a voir.
  */
 
+/** Version d'API figee : une montee du SDK ne la change jamais en silence. */
+const VERSION_API = '2026-09-30.endive'
+
 function stripe(): Stripe {
-  return new Stripe(env.stripeSecretKey, { timeout: 5000, maxNetworkRetries: 0 })
+  return new Stripe(env.stripeSecretKey, {
+    apiVersion: VERSION_API,
+    timeout: 5000,
+    maxNetworkRetries: 0,
+  })
+}
+
+/**
+ * Le mode attendu des objets Stripe du reglement agence, deduit de la cle.
+ *
+ * Une cle live n'accepte que des objets live, une cle test que des objets test :
+ * les deux modes ne se melangent jamais. Le mode test reste refuse sur le
+ * deploiement de production Vercel, ou une carte d'essai ne doit rien regler.
+ */
+function modeLiveAttendu(): boolean {
+  const cle = env.stripeSecretKey
+  if (/^[sr]k_live_/.test(cle)) return true
+  if (/^[sr]k_test_/.test(cle) && process.env.VERCEL_ENV !== 'production') return false
+  throw new Error('Mode Stripe refuse')
 }
 
 /**
@@ -116,7 +137,8 @@ export async function creerSessionLocataire(options: {
     const session = await api.checkout.sessions.create(
       {
         mode: 'payment',
-        payment_method_types: ['card'],
+        // Filtre Stripe 23 : la carte seule, aucun moyen differe que le webhook ne crediterait pas.
+        allowed_payment_method_types: ['card'],
         customer_email: options.email,
         client_reference_id: options.dossierId,
         metadata: {
@@ -288,6 +310,7 @@ export async function creerSessionActe(
   origine: string,
 ): Promise<string | null> {
   const api = stripe()
+  const live = modeLiveAttendu()
   let session: Stripe.Checkout.Session
   if (r.session) session = await api.checkout.sessions.retrieve(r.session)
   else {
@@ -297,7 +320,8 @@ export async function creerSessionActe(
     session = await api.checkout.sessions.create(
       {
         mode: 'payment',
-        payment_method_types: ['card'],
+        // Filtre Stripe 23 : la carte seule, aucun moyen differe que le webhook ne crediterait pas.
+        allowed_payment_method_types: ['card'],
         client_reference_id: r.facture,
         metadata: {
           produit: 'cloison_acte',
@@ -327,7 +351,7 @@ export async function creerSessionActe(
   }
   if (
     (r.session && session.id !== r.session) ||
-    !session.livemode ||
+    session.livemode !== live ||
     session.metadata?.produit !== 'cloison_acte' ||
     session.metadata.facture_id !== r.facture ||
     session.metadata.tentative !== r.id ||
@@ -363,13 +387,14 @@ export async function rapprocherSessionActe(
 ) {
   signal.throwIfAborted()
   if (!/^cs_[A-Za-z0-9_]{1,190}$/.test(reference)) throw new Error('Reference invalide')
+  const live = modeLiveAttendu()
   const s = await stripe().checkout.sessions.retrieve(reference, {
     expand: ['payment_intent.latest_charge'],
   })
   const m = s.metadata
   if (
     s.id !== reference ||
-    !s.livemode ||
+    s.livemode !== live ||
     s.mode !== 'payment' ||
     m?.produit !== 'cloison_acte' ||
     !estUuidCanonique(m.facture_id) ||
@@ -396,8 +421,8 @@ export async function rapprocherSessionActe(
       !/^pi_[A-Za-z0-9_]{1,190}$/.test(paiement.id) ||
       !/^ch_[A-Za-z0-9_]{1,190}$/.test(charge.id) ||
       paiementCharge !== paiement.id ||
-      paiement.livemode !== true ||
-      charge.livemode !== true ||
+      paiement.livemode !== live ||
+      charge.livemode !== live ||
       paiement.metadata?.produit !== 'cloison_acte' ||
       paiement.metadata.facture_id !== m.facture_id ||
       paiement.metadata.tentative !== m.tentative ||

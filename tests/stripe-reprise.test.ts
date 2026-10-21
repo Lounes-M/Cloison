@@ -352,3 +352,10 @@ test('une session ouverte historique conserve son tarif reserve sans metadonnee 
   expect(await creerSessionLocataire(OPTIONS)).toBe('https://checkout.example.invalid/1')
   expect(doubles.creer).toHaveBeenCalledOnce()
 })
+
+test('la session locataire ne propose que la carte, sans payment_method_types retire en Stripe 23', async () => {
+  expect(await creerSessionLocataire(OPTIONS)).toBe('https://checkout.example.invalid/1')
+  const parametres = doubles.creer.mock.calls[0]?.[0]
+  expect(parametres.allowed_payment_method_types).toEqual(['card'])
+  expect(parametres).not.toHaveProperty('payment_method_types')
+})
