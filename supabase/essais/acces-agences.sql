@@ -42,8 +42,13 @@ select public.rejoindre_ou_creer_agence('Autre nom') = (select id from public.ag
 reset role;
 select count(*) as nb_agences from public.agences;
 
-\echo '=== 3. Paul, meme domaine, rejoint comme membre ==='
-set role authenticated; set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+\echo '=== 3. Paul, meme domaine, demande ; Marie accepte avec MFA (0064) ==='
+set role authenticated;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","aal":"aal2"}', false);
+select public.rejoindre_ou_creer_agence(null) is null as paul_en_attente;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","aal":"aal2"}', false);
+select public.decider_rattachement('22222222-2222-2222-2222-222222222222', true) as accord_de_marie;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","aal":"aal2"}', false);
 select public.rejoindre_ou_creer_agence(null) is not null as paul_rattache;
 reset role;
 select count(*) as nb_agences_apres_paul from public.agences;

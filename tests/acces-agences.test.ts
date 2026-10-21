@@ -1,6 +1,14 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
-import { baseDEssai, compter, devenir, lignesTouchees, redevenirProprietaire, refus } from './base'
+import {
+  baseDEssai,
+  compter,
+  devenir,
+  lignesTouchees,
+  redevenirProprietaire,
+  refus,
+  rejoindreAvecAccord,
+} from './base'
 
 /**
  * Le modele d'acces de l'ADR 0002, automatise.
@@ -61,17 +69,24 @@ describe("modele d'acces des agences", () => {
       expect(await compter(db, 'public.agences')).toBe(1)
     })
 
-    test('le domaine est l invitation : un collegue rejoint au lieu de dupliquer', async () => {
+    test('le domaine designe l agence : un collegue demande au lieu de dupliquer', async () => {
       await devenir(db, 'authenticated', MARIE)
       await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
 
+      // Le domaine ne suffit plus (0064) : la demande est deposee, rien n'est ouvert.
       await devenir(db, 'authenticated', PAUL)
-      expect(await valeur('select public.rejoindre_ou_creer_agence(null)')).toBeTruthy()
+      expect(await valeur('select public.rejoindre_ou_creer_agence(null)')).toBeNull()
+      expect(await valeur('select public.agence_courante()')).toBeNull()
+      expect(await compter(db, 'public.agences')).toBe(0)
 
       await redevenirProprietaire(db)
       // Le cas que l'ADR 0002 pointe comme a ne pas rater : sans ce mecanisme,
       // une agence de huit personnes produit huit espaces isoles.
       expect(await compter(db, 'public.agences')).toBe(1)
+      expect(await compter(db, 'public.membres_agence')).toBe(1)
+
+      await rejoindreAvecAccord(db, MARIE, PAUL)
+      await redevenirProprietaire(db)
       expect(
         await valeur(`select role from public.membres_agence where utilisateur_id = '${PAUL}'`),
       ).toBe('membre')
@@ -92,8 +107,7 @@ describe("modele d'acces des agences", () => {
     beforeEach(async () => {
       await devenir(db, 'authenticated', MARIE)
       await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
-      await devenir(db, 'authenticated', PAUL)
-      await db.query('select public.rejoindre_ou_creer_agence(null)')
+      await rejoindreAvecAccord(db, MARIE, PAUL)
       await devenir(db, 'authenticated', SAM)
       await db.query(`select public.rejoindre_ou_creer_agence('Autre Agence')`)
     })
@@ -128,8 +142,7 @@ describe("modele d'acces des agences", () => {
     beforeEach(async () => {
       await devenir(db, 'authenticated', MARIE)
       await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
-      await devenir(db, 'authenticated', PAUL)
-      await db.query('select public.rejoindre_ou_creer_agence(null)')
+      await rejoindreAvecAccord(db, MARIE, PAUL)
     })
 
     test('un admin declare son SIREN mais ne se verifie pas lui-meme', async () => {

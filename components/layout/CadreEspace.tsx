@@ -3,6 +3,7 @@ import { facturation } from '@/lib/content/facturation'
 import Link from 'next/link'
 import { Logo } from '@/components/brand/Logo'
 import { interfaceEspace as t } from '@/lib/content/interface'
+import { juridique } from '@/lib/content/juridique'
 
 /** Identite commune, sans lecture de session ni decision d'autorisation. */
 export function CadreEspace({
@@ -65,6 +66,20 @@ export function CadreEspace({
         {children}
       </main>
       {footer}
+      <nav
+        aria-label={juridique.navigation}
+        className="text-muted mx-auto flex w-full max-w-[1280px] flex-wrap gap-x-5 gap-y-1 px-5 py-4 text-[13px] font-medium sm:px-8 lg:px-12"
+      >
+        {Object.values(juridique.liens).map((lien) => (
+          <a
+            key={lien.href}
+            href={lien.href}
+            className="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+          >
+            {lien.label}
+          </a>
+        ))}
+      </nav>
     </div>
   )
 }

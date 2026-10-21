@@ -21,12 +21,14 @@ function fixture(adresse: string) {
     headers.set('location', chemin === '/espace' ? '/connexion' : '/lien-invalide')
     return new Response(null, { status: 307, headers })
   }
-  const titre =
-    chemin === '/'
-      ? 'Cloison · Le coffre à trois clés'
-      : chemin === '/agences'
-        ? 'Agences · Cloison'
-        : 'Connexion · Cloison'
+  const titres: Record<string, string> = {
+    '/': 'Cloison · Le coffre à trois clés',
+    '/agences': 'Agences · Cloison',
+    '/mentions-legales': 'Mentions légales · Cloison',
+    '/confidentialite': 'Confidentialité · Cloison',
+    '/conditions': 'Conditions · Cloison',
+  }
+  const titre = titres[chemin] ?? 'Connexion · Cloison'
   return new Response(
     `<html lang="fr"><head><title>${titre}</title><meta name="robots" content="noindex, nofollow"/></head><body><main><h1>Contenu fictif</h1></main></body></html>`,
     { headers },
@@ -38,8 +40,8 @@ test('controle les pages et les refus sur une origine fixe sans identifiants', a
   const transport = vi.fn<typeof fetch>().mockImplementation(async (url) => fixture(String(url)))
   const rapport = await verifierProduction(transport)
   expect(rapport.conforme).toBe(true)
-  expect(rapport.controles).toHaveLength(13)
-  expect(transport).toHaveBeenCalledTimes(13)
+  expect(rapport.controles).toHaveLength(16)
+  expect(transport).toHaveBeenCalledTimes(16)
   for (const [url, options] of transport.mock.calls) {
     expect(new URL(String(url)).origin).toBe('https://www.cloison.immo')
     expect(options).toMatchObject({
@@ -142,7 +144,7 @@ test('ne suit jamais une redirection distante et nettoie le corps refuse', async
   )
   const rapport = await verifierProduction(transport)
   expect(rapport.conforme).toBe(false)
-  expect(annuler).toHaveBeenCalledTimes(13)
+  expect(annuler).toHaveBeenCalledTimes(16)
   expect(
     transport.mock.calls.every(([url]) => String(url).startsWith('https://www.cloison.immo/')),
   ).toBe(true)
@@ -178,4 +180,15 @@ test('un echec reseau reste visible sans divulguer son erreur et les autres cont
   expect(rapport.conforme).toBe(false)
   expect(rapport.controles.filter((c) => !c.conforme).map((c) => c.id)).toEqual(['agences'])
   expect(JSON.stringify(rapport)).not.toContain('SECRET_CONFIDENTIEL')
+})
+
+test('une page juridique sans identite d editeur est signalee, et seulement elle', async () => {
+  const rapport = await verifierProduction(async (url) => {
+    const r = fixture(String(url))
+    if (new URL(String(url)).pathname !== '/conditions') return r
+    const html = (await r.text()).replace('<main>', '<main data-editeur-incomplet="">')
+    return new Response(html, { headers: r.headers })
+  })
+  expect(rapport.conforme).toBe(false)
+  expect(rapport.controles.filter((c) => !c.conforme).map((c) => c.id)).toEqual(['conditions'])
 })

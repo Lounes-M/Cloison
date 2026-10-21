@@ -6,9 +6,10 @@ import { clientAgence } from '@/lib/acces/agence'
  * Le rattachement d'un collaborateur a son agence.
  *
  * Toute la logique vit dans `rejoindre_ou_creer_agence`, posee par la migration
- * 0002 : elle lit le domaine de l'adresse confirmee, rejoint l'agence qui
- * existe deja, ou en cree une. Ce module ne fait que l'appeler et traduire ses
- * refus.
+ * 0002 : elle lit le domaine de l'adresse confirmee et cree l'agence si elle
+ * n'existe pas. Depuis la 0064, rejoindre une agence existante demande l'accord
+ * d'un administrateur : la base depose la demande et rend `null` tant qu'elle
+ * attend. Ce module ne fait que l'appeler et traduire ses reponses.
  *
  * Le detail qui donne sa forme a l'ecran : on appelle d'abord SANS nom. La base
  * repond « il me faut un nom » seulement s'il faut creer l'agence. On ne
@@ -29,6 +30,7 @@ const REFUS = '42501'
 export type Rattachement =
   | { etat: 'rattache'; agenceId: string }
   | { etat: 'nom-requis' }
+  | { etat: 'en-attente' }
   | { etat: 'refus'; message: string }
   | { etat: 'panne' }
 
@@ -48,6 +50,10 @@ export function interpreterRattachement(
   if (!error && typeof data === 'string' && data.length > 0) {
     return { etat: 'rattache', agenceId: data }
   }
+
+  // `null` sans erreur : la demande est deposee, un administrateur decidera.
+  // Seule la 0064 rend cette valeur ; tout autre silence reste une panne.
+  if (!error && data === null) return { etat: 'en-attente' }
 
   if (error?.code === NOM_REQUIS) return { etat: 'nom-requis' }
 

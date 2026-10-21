@@ -1,7 +1,7 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { interpreterRattachement } from '@/lib/agences/rattachement'
-import { baseDEssai, devenir, redevenirProprietaire, refus } from './base'
+import { baseDEssai, devenir, redevenirProprietaire, refus, rejoindreAvecAccord } from './base'
 
 /**
  * Le rattachement d'un collaborateur a son agence.
@@ -54,30 +54,190 @@ describe('ce que la base decide', () => {
     })
   })
 
-  test('le suivant rejoint sans nommer quoi que ce soit', async () => {
+  test('le suivant demande sans nommer quoi que ce soit, et n entre pas seul', async () => {
     await devenir(db, 'authenticated', MARIE)
     await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
 
-    // L'ecran ne lui demande rien, et c'est la base qui le justifie : appele
-    // sans nom, l'appel reussit.
+    // L'ecran ne lui demande pas de nom, et c'est la base qui le justifie :
+    // appele sans nom, l'appel reussit. Mais depuis la 0064 il rend `null` :
+    // la demande est deposee, aucun dossier n'est ouvert.
     await devenir(db, 'authenticated', COLLEGUE)
-    await db.query(`select public.rejoindre_ou_creer_agence()`)
+    for (let i = 0; i < 2; i++) {
+      const { rows } = await db.query<{ r: string | null }>(
+        `select public.rejoindre_ou_creer_agence() as r`,
+      )
+      expect(rows[0]!.r).toBeNull()
+    }
+    const { rows: courante } = await db.query<{ a: string | null }>(
+      'select public.agence_courante() as a',
+    )
+    expect(courante[0]!.a).toBeNull()
 
     await redevenirProprietaire(db)
-    const { rows } = await db.query<{ role: string; n: number }>(`
-      select m.role, count(*) over ()::int as n
-        from public.membres_agence m
-       where m.utilisateur_id = '${COLLEGUE}'
+    const { rows } = await db.query<{ n: number; demandes: number; agences: number }>(`
+      select (select count(*)::int from public.membres_agence where utilisateur_id = '${COLLEGUE}') as n,
+             (select count(*)::int from public.demandes_rattachement where utilisateur_id = '${COLLEGUE}') as demandes,
+             (select count(*)::int from public.agences) as agences
     `)
-    expect(rows[0]!.role).toBe('membre')
+    // Une seule agence pour deux personnes du meme domaine, une seule demande
+    // malgre deux appels, et toujours aucun rattachement.
+    expect(rows[0]).toEqual({ n: 0, demandes: 1, agences: 1 })
+  })
 
-    const { rows: agences } = await db.query<{ n: number }>(
-      'select count(*)::int as n from public.agences',
+  test('l accord d un administrateur ouvre l agence a la connexion suivante', async () => {
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
+    await rejoindreAvecAccord(db, MARIE, COLLEGUE)
+
+    const { rows } = await db.query<{ a: string | null }>('select public.agence_courante() as a')
+    expect(rows[0]!.a).toBeTruthy()
+
+    await redevenirProprietaire(db)
+    const { rows: etat } = await db.query<{ role: string; demandes: number; journal: string }>(`
+      select (select role from public.membres_agence where utilisateur_id = '${COLLEGUE}') as role,
+             (select count(*)::int from public.demandes_rattachement) as demandes,
+             (select string_agg(action, ',') from public.journal_administration_agence) as journal
+    `)
+    expect(etat[0]).toEqual({ role: 'membre', demandes: 0, journal: 'approbation' })
+  })
+
+  test('seul un administrateur de cette agence, avec MFA, decide', async () => {
+    const AUTRE = '44444444-4444-4444-4444-444444444444'
+    const TIERS = '55555555-5555-5555-5555-555555555555'
+    await db.exec(`
+      insert into auth.users (id, email, email_confirmed_at) values
+        ('${AUTRE}', 'paul@autre-agence.fr', now()),
+        ('${TIERS}', 'zoe@agence-lyon3.fr', now())
+    `)
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
+    await devenir(db, 'authenticated', AUTRE)
+    await db.query(`select public.rejoindre_ou_creer_agence('Autre agence')`)
+    await rejoindreAvecAccord(db, MARIE, COLLEGUE)
+    await devenir(db, 'authenticated', TIERS)
+    await db.query(`select public.rejoindre_ou_creer_agence()`)
+
+    // Le demandeur ne lit ni n'ecrit la file lui-meme.
+    expect(await refus(db, 'select * from public.demandes_rattachement')).toContain(
+      'permission denied',
     )
-    // Une seule agence pour deux personnes du meme domaine : c'est tout
-    // l'interet du rattachement, sans quoi une agence de huit personnes
-    // produirait huit espaces isoles.
-    expect(agences[0]!.n).toBe(1)
+    expect(await refus(db, `select public.decider_rattachement('${TIERS}', true)`)).toContain(
+      'Administration refusee',
+    )
+
+    // Un membre simple de la meme agence.
+    await devenir(db, 'authenticated', COLLEGUE)
+    expect(await refus(db, `select public.decider_rattachement('${TIERS}', true)`)).toContain(
+      'Administration refusee',
+    )
+    const { rows: compteMembre } = await db.query<{ n: number }>(
+      'select public.rattachements_en_attente() as n',
+    )
+    expect(compteMembre[0]!.n).toBe(0)
+
+    // L'administrateur d'une autre agence ne trouve pas la demande.
+    await devenir(db, 'authenticated', AUTRE)
+    const { rows: ailleurs } = await db.query<{ ok: boolean }>(
+      `select public.decider_rattachement('${TIERS}', true) as ok`,
+    )
+    expect(ailleurs[0]!.ok).toBe(false)
+
+    // L'administrateur de l'agence, sans second facteur.
+    await db.exec('set role authenticated')
+    await db.query("select set_config('request.jwt.claims', $1, false)", [
+      JSON.stringify({ role: 'authenticated', sub: MARIE, aal: 'aal1' }),
+    ])
+    expect(await refus(db, `select public.decider_rattachement('${TIERS}', true)`)).toContain(
+      'Administration refusee',
+    )
+
+    await devenir(db, 'authenticated', MARIE)
+    const { rows: compte } = await db.query<{ n: number }>(
+      'select public.rattachements_en_attente() as n',
+    )
+    expect(compte[0]!.n).toBe(1)
+    const { rows: decision } = await db.query<{ ok: boolean }>(
+      `select public.decider_rattachement('${TIERS}', true) as ok`,
+    )
+    expect(decision[0]!.ok).toBe(true)
+    // Une demande deja tranchee ne se tranche pas deux fois.
+    const { rows: deuxieme } = await db.query<{ ok: boolean }>(
+      `select public.decider_rattachement('${TIERS}', false) as ok`,
+    )
+    expect(deuxieme[0]!.ok).toBe(false)
+  })
+
+  test('un refus exclut, et seule la readmission rouvre', async () => {
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
+    await devenir(db, 'authenticated', COLLEGUE)
+    await db.query(`select public.rejoindre_ou_creer_agence()`)
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.decider_rattachement('${COLLEGUE}', false)`)
+
+    await devenir(db, 'authenticated', COLLEGUE)
+    const erreur = await db
+      .query(`select public.rejoindre_ou_creer_agence()`)
+      .catch((e: { code?: string; message?: string }) => e)
+    expect((erreur as { code?: string }).code).toBe('42501')
+
+    // La readmission vaut accord : la connexion suivante rattache directement.
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.readmettre_collaborateur('${COLLEGUE}')`)
+    await devenir(db, 'authenticated', COLLEGUE)
+    const { rows } = await db.query<{ r: string | null }>(
+      `select public.rejoindre_ou_creer_agence() as r`,
+    )
+    expect(rows[0]!.r).toBeTruthy()
+
+    await redevenirProprietaire(db)
+    const { rows: journal } = await db.query<{ actions: string }>(
+      "select string_agg(action, ',' order by id) as actions from public.journal_administration_agence",
+    )
+    expect(journal[0]!.actions).toBe('refus,readmission')
+  })
+
+  test('une acceptation ne suit pas une adresse qui change de domaine', async () => {
+    const AUTRE = '44444444-4444-4444-4444-444444444444'
+    await db.exec(
+      `insert into auth.users (id, email, email_confirmed_at) values ('${AUTRE}', 'paul@autre-agence.fr', now())`,
+    )
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
+    await devenir(db, 'authenticated', AUTRE)
+    await db.query(`select public.rejoindre_ou_creer_agence('Autre agence')`)
+    await devenir(db, 'authenticated', COLLEGUE)
+    await db.query(`select public.rejoindre_ou_creer_agence()`)
+    await devenir(db, 'authenticated', MARIE)
+    await db.query(`select public.decider_rattachement('${COLLEGUE}', true)`)
+
+    // Avant de se reconnecter, l'adresse passe sur le domaine d'une autre agence.
+    await redevenirProprietaire(db)
+    await db.query(`update auth.users set email = 'luc@autre-agence.fr' where id = '${COLLEGUE}'`)
+    await devenir(db, 'authenticated', COLLEGUE)
+    const { rows } = await db.query<{ r: string | null }>(
+      `select public.rejoindre_ou_creer_agence() as r`,
+    )
+    expect(rows[0]!.r).toBeNull()
+
+    await redevenirProprietaire(db)
+    const { rows: demande } = await db.query<{ approuvee: boolean; membres: number }>(`
+      select d.approuvee_le is not null as approuvee,
+             (select count(*)::int from public.membres_agence where utilisateur_id = '${COLLEGUE}') as membres
+        from public.demandes_rattachement d where d.utilisateur_id = '${COLLEGUE}'
+    `)
+    expect(demande[0]).toEqual({ approuvee: false, membres: 0 })
+  })
+
+  test('les fournisseurs grand public ajoutes en 0064 ne creent pas d agence', async () => {
+    const BOX = '66666666-6666-6666-6666-666666666666'
+    await db.exec(
+      `insert into auth.users (id, email, email_confirmed_at) values ('${BOX}', 'jean@bbox.fr', now())`,
+    )
+    await devenir(db, 'authenticated', BOX)
+    expect(await refus(db, `select public.rejoindre_ou_creer_agence('Chez moi')`)).toContain(
+      'adresse professionnelle',
+    )
   })
 
   test('sans nom et sans agence existante, la base reclame le nom', async () => {
@@ -165,10 +325,16 @@ describe('ce que le code en fait', () => {
     }
   })
 
+  test('null sans erreur est une demande en attente, et rien d autre', () => {
+    // Seule valeur que la 0064 rend pour une demande deposee. Elle ne doit
+    // jamais ouvrir un espace.
+    expect(interpreterRattachement(null, null)).toEqual({ etat: 'en-attente' })
+  })
+
   test('une reponse vide sans erreur reste une panne', () => {
     // Le cas qu'on oublie : pas d'erreur, mais rien non plus. Le traiter comme
     // un succes donnerait un espace sans agence.
-    for (const data of [null, undefined, '', 0, {}, []]) {
+    for (const data of [undefined, '', 0, {}, []]) {
       expect(interpreterRattachement(data, null).etat).toBe('panne')
     }
   })

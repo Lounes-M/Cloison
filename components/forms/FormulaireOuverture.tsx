@@ -5,6 +5,7 @@ import { useActionState, useEffect, useId, useRef } from 'react'
 import { porte } from '@/lib/content/locataire'
 import { ouvrirMonDossier, type EtatOuverture } from '@/lib/locataire/action-ouverture'
 import { cn } from '@/lib/utils'
+import { informationCollecte } from '@/lib/content/information-collecte'
 
 const ETAT_INITIAL: EtatOuverture = { statut: 'inactif' }
 
@@ -69,6 +70,12 @@ export function FormulaireOuverture() {
         />
         <p id={`${idChamp}-aide`} className="text-muted mt-2 text-[13px] font-medium">
           {porte.aide}
+        </p>
+        <p className="text-muted mt-2 text-[13px] font-medium">
+          {informationCollecte.locataire}{' '}
+          <a href="/confidentialite" className="underline underline-offset-4">
+            {informationCollecte.lien}
+          </a>
         </p>
       </div>
 

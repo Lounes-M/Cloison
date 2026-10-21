@@ -78,3 +78,34 @@ test('la promotion confirmee reussit sans exposer les erreurs SQL', async () => 
   expect(etat.erreur).toBe(true)
   expect(etat.message).not.toContain('SECRET')
 })
+test.each([
+  ['accepter', true],
+  ['refuser', false],
+])('une demande en attente se tranche par la base : %s', async (operation, accepter) => {
+  const f = formulaire()
+  f.set('avant', 'en_attente')
+  f.set('operation', operation)
+  expect(await modifierCollaborateur({}, f)).toEqual({ message: 'Modification enregistrée.' })
+  expect(h.rpc).toHaveBeenCalledWith('decider_rattachement', { le_demandeur: cible, accepter })
+  expect(h.from).not.toHaveBeenCalled()
+})
+test.each([
+  ['en_attente', 'admin'],
+  ['en_attente', 'exclure'],
+  ['membre', 'accepter'],
+  ['exclu', 'refuser'],
+])('une demande ne se melange pas aux autres operations (%s, %s)', async (avant, operation) => {
+  const f = formulaire()
+  f.set('avant', avant)
+  f.set('operation', operation)
+  expect((await modifierCollaborateur({}, f)).erreur).toBe(true)
+  expect(h.rpc).not.toHaveBeenCalled()
+  expect(h.from).not.toHaveBeenCalled()
+})
+test('une decision deja prise ailleurs reste un echec', async () => {
+  h.rpc.mockResolvedValue({ data: false, error: null })
+  const f = formulaire()
+  f.set('avant', 'en_attente')
+  f.set('operation', 'accepter')
+  expect((await modifierCollaborateur({}, f)).erreur).toBe(true)
+})

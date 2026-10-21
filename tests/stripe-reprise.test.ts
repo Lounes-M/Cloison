@@ -359,3 +359,23 @@ test('la session locataire ne propose que la carte, sans payment_method_types re
   expect(parametres.allowed_payment_method_types).toEqual(['card'])
   expect(parametres).not.toHaveProperty('payment_method_types')
 })
+
+test('les accords du locataire accompagnent la session et restent identiques a la reprise', async () => {
+  perdreInscription = 'avant'
+  const avecAccords = {
+    ...OPTIONS,
+    accords: { conditions: 'conditions-fixture', executionImmediate: true as const },
+  }
+  expect(await creerSessionLocataire(avecAccords)).toBeNull()
+  expect(await creerSessionLocataire(avecAccords)).not.toBeNull()
+  const attendu = { conditions_version: 'conditions-fixture', execution_immediate: 'demandee' }
+  for (const [parametres] of doubles.creer.mock.calls) {
+    expect(parametres).toMatchObject({
+      metadata: attendu,
+      payment_intent_data: { metadata: attendu },
+    })
+  }
+  // La meme cle d'idempotence rejouee avec les memes parametres : aucune date
+  // ne s'y glisse, sinon Stripe refuserait la reprise.
+  expect(doubles.creer.mock.calls[0]![0]).toEqual(doubles.creer.mock.calls[1]![0])
+})

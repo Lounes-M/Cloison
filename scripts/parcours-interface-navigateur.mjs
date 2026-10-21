@@ -357,6 +357,8 @@ export async function parcourirInterface(
     await page.waitForURL((u) => u.pathname === '/agences')
   }
   await visiter('/agences', 'agences', false)
+  for (const juridique of ['mentions-legales', 'confidentialite', 'conditions'])
+    await visiter('/' + juridique, juridique, false)
   await visiter('/page-inexistante-mobile', 'introuvable', false)
   const reprise = page.getByRole('navigation', { name: 'Reprendre la navigation', exact: true })
   const retourDossier = reprise.getByRole('link', { name: 'Retrouver mon dossier', exact: true })

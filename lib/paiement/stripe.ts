@@ -59,6 +59,7 @@ export async function creerSessionLocataire(options: {
   retourOk: string
   retourAnnule: string
   tarifAttendu?: { version: string; montant: number }
+  accords?: { conditions: string; executionImmediate: true }
 }): Promise<string | null> {
   try {
     const db = await clientServeur()
@@ -134,6 +135,12 @@ export async function creerSessionLocataire(options: {
         return null
       }
     }
+    // Aucune date ici : la creation reprend la meme cle d'idempotence apres
+    // une reponse perdue, et Stripe refuse une cle rejouee avec d'autres
+    // parametres. L'heure de l'accord est celle de la session, `created`.
+    const accords: Record<string, string> = options.accords
+      ? { conditions_version: options.accords.conditions, execution_immediate: 'demandee' }
+      : {}
     const session = await api.checkout.sessions.create(
       {
         mode: 'payment',
@@ -145,12 +152,14 @@ export async function creerSessionLocataire(options: {
           dossier_id: options.dossierId,
           reference: options.reference,
           tarif_version: etat.tarif_version,
+          ...accords,
         },
         payment_intent_data: {
           metadata: {
             dossier_id: options.dossierId,
             tarif_version: etat.tarif_version,
             produit: 'cloison_locataire',
+            ...accords,
           },
         },
         line_items: [

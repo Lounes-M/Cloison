@@ -36,6 +36,7 @@ import { saisirMonLoyer } from '@/lib/locataire/action-loyer'
 import { designerMonGarant } from '@/lib/locataire/action-garant'
 import { rattacherMonDossier } from '@/lib/locataire/action-continuite'
 import { payerMonDossier } from '@/lib/locataire/action-paiement'
+import { versionConditions } from '@/lib/content/juridique'
 import { declarerNombreDocuments } from '@/lib/garant/action-documents'
 
 const A = '11111111-1111-4111-8111-111111111111'
@@ -195,6 +196,66 @@ test('paiement refuse le dossier ouvert dans un autre onglet', async () => {
   await expect(payerMonDossier(formulaire())).rejects.toThrow('REDIRECT:/lien-invalide')
   expect(h.client).not.toHaveBeenCalled()
   expect(h.paiement).not.toHaveBeenCalled()
+})
+
+function formulairePaiement(accords: Record<string, string>) {
+  const f = new FormData()
+  Object.entries({
+    dossier: A,
+    tarif_version: 'locataire-2026-09-04',
+    montant_cents: '900',
+    ...accords,
+  }).forEach(([k, v]) => f.set(k, v))
+  return f
+}
+function dossierLocataire() {
+  h.session.mockResolvedValue({ jeton: 'fixture', capacite: { dossierId: A, partie: 'locataire' } })
+  const q = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn(async () => ({
+      data: {
+        reference: 'CL-1',
+        email_locataire: 'l@example.fr',
+        paye_le: null,
+        agence_id: null,
+        demonstration: false,
+      },
+      error: null,
+    })),
+  }
+  h.client.mockReturnValue({ from: () => q })
+}
+test.each<Record<string, string>>([
+  {},
+  { accord_conditions: 'on', conditions_version: versionConditions },
+  { execution_immediate: 'on', conditions_version: versionConditions },
+  { accord_conditions: 'on', execution_immediate: 'on' },
+  { accord_conditions: 'on', execution_immediate: 'on', conditions_version: 'conditions-ancienne' },
+])('paiement refuse sans les deux accords sur les conditions en vigueur %#', async (accords) => {
+  dossierLocataire()
+  await expect(payerMonDossier(formulairePaiement(accords))).rejects.toThrow(
+    'REDIRECT:/locataire?paiement=accords#paiement',
+  )
+  expect(h.paiement).not.toHaveBeenCalled()
+})
+test('paiement transmet les accords a la session Stripe', async () => {
+  dossierLocataire()
+  h.paiement.mockResolvedValue('https://checkout.example.invalid/1')
+  await expect(
+    payerMonDossier(
+      formulairePaiement({
+        accord_conditions: 'on',
+        execution_immediate: 'on',
+        conditions_version: versionConditions,
+      }),
+    ),
+  ).rejects.toThrow('REDIRECT:https://checkout.example.invalid/1')
+  expect(h.paiement).toHaveBeenCalledWith(
+    expect.objectContaining({
+      accords: { conditions: versionConditions, executionImmediate: true },
+    }),
+  )
 })
 
 test.each(

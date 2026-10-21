@@ -32,7 +32,9 @@ export async function nommerAgence(
 
   const resultat = await rattacher(saisie)
 
-  if (resultat.etat === 'rattache') {
+  // Quelqu'un a cree l'agence du domaine entre l'affichage et l'envoi : la
+  // demande est deposee, la page montre maintenant l'attente.
+  if (resultat.etat === 'rattache' || resultat.etat === 'en-attente') {
     // La page relit le rattachement au rendu suivant : elle trouvera l'agence
     // et affichera l'espace au lieu de reposer la question.
     revalidatePath('/espace')

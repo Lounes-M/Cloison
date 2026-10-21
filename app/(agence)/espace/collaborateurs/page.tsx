@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 type Membre = {
   utilisateur_id: string
   email: string | null
-  etat: 'admin' | 'membre' | 'exclu'
+  etat: 'admin' | 'membre' | 'exclu' | 'en_attente' | 'approuve'
   admissible: boolean
 }
 type Trace = {
   id: number
-  action: 'role' | 'exclusion' | 'readmission'
+  action: 'role' | 'exclusion' | 'readmission' | 'approbation' | 'refus'
   acteur: string | null
   cible: string | null
   quand: string
@@ -57,13 +57,15 @@ export default async function PageCollaborateurs({
           <li key={`${m.utilisateur_id}:${m.etat}`} className="panneau-espace">
             <h2 className="font-bold break-words">{m.email ?? textes.adresseMasquee}</h2>
             <p className="mt-1 text-sm">{textes.roles[m.etat]}</p>
-            <FormulaireCollaborateur
-              agence={contexte.agence.id}
-              cible={m.utilisateur_id}
-              avant={m.etat}
-              soi={m.utilisateur_id === contexte.utilisateurId}
-              admissible={m.admissible}
-            />
+            {m.etat === 'approuve' ? null : (
+              <FormulaireCollaborateur
+                agence={contexte.agence.id}
+                cible={m.utilisateur_id}
+                avant={m.etat}
+                soi={m.utilisateur_id === contexte.utilisateurId}
+                admissible={m.admissible}
+              />
+            )}
           </li>
         ))}
       </ul>

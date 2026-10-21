@@ -33,7 +33,12 @@ export const paiementLocataire = {
   texte:
     'Une fois, pour trois mois de coffre : ton garant dépose ses pièces de son côté, l’agence reçoit un dossier complet, et tu suis l’avancement.',
   regle:
-    'Le paiement n’est pas remboursé si le dossier expire sans décision de l’agence : tu achètes trois mois de coffre, pas un résultat.',
+    'Tu peux te rétracter pendant quatorze jours : tu es alors remboursé, moins la part des trois mois déjà écoulée. Ensuite, le paiement reste acquis même si le dossier expire sans décision de l’agence : tu achètes trois mois de coffre, pas un résultat.',
+  accordConditions: 'J’accepte les conditions de Cloison.',
+  lienConditions: 'Lire les conditions',
+  executionImmediate:
+    'Je demande que le service commence tout de suite, pour que mon garant reçoive son lien sans attendre. Si je me rétracte dans les quatorze jours, je paie la part déjà fournie.',
+  accordsManquants: 'Coche les deux cases pour régler ton dossier.',
   attente: 'Le lien de ton garant partira une fois le dossier réglé.',
   bouton: `Régler ${prixLocataire}`,
   boutonPour: (montant: number) => `Régler ${euros(montant)}`,
