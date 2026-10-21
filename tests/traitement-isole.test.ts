@@ -116,3 +116,30 @@ for (const valeur of ['node:latest', '--privileged', 'sha256:' + 'g'.repeat(64)]
     expect(commandeDocker).not.toHaveBeenCalled()
   })
 }
+
+test('transmet la pagination et rend la reponse brute verifiee, refus compris', async () => {
+  const pdf = Buffer.from('%PDF-1.7\nfixture').toString('base64')
+  const pagine = Buffer.from(
+    JSON.stringify({ ...JSON.parse(entree.toString()), operation: 'rasteriser', pagination: true }),
+  )
+  const { traiterDocumentIsoleBrut, traiterDocumentIsole } =
+    await import('../scripts/traiter-document-isole.mjs')
+  const sortie = JSON.stringify({ ok: true, pdf, pages: 2 })
+  vi.mocked(commandeDocker).mockImplementation(async (args) =>
+    Buffer.from(args[0] === 'start' ? sortie : ''),
+  )
+  expect((await traiterDocumentIsoleBrut(pagine, image)).toString()).toBe(sortie)
+  expect(await traiterDocumentIsole(pagine, image)).toEqual(Buffer.from(pdf, 'base64'))
+  vi.mocked(commandeDocker).mockImplementation(async (args) =>
+    Buffer.from(args[0] === 'start' ? '{"ok":false,"pages":52}' : ''),
+  )
+  expect((await traiterDocumentIsoleBrut(entree, image)).toString()).toBe('{"ok":false,"pages":52}')
+  vi.mocked(commandeDocker).mockImplementation(async (args) =>
+    Buffer.from(args[0] === 'start' ? '{"ok":true,"pdf":"x"}' : ''),
+  )
+  await expect(traiterDocumentIsoleBrut(entree, image)).rejects.toThrow('invalide')
+  const verifierPagine = JSON.stringify({ ...JSON.parse(entree.toString()), pagination: true })
+  await expect(traiterDocumentIsoleBrut(Buffer.from(verifierPagine), image)).rejects.toThrow(
+    'Demande',
+  )
+})

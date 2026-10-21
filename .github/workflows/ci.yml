@@ -95,7 +95,7 @@ jobs:
   isolation:
     name: Isolation documentaire Linux
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -118,6 +118,8 @@ jobs:
         env:
           CLOISON_SECRET_FICTIF: ne-doit-pas-entrer-dans-le-conteneur
         run: node scripts/verifier-isolation-linux.mjs "$(cat /tmp/cloison-image-id)"
+      - name: Service HTTP signe autour du vrai conteneur
+        run: node scripts/verifier-service-documentaire.mjs "$(cat /tmp/cloison-image-id)"
 
   postgrest:
     name: PostgreSQL et PostgREST HTTP

@@ -65,7 +65,7 @@ export function BoutonsDecision({
             disabled={!peutRefuser || refusEnCours}
             className={cn(
               'press outlined bg-paper shadow-brut rounded-brut cursor-pointer px-8 py-4',
-              'text-flame text-[17px] font-bold disabled:cursor-not-allowed disabled:opacity-50',
+              'text-flame-texte text-[17px] font-bold disabled:cursor-not-allowed disabled:opacity-50',
             )}
           >
             {texte.refuser}

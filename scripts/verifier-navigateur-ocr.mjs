@@ -69,7 +69,7 @@ let historiqueResponsables = [],
 let demandesMfa = [],
   erreurMfa = true
 const reutilisation = await fixtureReutilisation(id)
-const actes = fixtureActes(id)
+const actes = fixtureActes(id, cleFictive)
 const api = createServer(async (req, res) => {
   const blocs = []
   for await (const bloc of req) blocs.push(bloc)
@@ -363,6 +363,8 @@ const next = spawn(
       CLE_MAITRESSE: cleFictive.toString('base64'),
       OCR_ACTIVE: 'true',
       SIGNATURE_PARCOURS_ENABLED: 'true',
+      // Reglement ouvert sans cle Stripe : la reservation aboutit au refus prudent.
+      FACTURATION_ACTES_ENABLED: 'true',
       YOUTRUST_ENVIRONMENT: 'sandbox',
       YOUTRUST_REGISTRY_ENABLED: 'true',
       ACTE_MODELE_VERSION: 'recette-v1',

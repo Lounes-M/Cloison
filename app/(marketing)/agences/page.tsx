@@ -66,7 +66,7 @@ export default function AgencesPage() {
       {/* CE QUE ÇA COÛTE AUJOURD'HUI : une liste qui se lit, pas trois cartes */}
       <Section className="border-ink bg-paper border-y-[3px] py-20">
         <Reveal>
-          <h2 className="font-display text-flame mb-10 text-[15px] tracking-[0.06em] uppercase">
+          <h2 className="font-display text-flame-texte mb-10 text-[15px] tracking-[0.06em] uppercase">
             {douleurs.eyebrow}
           </h2>
         </Reveal>
@@ -86,7 +86,7 @@ export default function AgencesPage() {
                   </div>
                   {/* Le tampon nomme le coût en trois mots, pour qui parcourt
                       la page sans lire les paragraphes. */}
-                  <span className="border-flame text-flame shrink-0 -rotate-2 rounded-lg border-2 px-3 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase">
+                  <span className="border-flame text-flame-texte shrink-0 -rotate-2 rounded-lg border-2 px-3 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase">
                     {item.tampon}
                   </span>
                 </article>
@@ -218,7 +218,8 @@ export default function AgencesPage() {
             <h2 className="font-display text-[clamp(2rem,5vw,48px)] leading-[1.05]">
               {tarifAgence.titre[0]}
               <br />
-              {tarifAgence.titre[1]} <span className="text-flame">{tarifAgence.titre[2]}</span>
+              {tarifAgence.titre[1]}{' '}
+              <span className="text-flame-texte">{tarifAgence.titre[2]}</span>
             </h2>
             <div className="bg-sun border-ink shadow-brut-sm mt-7 max-w-[420px] -rotate-1 rounded-2xl border-2 px-6 py-5">
               <p className="text-[14.5px] leading-relaxed font-bold">{tarifAgence.regleOr}</p>
@@ -258,7 +259,7 @@ export default function AgencesPage() {
                     <dd
                       className={cn(
                         'font-display text-base',
-                        'ton' in ligne && ligne.ton === 'vert' && 'text-[#1a9e50]',
+                        'ton' in ligne && ligne.ton === 'vert' && 'text-[#158242]',
                       )}
                     >
                       {ligne.valeur}
@@ -313,9 +314,7 @@ export default function AgencesPage() {
                     <dt className="sr-only">{metrique.libelle}</dt>
                     <dd>
                       <span className="font-display block text-[26px]">{metrique.valeur}</span>
-                      <span className="text-[11.5px] font-semibold opacity-85">
-                        {metrique.libelle}
-                      </span>
+                      <span className="text-[11.5px] font-semibold">{metrique.libelle}</span>
                     </dd>
                   </div>
                 ))}

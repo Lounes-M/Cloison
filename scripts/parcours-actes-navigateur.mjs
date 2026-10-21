@@ -1,16 +1,37 @@
 import { PDFDocument } from 'pdf-lib'
 import assert from 'node:assert/strict'
 import { parcourirExport } from './parcours-exports-navigateur.mjs'
-import { randomUUID } from 'node:crypto'
-import { mkdir } from 'node:fs/promises'
+import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from 'node:crypto'
+import { mkdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-export function fixtureActes(dossier) {
+import { auditerAccessibilite } from './audit-accessibilite.mjs'
+
+// Meme format que lib/coffre/enveloppe (nonce, marque, chiffre) et que
+// lib/signature/archive-format (contexte authentifie de chaque fichier).
+function ouvrirCleActe(scellee, cleMaitresse) {
+  const octets = Buffer.from(scellee.slice(2), 'hex')
+  const dechiffre = createDecipheriv('aes-256-gcm', cleMaitresse, octets.subarray(0, 12))
+  dechiffre.setAuthTag(octets.subarray(12, 28))
+  return Buffer.concat([dechiffre.update(octets.subarray(28)), dechiffre.final()])
+}
+function scellerFichier(pdf, cle, f) {
+  const chiffre = createCipheriv('aes-256-gcm', cle, Buffer.from(f.nonce.slice(2), 'hex'))
+  chiffre.setAAD(
+    Buffer.from(
+      JSON.stringify(['cloison-acte-v1', f.acte_id, f.id, f.nature, f.empreinte, f.taille]),
+    ),
+  )
+  return Buffer.concat([chiffre.update(pdf), chiffre.final(), chiffre.getAuthTag()])
+}
+
+export function fixtureActes(dossier, cleMaitresse) {
   let active = false,
     listesRemplies = false,
     acte = null,
     demande = null,
     fichiers = [],
-    objets = new Map()
+    objets = new Map(),
+    reglements = []
   return {
     activer() {
       active = true
@@ -19,13 +40,42 @@ export function fixtureActes(dossier) {
       demande = null
       fichiers = []
       objets = new Map()
+      reglements = []
     },
     desactiver() {
       active = false
     },
     lire: () => acte,
+    reglements: () => reglements,
     remplirListes() {
       listesRemplies = true
+    },
+    /** Etat final du fournisseur : PDF signe et preuve chiffres avec la cle de l'acte. */
+    async archiver() {
+      const cle = ouvrirCleActe(acte.cle_scellee, cleMaitresse)
+      const originaux = {}
+      try {
+        for (const nature of ['acte', 'preuve']) {
+          const pdf = await pdfRecette(`Recette ${nature} signe sans engagement`)
+          const f = {
+            id: randomUUID(),
+            acte_id: acte.id,
+            nature,
+            empreinte: createHash('sha256').update(pdf).digest('hex'),
+            taille: pdf.length,
+            nonce: '\\x' + randomBytes(12).toString('hex'),
+            confirme: true,
+          }
+          objets.set(`${acte.id}/${f.id}`, scellerFichier(pdf, cle, f))
+          fichiers.push(f)
+          originaux[nature] = pdf
+        }
+      } finally {
+        cle.fill(0)
+      }
+      acte.etape = 'archive'
+      demande.etat = 'done'
+      return originaux
     },
     traiter(req, res, brut) {
       const chemin = new URL(req.url, 'http://fixture.invalid').pathname
@@ -120,6 +170,16 @@ export function fixtureActes(dossier) {
         assert.equal(p.empreinte, demande.empreinte_acte)
         acte.etape = p.accepter ? 'valide' : 'refuse'
         resultat = true
+      } else if (chemin.endsWith('/rpc/reserver_reglement_acte')) {
+        resultat = {
+          id: randomUUID(),
+          facture: p.la_facture,
+          montant: 2900,
+          tarif: 'recette',
+          session: null,
+          cree_le: new Date().toISOString(),
+        }
+        reglements.push(resultat)
       } else if (chemin.endsWith('/rpc/actes_du_dossier'))
         resultat = acte
           ? [
@@ -237,6 +297,34 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
     await page.getByText('Envoi à préparer', { exact: false }).waitFor()
     assert.equal(fixture.lire().etape, 'valide')
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    await auditerAccessibilite(page, `validation-acte-confirmee ${moteur.name()} ${largeur}`)
+    const originaux = await fixture.archiver()
+    for (const [chemin, nom] of [
+      [`/espace/actes/${fixture.lire().id}`, 'acte-archive'],
+      [`/garant/actes/${fixture.lire().id}`, 'acte-archive-garant'],
+    ]) {
+      await visiter(chemin, nom)
+      await page.getByText('Signature terminée', { exact: false }).waitFor()
+      const documents = page.getByRole('list', { name: 'Documents disponibles', exact: true })
+      for (const [nature, libelle] of [
+        ['acte', 'Télécharger l’acte signé'],
+        ['preuve', 'Télécharger la preuve de signature'],
+      ]) {
+        const lien = documents.getByRole('link', { name: libelle, exact: true })
+        await lien.focus()
+        const [telechargement] = await Promise.all([
+          page.waitForEvent('download'),
+          page.keyboard.press('Enter'),
+        ])
+        assert.equal(telechargement.suggestedFilename(), `cloison-${nature}.pdf`)
+        // Restitution sans transformation : un filigrane invaliderait la signature.
+        assert(
+          (await readFile(await telechargement.path())).equals(originaux[nature]),
+          `Original ${nature} modifie ${nom}`,
+        )
+      }
+    }
+    await visiter(`/espace/actes/${fixture.lire().id}`, 'acte-archive-retour')
     for (const chemin of ['/espace/archives', '/espace/facturation']) {
       await visiter(chemin, chemin.endsWith('archives') ? 'archives' : 'facturation')
       await page.locator('h1').waitFor()
@@ -250,23 +338,44 @@ export async function parcourirActes(page, site, dossier, moteur, largeur, fixtu
     await archive.focus()
     assert(await archive.evaluate((e) => document.activeElement === e))
     await visiter('/espace/facturation', 'facturation-remplie')
-    await page.getByText('Rapprochement à examiner', { exact: true }).waitFor()
+    const anomalie = page.getByRole('listitem').filter({ hasText: 'Rapprochement à examiner' })
+    await anomalie.waitFor()
     assert.equal(
-      await page.getByRole('button', { name: 'Régler par carte', exact: true }).count(),
+      await anomalie.getByRole('button', { name: 'Régler par carte', exact: true }).count(),
       0,
-      'Le paiement ferme ne doit pas etre rendu disponible par la presentation',
+      'Un reglement a rapprocher ne doit pas etre propose au paiement',
     )
     await parcourirExport(page, 'reglements', fixture.lire().id)
+    const regler = page
+      .getByRole('listitem')
+      .filter({ hasText: 'À régler' })
+      .getByRole('button', { name: 'Régler par carte', exact: true })
+    await regler.focus()
+    await page.keyboard.press('Enter')
+    // Sans Stripe dans le harnais, la reservation aboutit au refus prudent et explique.
+    await page.waitForURL((u) => u.searchParams.get('paiement') === 'indisponible')
+    assert.equal(new URL(page.url()).origin, new URL(site).origin, 'Aucune sortie vers Checkout')
+    await page
+      .getByRole('status')
+      .filter({ hasText: 'Le paiement n’a pas pu être confirmé.' })
+      .waitFor()
+    assert.deepEqual(
+      fixture.reglements().map((r) => r.facture),
+      [fixture.lire().id],
+      'Une seule reservation pour la facture choisie',
+    )
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    await auditerAccessibilite(page, `paiement-indisponible ${moteur.name()} ${largeur}`)
     console.log(
-      `OK : acte ${moteur.name()} ${largeur}, depot chiffre, original, consentement explicite, clavier et espaces archives/reglements`,
+      `OK : acte ${moteur.name()} ${largeur}, depot chiffre, original, consentement explicite, archive signee intacte, reglement clavier et espaces archives/reglements`,
     )
   } finally {
     fixture.desactiver()
   }
 }
 
-async function pdfRecette() {
+async function pdfRecette(texte = 'Recette sans engagement') {
   const pdf = await PDFDocument.create()
-  pdf.addPage([595, 842]).drawText('Recette sans engagement', { x: 40, y: 740 })
+  pdf.addPage([595, 842]).drawText(texte, { x: 40, y: 740 })
   return Buffer.from(await pdf.save())
 }
