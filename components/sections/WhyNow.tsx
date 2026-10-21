@@ -34,7 +34,7 @@ export function WhyNow() {
                   <dt className="sr-only">{metric.label}</dt>
                   <dd>
                     <span className="font-display block text-2xl">{metric.value}</span>
-                    <span className="text-[11.5px] font-semibold opacity-85">{metric.label}</span>
+                    <span className="text-[11.5px] font-semibold">{metric.label}</span>
                   </dd>
                 </div>
               ))}

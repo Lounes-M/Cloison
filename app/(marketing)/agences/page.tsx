@@ -314,9 +314,7 @@ export default function AgencesPage() {
                     <dt className="sr-only">{metrique.libelle}</dt>
                     <dd>
                       <span className="font-display block text-[26px]">{metrique.valeur}</span>
-                      <span className="text-[11.5px] font-semibold opacity-85">
-                        {metrique.libelle}
-                      </span>
+                      <span className="text-[11.5px] font-semibold">{metrique.libelle}</span>
                     </dd>
                   </div>
                 ))}

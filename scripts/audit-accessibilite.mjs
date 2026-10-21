@@ -9,6 +9,12 @@ const NORMES = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 /** Regles WCAG 2.2 A et AA verifiables automatiquement, contrastes compris. */
 export async function auditerAccessibilite(page, nom) {
+  // Les apparitions (fondu, revelation au defilement) sont menees a leur etat
+  // final : un texte a mi-opacite fausserait le contraste d'un passage a l'autre.
+  await page.evaluate(() => {
+    for (const animation of document.getAnimations())
+      if (animation.effect?.getComputedTiming().endTime !== Infinity) animation.finish()
+  })
   if (!(await page.evaluate(() => 'axe' in window))) await page.evaluate(source)
   const violations = await page.evaluate(async (normes) => {
     const resultat = await window.axe.run(document, {
