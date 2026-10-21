@@ -22,13 +22,12 @@ export function SiteFooter() {
         </nav>
       </div>
 
-      {/* Lettrage geant en contour seul : signature de bas de page. */}
+      {/* Lettrage geant en contour seul : signature de bas de page. Le logotype
+          decoratif est genere en CSS pour rester hors du texte de la page. */}
       <div
         aria-hidden
-        className="font-display mt-9 text-center text-[clamp(3rem,18vw,150px)] leading-none text-transparent select-none [-webkit-text-stroke:2px_#3a3a3a]"
-      >
-        CLOISON
-      </div>
+        className="font-display mt-9 text-center text-[clamp(3rem,18vw,150px)] leading-none text-transparent select-none [-webkit-text-stroke:2px_#3a3a3a] before:content-['CLOISON']"
+      />
 
       <p className="text-cream/70 mx-auto mt-6 max-w-[1200px] border-t border-white/15 pt-6 text-xs leading-relaxed">
         © {new Date().getFullYear()} {site.name} · {site.tagline}.

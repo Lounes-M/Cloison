@@ -7,7 +7,7 @@ export function Pricing() {
     <Section id="tarifs" className="py-20 md:py-22">
       <Reveal>
         <h2 className="font-display mb-11 text-center text-[clamp(2rem,5vw,46px)]">
-          {pricing.headline[0]} <span className="text-flame">{pricing.headline[1]}</span>
+          {pricing.headline[0]} <span className="text-flame-texte">{pricing.headline[1]}</span>
         </h2>
       </Reveal>
 

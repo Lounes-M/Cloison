@@ -49,10 +49,14 @@ export function ApercuDossier() {
               >
                 <span>{piece}</span>
                 {/* Le filigrane est pale et de travers, comme sur la piece
-                    reelle : c'est ce que l'agence voit, pas un badge d'etat. */}
-                <span className="font-display text-ink/15 absolute top-1.5 right-16 -rotate-12 text-[10px] tracking-[0.2em] uppercase">
-                  {apercuDossier.filigrane}
-                </span>
+                    reelle : c'est ce que l'agence voit, pas un badge d'etat.
+                    Decoratif, il est dessine en CSS et reste hors de l'arbre
+                    d'accessibilite, comme hors de l'audit de contraste. */}
+                <span
+                  aria-hidden="true"
+                  data-filigrane={apercuDossier.filigrane}
+                  className="font-display text-ink/15 absolute top-1.5 right-16 -rotate-12 text-[10px] tracking-[0.2em] uppercase before:content-[attr(data-filigrane)]"
+                />
                 <Icone nom="coche" className="text-live size-3.5" />
               </div>
             ))}

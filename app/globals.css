@@ -12,6 +12,7 @@
   --color-cobalt: #2b3ef0; /* primaire */
   --color-sun: #ffd23f; /* accent logo */
   --color-flame: #ff5c1f; /* CTA, alerte douce */
+  --color-flame-texte: #cc3800; /* flame lisible en texte, 4.5:1 sur cream et paper */
   --color-mint: #7de08a; /* espace locataire */
   --color-sky: #9db8ff; /* espace agence */
   --color-muted: #646464;
@@ -711,7 +712,6 @@
 }
 .vue-produit-numero {
   font: 1rem var(--font-display);
-  opacity: 0.5;
 }
 .vue-produit-fleche {
   margin-left: auto;

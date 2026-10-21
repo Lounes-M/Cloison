@@ -18,12 +18,12 @@ export function BoutonRetrait({ pieceId, dossierId }: { pieceId: string; dossier
       <button
         type="submit"
         disabled={enCours}
-        className="text-flame cursor-pointer text-[13px] font-bold underline-offset-2 hover:underline disabled:cursor-wait"
+        className="text-flame-texte cursor-pointer text-[13px] font-bold underline-offset-2 hover:underline disabled:cursor-wait"
       >
         {enCours ? depot.retraitEnCours : depot.retirer}
       </button>
       {etat.statut === 'erreur' ? (
-        <span className="text-flame text-[12px] font-semibold">{etat.message}</span>
+        <span className="text-flame-texte text-[12px] font-semibold">{etat.message}</span>
       ) : null}
     </form>
   )

@@ -7,6 +7,7 @@ import { join } from 'node:path'
 import { SignJWT } from 'jose'
 import { createHmac } from 'node:crypto'
 import { parcourirSupport } from './parcours-support-navigateur.mjs'
+import { auditerAccessibilite, verifierDetectionAccessibilite } from './audit-accessibilite.mjs'
 
 async function verifierCommandes(page, nom) {
   const commandes = await page
@@ -163,9 +164,12 @@ export async function parcourirInterface(
         fullPage: true,
         animations: 'disabled',
       })
+    // Sans animation, les contrastes sont mesures sur l'etat final des elements.
+    await auditerAccessibilite(page, `${nom} ${moteur.name()} ${largeur}`)
     await page.emulateMedia({ reducedMotion: 'no-preference' })
   }
   await visiter('/espace', 'tableau')
+  if (moteur.name() === 'chromium' && largeur === 390) await verifierDetectionAccessibilite(page)
   const filtresAvances = page.locator('form[method="get"] details')
   assert.equal(
     await filtresAvances.getAttribute('open'),
