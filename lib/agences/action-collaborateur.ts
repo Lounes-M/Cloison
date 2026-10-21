@@ -18,19 +18,28 @@ export async function modifierCollaborateur(
     operation = String(form.get('operation') ?? '')
   if (
     !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(cible) ||
-    !['admin', 'membre', 'exclu'].includes(avant) ||
-    !['admin', 'membre', 'exclure', 'readmettre'].includes(operation) ||
+    !['admin', 'membre', 'exclu', 'en_attente'].includes(avant) ||
+    !['admin', 'membre', 'exclure', 'readmettre', 'accepter', 'refuser'].includes(operation) ||
     form.get('confirmation') !== 'on'
   )
     return { erreur: true, message: textes.invalide }
   if (
     (avant === 'exclu') !== (operation === 'readmettre') ||
+    (avant === 'en_attente') !== (operation === 'accepter' || operation === 'refuser') ||
     (operation === 'exclure' && cible === contexte.utilisateurId)
   )
     return { erreur: true, message: textes.invalide }
   try {
     const db = contexte.supabase
-    if (operation === 'readmettre') {
+    if (operation === 'accepter' || operation === 'refuser') {
+      // La base verifie l'agence, le role, la MFA et le domaine ; une demande
+      // deja tranchee ailleurs rend `false`.
+      const { data, error } = await db.rpc('decider_rattachement', {
+        le_demandeur: cible,
+        accepter: operation === 'accepter',
+      })
+      if (error || data !== true) return { erreur: true, message: textes.echec }
+    } else if (operation === 'readmettre') {
       const { data, error } = await db.rpc('readmettre_collaborateur', { cible })
       if (error || data !== true) return { erreur: true, message: textes.echec }
     } else {

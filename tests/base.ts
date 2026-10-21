@@ -67,6 +67,23 @@ export async function devenir(
   ])
 }
 
+/**
+ * Un collegue rejoint une agence existante, avec l'accord de son administrateur.
+ *
+ * Depuis la 0064, le domaine ne suffit plus : la premiere demande est deposee,
+ * l'administrateur l'accepte, la connexion suivante la consomme. Les tests qui
+ * ont besoin de deux membres passent par ce chemin reel plutot que par une
+ * insertion directe, pour que le rattachement reste eprouve partout.
+ */
+export async function rejoindreAvecAccord(db: PGlite, admin: string, collegue: string) {
+  await devenir(db, 'authenticated', collegue)
+  await db.query('select public.rejoindre_ou_creer_agence(null)')
+  await devenir(db, 'authenticated', admin)
+  await db.query('select public.decider_rattachement($1, true)', [collegue])
+  await devenir(db, 'authenticated', collegue)
+  await db.query('select public.rejoindre_ou_creer_agence(null)')
+}
+
 /** Repasse en superutilisateur, qui contourne RLS et voit donc la verite. */
 export async function redevenirProprietaire(db: PGlite) {
   await db.exec('reset role')

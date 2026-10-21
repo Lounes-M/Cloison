@@ -1,9 +1,17 @@
 export const collaborateurs = {
   titre: 'Collaborateurs',
   retour: 'Tous les dossiers',
-  aide: 'Les collaborateurs rejoignent l’agence avec une adresse de son domaine. Un administrateur peut changer leur rôle ou retirer leur accès.',
+  aide: 'Un collaborateur demande à rejoindre l’agence avec une adresse de son domaine. Il n’accède à aucun dossier tant qu’un administrateur n’a pas accepté sa demande. Un administrateur peut ensuite changer son rôle ou retirer son accès.',
   adresseMasquee: 'Adresse hors du domaine de l’agence',
-  roles: { admin: 'Administrateur', membre: 'Membre', exclu: 'Accès retiré' },
+  roles: {
+    admin: 'Administrateur',
+    membre: 'Membre',
+    exclu: 'Accès retiré',
+    en_attente: 'Demande en attente',
+    approuve: 'Demande acceptée, accès à sa prochaine connexion',
+  },
+  accepter: 'Accepter la demande',
+  refuser: 'Refuser la demande',
   action: 'Modification',
   choisir: 'Choisir une action',
   promouvoir: 'Nommer administrateur',
@@ -29,6 +37,19 @@ export const collaborateurs = {
     role: 'Changement de rôle',
     exclusion: 'Accès retiré',
     readmission: 'Retour autorisé',
+    approbation: 'Demande acceptée',
+    refus: 'Demande refusée',
+  },
+  demande: {
+    titre: 'Demande envoyée',
+    texte: (domaine: string) =>
+      `Une agence existe déjà pour le domaine ${domaine || 'de votre adresse'}. Un de ses administrateurs doit accepter votre demande avant que vous accédiez à ses dossiers.`,
+    aide: 'Rechargez cette page une fois votre demande acceptée. Si personne ne vous répond, contactez directement un administrateur de votre agence.',
+    signal: (n: number) =>
+      n === 1
+        ? 'Une demande d’accès attend votre décision.'
+        : `${n} demandes d’accès attendent votre décision.`,
+    lien: 'Voir les collaborateurs',
   },
   operateur: 'Identité non affichée',
   cible: 'Collaborateur',

@@ -13,6 +13,7 @@ import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
+import { collaborateurs } from '@/lib/content/collaborateurs'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
 import {
@@ -89,6 +90,18 @@ export default async function PageEspace({
             Ton adresse est vérifiée. Il ne manque que le nom sous lequel ton agence apparaîtra.
           </p>
           <FormulaireNomAgence domaine={email.split('@')[1] ?? 'ton domaine'} />
+        </div>
+      )
+    }
+
+    if (rattachement.etat === 'en-attente') {
+      return (
+        <div className="page-espace w-full max-w-[440px] text-center">
+          <h1 className="font-display text-3xl uppercase">{collaborateurs.demande.titre}</h1>
+          <p className="mt-4 text-[15px] leading-relaxed font-medium">
+            {collaborateurs.demande.texte(email.split('@')[1] ?? '')}
+          </p>
+          <p className="text-muted mt-4 text-[14px] font-medium">{collaborateurs.demande.aide}</p>
         </div>
       )
     }
@@ -175,6 +188,13 @@ export default async function PageEspace({
     ((affectations.data ?? []) as ResponsableDossier[]).map((r) => [r.dossier_id, r]),
   )
 
+  // Un signal, pas une donnee critique : en cas d'erreur, rien ne s'affiche
+  // et la page de l'equipe reste la reference.
+  const demandes =
+    role === 'admin' ? await supabase.rpc('rattachements_en_attente') : { data: 0, error: null }
+  const demandesEnAttente =
+    !demandes.error && Number.isSafeInteger(demandes.data) ? Number(demandes.data) : 0
+
   const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
 
   return (
@@ -196,6 +216,18 @@ export default async function PageEspace({
           {interfaceEspace.reglages}
         </a>
       </div>
+
+      {demandesEnAttente > 0 ? (
+        <p
+          role="status"
+          className="bg-sky outlined mt-6 rounded-xl px-4 py-3 text-[14px] font-semibold"
+        >
+          {collaborateurs.demande.signal(demandesEnAttente)}{' '}
+          <Link href="/espace/collaborateurs" className="underline underline-offset-4">
+            {collaborateurs.demande.lien}
+          </Link>
+        </p>
+      ) : null}
 
       {!verifiee ? (
         <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">

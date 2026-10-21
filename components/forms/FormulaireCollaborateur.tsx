@@ -11,7 +11,7 @@ export function FormulaireCollaborateur({
 }: {
   agence: string
   cible: string
-  avant: 'admin' | 'membre' | 'exclu'
+  avant: 'admin' | 'membre' | 'exclu' | 'en_attente'
   soi: boolean
   admissible: boolean
 }) {
@@ -40,7 +40,14 @@ export function FormulaireCollaborateur({
         <option value="" disabled>
           {textes.choisir}
         </option>
-        {avant === 'exclu' ? (
+        {avant === 'en_attente' ? (
+          <>
+            <option value="accepter" disabled={!admissible}>
+              {textes.accepter}
+            </option>
+            <option value="refuser">{textes.refuser}</option>
+          </>
+        ) : avant === 'exclu' ? (
           <option value="readmettre" disabled={!admissible}>
             {textes.readmettre}
           </option>

@@ -1,6 +1,6 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
-import { baseDEssai, devenir, redevenirProprietaire, refus } from './base'
+import { baseDEssai, devenir, redevenirProprietaire, refus, rejoindreAvecAccord } from './base'
 
 /**
  * La demande d'activation.
@@ -32,8 +32,7 @@ describe('demander l activation', () => {
     `)
     await devenir(db, 'authenticated', MARIE)
     await db.query(`select public.rejoindre_ou_creer_agence('Agence Lyon 3')`)
-    await devenir(db, 'authenticated', LUC)
-    await db.query(`select public.rejoindre_ou_creer_agence()`)
+    await rejoindreAvecAccord(db, MARIE, LUC)
   })
 
   async function agence() {
