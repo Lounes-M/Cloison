@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { PageJuridique, SectionJuridique } from '@/components/juridique/PageJuridique'
 import { confidentialite as textes, juridique } from '@/lib/content/juridique'
-import { editeur, traitementsFacultatifs } from '@/lib/juridique/editeur'
+import { editeur, retentionSauvegardes, traitementsFacultatifs } from '@/lib/juridique/editeur'
 
 export const metadata: Metadata = {
   title: textes.titre,
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 export default function PageConfidentialite() {
   const e = editeur()
   const facultatifs = traitementsFacultatifs()
-  const incomplet = !e.denomination || !e.courriel
+  const sauvegardes = retentionSauvegardes()
+  const incomplet = !e.denomination || !e.courriel || sauvegardes === null
 
   return (
     <PageJuridique titre={textes.titre} incomplet={incomplet}>
@@ -32,6 +33,9 @@ export default function PageConfidentialite() {
           titre={section.titre}
           paragraphes={[
             ...section.paragraphes,
+            ...(section.id === 'durees'
+              ? [sauvegardes === null ? juridique.aCompleter : textes.sauvegardes(sauvegardes)]
+              : []),
             ...(section.id === 'prestataires'
               ? [
                   ...(facultatifs.signature ? [textes.facultatifs.signature] : []),

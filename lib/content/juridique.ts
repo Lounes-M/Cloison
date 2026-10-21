@@ -28,6 +28,12 @@ export const juridique = {
   },
 } as const
 
+/** La mention fiscale du prix, selon que l'editeur facture la TVA ou non. */
+export const mentionTva = {
+  ttc: 'Prix toutes taxes comprises.',
+  franchise: 'TVA non applicable, article 293 B du CGI.',
+} as const
+
 export const mentionsLegales = {
   titre: 'Mentions légales',
   description: 'Éditeur, directeur de la publication et hébergeurs du site Cloison.',
@@ -115,7 +121,7 @@ export const confidentialite = {
         'Un dossier sans pièce est effacé 30 jours après son ouverture. Un dossier avec pièces est effacé trois mois après son ouverture : pièces, clés de chiffrement, engagements et journal des consultations disparaissent ensemble.',
         'Un lien d’accès vaut sept jours au plus, dans la limite de la durée du dossier, et le renvoyer révoque le précédent. Un brouillon d’engagement est conservé sept jours au plus.',
         'L’historique des changements d’accès dans une agence est conservé 90 jours. Les empreintes utilisées contre les abus ne durent que le temps de leur fenêtre, d’une heure au plus.',
-        'Les écritures comptables liées à un paiement sont conservées dix ans, comme l’exige la loi. Les sauvegardes techniques suivent leur propre cycle de rotation et ne sont jamais utilisées pour consulter un dossier effacé.',
+        'Les écritures comptables liées à un paiement sont conservées dix ans, comme l’exige la loi.',
       ],
     },
     {
@@ -127,6 +133,8 @@ export const confidentialite = {
       ],
     },
   ] satisfies readonly Section[],
+  sauvegardes: (jours: number) =>
+    `Les sauvegardes techniques sont conservées ${jours} jours au plus, puis écrasées : une donnée effacée disparaît aussi des sauvegardes au plus tard ${jours} jours après son effacement. Elles servent uniquement à rétablir le service après un incident, jamais à consulter un dossier effacé.`,
   facultatifs: {
     signature:
       'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
@@ -156,7 +164,7 @@ export const conditions = {
       titre: 'Le locataire',
       paragraphes: [
         'Vous obtenez un dossier valable trois mois à compter de son ouverture, dans lequel votre garant dépose ses pièces sans que vous les voyiez, et dont vous suivez l’avancement.',
-        `Un dossier que vous ouvrez vous-même coûte ${prixLocataire} TTC, une fois, payé par carte avant que le lien de votre garant parte. Un dossier ouvert par une agence ne vous coûte rien.`,
+        `Un dossier que vous ouvrez vous-même coûte ${prixLocataire}, une fois, payé par carte avant que le lien de votre garant parte. Un dossier ouvert par une agence ne vous coûte rien.`,
         'Vous fournissez une adresse e-mail à laquelle vous avez accès, désignez comme garant une personne qui a accepté de l’être et saisissez un loyer exact. Votre lien d’accès est personnel : ne le transmettez pas.',
       ],
     },

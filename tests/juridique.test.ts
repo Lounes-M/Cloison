@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import PageConditions from '@/app/(marketing)/conditions/page'
 import PageConfidentialite from '@/app/(marketing)/confidentialite/page'
 import PageMentionsLegales from '@/app/(marketing)/mentions-legales/page'
-import { editeur } from '@/lib/juridique/editeur'
+import { editeur, retentionSauvegardes } from '@/lib/juridique/editeur'
 
 const COMPLET = {
   EDITEUR_DENOMINATION: 'Cloison Fixture',
@@ -16,6 +16,7 @@ const COMPLET = {
   EDITEUR_DIRECTEUR_PUBLICATION: 'Directeur Fixture',
   MEDIATEUR_NOM: 'Mediateur Fixture',
   MEDIATEUR_SITE: 'https://mediateur.example.fr',
+  SAUVEGARDE_RETENTION_JOURS: '7',
 }
 
 function poser(valeurs: Record<string, string | undefined>) {
@@ -107,4 +108,27 @@ test('les conditions annoncent la retractation au prorata et le mediateur config
   expect(html).toContain('déduction faite de la part')
   expect(html).toContain('Mediateur Fixture')
   expect(html).toContain('href="https://mediateur.example.fr/"')
+})
+
+test('la politique dit la duree des sauvegardes, ou reste incomplete', () => {
+  poser({ ...COMPLET, SAUVEGARDE_RETENTION_JOURS: '' })
+  expect(rendre(PageConfidentialite)).toContain('data-editeur-incomplet')
+  for (const invalide of ['0', '400', '7j']) {
+    poser({ SAUVEGARDE_RETENTION_JOURS: invalide })
+    expect(retentionSauvegardes()).toBeNull()
+  }
+
+  poser({ ...COMPLET, SAUVEGARDE_RETENTION_JOURS: '7' })
+  const html = rendre(PageConfidentialite)
+  expect(html).not.toContain('data-editeur-incomplet')
+  expect(html).toContain('conservées 7 jours au plus')
+})
+
+test('le prix porte la mention fiscale de l editeur', () => {
+  poser({ ...COMPLET, EDITEUR_TVA: '' })
+  expect(rendre(PageConditions)).toContain('article 293 B du CGI')
+  poser({ EDITEUR_TVA: 'FR12345678901' })
+  const html = rendre(PageConditions)
+  expect(html).toContain('toutes taxes comprises')
+  expect(html).not.toContain('293 B')
 })

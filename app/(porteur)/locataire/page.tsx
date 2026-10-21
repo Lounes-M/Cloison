@@ -9,7 +9,8 @@ import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { espace, statuts } from '@/lib/content/locataire'
-import { versionConditions } from '@/lib/content/juridique'
+import { mentionTva, versionConditions } from '@/lib/content/juridique'
+import { editeur } from '@/lib/juridique/editeur'
 import { paiementLocataire, tarifs, euros } from '@/lib/content/tarifs'
 import { payerMonDossier } from '@/lib/locataire/action-paiement'
 import { cn } from '@/lib/utils'
@@ -183,11 +184,14 @@ export default async function PageLocataire({
           ) : (
             <div className="bg-sky outlined shadow-brut mt-4 rounded-[18px] p-6">
               <p className="font-display text-3xl">{euros(prixDossier)}</p>
+              <p className="mt-1 text-[13px] font-semibold">
+                {editeur().tva ? mentionTva.ttc : mentionTva.franchise}
+              </p>
               <p className="mt-2 text-[15px] leading-relaxed font-medium">
                 {paiementLocataire.texte}
               </p>
-              {/* La regle de non-remboursement s'affiche AVANT de payer : c'est
-                  la decision prise le 4 septembre 2026, et sa condition. */}
+              {/* La retractation au prorata s'affiche AVANT de payer, avec la
+                  demande d'execution immediate qu'elle suppose (L221-25). */}
               <p className="mt-3 text-[13px] leading-relaxed font-semibold">
                 {paiementLocataire.regle}
               </p>
