@@ -16,6 +16,7 @@ import {
   type EngagementAffiche,
 } from '@/components/forms/FormulaireEngagement'
 import { Icone } from '@/components/ui/Icone'
+import { informationCollecte } from '@/lib/content/information-collecte'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { FormulaireMention } from '@/components/forms/FormulaireMention'
 import {
@@ -190,6 +191,12 @@ export default async function PageGarant({
       />
       <section id="pieces" className="panneau-espace mt-6">
         <h2 className="text-xl font-bold">{depot.piecesTitre}</h2>
+        <p className="text-muted mt-2 text-[13px] leading-relaxed font-medium">
+          {informationCollecte.garant}{' '}
+          <a href="/confidentialite" className="underline underline-offset-4">
+            {informationCollecte.lien}
+          </a>
+        </p>
         <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
         <p className="text-muted mb-6 text-sm">{documentsDeclares.presence}</p>
         <p className="mb-6 text-sm">

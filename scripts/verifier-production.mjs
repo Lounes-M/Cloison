@@ -5,6 +5,21 @@ const ORIGINE = 'https://www.cloison.immo'
 const controles = [
   { id: 'accueil', chemin: '/', titre: 'Cloison · Le coffre à trois clés' },
   { id: 'agences', chemin: '/agences', titre: 'Agences · Cloison' },
+  // L'identite de l'editeur doit etre publiee : ces pages restent rouges tant
+  // qu'une variable EDITEUR_* manque en production (lib/juridique/editeur.ts).
+  {
+    id: 'mentions-legales',
+    chemin: '/mentions-legales',
+    titre: 'Mentions légales · Cloison',
+    editeur: true,
+  },
+  {
+    id: 'confidentialite',
+    chemin: '/confidentialite',
+    titre: 'Confidentialité · Cloison',
+    editeur: true,
+  },
+  { id: 'conditions', chemin: '/conditions', titre: 'Conditions · Cloison', editeur: true },
   { id: 'connexion', chemin: '/connexion', titre: 'Connexion · Cloison', prive: true },
   { id: 'nonce-renouvele', chemin: '/connexion', titre: 'Connexion · Cloison', prive: true },
   { id: 'agence-anonyme', chemin: '/espace', destination: '/connexion', prive: true },
@@ -136,6 +151,7 @@ export async function verifierProduction(transport = fetch, signalAppelant) {
             /<h1\b/.test(html) &&
             /<main\b/.test(html),
         )
+        if (controle.editeur) exiger(!html.includes('data-editeur-incomplet'))
         if (controle.prive)
           exiger(/<meta\s+name="robots"\s+content="noindex, nofollow"\s*\/?\s*>/.test(html))
       }

@@ -9,6 +9,7 @@ import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { espace, statuts } from '@/lib/content/locataire'
+import { versionConditions } from '@/lib/content/juridique'
 import { paiementLocataire, tarifs, euros } from '@/lib/content/tarifs'
 import { payerMonDossier } from '@/lib/locataire/action-paiement'
 import { cn } from '@/lib/utils'
@@ -155,6 +156,14 @@ export default async function PageLocataire({
               {paiementLocataire.annule}
             </p>
           ) : null}
+          {paiement === 'accords' ? (
+            <p
+              role="alert"
+              className="bg-flame outlined text-ink mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold"
+            >
+              {paiementLocataire.accordsManquants}
+            </p>
+          ) : null}
           {paiement === 'indisponible' ? (
             <p className="bg-flame outlined text-ink mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
               {paiementLocataire.indisponible}
@@ -186,6 +195,30 @@ export default async function PageLocataire({
                 <input type="hidden" name="tarif_version" value={versionTarif} />
                 <input type="hidden" name="montant_cents" value={prixDossier} />
                 <input type="hidden" name="dossier" value={porteur.capacite.dossierId} />
+                <input type="hidden" name="conditions_version" value={versionConditions} />
+                <label className="mb-3 flex items-start gap-3 text-[14px] leading-relaxed font-medium">
+                  <input
+                    type="checkbox"
+                    name="accord_conditions"
+                    required
+                    className="mt-1 size-4"
+                  />
+                  <span>
+                    {paiementLocataire.accordConditions}{' '}
+                    <a href="/conditions" className="underline underline-offset-4">
+                      {paiementLocataire.lienConditions}
+                    </a>
+                  </span>
+                </label>
+                <label className="mb-5 flex items-start gap-3 text-[14px] leading-relaxed font-medium">
+                  <input
+                    type="checkbox"
+                    name="execution_immediate"
+                    required
+                    className="mt-1 size-4"
+                  />
+                  <span>{paiementLocataire.executionImmediate}</span>
+                </label>
                 <button
                   type="submit"
                   className="press outlined bg-flame shadow-brut rounded-brut text-ink cursor-pointer px-8 py-4 text-[17px] font-bold"

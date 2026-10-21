@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { adresseDuSite } from '@/lib/courriels/envoi'
+import { versionConditions } from '@/lib/content/juridique'
 import { creerSessionLocataire } from '@/lib/paiement/stripe'
 
 /**
@@ -37,6 +38,17 @@ export async function payerMonDossier(donnees: FormData): Promise<void> {
   // Rien a regler : deja fait, ou dossier d'agence.
   if (dossier.paye_le || dossier.agence_id || dossier.demonstration) redirect('/locataire')
 
+  // Les deux accords se verifient ici, pas dans le navigateur : une case
+  // cochee n'est qu'une valeur envoyee. La version des conditions doit etre
+  // celle affichee aujourd'hui ; un onglet reste ouvert sur l'ancienne refait
+  // le choix sur le texte en vigueur.
+  if (
+    donnees.get('accord_conditions') !== 'on' ||
+    donnees.get('execution_immediate') !== 'on' ||
+    donnees.get('conditions_version') !== versionConditions
+  )
+    redirect('/locataire?paiement=accords#paiement')
+
   const version = donnees.get('tarif_version')
   const montant = donnees.get('montant_cents')
   if (
@@ -55,6 +67,9 @@ export async function payerMonDossier(donnees: FormData): Promise<void> {
     email: String(dossier.email_locataire),
     retourOk: `${site}/locataire?paiement=ok`,
     retourAnnule: `${site}/locataire?paiement=annule`,
+    // La preuve des accords accompagne le paiement chez Stripe, qui la
+    // conserve avec la transaction : c'est la qu'un litige la cherchera.
+    accords: { conditions: versionConditions, executionImmediate: true },
   })
 
   if (!url) redirect('/locataire?paiement=indisponible')

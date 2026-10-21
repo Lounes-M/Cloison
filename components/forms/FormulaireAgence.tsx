@@ -4,6 +4,7 @@ import { useActionState, useEffect, useId, useRef } from 'react'
 import { envoyerDemandeAgence, type EtatFormulaire } from '@/lib/agences/action'
 import { VOLUMES } from '@/lib/agences/schema'
 import { cn } from '@/lib/utils'
+import { informationCollecte } from '@/lib/content/information-collecte'
 
 const ETAT_INITIAL: EtatFormulaire = { statut: 'inactif' }
 
@@ -201,15 +202,18 @@ export function FormulaireAgence() {
       </button>
 
       {/*
-        Information au moment de la collecte. Ce n'est pas la page de mentions
-    legales (celle-ci demande une structure immatriculee), mais l'agence
-        doit savoir a quoi elle consent quand elle laisse son adresse.
+        Information au moment de la collecte, completee par la page de
+        confidentialite : l'agence doit savoir a quoi elle consent quand elle
+        laisse son adresse.
       */}
       <p className="text-muted text-[12.5px] leading-relaxed">
         Ces informations servent uniquement à vous recontacter au sujet du pilote Cloison. Elles ne
         sont ni revendues, ni utilisées pour de la prospection tierce, et sont conservées
         jusqu&apos;à la fin du pilote. Pour y accéder, les corriger ou les faire supprimer, il
-        suffit de répondre à l&apos;e-mail que vous recevrez.
+        suffit de répondre à l&apos;e-mail que vous recevrez.{' '}
+        <a href="/confidentialite" className="underline underline-offset-4">
+          {informationCollecte.lien}
+        </a>
       </p>
     </form>
   )

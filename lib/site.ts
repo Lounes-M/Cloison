@@ -25,4 +25,7 @@ export const footerLinks = [
   { label: 'Agences', href: '/agences' },
   { label: 'Connexion agence', href: '/connexion' },
   { label: 'Retrouver mon dossier', href: '/lien-invalide' },
+  { label: 'Mentions légales', href: '/mentions-legales' },
+  { label: 'Confidentialité', href: '/confidentialite' },
+  { label: 'Conditions', href: '/conditions' },
 ] as const
