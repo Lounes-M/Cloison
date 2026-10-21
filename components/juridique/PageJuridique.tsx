@@ -20,7 +20,7 @@ export function PageJuridique({
   return (
     <main {...(incomplet ? { 'data-editeur-incomplet': '' } : {})}>
       <Section className="bg-cream py-12 md:py-16" innerClassName="max-w-[760px]">
-        <h1 className="font-display text-4xl uppercase md:text-5xl">{titre}</h1>
+        <h1 className="font-display text-3xl break-words uppercase sm:text-4xl md:text-5xl">{titre}</h1>
         <p className="text-muted mt-3 text-sm font-medium">{juridique.miseAJour}</p>
         {incomplet ? (
           <p

@@ -5,7 +5,7 @@ import 'server-only'
  *
  * Rien n'est ecrit en dur : la structure n'est pas encore immatriculee, et une
  * raison sociale inventee serait pire qu'une ligne vide. Les valeurs viennent
- * des variables `EDITEUR_*`, lues au build comme le reste du site public : ce
+ * des variables `EDITEUR_*`, lues au rendu de chaque page : ce
  * sont des informations publiques par nature, aucune n'est un secret.
  *
  * Une valeur absente ou mal formee ne disparait pas en silence. Elle est
