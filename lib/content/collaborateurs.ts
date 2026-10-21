@@ -18,6 +18,9 @@ export const collaborateurs = {
   retrograder: 'Passer membre',
   exclure: 'Retirer l’accès',
   readmettre: 'Autoriser le retour',
+  mfa: 'Réinitialiser la double authentification',
+  aideMfa:
+    'Si un collaborateur a perdu son téléphone, vérifiez son identité par un autre moyen que le courriel, par exemple en l’appelant. Réinitialiser retire ses applications de double authentification et ferme ses sessions : il se reconnecte avec son lien habituel et enregistre une nouvelle application avant d’accéder aux dossiers.',
   confirmer: 'Je confirme cette modification d’accès.',
   appliquer: 'Appliquer',
   attente: 'Modification…',
@@ -39,6 +42,7 @@ export const collaborateurs = {
     readmission: 'Retour autorisé',
     approbation: 'Demande acceptée',
     refus: 'Demande refusée',
+    mfa: 'Double authentification réinitialisée',
   },
   demande: {
     titre: 'Demande envoyée',

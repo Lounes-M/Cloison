@@ -19,7 +19,7 @@ type Membre = {
 }
 type Trace = {
   id: number
-  action: 'role' | 'exclusion' | 'readmission' | 'approbation' | 'refus'
+  action: 'role' | 'exclusion' | 'readmission' | 'approbation' | 'refus' | 'mfa'
   acteur: string | null
   cible: string | null
   quand: string
@@ -50,6 +50,7 @@ export default async function PageCollaborateurs({
       <EnteteEspace titre={textes.titre} etiquette={interfaceEspace.equipe}>
         <p>{textes.aide}</p>
         <p className="mt-2 text-sm">{textes.readmission}</p>
+        <p className="mt-2 text-sm">{textes.aideMfa}</p>
       </EnteteEspace>
       <NavigationReglages courant="/espace/collaborateurs" administration />
       <ul className="mt-8 grid gap-4 sm:grid-cols-2">
