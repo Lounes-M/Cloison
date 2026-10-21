@@ -9,6 +9,9 @@ const NORMES = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 /** Regles WCAG 2.2 A et AA verifiables automatiquement, contrastes compris. */
 export async function auditerAccessibilite(page, nom) {
+  // Apres une action serveur, Next peut rendre le contenu avant de reposer le
+  // titre du document : on audite la page une fois son titre en place.
+  await page.waitForFunction(() => document.title.trim() !== '')
   // Les apparitions (fondu, revelation au defilement) sont menees a leur etat
   // final : un texte a mi-opacite fausserait le contraste d'un passage a l'autre.
   await page.evaluate(() => {
