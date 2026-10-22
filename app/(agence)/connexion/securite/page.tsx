@@ -23,6 +23,17 @@ export default async function PageSecurite() {
       <EnteteEspace titre={securite.titre} etiquette={interfaceEspace.securite}>
         <p>{facteur ? securite.aideConnexion : securite.aide}</p>
       </EnteteEspace>
+      {disponible && !facteur ? (
+        <details className="panneau-espace mb-6">
+          <summary className="cursor-pointer font-bold">{securite.guide.titre}</summary>
+          <ol className="mt-4 list-decimal space-y-2 pl-5 text-[15px] leading-relaxed">
+            {securite.guide.etapes.map((etape) => (
+              <li key={etape}>{etape}</li>
+            ))}
+          </ol>
+          <p className="mt-4 text-sm">{securite.guide.secours}</p>
+        </details>
+      ) : null}
       <div className="panneau-espace">
         {disponible ? (
           <FormulaireSecurite initial={{ facteur }} facteurs={facteurs} />
@@ -35,6 +46,7 @@ export default async function PageSecurite() {
           </div>
         )}
       </div>
+      {facteur ? <p className="mt-6 text-sm">{securite.perte}</p> : null}
     </div>
   )
 }
