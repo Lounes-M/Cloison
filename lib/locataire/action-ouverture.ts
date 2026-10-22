@@ -65,7 +65,7 @@ export async function ouvrirMonDossier(
     ) {
       return {
         statut: 'erreur',
-        message: 'Trop de dossiers ouverts depuis cette connexion. Reessaie dans une heure.',
+        message: 'Trop de dossiers ouverts depuis cette connexion. Réessaie dans une heure.',
         valeur: saisie,
       }
     }
@@ -74,7 +74,7 @@ export async function ouvrirMonDossier(
     if (!ouvert) {
       return {
         statut: 'erreur',
-        message: "Le dossier n'a pas pu etre ouvert. Reessaie dans un instant.",
+        message: "Le dossier n'a pas pu être ouvert. Réessaie dans un instant.",
         valeur: saisie,
       }
     }
@@ -84,7 +84,7 @@ export async function ouvrirMonDossier(
     console.error('[porte] ouverture impossible')
     return {
       statut: 'erreur',
-      message: "Le dossier n'a pas pu etre ouvert. Reessaie dans un instant.",
+      message: "Le dossier n'a pas pu être ouvert. Réessaie dans un instant.",
       valeur: saisie,
     }
   }

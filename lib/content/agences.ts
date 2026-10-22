@@ -152,4 +152,7 @@ export const formulaire = {
     { valeur: '20', libelle: 'agences' },
     { valeur: '6', libelle: 'mois' },
   ],
+  merci: 'C’est noté.',
+  suite:
+    'Nous revenons vers vous sous 48 heures ouvrées, avec une démonstration sur un dossier réel : pas une plaquette.',
 } as const

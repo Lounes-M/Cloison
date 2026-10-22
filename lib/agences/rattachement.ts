@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { clientAgence } from '@/lib/acces/agence'
+import { rattachement as textes } from '@/lib/content/rattachement'
 
 /**
  * Le rattachement d'un collaborateur a son agence.
@@ -58,10 +59,11 @@ export function interpreterRattachement(
   if (error?.code === NOM_REQUIS) return { etat: 'nom-requis' }
 
   if (error?.code === REFUS) {
-    // Les messages de la base sont ecrits pour etre lus par une personne
-    // (« Une adresse professionnelle est requise. »). On les reprend tels
-    // quels plutot que d'en tenir une seconde copie ici, qui divergerait.
-    return { etat: 'refus', message: error.message ?? 'Cette adresse ne convient pas.' }
+    // Les messages de la base sont courts et sans accents, figes dans des
+    // migrations appliquees. Chacun a sa traduction dans lib/content ; un
+    // message inconnu prend le texte par defaut, jamais le libelle brut.
+    const traduit = error.message ? textes.refus.messages[error.message] : undefined
+    return { etat: 'refus', message: traduit ?? textes.refus.parDefaut }
   }
 
   return { etat: 'panne' }

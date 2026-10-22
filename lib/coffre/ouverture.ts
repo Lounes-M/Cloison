@@ -44,8 +44,8 @@ export type Ouverture =
   { ouverte: true; pdf: Buffer; pages?: number } | { ouverte: false; raison: string }
 
 /** Ce que la personne lit, et ce qu'on ne lui detaille pas. */
-const INTROUVABLE = "Cette piece n'existe pas, ou tu n'y as pas acces."
-const INDISPONIBLE = "Cette piece n'a pas pu etre ouverte. Reessaie dans un instant."
+const INTROUVABLE = "Cette pièce n'existe pas, ou vous n'y avez pas accès."
+const INDISPONIBLE = "Cette pièce n'a pas pu être ouverte. Réessayez dans un instant."
 
 /**
  * Le texte du filigrane, ecrit a un seul endroit.

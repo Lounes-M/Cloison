@@ -14,6 +14,7 @@ import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { collaborateurs } from '@/lib/content/collaborateurs'
+import { rattachement as textesRattachement } from '@/lib/content/rattachement'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
 import {
@@ -85,11 +86,15 @@ export default async function PageEspace({
     if (rattachement.etat === 'nom-requis') {
       return (
         <div className="page-espace w-full max-w-[440px]">
-          <h1 className="font-display text-3xl uppercase md:text-4xl">Encore une chose</h1>
+          <h1 className="font-display text-3xl uppercase md:text-4xl">
+            {textesRattachement.nomRequis.titre}
+          </h1>
           <p className="text-muted mt-3 mb-8 text-[15px] leading-relaxed font-medium">
-            Ton adresse est vérifiée. Il ne manque que le nom sous lequel ton agence apparaîtra.
+            {textesRattachement.nomRequis.texte}
           </p>
-          <FormulaireNomAgence domaine={email.split('@')[1] ?? 'ton domaine'} />
+          <FormulaireNomAgence
+            domaine={email.split('@')[1] ?? textesRattachement.nomRequis.domaineParDefaut}
+          />
         </div>
       )
     }
@@ -109,22 +114,17 @@ export default async function PageEspace({
     if (rattachement.etat === 'refus') {
       return (
         <div className="page-espace w-full max-w-[440px] text-center">
-          <h1 className="font-display text-3xl uppercase">Pas cette adresse</h1>
+          <h1 className="font-display text-3xl uppercase">{textesRattachement.refus.titre}</h1>
           <p className="mt-4 text-[15px] leading-relaxed font-medium">{rattachement.message}</p>
-          <p className="text-muted mt-4 text-[14px] font-medium">
-            Le rattachement se fait par le domaine de ton adresse : c&apos;est lui qui te relie à
-            tes collègues, et une adresse personnelle ne relie à personne.
-          </p>
+          <p className="text-muted mt-4 text-[14px] font-medium">{textesRattachement.refus.aide}</p>
         </div>
       )
     }
 
     return (
       <div className="page-espace w-full max-w-[440px] text-center">
-        <h1 className="font-display text-3xl uppercase">Ça n&apos;a pas marché</h1>
-        <p className="text-muted mt-4 text-[15px] font-medium">
-          Réessaie dans un instant. Si ça persiste, écris-nous.
-        </p>
+        <h1 className="font-display text-3xl uppercase">{textesRattachement.panne.titre}</h1>
+        <p className="text-muted mt-4 text-[15px] font-medium">{textesRattachement.panne.texte}</p>
       </div>
     )
   }

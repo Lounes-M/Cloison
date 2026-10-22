@@ -112,7 +112,7 @@ export function analyserEngagement(
 
   const jusquAu = dateAVenir(champs.jusquAu ?? '', aujourdHui)
   if (jusquAu === 'invalide') {
-    return { ok: false, message: 'La date de fin doit etre a venir, au format AAAA-MM-JJ.' }
+    return { ok: false, message: 'La date de fin doit être à venir, au format AAAA-MM-JJ.' }
   }
 
   const revenuNetMensuelCents = montantEnCents(champs.revenu ?? '')

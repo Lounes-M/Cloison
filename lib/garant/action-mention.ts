@@ -62,7 +62,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
-      message: 'Ton lien a expire. Demande au locataire de te le renvoyer.',
+      message: 'Ton lien a expiré. Demande au locataire de te le renvoyer.',
     }
   }
 
@@ -84,7 +84,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!engagement || !engagement.montant_max_cents) {
     return {
       statut: 'erreur',
-      message: 'Enregistre d abord un montant maximum dans la partie consacrée à ton engagement.',
+      message: 'Enregistre d’abord un montant maximum dans la partie consacrée à ton engagement.',
       valeurs,
     }
   }
@@ -100,7 +100,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   ) {
     return {
       statut: 'erreur',
-      message: 'Il manque quelque chose a ta mention.',
+      message: 'Il manque quelque chose à ta mention.',
       manques: verdict.ok ? ['montant'] : verdict.manques,
       valeurs,
     }
@@ -124,7 +124,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     console.error('[garant] mention refusee')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
+      message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
       valeurs,
     }
   }

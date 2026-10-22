@@ -89,7 +89,7 @@ export async function envoyerDemandeAgence(
     ) {
       return {
         statut: 'erreur',
-        message: 'Trop de tentatives. Réessaie dans quelques minutes.',
+        message: 'Trop de tentatives. Réessayez dans quelques minutes.',
         valeurs: saisie,
       }
     }
@@ -99,7 +99,7 @@ export async function envoyerDemandeAgence(
     if (resultat.statut === 'echec') {
       return {
         statut: 'erreur',
-        message: "Nous n'avons pas pu enregistrer ta demande. Réessaie dans un instant.",
+        message: "Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant.",
         valeurs: saisie,
       }
     }
@@ -115,7 +115,7 @@ export async function envoyerDemandeAgence(
     console.error('[demande-agence] échec inattendu')
     return {
       statut: 'erreur',
-      message: "Nous n'avons pas pu enregistrer ta demande. Réessaie dans un instant.",
+      message: "Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant.",
       valeurs: saisie,
     }
   }

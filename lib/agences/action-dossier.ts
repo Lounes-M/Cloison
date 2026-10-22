@@ -38,7 +38,7 @@ const schemaLocataire = z.object({
 })
 
 const NON_VERIFIEE =
-  "Votre agence n'est pas encore verifiee : l'ouverture d'un dossier pour un vrai locataire attend la verification."
+  "Votre agence n'est pas encore vérifiée : l'ouverture d'un dossier pour un vrai locataire attend la verification."
 
 export async function ouvrirUnDossier(
   _precedent: EtatNouveauDossier,
@@ -55,7 +55,7 @@ export async function ouvrirUnDossier(
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
   if (contexte.agence.statut !== 'verifiee') {
     return { statut: 'erreur', message: NON_VERIFIEE, valeur: saisie }
   }
@@ -69,7 +69,7 @@ export async function ouvrirUnDossier(
     if (!ouvert) {
       return {
         statut: 'erreur',
-        message: "Le dossier n'a pas pu etre ouvert. Reessayez dans un instant.",
+        message: "Le dossier n'a pas pu être ouvert. Réessayez dans un instant.",
         valeur: saisie,
       }
     }
@@ -79,7 +79,7 @@ export async function ouvrirUnDossier(
     console.error('[agence] ouverture impossible')
     return {
       statut: 'erreur',
-      message: "Le dossier n'a pas pu etre ouvert. Reessayez dans un instant.",
+      message: "Le dossier n'a pas pu être ouvert. Réessayez dans un instant.",
       valeur: saisie,
     }
   }
@@ -102,7 +102,7 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
   if (!estUuidCanonique(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
 
   const { data, error } = await contexte.supabase
     .from('dossiers')
@@ -113,7 +113,7 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
   if (error || !Array.isArray(data) || data.length === 0) {
     if (error) console.error('[agence] prise refusee')
-    return { statut: 'erreur', message: "Ce dossier n'est pas complet, ou n'est plus le votre." }
+    return { statut: 'erreur', message: "Ce dossier n'est pas complet, ou n'est plus le vôtre." }
   }
 
   // La prise est un acces qui compte : elle fige ce que le garant a depose.
@@ -138,7 +138,7 @@ export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Pro
   if (!estUuidCanonique(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
 
   const { data, error } = await contexte.supabase
     .from('dossiers')
@@ -149,7 +149,7 @@ export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
   if (error || !Array.isArray(data) || data.length === 0) {
     if (error) console.error('[agence] refus refuse')
-    return { statut: 'erreur', message: 'Ce dossier ne peut pas etre refuse dans son etat actuel.' }
+    return { statut: 'erreur', message: 'Ce dossier ne peut pas être refusé dans son état actuel.' }
   }
 
   // Le refus se dit, sans son motif : c'est ce que l'ecran promet.
@@ -181,13 +181,13 @@ export async function reglerLeSeuil(_p: EtatSeuil, donnees: FormData): Promise<E
   if (!/^\d+(\.\d{1,2})?$/.test(saisie) || !(seuil >= 1 && seuil <= 10)) {
     return {
       statut: 'erreur',
-      message: 'Le seuil se lit entre 1 et 10, avec au plus deux decimales.',
+      message: 'Le seuil se lit entre 1 et 10, avec au plus deux décimales.',
       valeur: saisie,
     }
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
 
   const { data, error } = await contexte.supabase
     .from('agences')

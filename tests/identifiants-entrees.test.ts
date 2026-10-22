@@ -122,7 +122,7 @@ for (const id of invalides) {
     f.set('piece', id)
     await expect(retirerUnePiece({ statut: 'inactif' }, f)).resolves.toEqual({
       statut: 'erreur',
-      message: 'Piece inconnue.',
+      message: 'Pièce inconnue.',
     })
     expect(d.capacite).not.toHaveBeenCalled()
   })

@@ -32,8 +32,8 @@ const schema = z.object({
   cartePro: z
     .string()
     .trim()
-    .min(4, 'Le numero de carte professionnelle est trop court.')
-    .max(60, 'Le numero de carte professionnelle est trop long.'),
+    .min(4, 'Le numéro de carte professionnelle est trop court.')
+    .max(60, 'Le numéro de carte professionnelle est trop long.'),
 })
 
 export async function demanderLActivation(
@@ -54,7 +54,7 @@ export async function demanderLActivation(
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expiree.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
   const { supabase, agence, email } = contexte
 
   const { data, error } = await supabase

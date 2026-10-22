@@ -3,6 +3,7 @@
 import { useActionState, useId } from 'react'
 
 import { nommerAgence, type EtatNomAgence } from '@/lib/agences/action-rattachement'
+import { rattachement } from '@/lib/content/rattachement'
 import { cn } from '@/lib/utils'
 
 const ETAT_INITIAL: EtatNomAgence = { statut: 'inactif' }
@@ -31,7 +32,7 @@ export function FormulaireNomAgence({ domaine }: { domaine: string }) {
 
       <div>
         <label htmlFor={idChamp} className="mb-2 block text-[14px] font-bold">
-          Le nom de ton agence
+          {rattachement.nomRequis.libelle}
         </label>
         <input
           id={idChamp}
@@ -50,9 +51,8 @@ export function FormulaireNomAgence({ domaine }: { domaine: string }) {
           )}
         />
         <p id={`${idChamp}-aide`} className="text-muted mt-2 text-[13px] font-medium">
-          Tu es la première personne de <strong className="text-ink">{domaine}</strong> à arriver :
-          tu nommes l&apos;espace et tu l&apos;administres. Tes collègues du même domaine le
-          rejoindront sans rien avoir à saisir.
+          <strong className="text-ink">{rattachement.nomRequis.premier(domaine)}</strong>{' '}
+          {rattachement.nomRequis.aide}
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export function FormulaireNomAgence({ domaine }: { domaine: string }) {
           'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
         )}
       >
-        {enCours ? 'Création…' : 'Créer mon espace'}
+        {enCours ? rattachement.nomRequis.envoi : rattachement.nomRequis.bouton}
       </button>
     </form>
   )

@@ -5,6 +5,7 @@ import { envoyerDemandeAgence, type EtatFormulaire } from '@/lib/agences/action'
 import { VOLUMES } from '@/lib/agences/schema'
 import { cn } from '@/lib/utils'
 import { informationCollecte } from '@/lib/content/information-collecte'
+import { formulaire } from '@/lib/content/agences'
 
 const ETAT_INITIAL: EtatFormulaire = { statut: 'inactif' }
 
@@ -48,10 +49,9 @@ export function FormulaireAgence() {
         tabIndex={-1}
         className="bg-mint outlined shadow-brut scroll-mt-28 rounded-[18px] p-8 text-center"
       >
-        <p className="font-display text-2xl uppercase">C&apos;est noté.</p>
+        <p className="font-display text-2xl uppercase">{formulaire.merci}</p>
         <p className="mx-auto mt-3 max-w-[420px] text-[15px] leading-relaxed font-medium">
-          On revient vers toi sous 48 heures ouvrées, avec une démonstration sur un dossier réel :
-          pas une plaquette.
+          {formulaire.suite}
         </p>
       </div>
     )

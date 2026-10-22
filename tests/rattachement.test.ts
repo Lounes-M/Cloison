@@ -1,6 +1,8 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { interpreterRattachement } from '@/lib/agences/rattachement'
+import { rattachement } from '@/lib/content/rattachement'
 import { baseDEssai, devenir, redevenirProprietaire, refus, rejoindreAvecAccord } from './base'
 
 /**
@@ -304,15 +306,33 @@ describe('ce que le code en fait', () => {
     })
   })
 
-  test('un refus garde le message de la base', () => {
-    // Le message est deja ecrit pour etre lu par une personne. En tenir une
-    // seconde copie ici, c'est garantir qu'elles divergeront.
+  test('un refus est traduit, jamais affiche brut', () => {
     expect(
       interpreterRattachement(null, {
         code: '42501',
         message: 'Une adresse professionnelle est requise.',
       }),
-    ).toEqual({ etat: 'refus', message: 'Une adresse professionnelle est requise.' })
+    ).toEqual({
+      etat: 'refus',
+      message: rattachement.refus.messages['Une adresse professionnelle est requise.'],
+    })
+    expect(
+      interpreterRattachement(null, { code: '42501', message: 'Libelle technique inconnu' }),
+    ).toEqual({ etat: 'refus', message: rattachement.refus.parDefaut })
+  })
+
+  test('chaque refus de la fonction de rattachement a sa traduction', () => {
+    // La derniere definition de rejoindre_ou_creer_agence fait foi.
+    const sql = readFileSync('supabase/migrations/0064_approbation_collaborateurs.sql', 'utf8')
+    const corps = sql.slice(
+      sql.indexOf('function public.rejoindre_ou_creer_agence'),
+      sql.indexOf('$$;', sql.indexOf('function public.rejoindre_ou_creer_agence')),
+    )
+    const refus = [...corps.matchAll(/raise exception '([^']+)' using errcode = '42501'/g)].map(
+      (m) => m[1]!,
+    )
+    expect(refus.length).toBeGreaterThan(2)
+    for (const message of refus) expect(rattachement.refus.messages).toHaveProperty([message])
   })
 
   test('tout le reste est une panne, jamais un refus deguise', () => {
