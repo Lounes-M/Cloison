@@ -35,7 +35,7 @@ export const garant: Record<string, { sujet: string; texte: string }> = {
   complement_demande: {
     sujet: 'Ton agence demande une correction',
     texte:
-      'Une correction est attendue dans ton depot Cloison. Consulte la demande depuis ton lien habituel, depose le nouveau fichier puis propose-le a ton agence. Le motif reste dans ton espace prive.',
+      'Une correction est attendue dans ton dépôt Cloison. Consulte la demande depuis ton lien habituel, dépose le nouveau fichier puis propose-le à ton agence. Le motif reste dans ton espace privé.',
   },
   transmis: {
     sujet: 'L’agence a pris le dossier',

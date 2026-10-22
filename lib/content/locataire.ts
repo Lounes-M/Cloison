@@ -22,7 +22,7 @@ export const porte = {
 
 export const espace = {
   garantRenouvellement:
-    'Tu peux renvoyer son acces au meme garant. Le dossier reste fige et le nouveau lien remplace le precedent.',
+    'Tu peux renvoyer son accès au même garant. Le dossier reste figé et le nouveau lien remplace le précédent.',
   titre: 'Ton dossier',
   reference: 'Référence',
   garantTitre: 'Ton garant',
