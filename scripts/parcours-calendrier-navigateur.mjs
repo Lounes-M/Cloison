@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 
 export async function parcourirCalendrier(page, site, id, moteur, largeur) {
   await page.goto(`${site}/espace/dossiers/${id}`)
-  const section = page.getByRole('region', { name: 'Échéance dans ton agenda' })
+  const section = page.getByRole('region', { name: 'Échéance dans votre agenda' })
   const bouton = section.getByRole('button', { name: 'Télécharger l’échéance (.ics)' })
   const telechargements = []
   const memoriser = (fichier) => telechargements.push(fichier)
