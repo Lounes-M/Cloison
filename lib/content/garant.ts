@@ -118,6 +118,7 @@ export const depot = {
   piecesTitre: 'Tes pièces',
   formats: 'PDF, JPEG ou PNG, 4 Mo par fichier. Une photo bien cadrée suffit.',
   ajouter: 'Ajouter',
+  deposer: 'Déposer le fichier sélectionné',
   envoi: 'Envoi…',
   retirer: 'Retirer',
   retraitEnCours: 'Retrait…',

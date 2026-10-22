@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useId, useRef, useState } from 'react'
+import { useActionState, useId, useRef, useState, useSyncExternalStore } from 'react'
 
 import { depot, documentsDeclares } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
@@ -9,6 +9,7 @@ import { TAILLE_MAX_DEPOT } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 
 const ETAT_INITIAL: EtatDepot = { statut: 'inactif' }
+const rien = () => () => {}
 
 export function FormulaireDepot({
   nature,
@@ -25,6 +26,16 @@ export function FormulaireDepot({
   const champ = useRef<HTMLInputElement>(null)
   const [selection, selectionner] = useState<string | null>(null)
   const [erreurLocale, signaler] = useState<string | null>(null)
+  // Sans JavaScript, le champ natif reste visible et le formulaire part tel
+  // quel. Avec, le bouton « Ajouter » ouvre le choix, et le nombre comme l'envoi
+  // n'apparaissent qu'une fois un fichier choisi : une page de cinq pieces ne
+  // montre plus cinq champs et cinq boutons d'envoi vides.
+  const interactif = useSyncExternalStore(
+    rien,
+    () => true,
+    () => false,
+  )
+  const choisi = !interactif || selection !== null || preparation
 
   function verifier(entree: HTMLInputElement) {
     const fichier = entree.files?.[0]
@@ -92,7 +103,7 @@ export function FormulaireDepot({
     >
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="nature" value={nature} />
-      {['bulletin_paie', 'bilan_comptable'].includes(nature) ? (
+      {choisi && ['bulletin_paie', 'bilan_comptable'].includes(nature) ? (
         <div>
           <label htmlFor={`${idChamp}-nombre`} className="mb-2 block text-sm font-bold">
             {documentsDeclares.nombre}
@@ -117,16 +128,6 @@ export function FormulaireDepot({
         </div>
       ) : null}
 
-      <label
-        htmlFor={idChamp}
-        className={cn(
-          'press outlined bg-paper shadow-brut-xs inline-flex cursor-pointer items-center gap-2',
-          'self-start rounded-[10px] px-4 py-2 text-[14px] font-bold',
-          enCours && 'cursor-wait opacity-70',
-        )}
-      >
-        {enCours ? depot.envoi : `${depot.ajouter} : ${libelle.toLowerCase()}`}
-      </label>
       <input
         ref={champ}
         id={idChamp}
@@ -146,9 +147,25 @@ export function FormulaireDepot({
         accept="application/pdf,image/jpeg,image/png"
         disabled={enCours || preparation}
         onChange={auChoix}
-        className="border-ink rounded-xl border-2 p-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-4"
+        className={
+          interactif
+            ? 'peer sr-only'
+            : 'border-ink rounded-xl border-2 p-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-4'
+        }
       />
-      <p id={`${idChamp}-aide`} className="text-muted text-sm">
+      <label
+        htmlFor={idChamp}
+        className={cn(
+          'press outlined bg-paper shadow-brut-xs inline-flex cursor-pointer items-center gap-2',
+          'self-start rounded-[10px] px-4 py-2 text-[14px] font-bold',
+          'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4',
+          enCours && 'cursor-wait opacity-70',
+        )}
+      >
+        {enCours ? depot.envoi : `${depot.ajouter} : ${libelle.toLowerCase()}`}
+      </label>
+      {/* Les formats sont dits une fois en tete de liste ; ici, seulement aux lecteurs d'ecran. */}
+      <p id={`${idChamp}-aide`} className={interactif ? 'sr-only' : 'text-muted text-sm'}>
         {depot.formats}
       </p>
       <p id={`${idChamp}-selection`} role="status" className="text-sm break-words">
@@ -173,13 +190,15 @@ export function FormulaireDepot({
         </button>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={enCours || preparation}
-        className="press shadow-brut-xs outlined bg-cobalt cursor-pointer rounded-xl px-4 py-3 font-bold text-white disabled:translate-none disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {preparation ? depot.preparation : enCours ? depot.envoi : 'Déposer le fichier sélectionné'}
-      </button>
+      {choisi ? (
+        <button
+          type="submit"
+          disabled={enCours || preparation}
+          className="press shadow-brut-xs outlined bg-cobalt cursor-pointer rounded-xl px-4 py-3 font-bold text-white disabled:translate-none disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {preparation ? depot.preparation : enCours ? depot.envoi : depot.deposer}
+        </button>
+      ) : null}
       {erreurLocale ? (
         <p role="alert" className="text-sm font-semibold">
           {erreurLocale}
