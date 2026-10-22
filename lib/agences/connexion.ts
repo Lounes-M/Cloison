@@ -33,9 +33,9 @@ const schema = z.object({
   courriel: z
     .string()
     .trim()
-    .min(1, 'Ton adresse professionnelle est requise.')
+    .min(1, 'Votre adresse professionnelle est requise.')
     .max(320)
-    .pipe(z.email('Cette adresse ne ressemble pas a une adresse e-mail.')),
+    .pipe(z.email('Cette adresse ne ressemble pas à une adresse e-mail.')),
 })
 
 /**
@@ -79,7 +79,7 @@ export async function envoyerLienDeConnexion(
     ) {
       return {
         statut: 'erreur',
-        message: 'Trop de tentatives. Reessaie dans quelques minutes.',
+        message: 'Trop de tentatives. Réessayez dans quelques minutes.',
         valeur: saisie,
       }
     }

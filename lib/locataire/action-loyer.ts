@@ -40,7 +40,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
     return { statut: 'erreur', message: sessionPorteur.autreDossier }
   }
   if (!porteur || porteur.capacite.partie !== 'locataire') {
-    return { statut: 'erreur', message: 'Ton lien a expire. Demande-en un nouveau.' }
+    return { statut: 'erreur', message: 'Ton lien a expiré. Demande-en un nouveau.' }
   }
 
   try {
@@ -58,7 +58,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
       console.error('[locataire] loyer refuse')
       return {
         statut: 'erreur',
-        message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
+        message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
         valeur: saisie,
       }
     }
@@ -70,7 +70,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
     console.error('[locataire] loyer impossible')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
+      message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
       valeur: saisie,
     }
   }

@@ -2,13 +2,15 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { rattachement as textes } from '@/lib/content/rattachement'
+
 import { rattacher } from './rattachement'
 
 /**
  * Nommer son agence, une seule fois, par la premiere personne qui arrive.
  *
  * Cette action n'existe que pour le cas « creation » : quelqu'un dont le
- * domaine n'a pas encore d'espace. Les suivants rejoignent sans rien saisir.
+ * domaine n'a pas encore d'espace. Les suivants demandent a le rejoindre (0064).
  */
 
 export type EtatNomAgence =
@@ -23,11 +25,11 @@ export async function nommerAgence(
   // La base exige deux caracteres au minimum. On le verifie aussi ici, pour
   // rendre un message tout de suite plutot qu'un aller-retour.
   if (saisie.length < 2) {
-    return { statut: 'erreur', message: 'Le nom de ton agence est requis.', valeur: saisie }
+    return { statut: 'erreur', message: textes.nomRequis.requis, valeur: saisie }
   }
 
   if (saisie.length > 120) {
-    return { statut: 'erreur', message: 'Ce nom est trop long.', valeur: saisie.slice(0, 120) }
+    return { statut: 'erreur', message: textes.nomRequis.long, valeur: saisie.slice(0, 120) }
   }
 
   const resultat = await rattacher(saisie)
@@ -47,7 +49,7 @@ export async function nommerAgence(
 
   return {
     statut: 'erreur',
-    message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
+    message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
     valeur: saisie,
   }
 }

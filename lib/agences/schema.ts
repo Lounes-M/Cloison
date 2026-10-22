@@ -59,13 +59,13 @@ export const schemaDemandeAgence = z.object({
     .max(180, 'Adresse e-mail trop longue.')
     .pipe(z.email("Cette adresse e-mail n'est pas valide."))
     .refine((valeur) => !DOMAINES_GRAND_PUBLIC.has(valeur.split('@')[1] ?? ''), {
-      message: 'Utilise ton adresse professionnelle, pas une adresse personnelle.',
+      message: 'Utilisez votre adresse professionnelle, pas une adresse personnelle.',
     }),
 
   ville: z.string().trim().min(2, 'Ville trop courte.').max(80, 'Ville trop longue.'),
 
   dossiersParAn: z.enum(volumes as [string, ...string[]], {
-    message: 'Choisis un volume.',
+    message: 'Choisissez un volume.',
   }),
 
   message: z

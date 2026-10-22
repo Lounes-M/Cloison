@@ -33,7 +33,7 @@ export type EtatDepot =
   | { statut: 'depose'; nature: string }
   | { statut: 'erreur'; message: string; nature?: string }
 
-const LIEN_EXPIRE = 'Ton lien a expire. Demande au locataire de te le renvoyer.'
+const LIEN_EXPIRE = 'Ton lien a expiré. Demande au locataire de te le renvoyer.'
 
 async function porteurGarant() {
   const porteur = await capaciteDepuisCookies()
@@ -45,7 +45,7 @@ export async function deposerUnePiece(
   donnees: FormData,
 ): Promise<EtatDepot> {
   const nature = natureDepuis(donnees.get('nature'))
-  if (!nature) return { statut: 'erreur', message: 'Nature de piece inconnue.' }
+  if (!nature) return { statut: 'erreur', message: 'Nature de pièce inconnue.' }
   const nombre = nombreDocumentsDepuis(nature, donnees.get('nombre_documents'))
   if (nombre === null) return { statut: 'erreur', message: documentsDeclares.invalide, nature }
 
@@ -60,7 +60,7 @@ export async function deposerUnePiece(
   if (fichier.size > TAILLE_MAX_DEPOT) {
     return {
       statut: 'erreur',
-      message: 'Ce fichier depasse 4 Mo. Une photo moins lourde ou un PDF plus leger passera.',
+      message: 'Ce fichier dépasse 4 Mo. Une photo moins lourde ou un PDF plus léger passera.',
       nature,
     }
   }
@@ -108,7 +108,7 @@ export async function deposerUnePiece(
     console.error('[garant] depot impossible')
     return {
       statut: 'erreur',
-      message: "Le depot n'a pas abouti. Reessaie dans un instant.",
+      message: "Le dépôt n'a pas abouti. Réessaie dans un instant.",
       nature,
     }
   }
@@ -124,7 +124,7 @@ export async function retirerUnePiece(
   donnees: FormData,
 ): Promise<EtatRetrait> {
   const pieceId = String(donnees.get('piece') ?? '')
-  if (!estUuidCanonique(pieceId)) return { statut: 'erreur', message: 'Piece inconnue.' }
+  if (!estUuidCanonique(pieceId)) return { statut: 'erreur', message: 'Pièce inconnue.' }
 
   const porteur = await porteurGarant()
   if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
@@ -140,7 +140,7 @@ export async function retirerUnePiece(
     await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
   } catch {
     console.error('[garant] retrait impossible')
-    return { statut: 'erreur', message: "Le retrait n'a pas abouti. Reessaie dans un instant." }
+    return { statut: 'erreur', message: "Le retrait n'a pas abouti. Réessaie dans un instant." }
   }
 
   revalidatePath('/garant')

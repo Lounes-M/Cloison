@@ -49,7 +49,7 @@ export async function declarerMonEngagement(
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
-      message: 'Ton lien a expire. Demande au locataire de te le renvoyer.',
+      message: 'Ton lien a expiré. Demande au locataire de te le renvoyer.',
     }
   }
 
@@ -98,7 +98,7 @@ export async function declarerMonEngagement(
       console.error('[garant] engagement refuse')
       return {
         statut: 'erreur',
-        message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
+        message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
       }
     }
 
@@ -109,7 +109,7 @@ export async function declarerMonEngagement(
     console.error('[garant] engagement impossible')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Reessaie dans un instant.",
+      message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
     }
   }
 

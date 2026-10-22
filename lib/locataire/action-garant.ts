@@ -74,14 +74,14 @@ export async function designerMonGarant(
     return { statut: 'erreur', message: sessionPorteur.autreDossier }
   }
   if (!porteur || porteur.capacite.partie !== 'locataire') {
-    return { statut: 'erreur', message: 'Ton lien a expire. Demande-en un nouveau.' }
+    return { statut: 'erreur', message: 'Ton lien a expiré. Demande-en un nouveau.' }
   }
 
   try {
     if (!(await consommerDebit(await clientServeur(), 'lien_garant', await empreinteAppelant()))) {
       return {
         statut: 'erreur',
-        message: 'Trop de liens envoyes. Reessaie dans un quart d’heure.',
+        message: 'Trop de liens envoyés. Réessaie dans un quart d’heure.',
         valeur: saisie,
       }
     }
@@ -98,7 +98,7 @@ export async function designerMonGarant(
       .maybeSingle()
 
     if (!dossier) {
-      return { statut: 'erreur', message: 'Ton lien a expire. Demande-en un nouveau.' }
+      return { statut: 'erreur', message: 'Ton lien a expiré. Demande-en un nouveau.' }
     }
 
     // La base refuserait de toute facon d'emettre le lien (migration 0018) ;
@@ -106,7 +106,7 @@ export async function designerMonGarant(
     if (!dossier.paye_le && !dossier.agence_id && !dossier.demonstration) {
       return {
         statut: 'erreur',
-        message: 'Regle d abord ton dossier, plus haut : le lien de ton garant partira ensuite.',
+        message: 'Règle d’abord ton dossier, plus haut : le lien de ton garant partira ensuite.',
         valeur: saisie,
       }
     }
@@ -114,7 +114,7 @@ export async function designerMonGarant(
     if (courriel === String(dossier.email_locataire).toLowerCase()) {
       return {
         statut: 'erreur',
-        message: 'Ton garant ne peut pas etre toi-meme.',
+        message: 'Ton garant ne peut pas être toi-même.',
         valeur: saisie,
       }
     }
@@ -146,7 +146,7 @@ export async function designerMonGarant(
       if (!envoye) {
         return {
           statut: 'erreur',
-          message: "Le lien n'a pas pu etre envoye. Verifie l'adresse et reessaie.",
+          message: "Le lien n'a pas pu être envoyé. Vérifie l'adresse et réessaie.",
           valeur: saisie,
         }
       }

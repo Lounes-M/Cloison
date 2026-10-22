@@ -47,23 +47,23 @@ const NOMMES: readonly { readonly octets: readonly number[]; readonly raison: st
     octets: [0x50, 0x4b, 0x03, 0x04],
     raison:
       'Ce fichier est un document bureautique (Word, Excel, OpenDocument). ' +
-      'Exporte-le en PDF avant de le deposer.',
+      'Exporte-le en PDF avant de le déposer.',
   },
   {
     // L'ancien format Office, avant 2007.
     octets: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1],
     raison:
       'Ce fichier est un ancien document Office. Ouvre-le et enregistre-le en PDF ' +
-      'avant de le deposer.',
+      'avant de le déposer.',
   },
   {
     // `{\rtf`
     octets: [0x7b, 0x5c, 0x72, 0x74, 0x66],
-    raison: 'Ce fichier est un document RTF. Exporte-le en PDF avant de le deposer.',
+    raison: 'Ce fichier est un document RTF. Exporte-le en PDF avant de le déposer.',
   },
   {
     octets: [0x47, 0x49, 0x46, 0x38],
-    raison: 'Ce fichier est une image GIF. Depose plutot une photo JPEG ou PNG, ou un PDF.',
+    raison: 'Ce fichier est une image GIF. Dépose plutôt une photo JPEG ou PNG, ou un PDF.',
   },
 ]
 
@@ -84,11 +84,11 @@ const MARQUES_ISO: readonly { readonly prefixes: readonly string[]; readonly rai
   },
   {
     prefixes: ['avif', 'avis'],
-    raison: 'Cette photo est au format AVIF. Enregistre-la en JPEG ou en PNG avant de la deposer.',
+    raison: 'Cette photo est au format AVIF. Enregistre-la en JPEG ou en PNG avant de la déposer.',
   },
   {
     prefixes: ['isom', 'mp41', 'mp42', 'qt  ', 'M4V ', '3gp'],
-    raison: 'Ce fichier est une video. Le coffre attend des documents : un PDF ou une photo.',
+    raison: 'Ce fichier est une vidéo. Le coffre attend des documents : un PDF ou une photo.',
   },
 ]
 

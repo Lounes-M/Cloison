@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { expect, test } from 'vitest'
 
 /**
@@ -15,7 +15,7 @@ import { expect, test } from 'vitest'
 
 /** Des formes qui n'existent pas en francais : chacune a perdu un accent. */
 const SANS_ACCENT =
-  /(?<![\p{L}_/-])(deja|memes?|tres|apres|etre|pieces?|depots?|privee?s?|precedente?s?|verifiee?s?|verifier|solidarite|securite|acces|echeances?|references?|cles?|delais?|donnees?|identite|telecharger?|reponses?|numeros?|etapes?|etat|equipes?|reessaie|reessayez|operations?|categories?|controler?|dernieres?|premieres?|desormais|systemes?|regles?|reglements?)(?![\p{L}_])/giu
+  /(?<![\p{L}_/-])(deja|memes?|tres|apres|etre|pieces?|depots?|privee?s?|precedente?s?|verifiee?s?|verifier|solidarite|securite|acces|echeances?|references?|cles?|delais?|donnees?|identite|telecharger?|reponses?|numeros?|etapes?|etat|equipes?|reessaie|reessayez|operations?|categories?|controler?|dernieres?|premieres?|desormais|systemes?|regles?|reglements?|expirees?|decimales?|depasse|legere?|plutot|videos?|deposer|depose)(?![\p{L}_])/giu
 
 /** Les modules lus uniquement dans l'espace agence, qui vouvoie. */
 const AGENCE = [
@@ -29,6 +29,7 @@ const AGENCE = [
   'historique-responsables',
   'pilotage',
   'preferences',
+  'rattachement',
   'responsables',
 ]
 const TUTOIEMENT = /(?<![\p{L}_’'-])(tu|ton|ta|tes|toi|te)(?![\p{L}_])/giu
@@ -77,6 +78,40 @@ test('les ecrans d agence vouvoient', async () => {
     for (const phrase of await lire(nom))
       if (phrase.slice(phrase.indexOf(': ')).match(TUTOIEMENT)) fautes.push(phrase)
   expect(fautes).toEqual([])
+})
+
+/**
+ * Les messages d'erreur rendus par les actions, ecrits a cote du code.
+ *
+ * Ils s'affichent comme le reste mais echappaient a la garde de
+ * `lib/content` : on lit donc chaque litteral pose sous `message:` ou
+ * `raison:`, ou dans une constante, dans les dossiers qui parlent aux personnes.
+ */
+const MESSAGES = ['lib/agences', 'lib/garant', 'lib/locataire', 'lib/coffre']
+const LITTERAL = /(?:\b(?:message|raison): *|\bconst [A-Z_]+ = )(?:'([^']*)'|"([^"]*)")/g
+
+function messages(dossier: string) {
+  return readdirSync(dossier)
+    .filter((f) => f.endsWith('.ts'))
+    .flatMap((f) =>
+      [...readFileSync(`${dossier}/${f}`, 'utf8').matchAll(LITTERAL)]
+        .map((m) => m[1] ?? m[2] ?? '')
+        .filter((texte) => texte.includes(' '))
+        .map((texte) => `${dossier}/${f}: ${texte}`),
+    )
+}
+
+test('les messages des actions gardent leurs accents', () => {
+  const lus = MESSAGES.flatMap(messages)
+  expect(lus.length).toBeGreaterThan(40)
+  expect(lus.filter((m) => m.slice(m.indexOf(': ')).match(SANS_ACCENT))).toEqual([])
+})
+
+test('les messages de l espace agence vouvoient', () => {
+  const lus = [...messages('lib/agences'), ...messages('lib/coffre')].filter(
+    (m) => m.startsWith('lib/agences/') || m.startsWith('lib/coffre/ouverture.ts'),
+  )
+  expect(lus.filter((m) => m.slice(m.indexOf(': ')).match(TUTOIEMENT))).toEqual([])
 })
 
 test('les deux gardes reconnaissent les fautes qu elles visent', () => {

@@ -80,7 +80,7 @@ describe('ce qui doit etre refuse', () => {
 
   test('une video est reconnue comme telle', () => {
     for (const marque of ['isom', 'mp42', 'qt  ']) {
-      expect(raison(typeReel(boiteIso(marque)))).toContain('video')
+      expect(raison(typeReel(boiteIso(marque)))).toContain('vidéo')
     }
   })
 
