@@ -11,7 +11,8 @@ export async function parcourirDepot(page, site, moteur, largeur) {
   }
   page.on('request', compter)
   try {
-    await envoyer.click()
+    // L'envoi n'apparait qu'une fois un fichier choisi, apres l'hydratation.
+    await envoyer.waitFor({ state: 'detached' })
     assert.equal(await champ.evaluate((input) => input.validity.valueMissing), true)
     await champ.setInputFiles({
       name: 'vide.pdf',
@@ -41,6 +42,7 @@ export async function parcourirDepot(page, site, moteur, largeur) {
     await formulaire.getByRole('button', { name: 'Annuler la sélection' }).click()
     assert.equal(await champ.inputValue(), '')
     assert.equal(await champ.evaluate((input) => input.validity.valueMissing), true)
+    assert.equal(await envoyer.count(), 0)
     await champ.setInputFiles({
       name: 'autre.pdf',
       mimeType: 'application/pdf',
