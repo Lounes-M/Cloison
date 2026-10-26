@@ -1,6 +1,7 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
+import { acte as texteActe } from '@/lib/content/acte'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -412,6 +413,15 @@ export default async function PageDossier({
       </p>
       <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />
+      {d.statut === 'transmis' && !d.demonstration ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="font-display text-2xl uppercase">{texteActe.etiquette}</h2>
+          <p className="mt-2">{texteActe.mention}</p>
+          <Link className="lien-espace mt-4 inline-block" href={`/espace/dossiers/${id}/acte`}>
+            {texteActe.titre}
+          </Link>
+        </section>
+      ) : null}
       <SuiviSignature db={supabase} dossier={id} partie="agence" />
     </div>
   )
