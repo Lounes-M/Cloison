@@ -1,18 +1,18 @@
 export const aideDossier = {
   titre: 'Besoin d’aide sur ce dossier ?',
   aide: 'Préparez un message avec la référence et la catégorie du problème, puis complétez-le et envoyez-le depuis votre messagerie.',
-  aidePorteur:
+  aideLocataire:
     'Prépare un message avec la référence et la catégorie du problème, puis complète-le et envoie-le depuis ta messagerie.',
   confidentialite:
     'Ne joignez aucun justificatif, montant, pièce d’identité ou lien d’accès. Le support ne consulte pas les documents à votre place.',
-  confidentialitePorteur:
+  confidentialiteLocataire:
     'Ne joins aucun justificatif, montant, pièce d’identité ou lien d’accès. Le support ne consulte pas les documents à ta place.',
   categorie: 'Catégorie du problème',
   apercu: 'Message à compléter dans la messagerie',
   ouvrir: 'Ouvrir ma messagerie',
   copier: 'Copier le message',
   copie: 'Message copié. Il reste à l’envoyer dans votre messagerie.',
-  copiePorteur: 'Message copié. Il reste à l’envoyer dans ta messagerie.',
+  copieLocataire: 'Message copié. Il reste à l’envoyer dans ta messagerie.',
   erreurCopie: 'Copie indisponible. Le message peut être sélectionné dans le champ ci-dessus.',
   destinataire: 'Adresse du support',
   reference: 'Référence du dossier',

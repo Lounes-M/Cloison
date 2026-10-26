@@ -21,14 +21,15 @@ export function FormulaireSupportDossier({
   const [copie, noter] = useState<'repos' | 'ok' | 'erreur'>('repos')
   const message = preparerMessageSupport({ adresse, reference, espace, categorie })
   if (!message) return null
-  const agence = espace === 'agence'
+  // Seul le locataire est tutoye ; l'agence et le garant sont vouvoyes.
+  const tutoie = espace === 'locataire'
   return (
     <details className="panneau-espace mt-10 min-w-0">
       <summary className="cursor-pointer text-lg font-bold">{t.titre}</summary>
       <div className="mt-5 grid min-w-0 gap-4">
-        <p>{agence ? t.aide : t.aidePorteur}</p>
+        <p>{tutoie ? t.aideLocataire : t.aide}</p>
         <p className="text-sm font-semibold">
-          {agence ? t.confidentialite : t.confidentialitePorteur}
+          {tutoie ? t.confidentialiteLocataire : t.confidentialite}
         </p>
         <p className="min-w-0 break-words">
           {t.destinataire} : {adresse}
@@ -84,7 +85,7 @@ export function FormulaireSupportDossier({
           </button>
         </div>
         {copie === 'ok' ? (
-          <p role="status">{agence ? t.copie : t.copiePorteur}</p>
+          <p role="status">{tutoie ? t.copieLocataire : t.copie}</p>
         ) : copie === 'erreur' ? (
           <p role="alert">{t.erreurCopie}</p>
         ) : null}

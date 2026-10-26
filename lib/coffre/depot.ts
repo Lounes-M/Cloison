@@ -123,7 +123,7 @@ export async function deposer(
   const chemin = `${dossierId}/${randomUUID()}`
 
   if (!(await base.televerser(chemin, sceller(contenu, cle)))) {
-    return { depose: false, raison: "Le dépôt n'a pas abouti. Réessaie dans un instant." }
+    return { depose: false, raison: "Le dépôt n'a pas abouti. Réessayez dans un instant." }
   }
 
   const pieceId = await base.inscrirePiece({
@@ -139,7 +139,7 @@ export async function deposer(
 
   if (!pieceId) {
     await base.retirerObjet(chemin)
-    return { depose: false, raison: "Le dépôt n'a pas abouti. Réessaie dans un instant." }
+    return { depose: false, raison: "Le dépôt n'a pas abouti. Réessayez dans un instant." }
   }
 
   // Le journal vient apres, et son echec n'annule rien : la ligne `pieces`
@@ -175,10 +175,11 @@ export async function deposer(
  */
 export async function retirerPiece(base: DepotBase, pieceId: string): Promise<Retrait> {
   const piece = await base.pieceDeposee(pieceId)
-  if (!piece) return { retiree: false, raison: "Cette pièce n'existe pas, ou tu n'y as pas accès." }
+  if (!piece)
+    return { retiree: false, raison: "Cette pièce n'existe pas, ou vous n'y avez pas accès." }
 
   if (!(await base.journaliser(piece.dossierId, 'piece_retiree', pieceId))) {
-    return { retiree: false, raison: "Le retrait n'a pas abouti. Réessaie dans un instant." }
+    return { retiree: false, raison: "Le retrait n'a pas abouti. Réessayez dans un instant." }
   }
 
   if (!(await base.supprimerPiece(pieceId))) {

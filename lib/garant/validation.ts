@@ -102,7 +102,7 @@ export function analyserEngagement(
     return { ok: false, message: texteEngagement.profilInvalide }
   const couvre = champs.couvre
   if (couvre !== 'loyer' && couvre !== 'loyer_charges') {
-    return { ok: false, message: 'Indique ce que tu couvres.' }
+    return { ok: false, message: 'Indiquez ce que vous couvrez.' }
   }
 
   const montantMaxCents = montantEnCents(champs.montant ?? '')
