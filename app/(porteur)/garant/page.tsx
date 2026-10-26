@@ -1,3 +1,6 @@
+import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
+import { frise } from '@/lib/content/frise'
+import { etapesGarant } from '@/lib/dossiers/frise'
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
@@ -174,6 +177,11 @@ export default async function PageGarant({
           <p className="mt-2 text-[15px] leading-relaxed font-medium">{depot.fermeTexte}</p>
         </div>
       ) : null}
+
+      <FriseAvancement
+        titre={frise.garant.titre}
+        etapes={etapesGarant(String(dossier.statut), Boolean(engagement) && deposees.length > 0)}
+      />
 
       <SommaireDossier
         liens={[
