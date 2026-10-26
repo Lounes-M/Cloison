@@ -84,7 +84,7 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
           return reponse
         }
         await page.goto(`${site}/garant`)
-        const profil = page.getByLabel('Ta situation professionnelle')
+        const profil = page.getByLabel('Votre situation professionnelle')
         let atteint = false
         for (let i = 0; i < 60; i++) {
           await page.keyboard.press('Tab')
@@ -94,7 +94,7 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
           }
         }
         assert(atteint, 'Profil accessible au clavier')
-        await page.getByLabel('Ta situation professionnelle').selectOption('retraite')
+        await page.getByLabel('Votre situation professionnelle').selectOption('retraite')
         const engagement = page
           .locator('form')
           .filter({ has: page.locator('select[name="profil"]') })
@@ -114,7 +114,10 @@ async function verifierMoteur({ moteur, site, origine, cookies, db, dossierId, a
           'retraite',
         )
         await page.reload()
-        assert.equal(await page.getByLabel('Ta situation professionnelle').inputValue(), 'retraite')
+        assert.equal(
+          await page.getByLabel('Votre situation professionnelle').inputValue(),
+          'retraite',
+        )
         assert((await page.getByText('Droits à la retraite', { exact: true }).count()) > 0)
         const nombre = page
           .locator('form')
