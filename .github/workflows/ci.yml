@@ -124,7 +124,7 @@ jobs:
   postgrest:
     name: PostgreSQL et PostgREST HTTP
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:17.6
@@ -161,8 +161,16 @@ jobs:
             postgrest/postgrest:v16.2
       - name: Build pour les parcours HTTP authentifies
         run: npm run build
+      # Habituellement moins d'une minute ; un miroir de paquets bloque a deja
+      # consomme tout le delai du job. Trois essais bornes, puis echec franc.
       - name: Installer Chromium, Firefox et WebKit pour les parcours locaux
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: |
+          for essai in 1 2 3; do
+            timeout 240 npx playwright install --with-deps chromium firefox webkit && exit 0
+            echo "Installation interrompue (essai $essai)"
+            sleep 5
+          done
+          exit 1
       - name: Parcours porteurs via Next et PostgREST reels
         env:
           CLOISON_TEST_NAVIGATEUR: '1'
