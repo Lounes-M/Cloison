@@ -241,6 +241,10 @@ export async function parcourirInterface(
   }
   await visiter('/espace/activite', 'activite')
   await page.getByText('Taux d’acceptation', { exact: true }).waitFor()
+  await visiter('/espace/logements', 'logements')
+  await page.getByRole('link', { name: 'T2 fictif, 3e étage', exact: true }).waitFor()
+  await visiter(`/espace/logements/${id}`, 'logement')
+  await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
   await visiter('/espace/notifications', 'notifications')
