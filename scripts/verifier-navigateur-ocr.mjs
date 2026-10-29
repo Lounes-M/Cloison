@@ -291,6 +291,8 @@ const api = createServer(async (req, res) => {
         code_candidature: 'c'.repeat(32),
       },
     ]
+  else if (path.endsWith('/rpc/agence_de_mon_dossier'))
+    valeur = [{ agence: 'Agence fictive', logement: 'T2 fictif, 3e étage', ville: 'Lyon 7e' }]
   else if (path.endsWith('/rpc/logement_par_code'))
     valeur =
       entree.le_code === 'c'.repeat(32)

@@ -12,7 +12,9 @@ import { redirect } from 'next/navigation'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
 import { FormulaireSecondGarant } from '@/components/forms/FormulaireSecondGarant'
+import { agenceDuDossier } from '@/lib/acces/agence-du-dossier'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
+import { agenceDuDossier as texteAgence } from '@/lib/content/agence-du-dossier'
 import { espace, secondGarant as texteSecond, statuts } from '@/lib/content/locataire'
 import { mentionTva, versionConditions } from '@/lib/content/juridique'
 import { editeur } from '@/lib/juridique/editeur'
@@ -105,6 +107,7 @@ export default async function PageLocataire({
       versionTarif = prix.tarif_version
     }
   }
+  const suivi = dossier.agence_id ? await agenceDuDossier(supabase) : null
   const loyer =
     dossier.loyer_cents == null ? '' : (Number(dossier.loyer_cents) / 100).toLocaleString('fr-FR')
   const expire = new Date(String(dossier.expire_le)).toLocaleDateString('fr-FR', {
@@ -124,6 +127,11 @@ export default async function PageLocataire({
         <p className="text-xl font-bold">{statut.libelle}</p>
         <p className="mt-2 text-[15px] leading-relaxed font-medium">{statut.explication}</p>
       </div>
+      {suivi ? (
+        <p className="mt-4 text-[14px] leading-relaxed font-semibold">
+          {texteAgence.locataire(suivi)}
+        </p>
+      ) : null}
 
       <FriseAvancement
         titre={frise.locataire.titre}

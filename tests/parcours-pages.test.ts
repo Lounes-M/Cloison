@@ -79,6 +79,7 @@ function client() {
         return reponses.journal_acces!
       }
       if (nom === 'mon_tarif_paiement' && reponses.tarif) return reponses.tarif
+      if (nom === 'agence_de_mon_dossier' && reponses.agence) return reponses.agence
       return { data: [], error: null }
     }),
   }
@@ -141,6 +142,33 @@ test.each(['retraite', 'independant'])(
     expect(propositions).toContain('piece_identite')
   },
 )
+
+test('le garant et le locataire voient quelle agence suit le dossier', async () => {
+  reponses.agence = {
+    data: [{ agence: 'Logis Lyon', logement: 'T2 Gerland', ville: 'Lyon 7e' }],
+    error: null,
+  }
+  reponses.dossiers = {
+    data: { ...(reponses.dossiers!.data as object), agence_id: ID },
+    error: null,
+  }
+  function textes(noeud: ReactNode, sortie: string[] = []): string[] {
+    if (typeof noeud === 'string') sortie.push(noeud)
+    if (Array.isArray(noeud)) noeud.forEach((n) => textes(n, sortie))
+    if (isValidElement<{ children?: ReactNode }>(noeud)) textes(noeud.props.children, sortie)
+    return sortie
+  }
+  expect(textes(await PageGarant()).join(' ')).toContain(
+    'Ce dossier est suivi par Logis Lyon pour le logement « T2 Gerland » (Lyon 7e).',
+  )
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  expect(textes(await locataire()).join(' ')).toContain('Ton dossier est suivi par Logis Lyon')
+  reponses.agence = { data: null, error: { message: 'panne' } }
+  expect(textes(await locataire()).join(' ')).not.toContain('suivi par')
+})
 
 test('le paiement affiche le prix reserve et transmet exactement cette offre', async () => {
   doublures.capacite.mockResolvedValue({
