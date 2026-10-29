@@ -13,7 +13,37 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-type Logement = { libelle: string; loyer_cents: number | null; agence: string }
+type Logement = {
+  libelle: string
+  loyer_cents: number | null
+  agence: string
+  ville?: string | null
+  surface_m2?: number | null
+  pieces?: number | null
+  meuble?: boolean | null
+  disponible_le?: string | null
+}
+
+/** Les faits que l'agence a renseignes (0072), dans l'ordre d'une annonce. */
+function details(l: Logement): { terme: string; valeur: string }[] {
+  const lignes: { terme: string; valeur: string }[] = []
+  if (l.ville) lignes.push({ terme: t.page.ville, valeur: l.ville })
+  if (l.surface_m2 != null) lignes.push({ terme: t.page.surface, valeur: `${l.surface_m2} m²` })
+  if (l.pieces != null) lignes.push({ terme: t.page.pieces, valeur: String(l.pieces) })
+  if (l.meuble != null)
+    lignes.push({ terme: t.page.meuble, valeur: l.meuble ? t.page.meubleOui : t.page.meubleNon })
+  if (l.disponible_le) {
+    const date = new Date(`${l.disponible_le}T12:00:00Z`)
+    lignes.push({
+      terme: t.page.disponible,
+      valeur:
+        date.getTime() <= Date.now()
+          ? t.page.disponibleDes
+          : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+    })
+  }
+  return lignes
+}
 
 async function logementDuCode(code: string): Promise<Logement | null> {
   if (!/^[a-f0-9]{32}$/.test(code)) return null
@@ -64,6 +94,12 @@ export default async function PageCandidater({ params }: { params: Promise<{ cod
             <dt className="text-muted font-bold">{t.page.agence}</dt>
             <dd className="font-semibold">{logement.agence}</dd>
           </div>
+          {details(logement).map((d) => (
+            <div key={d.terme}>
+              <dt className="text-muted font-bold">{d.terme}</dt>
+              <dd className="font-semibold">{d.valeur}</dd>
+            </div>
+          ))}
           <div>
             <dt className="text-muted font-bold">{t.page.loyer}</dt>
             <dd className="font-semibold">

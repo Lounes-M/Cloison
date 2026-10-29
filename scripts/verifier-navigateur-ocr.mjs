@@ -294,7 +294,18 @@ const api = createServer(async (req, res) => {
   else if (path.endsWith('/rpc/logement_par_code'))
     valeur =
       entree.le_code === 'c'.repeat(32)
-        ? [{ libelle: 'T2 fictif, 3e étage', loyer_cents: 85000, agence: 'Agence fictive' }]
+        ? [
+            {
+              libelle: 'T2 fictif, 3e étage',
+              loyer_cents: 85000,
+              agence: 'Agence fictive',
+              ville: 'Lyon 7e',
+              surface_m2: 42,
+              pieces: 2,
+              meuble: false,
+              disponible_le: '2026-12-01',
+            },
+          ]
         : []
   else if (path.endsWith('/rpc/activite_de_mon_agence'))
     valeur = Array.from({ length: 12 }, (_, i) => ({

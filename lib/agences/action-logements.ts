@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 
+import { candidature as texteCandidature } from '@/lib/content/candidature'
 import { logements as texte } from '@/lib/content/logements'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 import { montantEnCents } from '@/lib/garant/validation'
@@ -181,4 +182,57 @@ export async function reglerLaCandidature(donnees: FormData): Promise<void> {
   })
   if (error) console.error('[agence] lien de candidature non regle')
   revalidatePath(`/espace/logements/${id}`)
+}
+
+/** Un entier facultatif dans des bornes : null s'il est vide, 'invalide' sinon. */
+function entierFacultatif(brut: string, min: number, max: number): number | null | 'invalide' {
+  if (brut === '') return null
+  if (!/^\d{1,4}$/.test(brut)) return 'invalide'
+  const n = Number(brut)
+  return n >= min && n <= max ? n : 'invalide'
+}
+
+/**
+ * Decrire le bien pour la page du lien de candidature (migration 0072).
+ * Chaque champ est facultatif ; vide, il efface la valeur.
+ */
+export async function decrireLeLogement(
+  _p: EtatLogement,
+  donnees: FormData,
+): Promise<EtatLogement> {
+  const t = texteCandidature.description.erreurs
+  const id = String(donnees.get('logement') ?? '')
+  if (!estUuidCanonique(id)) return { statut: 'erreur', message: texte.erreurs.general }
+  const ville = String(donnees.get('ville') ?? '').trim()
+  if (ville.length > 80) return { statut: 'erreur', message: t.ville }
+  const surface = entierFacultatif(String(donnees.get('surface') ?? '').trim(), 5, 1000)
+  if (surface === 'invalide') return { statut: 'erreur', message: t.surface }
+  const pieces = entierFacultatif(String(donnees.get('pieces') ?? '').trim(), 1, 20)
+  if (pieces === 'invalide') return { statut: 'erreur', message: t.pieces }
+  const meuble = { oui: true, non: false }[String(donnees.get('meuble') ?? '')] ?? null
+  const date = String(donnees.get('disponible') ?? '')
+  if (date !== '' && !(/^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(date)))) {
+    return { statut: 'erreur', message: t.date }
+  }
+
+  const contexte = await contexteAgence()
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: texte.erreurs.session }
+  const { data, error } = await contexte.supabase
+    .from('logements')
+    .update({
+      ville: ville === '' ? null : ville,
+      surface_m2: surface,
+      pieces,
+      meuble,
+      disponible_le: date === '' ? null : date,
+    })
+    .eq('id', id)
+    .select('id')
+    .maybeSingle()
+  if (error || !data) {
+    if (error) console.error('[agence] description du logement refusee')
+    return { statut: 'erreur', message: texte.erreurs.general }
+  }
+  revalidatePath(`/espace/logements/${id}`)
+  return { statut: 'enregistre' }
 }

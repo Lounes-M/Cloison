@@ -24,7 +24,7 @@ vi.mock('@/lib/courriels/notifications', () => ({ prevenirSiLeStatutAChange: h.p
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
 
-import { reglerLaCandidature } from '@/lib/agences/action-logements'
+import { decrireLeLogement, reglerLaCandidature } from '@/lib/agences/action-logements'
 import { candidature } from '@/lib/content/candidature'
 import { candidaterAuLogement } from '@/lib/locataire/action-candidature'
 import { ouvrirMonDossier } from '@/lib/locataire/action-ouverture'
@@ -167,4 +167,61 @@ test('un rattachement refuse laisse le dossier ouvert et le dit', async () => {
   expect(await ouvrirMonDossier(initial, form({ courriel: 'toi@exemple.fr' }))).toEqual({
     statut: 'envoye',
   })
+})
+
+test('la description du bien se valide puis s ecrit avec les droits de l agence', async () => {
+  const ecrit: unknown[] = []
+  const filtres: unknown[] = []
+  const chaine = {
+    eq: (...x: unknown[]) => (filtres.push(x), chaine),
+    select: () => chaine,
+    maybeSingle: async () => ({ data: { id: LOGEMENT }, error: null }),
+  }
+  h.contexte.mockResolvedValue({
+    etat: 'rattache',
+    supabase: { from: () => ({ update: (v: unknown) => (ecrit.push(v), chaine) }) },
+  })
+  const initial = { statut: 'inactif' } as const
+  expect(
+    await decrireLeLogement(
+      initial,
+      form({
+        logement: LOGEMENT,
+        ville: ' Lyon 7e ',
+        surface: '42',
+        pieces: '2',
+        meuble: 'non',
+        disponible: '2026-12-01',
+      }),
+    ),
+  ).toEqual({ statut: 'enregistre' })
+  expect(ecrit).toEqual([
+    { ville: 'Lyon 7e', surface_m2: 42, pieces: 2, meuble: false, disponible_le: '2026-12-01' },
+  ])
+  expect(filtres).toEqual([['id', LOGEMENT]])
+
+  expect(await decrireLeLogement(initial, form({ logement: LOGEMENT }))).toEqual({
+    statut: 'enregistre',
+  })
+  expect(ecrit[1]).toEqual({
+    ville: null,
+    surface_m2: null,
+    pieces: null,
+    meuble: null,
+    disponible_le: null,
+  })
+
+  const e = candidature.description.erreurs
+  for (const [champs, message] of [
+    [{ surface: '3' }, e.surface],
+    [{ surface: '42,5' }, e.surface],
+    [{ pieces: '0' }, e.pieces],
+    [{ ville: 'x'.repeat(81) }, e.ville],
+    [{ disponible: '01/12/2026' }, e.date],
+  ] as const)
+    expect(await decrireLeLogement(initial, form({ logement: LOGEMENT, ...champs }))).toEqual({
+      statut: 'erreur',
+      message,
+    })
+  expect(ecrit).toHaveLength(2)
 })
