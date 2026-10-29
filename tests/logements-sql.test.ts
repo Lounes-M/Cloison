@@ -177,6 +177,12 @@ test('le tableau compte les candidats par logement, sans les demonstrations', as
     { id: logement },
   ])
   expect((await db.query('select id from logements_de_mon_agence(true)')).rows).toHaveLength(2)
+
+  // Le lien de candidature (0070) se voit dans la liste comme un booleen (0074).
+  await db.query('select regler_candidature_logement($1,true)', [logement])
+  expect(
+    (await db.query('select candidature_ouverte from logements_de_mon_agence()')).rows,
+  ).toEqual([{ candidature_ouverte: true }])
 })
 
 test('supprimer un logement detache ses dossiers sans les toucher', async () => {
