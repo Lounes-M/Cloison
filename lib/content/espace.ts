@@ -135,6 +135,21 @@ export const dossier = {
   refuseTexte: 'Dossier refusé.',
 } as const
 
+/** Clore un dossier avant son echeance : le geste est definitif. */
+export const cloture = {
+  titre: 'Clore le dossier',
+  aide: 'Le candidat s’est retiré ou le logement est attribué ? Clore le dossier efface tout de suite l’accès de chacun et détruit la clé de chiffrement des pièces. Les données restantes partent à la prochaine purge. Le locataire et le garant sont prévenus par courriel. Ce geste est définitif.',
+  reserve:
+    'Réservé à un administrateur ou au responsable attribué. Un dossier pris doit d’abord être refusé.',
+  champ: (reference: string) => `Retapez la référence ${reference} pour confirmer`,
+  bouton: 'Clore et effacer le dossier',
+  envoi: 'Clôture…',
+  erreur:
+    'La clôture n’a pas eu lieu. Vérifiez la référence ; seul un administrateur ou le responsable du dossier peut le clore, et un dossier pris doit d’abord être refusé.',
+  succes: (reference: string) =>
+    `Dossier ${reference} clos. Ses accès sont fermés et ses pièces seront purgées.`,
+} as const
+
 /** Les statuts vus par l'agence : ici, dire pourquoi est permis. */
 export const statuts: Record<
   string,
