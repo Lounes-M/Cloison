@@ -26,9 +26,9 @@ export type ReglagesRappels = {
 }
 export const courrielsRappels = {
   depot: {
-    sujet: 'Ton dépôt Cloison attend ton retour',
+    sujet: 'Votre dépôt Cloison attend votre retour',
     texte:
-      'Ton dépôt ou une correction demandée par ton agence reste en attente. Reviens dans ton espace avec ton lien habituel pour voir la prochaine étape. Si ton lien a expiré, demande un nouveau lien à ton agence. Aucun justificatif ne doit être envoyé par courriel.',
+      'Votre dépôt ou une correction demandée par votre agence reste en attente. Revenez dans votre espace avec votre lien habituel pour voir la prochaine étape. Si votre lien a expiré, demandez un nouveau lien à votre agence. Aucun justificatif ne doit être envoyé par courriel.',
   },
   echeance: {
     sujet: 'Un dossier Cloison approche de son échéance',

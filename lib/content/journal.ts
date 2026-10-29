@@ -1,6 +1,6 @@
 export const journal = {
   titre: 'Historique des accès',
-  aide: 'Consulte l’historique des accès à ton dossier.',
+  aide: 'Consultez l’historique des accès à votre dossier.',
   indisponible: 'L’historique est momentanément indisponible.',
   aucun: 'Aucun accès enregistré.',
   navigation: 'Navigation dans l’historique des accès',
@@ -14,10 +14,10 @@ export const journal = {
     piece_deposee: 'Pièce déposée',
     piece_retiree: 'Pièce retirée',
     piece_ouverte: 'Pièce ouverte',
-    complement_demande: 'Remplacement demande',
+    complement_demande: 'Remplacement demandé',
     complement_fourni: 'Remplacement fourni',
-    complement_valide: 'Remplacement valide',
-    complement_refuse: 'Nouvelle correction demandee',
+    complement_valide: 'Remplacement validé',
+    complement_refuse: 'Nouvelle correction demandée',
     dossier_transmis: 'Dossier transmis',
   } as Record<string, string>,
   acteurs: { agence: 'l’agence', garant: 'le garant', locataire: 'le locataire' } as Record<

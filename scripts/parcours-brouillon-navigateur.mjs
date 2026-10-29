@@ -45,7 +45,7 @@ export async function parcourirBrouillon(page, site, moteur, largeur, fixture) {
   await page.getByRole('button', { name: 'Supprimer mon brouillon', exact: true }).click()
   await page
     .getByRole('status')
-    .filter({ hasText: 'Le contenu de ton brouillon a été supprimé.' })
+    .filter({ hasText: 'Le contenu de votre brouillon a été supprimé.' })
     .waitFor()
   assert.equal(fixture.lire().chiffre, null)
   assert.equal(

@@ -47,23 +47,23 @@ const NOMMES: readonly { readonly octets: readonly number[]; readonly raison: st
     octets: [0x50, 0x4b, 0x03, 0x04],
     raison:
       'Ce fichier est un document bureautique (Word, Excel, OpenDocument). ' +
-      'Exporte-le en PDF avant de le déposer.',
+      'Exportez-le en PDF avant de le déposer.',
   },
   {
     // L'ancien format Office, avant 2007.
     octets: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1],
     raison:
-      'Ce fichier est un ancien document Office. Ouvre-le et enregistre-le en PDF ' +
+      'Ce fichier est un ancien document Office. Ouvrez-le et enregistrez-le en PDF ' +
       'avant de le déposer.',
   },
   {
     // `{\rtf`
     octets: [0x7b, 0x5c, 0x72, 0x74, 0x66],
-    raison: 'Ce fichier est un document RTF. Exporte-le en PDF avant de le déposer.',
+    raison: 'Ce fichier est un document RTF. Exportez-le en PDF avant de le déposer.',
   },
   {
     octets: [0x47, 0x49, 0x46, 0x38],
-    raison: 'Ce fichier est une image GIF. Dépose plutôt une photo JPEG ou PNG, ou un PDF.',
+    raison: 'Ce fichier est une image GIF. Déposez plutôt une photo JPEG ou PNG, ou un PDF.',
   },
 ]
 
@@ -78,13 +78,13 @@ const MARQUES_ISO: readonly { readonly prefixes: readonly string[]; readonly rai
   {
     prefixes: ['heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'hevm', 'hevs', 'mif1', 'msf1'],
     raison:
-      'Cette photo est au format HEIC, celui des iPhone recents. ' +
-      'Dans Reglages, Appareil photo, Formats, choisis « Plus compatible », ' +
-      'ou envoie-la en PDF.',
+      'Cette photo est au format HEIC, celui des iPhone récents. ' +
+      'Dans Réglages, Appareil photo, Formats, choisissez « Plus compatible », ' +
+      'ou envoyez-la en PDF.',
   },
   {
     prefixes: ['avif', 'avis'],
-    raison: 'Cette photo est au format AVIF. Enregistre-la en JPEG ou en PNG avant de la déposer.',
+    raison: 'Cette photo est au format AVIF. Enregistrez-la en JPEG ou en PNG avant de la déposer.',
   },
   {
     prefixes: ['isom', 'mp41', 'mp42', 'qt  ', 'M4V ', '3gp'],

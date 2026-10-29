@@ -3,7 +3,7 @@ export const complements = {
   aideAgence:
     'Une demande rouvre le dépôt du garant. Examinez le remplacement avant de le valider. Les autres informations du dépôt peuvent être corrigées pendant cette réouverture.',
   aideGarant:
-    'Ton agence demande une correction. Dépose un nouveau fichier de la même catégorie, puis associe-le à la demande. Ton dépôt reste modifiable jusqu’à la prochaine transmission.',
+    'Votre agence demande une correction. Déposez un nouveau fichier de la même catégorie, puis associez-le à la demande. Votre dépôt reste modifiable jusqu’à la prochaine transmission.',
   motif: 'Motif de la demande',
   motifs: {
     illisible: 'Document illisible',
@@ -20,10 +20,10 @@ export const complements = {
   valider: 'Valider le remplacement',
   refuser: 'Demander une nouvelle correction',
   remplacement: 'Nouveau fichier',
-  aucun: 'Dépose un nouveau fichier dans la catégorie demandee pour pouvoir le proposer.',
+  aucun: 'Déposez un nouveau fichier dans la catégorie demandée pour pouvoir le proposer.',
   ouvrir: 'Ouvrir le remplacement',
   enregistre: 'Demande mise à jour.',
-  erreur: 'Cette opération n’a pas abouti. Actualise la page et vérifie l’état du dossier.',
+  erreur: 'Cette opération n’a pas abouti. Actualisez la page et vérifiez l’état du dossier.',
   choix: 'Choisir un fichier',
   attente: 'Enregistrement...',
 }

@@ -7,6 +7,6 @@ export const informationCollecte = {
   locataire:
     'Ton adresse sert à t’envoyer ton lien et à suivre ton dossier, effacé au plus tard trois mois après son ouverture.',
   garant:
-    'Tes pièces sont chiffrées, l’agence ne les voit que filigranées à son nom, et elles sont effacées avec le dossier, au plus tard trois mois après son ouverture.',
+    'Vos pièces sont chiffrées, l’agence ne les voit que filigranées à son nom, et elles sont effacées avec le dossier, au plus tard trois mois après son ouverture.',
   lien: 'Ce que nous en faisons',
 } as const

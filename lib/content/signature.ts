@@ -38,7 +38,7 @@ export const signature = {
   acte: 'Télécharger l’acte signé',
   preuve: 'Télécharger la preuve de signature',
   garant:
-    'Lis le PDF, vérifie les parties, les conditions, ta mention personnelle et le téléphone affiché. Cette validation autorise l’envoi chez le prestataire ; elle ne remplace pas ta signature.',
+    'Lisez le PDF, vérifiez les parties, les conditions, votre mention personnelle et le téléphone affiché. Cette validation autorise l’envoi chez le prestataire ; elle ne remplace pas votre signature.',
   accordGarant:
     'J’ai consulté le PDF et je confirme son contenu ainsi que mon numéro de téléphone.',
   accepter: 'Valider pour signature',

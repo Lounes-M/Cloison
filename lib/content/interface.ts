@@ -30,7 +30,7 @@ export const interfaceEspace = {
   parcours: 'Trois rôles. Une règle : chacun sa place.',
   roles: [
     { nom: 'Locataire', texte: 'Tu ouvres le dossier et tu suis son avancée.', ton: 'mint' },
-    { nom: 'Garant', texte: 'Tu déposes tes pièces dans ton espace privé.', ton: 'sun' },
+    { nom: 'Garant', texte: 'Vous déposez vos pièces dans votre espace privé.', ton: 'sun' },
     { nom: 'Agence', texte: 'Vous examinez le dossier dans votre espace.', ton: 'sky' },
   ],
 } as const

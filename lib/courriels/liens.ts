@@ -76,13 +76,11 @@ export function envoyerLienGarant({
 }: Envoi & { demandePar: string }): Promise<boolean> {
   return envoyer(
     a,
-    `${demandePar} te demande de te porter garant (${reference})`,
+    liens.garant.sujet(demandePar, reference),
     [
-      `${demandePar} constitue un dossier de location et t’a désigné comme garant.`,
+      liens.garant.designe(demandePar),
       '',
-      'Voici ton lien pour déposer tes pièces, de ton côté et en toute',
-      'discrétion : le locataire ne verra jamais ce que tu déposes, seulement',
-      'que le dossier avance.',
+      ...liens.garant.lien,
       url,
       '',
       validite(expireLe),

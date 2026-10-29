@@ -33,6 +33,42 @@ const AGENCE = [
   'responsables',
 ]
 const TUTOIEMENT = /(?<![\p{L}_’'-])(tu|ton|ta|tes|toi|te)(?![\p{L}_])/giu
+/**
+ * Le tutoiement qui ne passe pas par un pronom : l'elision (« t’a désigné »),
+ * les imperatifs sans equivoque et l'imperatif suivi d'un pronom
+ * (« Exporte-le », quand le vouvoiement ecrit « Exportez-le »).
+ */
+const IMPERATIF =
+  /(?<![\p{L}_])(réessaie|choisis|saisis|réduis|reprends|reviens|lis)(?![\p{L}_])|\p{L}*[^z\s’'-]-(le|la|les)(?![\p{L}_])|(?<![\p{L}_])t[’'](?=\p{L})/giu
+const tutoie = (texte: string) => Boolean(texte.match(TUTOIEMENT) || texte.match(IMPERATIF))
+
+/**
+ * Les textes lus par le garant, qui se vouvoie aussi : des modules entiers, et
+ * les branches propres au garant dans les modules partages avec le locataire.
+ */
+const GARANT = [
+  'brouillons',
+  'conditions-engagement',
+  'garant',
+  'journal',
+  'remise-droits',
+  'reutilisation',
+  'session-porteur',
+  'signature',
+]
+const BRANCHES_GARANT = [
+  'complements.complements.aideGarant',
+  'courriels.garant.',
+  'courriels.cloture.garant.',
+  'information-collecte.informationCollecte.garant',
+  'interface.interfaceEspace.roles[1]',
+  'liens.liens.garant.',
+  'locataire.lienInvalide.garant',
+  'rappels.courrielsRappels.depot.',
+  'support-dossier.aideDossier.aide:',
+  'support-dossier.aideDossier.confidentialite:',
+  'support-dossier.aideDossier.copie:',
+]
 
 function phrases(valeur: unknown, sortie: string[], chemin: string) {
   if (typeof valeur === 'string') {
@@ -76,8 +112,22 @@ test('les ecrans d agence vouvoient', async () => {
   const fautes: string[] = []
   for (const nom of AGENCE)
     for (const phrase of await lire(nom))
-      if (phrase.slice(phrase.indexOf(': ')).match(TUTOIEMENT)) fautes.push(phrase)
+      if (tutoie(phrase.slice(phrase.indexOf(': ')))) fautes.push(phrase)
   expect(fautes).toEqual([])
+})
+
+test('les textes du garant le vouvoient', async () => {
+  for (const nom of GARANT) expect(modules).toContain(nom)
+  const lues = [
+    ...(await Promise.all(GARANT.map(lire))).flat(),
+    ...(await Promise.all(modules.map(lire)))
+      .flat()
+      .filter((phrase) => BRANCHES_GARANT.some((branche) => phrase.startsWith(branche))),
+  ]
+  // Chaque branche nommee doit exister : un renommage la ferait sortir de la garde.
+  for (const branche of BRANCHES_GARANT)
+    expect(lues.some((phrase) => phrase.startsWith(branche))).toBe(true)
+  expect(lues.filter((phrase) => tutoie(phrase.slice(phrase.indexOf(': '))))).toEqual([])
 })
 
 /**
@@ -88,14 +138,22 @@ test('les ecrans d agence vouvoient', async () => {
  * `raison:`, ou dans une constante, dans les dossiers qui parlent aux personnes.
  */
 const MESSAGES = ['lib/agences', 'lib/garant', 'lib/locataire', 'lib/coffre']
-const LITTERAL = /(?:\b(?:message|raison): *|\bconst [A-Z_]+ = )(?:'([^']*)'|"([^"]*)")/g
+// Un litteral peut etre renvoye a la ligne apres sa cle, ou coupe en plusieurs
+// morceaux joints par `+` : on lit toute la chaine.
+const MORCEAU = `(?:'[^'\\n]*'|"[^"\\n]*")`
+const LITTERAL = new RegExp(
+  `(?:\\b(?:message|raison):\\s*|\\bconst [A-Z_]+ = )(${MORCEAU}(?:\\s*\\+\\s*${MORCEAU})*)`,
+  'g',
+)
+const recoller = (chaine: string) =>
+  [...chaine.matchAll(/'([^']*)'|"([^"]*)"/g)].map((m) => m[1] ?? m[2]).join('')
 
 function messages(dossier: string) {
   return readdirSync(dossier)
     .filter((f) => f.endsWith('.ts'))
     .flatMap((f) =>
       [...readFileSync(`${dossier}/${f}`, 'utf8').matchAll(LITTERAL)]
-        .map((m) => m[1] ?? m[2] ?? '')
+        .map((m) => recoller(m[1] ?? ''))
         .filter((texte) => texte.includes(' '))
         .map((texte) => `${dossier}/${f}: ${texte}`),
     )
@@ -107,11 +165,10 @@ test('les messages des actions gardent leurs accents', () => {
   expect(lus.filter((m) => m.slice(m.indexOf(': ')).match(SANS_ACCENT))).toEqual([])
 })
 
-test('les messages de l espace agence vouvoient', () => {
-  const lus = [...messages('lib/agences'), ...messages('lib/coffre')].filter(
-    (m) => m.startsWith('lib/agences/') || m.startsWith('lib/coffre/ouverture.ts'),
-  )
-  expect(lus.filter((m) => m.slice(m.indexOf(': ')).match(TUTOIEMENT))).toEqual([])
+test('les messages de l agence et du garant vouvoient', () => {
+  // Le locataire est le seul tutoye : lib/locataire reste hors de cette garde.
+  const lus = ['lib/agences', 'lib/garant', 'lib/coffre'].flatMap(messages)
+  expect(lus.filter((m) => tutoie(m.slice(m.indexOf(': '))))).toEqual([])
 })
 
 test('les deux gardes reconnaissent les fautes qu elles visent', () => {
@@ -120,4 +177,8 @@ test('les deux gardes reconnaissent les fautes qu elles visent', () => {
   expect('Dépose un fichier de la même catégorie.').not.toMatch(SANS_ACCENT)
   expect('Importe-le dans ton agenda.').toMatch(TUTOIEMENT)
   expect('Importez-le dans votre agenda, puis tenez-le à jour.').not.toMatch(TUTOIEMENT)
+  expect(tutoie('locataire@exemple.fr t’a désigné comme garant.')).toBe(true)
+  expect(tutoie('Exporte-le en PDF.')).toBe(true)
+  expect(tutoie('Réessaie dans un instant.')).toBe(true)
+  expect(tutoie('Exportez-le en PDF, puis réessayez. Peut-être plus tard.')).toBe(false)
 })
