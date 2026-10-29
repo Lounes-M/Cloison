@@ -103,6 +103,7 @@ beforeEach(() => {
     pieces: { data: [], error: null },
     journal_acces: { data: [], error: null },
     complements_documentaires: { data: [], error: null },
+    logements: { data: [], error: null },
   }
   doublures.capacite.mockResolvedValue({
     jeton: 'jeton-fictif',
