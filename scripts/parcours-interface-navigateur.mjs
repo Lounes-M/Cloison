@@ -363,6 +363,7 @@ export async function parcourirInterface(
     await page.waitForURL((u) => u.pathname === '/agences')
   }
   await visiter('/agences', 'agences', false)
+  await visiter('/questions', 'questions', false)
   for (const juridique of ['mentions-legales', 'confidentialite', 'conditions'])
     await visiter('/' + juridique, juridique, false)
   await visiter('/page-inexistante-mobile', 'introuvable', false)
