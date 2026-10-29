@@ -268,7 +268,17 @@ const api = createServer(async (req, res) => {
       revisionResponsable = randomUUID()
       valeur = revisionResponsable
     }
-  } else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
+  } else if (path.endsWith('/rpc/activite_de_mon_agence'))
+    valeur = Array.from({ length: 12 }, (_, i) => ({
+      mois: `2026-${String(12 - i).padStart(2, '0')}-01`,
+      ouverts: i === 0 ? 3 : 0,
+      pris: i === 0 ? 1 : 0,
+      refuses: 0,
+      signes: 0,
+      clos: 0,
+      delai_prise_moyen_jours: i === 0 ? '2.5' : null,
+    }))
+  else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
   else if (path.endsWith('/rpc/enregistrer_examen_documentaire')) {
     assert.equal(entree.le_dossier, id)
     assert.equal(entree.la_piece, id)
