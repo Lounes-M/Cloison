@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
+import { FormulaireAttributionLogement } from '@/components/forms/FormulaireAttributionLogement'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { contexteAgence } from '@/lib/agences/contexte'
@@ -65,6 +66,9 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
   const candidats = ((dossiers ?? []) as Candidat[])
     .map((d) => ({ ...d, ratio: ratioDe(d) }))
     .sort((a, b) => (b.ratio ?? -1) - (a.ratio ?? -1))
+  const retenus = candidats
+    .filter((d) => d.statut === 'transmis' || d.statut === 'signe')
+    .map((d) => ({ id: d.id, reference: d.reference }))
   const seuil = c.agence.seuilRatio
   const fmt = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
   const loyer =
@@ -146,6 +150,18 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
           </table>
         )}
       </section>
+
+      {!logement.archive && candidats.length > 0 ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{t.attribution.titre}</h2>
+          <p className="text-muted mt-2 mb-5 text-[14px] font-medium">
+            {retenus.length > 0 ? t.attribution.aide : t.attribution.attente}
+          </p>
+          {retenus.length > 0 ? (
+            <FormulaireAttributionLogement logementId={id} retenus={retenus} />
+          ) : null}
+        </section>
+      ) : null}
 
       {!logement.archive ? (
         <section className="panneau-espace mt-8">
