@@ -10,8 +10,9 @@ import { redirect } from 'next/navigation'
 
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
+import { FormulaireSecondGarant } from '@/components/forms/FormulaireSecondGarant'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { espace, statuts } from '@/lib/content/locataire'
+import { espace, secondGarant as texteSecond, statuts } from '@/lib/content/locataire'
 import { mentionTva, versionConditions } from '@/lib/content/juridique'
 import { editeur } from '@/lib/juridique/editeur'
 import { paiementLocataire, tarifs, euros } from '@/lib/content/tarifs'
@@ -70,6 +71,14 @@ export default async function PageLocataire({
     String(dossier.statut),
   )
   const garant = dossier.email_garant ? String(dossier.email_garant) : null
+  // Le second garant n'existe que dans un dossier d'agence (0067).
+  const secondPossible = Boolean(dossier.agence_id) && !dossier.demonstration && Boolean(garant)
+  let second: string | null = null
+  if (secondPossible) {
+    const { data, error } = await supabase.rpc('mon_second_garant')
+    if (error) throw new Error('Chargement du dossier indisponible.')
+    second = typeof data === 'string' && data.length > 0 ? data : null
+  }
 
   // Ce que le locataire achete, c'est le lien de son garant. Un dossier ouvert
   // par une agence, ou une demonstration, n'attend rien de lui.
@@ -127,6 +136,9 @@ export default async function PageLocataire({
             ? [{ id: 'paiement', titre: interfaceEspace.paiement }]
             : []),
           { id: 'garant', titre: interfaceEspace.garant },
+          ...(secondPossible && (ouvert || second)
+            ? [{ id: 'second-garant', titre: texteSecond.titre }]
+            : []),
         ]}
       />
       <section id="logement" className="panneau-espace mt-6">
@@ -272,6 +284,18 @@ export default async function PageLocataire({
           <p>Ce dossier ne peut plus être modifié.</p>
         )}
       </section>
+
+      {secondPossible && (ouvert || second) ? (
+        <section id="second-garant" className="panneau-espace mt-6">
+          <h2 className="text-xl font-bold">{texteSecond.titre}</h2>
+          <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
+            {second ? texteSecond.designe(second) : texteSecond.aide}
+          </p>
+          {ouvert ? (
+            <FormulaireSecondGarant dossierId={porteur.capacite.dossierId} secondActuel={second} />
+          ) : null}
+        </section>
+      ) : null}
 
       <p className="text-muted mt-10 text-[13px] font-medium">{espace.expire(expire)}</p>
       <SupportDossier reference={String(dossier.reference)} espace="locataire" />

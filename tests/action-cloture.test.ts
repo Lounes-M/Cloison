@@ -91,6 +91,25 @@ test('une cloture previent le locataire et le garant avec des identites stables'
   expect(d.revalider).toHaveBeenCalledWith('/espace')
 })
 
+test('un second garant est prevenu a son tour, sous sa propre identite', async () => {
+  d.rpc.mockResolvedValue({
+    data: {
+      reference: 'CL-ABC123',
+      email_locataire: 'locataire@example.invalid',
+      email_garant: 'garant@example.invalid',
+      email_second_garant: 'second@example.invalid',
+    },
+    error: null,
+  })
+  await clore()
+  expect(d.envoyer.mock.calls.map((a) => a[0])).toEqual([
+    'locataire@example.invalid',
+    'garant@example.invalid',
+    'second@example.invalid',
+  ])
+  expect(new Set(d.envoyer.mock.calls.map((a) => a[3])).size).toBe(3)
+})
+
 test("sans garant designe, seul le locataire est prevenu ; un echec d'envoi ne defait pas la cloture", async () => {
   d.rpc.mockResolvedValue({
     data: {

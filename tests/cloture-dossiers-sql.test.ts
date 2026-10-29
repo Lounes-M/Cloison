@@ -93,6 +93,7 @@ test("un administrateur clot : statut, echeance, jetons, cle et notifications d'
     reference,
     email_locataire: 'ocr@example.invalid',
     email_garant: 'garant@example.invalid',
+    email_second_garant: null,
   })
   expect(await etat()).toEqual({
     statut: 'expire',
