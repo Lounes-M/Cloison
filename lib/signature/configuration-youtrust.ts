@@ -1,5 +1,6 @@
 import 'server-only'
 import { creerClientYoutrust } from './client-youtrust'
+import type { PrestataireSignature } from './prestataire'
 import { creerVerificateurYoutrust, environnementYoutrust } from './youtrust'
 
 function configuration() {
@@ -10,7 +11,7 @@ function configuration() {
 
 /** Aucune origine configurable, aucun environnement de repli, aucune cle client. */
 export function clientYoutrustConfigure(signal?: AbortSignal) {
-  return creerClientYoutrust(
+  const client = creerClientYoutrust(
     {
       environnement: configuration(),
       cleApi: process.env.YOUTRUST_API_KEY ?? '',
@@ -19,6 +20,9 @@ export function clientYoutrustConfigure(signal?: AbortSignal) {
     fetch,
     signal,
   )
+  // Youtrust est la premiere implementation de l'interface prestataire.
+  client satisfies PrestataireSignature
+  return client
 }
 
 export function verificateurYoutrustConfigure() {

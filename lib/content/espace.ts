@@ -135,6 +135,34 @@ export const dossier = {
   refuseTexte: 'Dossier refusé.',
 } as const
 
+/** Clore un dossier avant son echeance : le geste est definitif. */
+/** Deux garants, deux dossiers lies (0067). */
+export const groupe = {
+  principal: (reference: string) =>
+    `Ce dossier est celui du second garant. Le premier garant est dans le dossier ${reference}.`,
+  second: (reference: string) =>
+    `Un second garant est désigné, dans le dossier ${reference}. Les deux revenus sont jugés ensemble.`,
+  lien: 'Ouvrir l’autre dossier',
+  ratio: (valeur: string) => `Solvabilité des deux garants ensemble : ${valeur}× le loyer.`,
+  ratioAttente:
+    'La solvabilité commune s’affichera quand les deux garants auront déclaré leurs revenus.',
+  decision: 'Prendre, refuser ou clore ce dossier s’applique aux deux garants.',
+} as const
+
+export const cloture = {
+  titre: 'Clore le dossier',
+  aide: 'Le candidat s’est retiré ou le logement est attribué ? Clore le dossier efface tout de suite l’accès de chacun et détruit la clé de chiffrement des pièces. Les données restantes partent à la prochaine purge. Le locataire et le garant sont prévenus par courriel. Ce geste est définitif.',
+  reserve:
+    'Réservé à un administrateur ou au responsable attribué. Un dossier pris doit d’abord être refusé.',
+  champ: (reference: string) => `Retapez la référence ${reference} pour confirmer`,
+  bouton: 'Clore et effacer le dossier',
+  envoi: 'Clôture…',
+  erreur:
+    'La clôture n’a pas eu lieu. Vérifiez la référence ; seul un administrateur ou le responsable du dossier peut le clore, et un dossier pris doit d’abord être refusé.',
+  succes: (reference: string) =>
+    `Dossier ${reference} clos. Ses accès sont fermés et ses pièces seront purgées.`,
+} as const
+
 /** Les statuts vus par l'agence : ici, dire pourquoi est permis. */
 export const statuts: Record<
   string,

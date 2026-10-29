@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { ouvrir } from '@/lib/coffre/enveloppe'
 import { ouvrirMaitresse } from '@/lib/coffre/rotation-maitresse'
-import type { creerClientYoutrust } from './client-youtrust'
+import type { PrestataireSignature } from './prestataire'
 import { contexteActe, dossierActe, type DossierActe } from './parcours-types'
 import {
   empreintePdf,
@@ -16,7 +16,7 @@ import { stockageActe } from './stockage-actes'
 
 export type BaseActes = Pick<SupabaseClient, 'rpc'>
 type Stockage = typeof stockageActe
-type Fournisseur = ReturnType<typeof creerClientYoutrust>
+type Fournisseur = PrestataireSignature
 const bytea = (b: Buffer) => `\\x${b.toString('hex')}`
 export function ouvrirContexteActe(dossier: DossierActe) {
   const cle = ouvrirMaitresse(Buffer.from(dossier.acte.cle_scellee.slice(2), 'hex'))

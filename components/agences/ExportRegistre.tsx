@@ -1,8 +1,12 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { exportsRegistres as t } from '@/lib/content/exports-registres'
+import { exportsRegistres } from '@/lib/content/exports-registres'
 
-export function ExportRegistre({ registre }: { registre: 'archives' | 'reglements' }) {
+export function ExportRegistre({ registre }: { registre: 'archives' | 'reglements' | 'dossiers' }) {
+  const t =
+    registre === 'dossiers'
+      ? { ...exportsRegistres, ...exportsRegistres.dossiers }
+      : exportsRegistres
   const [etat, afficher] = useState<'repos' | 'attente' | 'succes' | 'erreur' | 'limite'>('repos')
   const controleur = useRef<AbortController | null>(null)
   const objet = useRef<string | null>(null)
