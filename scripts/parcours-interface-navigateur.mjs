@@ -239,6 +239,12 @@ export async function parcourirInterface(
     await verifierSurface(page)
     console.log('OK : retour du defilement anime detecte par contre-preuve navigateur')
   }
+  await visiter('/espace/activite', 'activite')
+  await page.getByText('Taux d’acceptation', { exact: true }).waitFor()
+  await visiter('/espace/logements', 'logements')
+  await page.getByRole('link', { name: 'T2 fictif, 3e étage', exact: true }).waitFor()
+  await visiter(`/espace/logements/${id}`, 'logement')
+  await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
   await visiter('/espace/notifications', 'notifications')
@@ -357,6 +363,7 @@ export async function parcourirInterface(
     await page.waitForURL((u) => u.pathname === '/agences')
   }
   await visiter('/agences', 'agences', false)
+  await visiter('/questions', 'questions', false)
   for (const juridique of ['mentions-legales', 'confidentialite', 'conditions'])
     await visiter('/' + juridique, juridique, false)
   await visiter('/page-inexistante-mobile', 'introuvable', false)

@@ -43,6 +43,10 @@ export const tableau = {
   nouveauAide:
     'Le locataire reçoit un lien pour désigner son garant. Vous n’avez rien d’autre à envoyer.',
   nouveauChamp: 'Adresse e-mail du locataire',
+  nouveauLoyer: 'Loyer mensuel, charges comprises (facultatif)',
+  nouveauLoyerAide:
+    'Si vous le connaissez, le locataire n’aura pas à le saisir. Il reste modifiable jusqu’à la déclaration du garant.',
+  nouveauLoyerInvalide: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
   nouveauBouton: 'Envoyer le lien',
   nouveauEnvoi: 'Envoi…',
   nouveauSucces: (email: string) => `Dossier ouvert. L’envoi du lien à ${email} est programmé.`,
@@ -133,6 +137,48 @@ export const dossier = {
   prisTexte:
     'Dossier pris. Les pièces sont figées ; l’acte de cautionnement arrive au prochain chantier.',
   refuseTexte: 'Dossier refusé.',
+} as const
+
+/** Clore un dossier avant son echeance : le geste est definitif. */
+/** Le loyer saisi par l'agence sur un dossier. */
+export const loyerAgence = {
+  titre: 'Loyer du logement',
+  champ: 'Loyer mensuel, charges comprises',
+  bouton: 'Enregistrer le loyer',
+  envoi: 'Enregistrement…',
+  succes: 'Loyer enregistré. Le locataire le voit dans son dossier.',
+  invalide: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
+  erreur:
+    'Le loyer n’a pas pu être enregistré. Il est peut-être déjà figé par la déclaration du garant.',
+  fige: 'Le loyer est figé : le garant a déclaré ses revenus sur cette base.',
+  second: 'Le loyer se saisit sur le dossier du premier garant et se recopie ici.',
+} as const
+
+/** Deux garants, deux dossiers lies (0067). */
+export const groupe = {
+  principal: (reference: string) =>
+    `Ce dossier est celui du second garant. Le premier garant est dans le dossier ${reference}.`,
+  second: (reference: string) =>
+    `Un second garant est désigné, dans le dossier ${reference}. Les deux revenus sont jugés ensemble.`,
+  lien: 'Ouvrir l’autre dossier',
+  ratio: (valeur: string) => `Solvabilité des deux garants ensemble : ${valeur}× le loyer.`,
+  ratioAttente:
+    'La solvabilité commune s’affichera quand les deux garants auront déclaré leurs revenus.',
+  decision: 'Prendre, refuser ou clore ce dossier s’applique aux deux garants.',
+} as const
+
+export const cloture = {
+  titre: 'Clore le dossier',
+  aide: 'Le candidat s’est retiré ou le logement est attribué ? Clore le dossier efface tout de suite l’accès de chacun et détruit la clé de chiffrement des pièces. Les données restantes partent à la prochaine purge. Le locataire et le garant sont prévenus par courriel. Ce geste est définitif.',
+  reserve:
+    'Réservé à un administrateur ou au responsable attribué. Un dossier pris doit d’abord être refusé.',
+  champ: (reference: string) => `Retapez la référence ${reference} pour confirmer`,
+  bouton: 'Clore et effacer le dossier',
+  envoi: 'Clôture…',
+  erreur:
+    'La clôture n’a pas eu lieu. Vérifiez la référence ; seul un administrateur ou le responsable du dossier peut le clore, et un dossier pris doit d’abord être refusé.',
+  succes: (reference: string) =>
+    `Dossier ${reference} clos. Ses accès sont fermés et ses pièces seront purgées.`,
 } as const
 
 /** Les statuts vus par l'agence : ici, dire pourquoi est permis. */

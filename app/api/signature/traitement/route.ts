@@ -4,7 +4,10 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { suivreTraitementActes } from '@/lib/exploitation/suivi-actes'
 import { diagnosticActes, type EtapeDiagnosticActes } from '@/lib/exploitation/diagnostic-actes'
 import { creerEntretienActes } from '@/lib/exploitation/entretien-actes'
-import { clientYoutrustConfigure } from '@/lib/signature/configuration-youtrust'
+import {
+  clientSignatureConfigure,
+  mutationsSignatureAutorisees,
+} from '@/lib/signature/configuration-prestataire'
 import { configurationParcours } from '@/lib/signature/configuration-parcours'
 import { chargerActe, traiterActe } from '@/lib/signature/parcours'
 export const runtime = 'nodejs'
@@ -86,11 +89,10 @@ async function executer(requete: Request) {
           signal.throwIfAborted()
           etape = 'actes_lecture'
           const d = await chargerActe(db, id)
-          if (d.acte.etape !== 'en_cours' && process.env.YOUTRUST_MUTATIONS_ENABLED !== 'true')
-            continue
+          if (d.acte.etape !== 'en_cours' && !mutationsSignatureAutorisees()) continue
           etape = 'actes_traitement'
           signal.throwIfAborted()
-          await traiterActe(db, id, config.mode, clientYoutrustConfigure(signal), signal)
+          await traiterActe(db, id, config.mode, clientSignatureConfigure(signal), signal)
           traites++
         } catch {
           signaler(etape)

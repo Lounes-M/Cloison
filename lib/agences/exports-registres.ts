@@ -1,8 +1,9 @@
 import { z } from 'zod'
 import { exportsRegistres as t } from '@/lib/content/exports-registres'
 import { facturation } from '@/lib/content/facturation'
+import { statuts } from '@/lib/content/espace'
 
-export type Registre = 'archives' | 'reglements'
+export type Registre = 'archives' | 'reglements' | 'dossiers'
 export const LIMITE_REGISTRE = 1000
 export const TAILLE_EXPORT_MAX = 2 * 1024 * 1024
 const date = z.iso.datetime({ offset: true }).transform((v) => new Date(v).toISOString())
@@ -27,6 +28,18 @@ const reglement = z
     anomalie: z.boolean().nullable(),
   })
   .refine((v) => (v.rembourse_cents ?? 0) <= v.montant_cents)
+
+// Ni adresse ni montant : l'export sert au pilotage, pas a sortir des donnees personnelles.
+const ratio = z.union([z.number(), z.string().regex(/^\d{1,6}(\.\d{1,6})?$/)]).nullable()
+const dossier = z.object({
+  id: z.uuid(),
+  reference: z.string().min(1).max(64),
+  statut: z.enum(Object.keys(statuts) as [string, ...string[]]),
+  garant: z.boolean(),
+  ratio,
+  cree_le: date,
+  expire_le: date,
+})
 
 export class RegistreTropGrand extends Error {}
 
@@ -57,12 +70,24 @@ export async function exporterRegistre(
     const page =
       registre === 'archives'
         ? z.array(archive).max(20).parse(donnees)
-        : z.array(reglement).max(20).parse(donnees)
+        : registre === 'dossiers'
+          ? z.array(dossier).max(20).parse(donnees)
+          : z.array(reglement).max(20).parse(donnees)
     for (const ligne of page) {
       if (ids.has(ligne.id)) throw new Error('Pagination incohérente')
       ids.add(ligne.id)
       if (ids.size > LIMITE_REGISTRE) throw new RegistreTropGrand()
-      if ('modele' in ligne) {
+      if ('reference' in ligne) {
+        lignes.push([
+          ligne.reference,
+          statuts[ligne.statut]?.libelle ?? ligne.statut,
+          ligne.garant ? t.oui : t.non,
+          ligne.ratio === null ? '' : Number(ligne.ratio).toFixed(2).replace('.', ','),
+          ligne.cree_le,
+          ligne.expire_le,
+          generation,
+        ])
+      } else if ('modele' in ligne) {
         lignes.push([
           ligne.id,
           ligne.modele,
@@ -88,7 +113,12 @@ export async function exporterRegistre(
     if (page.length < 20) break
     avant = page.at(-1)!.id
   }
-  const entete = registre === 'archives' ? t.colonnesArchives : t.colonnesReglements
+  const entete =
+    registre === 'archives'
+      ? t.colonnesArchives
+      : registre === 'dossiers'
+        ? t.colonnesDossiers
+        : t.colonnesReglements
   const csv =
     '\ufeff' +
     [entete, ...lignes].map((ligne) => ligne.map(celluleCSV).join(';')).join('\r\n') +

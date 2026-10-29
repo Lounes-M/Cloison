@@ -268,7 +268,32 @@ const api = createServer(async (req, res) => {
       revisionResponsable = randomUUID()
       valeur = revisionResponsable
     }
-  } else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
+  } else if (path.endsWith('/rpc/logements_de_mon_agence'))
+    valeur = [
+      {
+        id,
+        libelle: 'T2 fictif, 3e étage',
+        loyer_cents: 85000,
+        archive: false,
+        cree_le: '2026-01-01T00:00:00Z',
+        candidats: 1,
+        complets: 1,
+        pris: 0,
+      },
+    ]
+  else if (path.endsWith('/logements'))
+    valeur = [{ id, libelle: 'T2 fictif, 3e étage', loyer_cents: 85000, archive: false }]
+  else if (path.endsWith('/rpc/activite_de_mon_agence'))
+    valeur = Array.from({ length: 12 }, (_, i) => ({
+      mois: `2026-${String(12 - i).padStart(2, '0')}-01`,
+      ouverts: i === 0 ? 3 : 0,
+      pris: i === 0 ? 1 : 0,
+      refuses: 0,
+      signes: 0,
+      clos: 0,
+      delai_prise_moyen_jours: i === 0 ? '2.5' : null,
+    }))
+  else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
   else if (path.endsWith('/rpc/enregistrer_examen_documentaire')) {
     assert.equal(entree.le_dossier, id)
     assert.equal(entree.la_piece, id)
@@ -307,6 +332,7 @@ const api = createServer(async (req, res) => {
       '/rest/v1/engagements',
       '/rest/v1/complements_documentaires',
       '/rest/v1/rpc/journal_du_dossier',
+      '/rest/v1/rpc/groupe_du_dossier',
       '/rest/v1/rpc/journal_de_mon_agence',
       '/rest/v1/rpc/mon_tarif_paiement',
     ].includes(path)
@@ -365,8 +391,8 @@ const next = spawn(
       SIGNATURE_PARCOURS_ENABLED: 'true',
       // Reglement ouvert sans cle Stripe : la reservation aboutit au refus prudent.
       FACTURATION_ACTES_ENABLED: 'true',
-      YOUTRUST_ENVIRONMENT: 'sandbox',
-      YOUTRUST_REGISTRY_ENABLED: 'true',
+      SIGNATURE_ENVIRONMENT: 'sandbox',
+      SIGNATURE_REGISTRE_ENABLED: 'true',
       ACTE_MODELE_VERSION: 'recette-v1',
       ACTE_CONSERVATION_JOURS: '30',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',

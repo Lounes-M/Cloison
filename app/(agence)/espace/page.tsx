@@ -10,12 +10,15 @@ import { AttributionsGroupees } from '@/components/dossiers/AttributionsGroupees
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
+import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { rattachement as textesRattachement } from '@/lib/content/rattachement'
 import { activation, statuts, tableau } from '@/lib/content/espace'
+import { activite as texteActivite } from '@/lib/content/activite'
+import { logements as texteLogements } from '@/lib/content/logements'
 import { cn } from '@/lib/utils'
 import {
   responsables as texteResponsables,
@@ -215,6 +218,12 @@ export default async function PageEspace({
         <a href="#reglages" className="lien-espace">
           {interfaceEspace.reglages}
         </a>
+        <Link href="/espace/activite" className="lien-espace">
+          {texteActivite.lien}
+        </Link>
+        <Link href="/espace/logements" className="lien-espace">
+          {texteLogements.lien}
+        </Link>
       </div>
 
       {demandesEnAttente > 0 ? (
@@ -553,6 +562,11 @@ export default async function PageEspace({
         pageEquipe={recherche.equipe}
         baseUrl={lienPage(numero)}
       />
+      {verifiee ? (
+        <div className="mt-8">
+          <ExportRegistre registre="dossiers" />
+        </div>
+      ) : null}
       <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
         <div>
           <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>

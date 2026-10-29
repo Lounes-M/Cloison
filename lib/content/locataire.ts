@@ -20,6 +20,25 @@ export const porte = {
     'Si la demande a pu être traitée, tu recevras un lien valable sept jours. Garde-le pour retrouver ton dossier.',
 } as const
 
+/** Le second garant (0067), proposé seulement dans un dossier ouvert par une agence. */
+export const secondGarant = {
+  titre: 'Un second garant',
+  aide: 'Si un seul garant ne suffit pas, tu peux en ajouter un deuxième. Ses revenus s’ajoutent à ceux du premier, et chacun dépose ses pièces de son côté, sans voir celles de l’autre.',
+  designe: (email: string) => `Second garant désigné : ${email}. Il dépose ses pièces de son côté.`,
+  champ: 'Son adresse e-mail',
+  bouton: 'Envoyer le lien au second garant',
+  renvoyer: 'Renvoyer son lien',
+  envoi: 'Envoi…',
+  succes: 'L’envoi du lien est programmé. Le dossier attend désormais les pièces des deux garants.',
+  erreurs: {
+    adresse: 'Cette adresse ne ressemble pas à une adresse e-mail.',
+    doublon: 'Le second garant doit être une autre personne que toi et ton premier garant.',
+    refus: 'Ce dossier ne peut pas recevoir de second garant pour l’instant.',
+    debit: 'Trop de liens envoyés. Réessaie dans un quart d’heure.',
+    expire: 'Ton lien a expiré. Demande-en un nouveau.',
+  },
+} as const
+
 export const espace = {
   garantRenouvellement:
     'Tu peux renvoyer son accès au même garant. Le dossier reste figé et le nouveau lien remplace le précédent.',

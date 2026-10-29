@@ -1,6 +1,7 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
+import { acte as texteActe } from '@/lib/content/acte'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -18,9 +19,23 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
+import { FormulaireCloture } from '@/components/forms/FormulaireCloture'
+import { FormulaireLoyerAgence } from '@/components/forms/FormulaireLoyerAgence'
+import { FormulaireRattachementLogement } from '@/components/forms/FormulaireRattachementLogement'
+import { logements as texteLogements } from '@/lib/content/logements'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { acteurs, actions, dossier as texte, natures, statuts, tableau } from '@/lib/content/espace'
+import {
+  acteurs,
+  actions,
+  cloture as texteCloture,
+  dossier as texte,
+  groupe as texteGroupe,
+  loyerAgence as texteLoyer,
+  natures,
+  statuts,
+  tableau,
+} from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
@@ -88,11 +103,13 @@ export default async function PageDossier({
     { data: journal, error: erreurJournal },
     { data: demandes, error: erreurComplements },
     { data: examens, error: erreurExamens },
+    { data: groupes, error: erreurGroupe },
+    { data: biens, error: erreurBiens },
   ] = await Promise.all([
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration',
+        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -119,10 +136,18 @@ export default async function PageDossier({
       .eq('dossier_id', id)
       .order('cree_le', { ascending: true }),
     supabase.rpc('examens_du_dossier', { le_dossier: id }),
+    supabase.rpc('groupe_du_dossier', { le_dossier: id }),
+    supabase
+      .from('logements')
+      .select('id, libelle, archive')
+      .order('cree_le', { ascending: false })
+      .limit(200),
   ])
 
   if (
     erreurExamens ||
+    erreurGroupe ||
+    erreurBiens ||
     erreurComplements ||
     erreurDossier ||
     erreurEngagement ||
@@ -148,8 +173,24 @@ export default async function PageDossier({
   const seuil = agence.seuilRatio
   const fmt = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
 
+  const lie = Array.isArray(groupes) ? groupes[0] : null
+  const ratioGroupe = lie?.ratio_groupe == null ? null : Number(lie.ratio_groupe)
+
+  // La base tranche (0011, 0020, 0067) ; l'ecran ne propose que ce qui peut aboutir.
+  const loyerModifiable =
+    !d.demonstration &&
+    !d.loyer_verrouille &&
+    !d.dossier_principal &&
+    ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(String(d.statut))
+
   const peutPrendre = d.statut === 'complet'
   const peutRefuser = ['complet', 'garant_insuffisant', 'transmis'].includes(String(d.statut))
+  // La base tranche (0066) ; l'ecran ne propose le geste que la ou il peut aboutir.
+  const peutClore =
+    !d.demonstration &&
+    ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant', 'refuse'].includes(
+      String(d.statut),
+    )
 
   return (
     <div className="page-espace w-full max-w-[880px] self-start">
@@ -239,6 +280,76 @@ export default async function PageDossier({
           </dd>
         </div>
       </dl>
+
+      {loyerModifiable ? (
+        <section className="panneau-espace mt-4">
+          <h2 className="text-lg font-bold">{texteLoyer.titre}</h2>
+          <div className="mt-3">
+            <FormulaireLoyerAgence
+              dossierId={id}
+              loyerActuel={
+                d.loyer_cents == null
+                  ? ''
+                  : (Number(d.loyer_cents) / 100).toLocaleString('fr-FR', {
+                      useGrouping: false,
+                    })
+              }
+            />
+          </div>
+        </section>
+      ) : d.dossier_principal && !d.demonstration ? (
+        <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.second}</p>
+      ) : d.loyer_verrouille ? (
+        <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.fige}</p>
+      ) : null}
+
+      {!d.demonstration && !d.dossier_principal ? (
+        <section className="panneau-espace mt-4">
+          <h2 className="text-lg font-bold">{texteLogements.rattachement.titre}</h2>
+          <div className="mt-3">
+            <FormulaireRattachementLogement
+              dossierId={id}
+              actuel={d.logement_id ? String(d.logement_id) : null}
+              options={(biens ?? [])
+                .filter((b) => !b.archive || b.id === d.logement_id)
+                .map((b) => ({ id: String(b.id), libelle: String(b.libelle) }))}
+            />
+          </div>
+          {d.logement_id ? (
+            <Link
+              href={`/espace/logements/${String(d.logement_id)}`}
+              className="text-cobalt mt-3 inline-block text-[14px] font-bold underline underline-offset-2"
+            >
+              {texteLogements.rattachement.lien}
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
+
+      {lie ? (
+        <div
+          className={cn(
+            'outlined mt-4 rounded-xl p-4 text-[14px]',
+            ratioGroupe == null ? 'bg-paper' : ratioGroupe >= seuil ? 'bg-mint' : 'bg-sun',
+          )}
+        >
+          <p className="font-semibold">
+            {lie.autre_principal
+              ? texteGroupe.principal(String(lie.autre_reference))
+              : texteGroupe.second(String(lie.autre_reference))}
+          </p>
+          <p className="mt-1 font-medium">
+            {ratioGroupe == null ? texteGroupe.ratioAttente : texteGroupe.ratio(fmt(ratioGroupe))}
+          </p>
+          <p className="text-muted mt-1 text-[13px] font-medium">{texteGroupe.decision}</p>
+          <Link
+            href={`/espace/dossiers/${String(lie.autre)}`}
+            className="text-cobalt mt-2 inline-block text-[14px] font-bold underline underline-offset-2"
+          >
+            {texteGroupe.lien}
+          </Link>
+        </div>
+      ) : null}
 
       <section id="engagement" className="panneau-espace mt-8">
         <h2 className="text-xl font-bold">{texte.engagementTitre}</h2>
@@ -358,6 +469,15 @@ export default async function PageDossier({
             </div>
           ) : null}
         </div>
+        {peutClore ? (
+          <div className="border-ink/15 mt-8 border-t pt-6">
+            <h3 className="text-lg font-bold">{texteCloture.titre}</h3>
+            <p className="text-muted mt-2 mb-4 text-[14px] leading-relaxed font-medium">
+              {texteCloture.aide}
+            </p>
+            <FormulaireCloture dossierId={id} reference={String(d.reference)} />
+          </div>
+        ) : null}
       </section>
 
       <section id="organisation" className="border-ink/15 mt-8 border-t pt-6">
@@ -412,6 +532,15 @@ export default async function PageDossier({
       </p>
       <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />
+      {d.statut === 'transmis' && !d.demonstration ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="font-display text-2xl uppercase">{texteActe.etiquette}</h2>
+          <p className="mt-2">{texteActe.mention}</p>
+          <Link className="lien-espace mt-4 inline-block" href={`/espace/dossiers/${id}/acte`}>
+            {texteActe.titre}
+          </Link>
+        </section>
+      ) : null}
       <SuiviSignature db={supabase} dossier={id} partie="agence" />
     </div>
   )

@@ -17,6 +17,23 @@ export const exportsRegistres = {
     'Environnement',
     'Exporté le (UTC)',
   ],
+  dossiers: {
+    titre: 'Exporter vos dossiers',
+    aide: 'Téléchargez la liste de vos dossiers en cours, dans la limite de 1 000 lignes : référence, statut, ratio et dates. Le CSV ne contient ni pièce, ni montant déclaré, ni adresse e-mail. Les dossiers de démonstration sont exclus. Les dates sont en UTC.',
+    telecharger: 'Télécharger les dossiers en CSV',
+    attente: 'Préparation de la liste…',
+    erreur: 'La liste est indisponible. Aucun fichier partiel n’a été téléchargé. Réessayez.',
+    limite: 'Vos dossiers dépassent 1 000 lignes. Aucun fichier partiel n’a été téléchargé.',
+  },
+  colonnesDossiers: [
+    'Référence',
+    'Statut',
+    'Garant désigné',
+    'Ratio',
+    'Ouvert le (UTC)',
+    'Fin du coffre (UTC)',
+    'Exporté le (UTC)',
+  ],
   colonnesReglements: [
     'Référence règlement',
     'Montant EUR',

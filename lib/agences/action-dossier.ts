@@ -7,6 +7,8 @@ import { z } from 'zod'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
+import { tableau } from '@/lib/content/espace'
+import { montantEnCents } from '@/lib/garant/validation'
 import { contexteAgence } from './contexte'
 
 /**
@@ -25,7 +27,7 @@ import { contexteAgence } from './contexte'
 export type EtatNouveauDossier =
   | { statut: 'inactif' }
   | { statut: 'ouvert'; email: string }
-  | { statut: 'erreur'; message: string; valeur?: string }
+  | { statut: 'erreur'; message: string; valeur?: string; loyer?: string }
 
 const schemaLocataire = z.object({
   courriel: z
@@ -36,6 +38,8 @@ const schemaLocataire = z.object({
     .max(180, 'Cette adresse est trop longue.')
     .pipe(z.email('Cette adresse ne ressemble pas a une adresse e-mail.')),
 })
+
+const OUVERTURE_IMPOSSIBLE = "Le dossier n'a pas pu être ouvert. Réessayez dans un instant."
 
 const NON_VERIFIEE =
   "Votre agence n'est pas encore vérifiée : l'ouverture d'un dossier pour un vrai locataire attend la verification."
@@ -54,10 +58,43 @@ export async function ouvrirUnDossier(
     }
   }
 
+  // Le loyer est facultatif a l'ouverture : vide, le locataire le saisira.
+  const saisieLoyer = String(donnees.get('loyer') ?? '')
+  const loyer = montantEnCents(saisieLoyer)
+  if (loyer === 'invalide') {
+    return {
+      statut: 'erreur',
+      message: tableau.nouveauLoyerInvalide,
+      valeur: saisie,
+      loyer: saisieLoyer,
+    }
+  }
+
+  const brutLogement = String(donnees.get('logement') ?? '')
+  if (brutLogement !== '' && !estUuidCanonique(brutLogement)) {
+    return { statut: 'erreur', message: OUVERTURE_IMPOSSIBLE, valeur: saisie }
+  }
+
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
   if (contexte.agence.statut !== 'verifiee') {
     return { statut: 'erreur', message: NON_VERIFIEE, valeur: saisie }
+  }
+
+  // Le logement se lit avec les droits de l'agence (0069) : celui d'une autre
+  // n'existe pas, et rien ne s'ouvre.
+  let logement: { id: string; loyer_cents: number | null } | null = null
+  if (brutLogement !== '') {
+    const { data } = await contexte.supabase
+      .from('logements')
+      .select('id, loyer_cents')
+      .eq('id', brutLogement)
+      .maybeSingle()
+    if (!data) return { statut: 'erreur', message: OUVERTURE_IMPOSSIBLE, valeur: saisie }
+    logement = {
+      id: String(data.id),
+      loyer_cents: data.loyer_cents == null ? null : Number(data.loyer_cents),
+    }
   }
 
   const { courriel } = analyse.data
@@ -72,6 +109,21 @@ export async function ouvrirUnDossier(
         message: "Le dossier n'a pas pu être ouvert. Réessayez dans un instant.",
         valeur: saisie,
       }
+    }
+
+    // Le loyer saisi prime sur celui du logement.
+    const complement: { loyer_cents?: number; logement_id?: string } = {}
+    const loyerInitial = loyer ?? logement?.loyer_cents ?? null
+    if (loyerInitial !== null) complement.loyer_cents = loyerInitial
+    if (logement) complement.logement_id = logement.id
+    if (Object.keys(complement).length > 0) {
+      // Le dossier est ouvert : un complement refuse ne le defait pas, le
+      // locataire pourra saisir son loyer lui-meme.
+      const { error } = await contexte.supabase
+        .from('dossiers')
+        .update(complement)
+        .eq('id', ouvert.dossierId)
+      if (error) console.error('[agence] complement d ouverture non enregistre')
     }
 
     await reprendreLivraisonLiens(ouvert.dossierId)
