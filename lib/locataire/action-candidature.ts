@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { candidature } from '@/lib/content/candidature'
+import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 import { sessionPorteur } from '@/lib/content/session-porteur'
 import { codeDeCandidature } from '@/lib/validation/candidature'
 
@@ -35,13 +36,13 @@ export async function candidaterAuLogement(
   if (donnees.get('accord') !== 'on') {
     return { statut: 'erreur', message: candidature.espace.accord }
   }
-  const { data, error } = await clientPorteurDeLien(porteur.jeton).rpc('candidater_au_logement', {
-    le_code: code,
-  })
+  const db = clientPorteurDeLien(porteur.jeton)
+  const { data, error } = await db.rpc('candidater_au_logement', { le_code: code })
   if (error || typeof data !== 'string') {
     if (error) console.error('[candidature] rattachement refuse')
     return { statut: 'erreur', message: candidature.espace.erreur }
   }
+  await prevenirSiLeStatutAChange(db, porteur.capacite.dossierId, null)
   revalidatePath('/locataire')
   return { statut: 'transmis', agence: data }
 }

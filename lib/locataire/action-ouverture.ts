@@ -8,6 +8,7 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
 import { candidature as texteCandidature } from '@/lib/content/candidature'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
+import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 
 /**
  * La porte principale du produit : une adresse, un dossier, un lien.
@@ -104,6 +105,9 @@ export async function ouvrirMonDossier(
     }
 
     await reprendreLivraisonLiens(ouvert.dossierId)
+    if (rattachement === 'rattachee') {
+      await prevenirSiLeStatutAChange(await clientServeur(), ouvert.dossierId, null)
+    }
   } catch {
     console.error('[porte] ouverture impossible')
     return {

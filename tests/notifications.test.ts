@@ -34,6 +34,14 @@ describe('courrielsPour', () => {
     expect(envois[1]!.texte).toContain('ne constitue pas une signature')
   })
 
+  test('rattache : l agence seule, avec le lien du dossier', () => {
+    const envois = courrielsPour({ ...DOSSIER, statut: 'rattache' }, ['marie@agence-lyon3.fr'])
+    expect(envois.map((e) => e.a)).toEqual([['marie@agence-lyon3.fr']])
+    expect(envois[0]!.sujet).toContain(DOSSIER.reference)
+    expect(envois[0]!.texte).toContain(`/espace/dossiers/${DOSSIER.id}`)
+    expect(envois[0]!.texte).not.toContain(DOSSIER.email_locataire)
+  })
+
   test('garant insuffisant : le locataire et l agence, sans le pourquoi', () => {
     const envois = courrielsPour({ ...DOSSIER, statut: 'garant_insuffisant' }, ['a@b.fr'])
     const auLocataire = envois.find((e) => e.a === 'locataire@exemple.fr')!
