@@ -180,6 +180,24 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
               <div className="mt-3">
                 <BoutonCopierLien lien={lienCandidature} />
               </div>
+              <h3 className="mt-6 text-[15px] font-bold">{tc.agence.messageTitre}</h3>
+              <p className="text-muted mt-1 text-[13px] font-medium">{tc.agence.messageAide}</p>
+              <label htmlFor="message-candidature" className="sr-only">
+                {tc.agence.messageTitre}
+              </label>
+              <textarea
+                id="message-candidature"
+                readOnly
+                rows={7}
+                value={tc.agence.message(String(logement.libelle), lienCandidature)}
+                className="border-ink bg-paper mt-3 w-full rounded-xl border-2 px-4 py-3 text-[16px] font-medium"
+              />
+              <div className="mt-3">
+                <BoutonCopierLien
+                  lien={tc.agence.message(String(logement.libelle), lienCandidature)}
+                  sorte="message"
+                />
+              </div>
               <p className="text-muted mt-2 text-[13px] font-medium">
                 {tc.agence.renouvelerAide} {tc.agence.archive}
               </p>

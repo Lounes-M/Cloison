@@ -225,3 +225,12 @@ test('la description du bien se valide puis s ecrit avec les droits de l agence'
     })
   expect(ecrit).toHaveLength(2)
 })
+
+test('le message aux candidats porte le bien et le lien, sans tutoyer', () => {
+  const lien = `https://cloison.fr/candidater/${CODE}`
+  const message = candidature.agence.message('T2 Gerland', lien)
+  expect(message).toContain('« T2 Gerland »')
+  expect(message).toContain(lien)
+  expect(codeDeCandidature(lien)).toBe(CODE)
+  expect(message).not.toMatch(/\b(tu|ton|ta|tes)\b/i)
+})
