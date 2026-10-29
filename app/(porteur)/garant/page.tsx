@@ -36,6 +36,8 @@ import { tailleLisible } from '@/lib/garant/validation'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournal } from '@/lib/content/journal'
+import { agenceDuDossier } from '@/lib/acces/agence-du-dossier'
+import { agenceDuDossier as texteAgence } from '@/lib/content/agence-du-dossier'
 
 export const metadata: Metadata = {
   title: 'Votre dépôt',
@@ -122,6 +124,7 @@ export default async function PageGarant({
   const historique = pageJournal(erreurJournal ? null : journal, dossierId)
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
+  const suivi = await agenceDuDossier(supabase)
 
   // La preparation reste possible pendant le depot, des qu'un plafond existe.
   // Apres transmission les conditions et la mention sont figees par la base.
@@ -165,6 +168,11 @@ export default async function PageGarant({
       <p className="mt-3 text-[15px] leading-relaxed font-medium">
         {depot.demandePar(String(dossier.email_locataire))}
       </p>
+      {suivi ? (
+        <p className="mt-2 text-[14px] leading-relaxed font-semibold">
+          {texteAgence.garant(suivi)}
+        </p>
+      ) : null}
 
       <div className="bg-sun/25 border-sun mt-5 flex items-start gap-3 rounded-[18px] border p-5">
         <Icone nom="cadenas" className="mt-0.5 size-5 shrink-0" />
