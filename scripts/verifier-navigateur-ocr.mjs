@@ -279,6 +279,7 @@ const api = createServer(async (req, res) => {
         candidats: 1,
         complets: 1,
         pris: 0,
+        candidature_ouverte: true,
       },
     ]
   else if (path.endsWith('/logements'))

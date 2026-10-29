@@ -20,6 +20,7 @@ type Ligne = {
   candidats: number
   complets: number
   pris: number
+  candidature_ouverte?: boolean
 }
 
 /** Les logements de l'agence et, pour chacun, ou en sont ses candidats (0069). */
@@ -98,6 +99,11 @@ export default async function PageLogements({
                     >
                       {l.libelle}
                     </Link>
+                    {l.candidature_ouverte ? (
+                      <span className="border-ink bg-mint ml-2 inline-block rounded-full border-2 px-2 py-0.5 text-[11px] font-bold">
+                        {t.lienOuvert}
+                      </span>
+                    ) : null}
                     {l.archive ? (
                       <span className="text-muted ml-2 text-[12px]">{t.archive}</span>
                     ) : null}

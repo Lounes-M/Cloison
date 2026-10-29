@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { cache } from 'react'
 
 import { FormulaireOuverture } from '@/components/forms/FormulaireOuverture'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
@@ -7,11 +8,6 @@ import { Section } from '@/components/ui/Section'
 import { clientServeur } from '@/lib/acces/serveur'
 import { candidature as t } from '@/lib/content/candidature'
 import { euros } from '@/lib/content/tarifs'
-
-export const metadata: Metadata = {
-  title: t.page.titre,
-  robots: { index: false, follow: false },
-}
 
 type Logement = {
   libelle: string
@@ -45,7 +41,7 @@ function details(l: Logement): { terme: string; valeur: string }[] {
   return lignes
 }
 
-async function logementDuCode(code: string): Promise<Logement | null> {
+const logementDuCode = cache(async (code: string): Promise<Logement | null> => {
   if (!/^[a-f0-9]{32}$/.test(code)) return null
   const { data, error } = await (await clientServeur()).rpc('logement_par_code', { le_code: code })
   if (error) {
@@ -53,6 +49,29 @@ async function logementDuCode(code: string): Promise<Logement | null> {
     return null
   }
   return (Array.isArray(data) ? (data[0] as Logement | undefined) : null) ?? null
+})
+
+/**
+ * Le titre et la description de l'apercu quand le lien est partage dans une
+ * annonce ou une messagerie : le bien et l'agence, ce que la page montre deja.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ code: string }>
+}): Promise<Metadata> {
+  const logement = await logementDuCode((await params).code)
+  const robots = { index: false, follow: false }
+  if (!logement) return { title: t.page.invalideTitre, robots }
+  const titre = t.page.apercuTitre(logement.libelle, logement.agence)
+  const description = t.page.apercuTexte(logement.agence)
+  return {
+    title: titre,
+    description,
+    robots,
+    openGraph: { title: titre, description },
+    twitter: { title: titre, description },
+  }
 }
 
 /**

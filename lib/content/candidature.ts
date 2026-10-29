@@ -44,6 +44,9 @@ export const candidature = {
   },
   page: {
     titre: 'Candidater pour ce logement',
+    apercuTitre: (libelle: string, agence: string) => `${libelle}, avec ${agence}`,
+    apercuTexte: (agence: string) =>
+      `Crée ton dossier de location sur Cloison et transmets-le à ${agence} pour ce logement.`,
     etiquette: 'Candidature',
     loyer: 'Loyer de référence',
     sansLoyer: 'Non renseigné',

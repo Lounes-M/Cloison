@@ -25,6 +25,7 @@ export const logements = {
   },
   sansLoyer: 'Non renseigné',
   archive: 'Archivé',
+  lienOuvert: 'Lien de candidature ouvert',
   archiver: 'Archiver',
   desarchiver: 'Réactiver',
   voirArchives: 'Afficher les logements archivés',
