@@ -35,7 +35,7 @@ import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournal } from '@/lib/content/journal'
 
 export const metadata: Metadata = {
-  title: 'Ton dépôt',
+  title: 'Votre dépôt',
   robots: { index: false, follow: false },
 }
 

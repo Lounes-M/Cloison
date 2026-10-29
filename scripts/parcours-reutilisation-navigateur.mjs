@@ -122,15 +122,15 @@ export async function parcourirReutilisation(page, site, moteur, largeur, fixtur
     const bloc = page
       .locator('section')
       .filter({
-        has: page.getByRole('heading', { name: 'Réutiliser une de tes pièces', exact: true }),
+        has: page.getByRole('heading', { name: 'Réutiliser une de vos pièces', exact: true }),
       })
       .last()
     await bloc
-      .getByLabel('Ton lien garant du dossier source')
+      .getByLabel('Votre lien garant du dossier source')
       .fill('https://tiers.invalid/lien/aaa.bbb.ccc')
     await bloc.getByRole('button', { name: 'Afficher les pièces disponibles' }).click()
     await bloc.getByRole('alert').filter({ hasText: 'Ce lien ne permet pas' }).waitFor()
-    await bloc.getByLabel('Ton lien garant du dossier source').fill(fixture.lien)
+    await bloc.getByLabel('Votre lien garant du dossier source').fill(fixture.lien)
     await bloc.getByRole('button', { name: 'Afficher les pièces disponibles' }).click()
     await bloc.getByLabel('Pièce à copier', { exact: true }).selectOption(piece)
     await bloc.getByRole('button', { name: 'Copier cette pièce' }).click()
@@ -141,7 +141,7 @@ export async function parcourirReutilisation(page, site, moteur, largeur, fixtur
     await bloc.getByRole('status').filter({ hasText: 'La copie est confirmée' }).waitFor()
     assert.equal(fixture.depots(), 1)
     await page.reload()
-    await bloc.getByLabel('Ton lien garant du dossier source').fill(fixture.lien)
+    await bloc.getByLabel('Votre lien garant du dossier source').fill(fixture.lien)
     await bloc.getByRole('button', { name: 'Afficher les pièces disponibles' }).click()
     await bloc.getByLabel('Pièce à copier', { exact: true }).selectOption(piece)
     await bloc.getByRole('checkbox').check()

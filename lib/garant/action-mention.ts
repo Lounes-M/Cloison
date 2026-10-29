@@ -30,9 +30,9 @@ export type EtatMention =
   | { statut: 'erreur'; message: string; manques?: Element[]; valeurs?: Record<string, string> }
 
 const schema = z.object({
-  nom: z.string().trim().min(1, 'Ton nom est requis.').max(120),
-  prenom: z.string().trim().min(1, 'Ton prenom est requis.').max(120),
-  adresse: z.string().trim().min(5, 'Ton adresse est requise.').max(400),
+  nom: z.string().trim().min(1, 'Votre nom est requis.').max(120),
+  prenom: z.string().trim().min(1, 'Votre prénom est requis.').max(120),
+  adresse: z.string().trim().min(5, 'Votre adresse est requise.').max(400),
   mention: z
     .string()
     .trim()
@@ -62,7 +62,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
-      message: 'Ton lien a expiré. Demande au locataire de te le renvoyer.',
+      message: 'Votre lien a expiré. Demandez au locataire de vous le renvoyer.',
     }
   }
 
@@ -84,7 +84,8 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!engagement || !engagement.montant_max_cents) {
     return {
       statut: 'erreur',
-      message: 'Enregistre d’abord un montant maximum dans la partie consacrée à ton engagement.',
+      message:
+        'Enregistrez d’abord un montant maximum dans la partie consacrée à votre engagement.',
       valeurs,
     }
   }
@@ -100,7 +101,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   ) {
     return {
       statut: 'erreur',
-      message: 'Il manque quelque chose à ta mention.',
+      message: 'Il manque quelque chose à votre mention.',
       manques: verdict.ok ? ['montant'] : verdict.manques,
       valeurs,
     }
@@ -124,7 +125,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     console.error('[garant] mention refusee')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
+      message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
       valeurs,
     }
   }

@@ -33,27 +33,27 @@ export const locataire: Record<string, { sujet: string; texte: string }> = {
 
 export const garant: Record<string, { sujet: string; texte: string }> = {
   complement_demande: {
-    sujet: 'Ton agence demande une correction',
+    sujet: 'Votre agence demande une correction',
     texte:
-      'Une correction est attendue dans ton dépôt Cloison. Consulte la demande depuis ton lien habituel, dépose le nouveau fichier puis propose-le à ton agence. Le motif reste dans ton espace privé.',
+      'Une correction est attendue dans votre dépôt Cloison. Consultez la demande depuis votre lien habituel, déposez le nouveau fichier puis proposez-le à votre agence. Le motif reste dans votre espace privé.',
   },
   transmis: {
     sujet: 'L’agence a pris le dossier',
     texte:
-      'L’agence a pris le dossier auquel tu te portes garant. Tes pièces et ta déclaration sont figées. Tu peux consulter tes originaux et l’historique des accès depuis ton dépôt. Cette transmission ne constitue pas une signature.',
+      'L’agence a pris le dossier auquel vous vous portez garant. Vos pièces et votre déclaration sont figées. Vous pouvez consulter vos originaux et l’historique des accès depuis votre dépôt. Cette transmission ne constitue pas une signature.',
   },
   refuse: {
     sujet: 'Le dossier n’a pas été retenu',
     texte:
-      'L’agence n’a pas retenu le dossier auquel tu te portais garant. Tes pièces seront détruites à l’échéance du dossier ; tu n’as rien à faire.',
+      'L’agence n’a pas retenu le dossier auquel vous vous portiez garant. Vos pièces seront détruites à l’échéance du dossier ; vous n’avez rien à faire.',
   },
 }
 
 export const agence: Record<string, { sujet: (reference: string) => string; texte: string }> = {
   complement_fourni: {
-    sujet: (reference) => `Dossier ${reference} : remplacement a examiner`,
+    sujet: (reference) => `Dossier ${reference} : remplacement à examiner`,
     texte:
-      'Le garant a propose un remplacement. Consultez-le dans votre espace avant de le valider ou de demander une nouvelle correction.',
+      'Le garant a proposé un remplacement. Consultez-le dans votre espace avant de le valider ou de demander une nouvelle correction.',
   },
   complet: {
     sujet: (reference) => `Dossier ${reference} complet`,

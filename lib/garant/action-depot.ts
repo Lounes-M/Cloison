@@ -33,7 +33,7 @@ export type EtatDepot =
   | { statut: 'depose'; nature: string }
   | { statut: 'erreur'; message: string; nature?: string }
 
-const LIEN_EXPIRE = 'Ton lien a expiré. Demande au locataire de te le renvoyer.'
+const LIEN_EXPIRE = 'Votre lien a expiré. Demandez au locataire de vous le renvoyer.'
 
 async function porteurGarant() {
   const porteur = await capaciteDepuisCookies()
@@ -51,7 +51,7 @@ export async function deposerUnePiece(
 
   const fichier = donnees.get('fichier')
   if (!(fichier instanceof File) || fichier.size === 0) {
-    return { statut: 'erreur', message: 'Choisis un fichier.', nature }
+    return { statut: 'erreur', message: 'Choisissez un fichier.', nature }
   }
 
   // La borne pratique, avant meme de lire les octets : au-dela, Vercel aurait
@@ -87,7 +87,7 @@ export async function deposerUnePiece(
       return {
         statut: 'erreur',
         message:
-          'Ce document est invalide, protégé ou trop grand. Exporte une copie lisible de moins de 40 pages.',
+          'Ce document est invalide, protégé ou trop grand. Exportez une copie lisible de moins de 40 pages.',
         nature,
       }
     }
@@ -108,7 +108,7 @@ export async function deposerUnePiece(
     console.error('[garant] depot impossible')
     return {
       statut: 'erreur',
-      message: "Le dépôt n'a pas abouti. Réessaie dans un instant.",
+      message: "Le dépôt n'a pas abouti. Réessayez dans un instant.",
       nature,
     }
   }
@@ -140,7 +140,7 @@ export async function retirerUnePiece(
     await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
   } catch {
     console.error('[garant] retrait impossible')
-    return { statut: 'erreur', message: "Le retrait n'a pas abouti. Réessaie dans un instant." }
+    return { statut: 'erreur', message: "Le retrait n'a pas abouti. Réessayez dans un instant." }
   }
 
   revalidatePath('/garant')

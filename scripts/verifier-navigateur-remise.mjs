@@ -134,7 +134,7 @@ try {
           await page
             .getByRole('button', { name: 'Confirmer que j’ai récupéré mes fichiers' })
             .click()
-          await page.getByText('Ta confirmation de réception a été enregistrée.').waitFor()
+          await page.getByText('Votre confirmation de réception a été enregistrée.').waitFor()
           assert.equal(demandes, 2)
           assert.equal(confirmations, 1)
           assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
