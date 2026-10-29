@@ -9,6 +9,7 @@ const h = vi.hoisted(() => ({
   livrer: vi.fn(),
   debit: vi.fn(),
   rpc: vi.fn(),
+  prevenir: vi.fn(),
 }))
 vi.mock('@/lib/agences/contexte', () => ({ contexteAgence: h.contexte }))
 vi.mock('@/lib/acces/session', () => ({
@@ -19,7 +20,7 @@ vi.mock('@/lib/acces/session', () => ({
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: h.serveur }))
 vi.mock('@/lib/acces/debit', () => ({ consommerDebit: h.debit }))
 vi.mock('@/lib/courriels/livraison-liens', () => ({ reprendreLivraisonLiens: h.livrer }))
-vi.mock('@/lib/courriels/notifications', () => ({ prevenirSiLeStatutAChange: vi.fn() }))
+vi.mock('@/lib/courriels/notifications', () => ({ prevenirSiLeStatutAChange: h.prevenir }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('next/headers', () => ({ headers: async () => new Headers() }))
 
@@ -86,6 +87,7 @@ test('le locataire candidate avec son accord, depuis son propre dossier', async 
   ).toEqual({ statut: 'transmis', agence: 'Agence Fictive' })
   expect(h.porteur).toHaveBeenCalledWith('jeton')
   expect(h.rpc).toHaveBeenCalledExactlyOnceWith('candidater_au_logement', { le_code: CODE })
+  expect(h.prevenir).toHaveBeenCalledExactlyOnceWith({ rpc: h.rpc }, DOSSIER, null)
 
   h.rpc.mockClear()
   expect(await candidaterAuLogement(initial, form({ dossier: DOSSIER, code: CODE }))).toEqual({
@@ -132,6 +134,7 @@ test('un dossier ouvert depuis le lien rejoint le logement avant l envoi du lien
     le_code: CODE,
   })
   expect(ordre).toEqual(['candidater_dossier_neuf', 'livraison'])
+  expect(h.prevenir).toHaveBeenCalledExactlyOnceWith({ rpc: h.rpc }, DOSSIER, null)
 })
 
 test('sans accord, ou avec un code mal forme, aucun dossier ne s ouvre', async () => {
@@ -160,6 +163,7 @@ test('un rattachement refuse laisse le dossier ouvert et le dit', async () => {
     ),
   ).toEqual({ statut: 'envoye', candidature: 'echouee' })
   expect(h.livrer).toHaveBeenCalledWith(DOSSIER)
+  expect(h.prevenir).not.toHaveBeenCalled()
   expect(await ouvrirMonDossier(initial, form({ courriel: 'toi@exemple.fr' }))).toEqual({
     statut: 'envoye',
   })

@@ -50,6 +50,11 @@ export const garant: Record<string, { sujet: string; texte: string }> = {
 }
 
 export const agence: Record<string, { sujet: (reference: string) => string; texte: string }> = {
+  rattache: {
+    sujet: (reference) => `Dossier ${reference} transmis à votre agence`,
+    texte:
+      'Un locataire a rattaché son dossier à votre agence, avec son accord. Son garant n’a peut-être pas encore déposé ses pièces : un autre courriel suivra quand le dossier sera complet.',
+  },
   complement_fourni: {
     sujet: (reference) => `Dossier ${reference} : remplacement à examiner`,
     texte:

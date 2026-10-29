@@ -9,6 +9,7 @@ import { consommerDebit } from '@/lib/acces/debit'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { continuite } from '@/lib/content/continuite'
+import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 export type EtatContinuite = { message?: string }
 export async function retrouverMonDossier(
   _etat: EtatContinuite,
@@ -65,6 +66,7 @@ export async function rattacherMonDossier(
   const db = clientPorteurDeLien(porteur.jeton)
   const { error } = await db.rpc('rattacher_mon_dossier', { domaine_agence: domaine })
   if (error) return { message: continuite.erreur }
+  await prevenirSiLeStatutAChange(db, porteur.capacite.dossierId, null)
   revalidatePath('/locataire')
   return { message: continuite.rattache }
 }
