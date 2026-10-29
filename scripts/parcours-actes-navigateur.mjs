@@ -241,6 +241,11 @@ export function fixtureActes(dossier, cleMaitresse) {
 export async function parcourirActes(page, site, dossier, moteur, largeur, fixture, visiter) {
   fixture.activer()
   try {
+    await visiter(`/espace/dossiers/${dossier}/acte`, 'modele-acte')
+    await page
+      .getByRole('heading', { name: 'Modèle d’acte de cautionnement', exact: true })
+      .waitFor()
+    await page.getByRole('button', { name: 'Télécharger le projet PDF', exact: true }).waitFor()
     await visiter(`/espace/dossiers/${dossier}/signature`, 'preparation-acte')
     await page.getByRole('heading', { name: 'Préparer l’acte', exact: true }).waitFor()
     await page.locator('input[name="pdf"]').setInputFiles({
