@@ -104,7 +104,9 @@ export async function parcourirInterface(
   if (repertoire) await mkdir(repertoire, { recursive: true })
   const visiter = async (chemin, nom, shell = true) => {
     routesVues.add(
-      chemin.replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/g, '[id]'),
+      chemin
+        .replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/g, '[id]')
+        .replace(/^\/candidater\/[a-f0-9]{32}$/, '/candidater/[code]'),
     )
     await page.goto(site + chemin)
     await page.locator('h1').first().waitFor()
@@ -290,6 +292,8 @@ export async function parcourirInterface(
   await page.keyboard.press('Enter')
   assert(await page.locator('#email-retour').isVisible(), 'Recuperation inaccessible au clavier')
   await retrouver.locator('summary').press('Enter')
+  await visiter('/candidater/' + 'c'.repeat(32), 'candidater')
+  await page.getByText('Agence fictive', { exact: true }).waitFor()
   await visiter('/remise-donnees', 'remise-donnees')
   await visiter('/lien-invalide', 'lien-invalide')
   // Le lien de saut doit rendre le contenu atteignable au clavier.

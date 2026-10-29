@@ -282,7 +282,20 @@ const api = createServer(async (req, res) => {
       },
     ]
   else if (path.endsWith('/logements'))
-    valeur = [{ id, libelle: 'T2 fictif, 3e étage', loyer_cents: 85000, archive: false }]
+    valeur = [
+      {
+        id,
+        libelle: 'T2 fictif, 3e étage',
+        loyer_cents: 85000,
+        archive: false,
+        code_candidature: 'c'.repeat(32),
+      },
+    ]
+  else if (path.endsWith('/rpc/logement_par_code'))
+    valeur =
+      entree.le_code === 'c'.repeat(32)
+        ? [{ libelle: 'T2 fictif, 3e étage', loyer_cents: 85000, agence: 'Agence fictive' }]
+        : []
   else if (path.endsWith('/rpc/activite_de_mon_agence'))
     valeur = Array.from({ length: 12 }, (_, i) => ({
       mois: `2026-${String(12 - i).padStart(2, '0')}-01`,

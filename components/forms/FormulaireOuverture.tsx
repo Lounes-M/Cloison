@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef } from 'react'
 
+import { candidature as texteCandidature } from '@/lib/content/candidature'
 import { porte } from '@/lib/content/locataire'
 import { ouvrirMonDossier, type EtatOuverture } from '@/lib/locataire/action-ouverture'
 import { cn } from '@/lib/utils'
@@ -13,11 +14,16 @@ const ETAT_INITIAL: EtatOuverture = { statut: 'inactif' }
  * La porte principale : un champ, un bouton.
  *
  * Aucune restriction de domaine ici, a l'inverse du formulaire agence : un
- * locataire a une adresse personnelle, et c'est normal.
+ * locataire a une adresse personnelle, et c'est normal. Depuis un lien de
+ * candidature (0070), le code voyage en champ cache, avec l'accord explicite
+ * de transmettre le dossier a l'agence nommee.
  */
-export function FormulaireOuverture() {
+export function FormulaireOuverture({
+  candidature,
+}: { candidature?: { code: string; agence: string } } = {}) {
   const [etat, envoyer, enCours] = useActionState(ouvrirMonDossier, ETAT_INITIAL)
   const idChamp = useId()
+  const idAccord = useId()
   const resume = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -35,6 +41,13 @@ export function FormulaireOuverture() {
         <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-relaxed font-medium">
           {porte.succesTexte}
         </p>
+        {etat.candidature ? (
+          <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-relaxed font-semibold">
+            {etat.candidature === 'rattachee'
+              ? texteCandidature.page.rattache
+              : texteCandidature.page.nonRattache}
+          </p>
+        ) : null}
       </div>
     )
   }
@@ -78,6 +91,22 @@ export function FormulaireOuverture() {
           </a>
         </p>
       </div>
+
+      {candidature ? (
+        <div className="flex gap-3">
+          <input type="hidden" name="candidature" value={candidature.code} />
+          <input
+            id={idAccord}
+            type="checkbox"
+            name="accord"
+            required
+            className="accent-ink mt-1 size-5 shrink-0"
+          />
+          <label htmlFor={idAccord} className="text-[14px] font-medium">
+            {texteCandidature.page.accord(candidature.agence)}
+          </label>
+        </div>
+      ) : null}
 
       <button
         type="submit"

@@ -162,3 +162,23 @@ export async function attribuerLeLogement(
   }
   return { statut: 'attribue', refuses: refuses.length }
 }
+
+/**
+ * Ouvrir, renouveler ou fermer le lien de candidature (migration 0070).
+ *
+ * La base tire le code et verifie que le logement est a l'agence et, pour
+ * l'ouvrir, qu'il n'est pas archive. Renouveler revoque l'ancien lien.
+ */
+export async function reglerLaCandidature(donnees: FormData): Promise<void> {
+  const id = String(donnees.get('logement') ?? '')
+  const ouvrir = donnees.get('candidature') === 'ouvrir'
+  if (!estUuidCanonique(id)) return
+  const contexte = await contexteAgence()
+  if (contexte.etat !== 'rattache') return
+  const { error } = await contexte.supabase.rpc('regler_candidature_logement', {
+    le_logement: id,
+    ouvrir,
+  })
+  if (error) console.error('[agence] lien de candidature non regle')
+  revalidatePath(`/espace/logements/${id}`)
+}

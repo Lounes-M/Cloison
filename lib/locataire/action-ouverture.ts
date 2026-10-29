@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { consommerDebit } from '@/lib/acces/debit'
 import { clientServeur } from '@/lib/acces/serveur'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
+import { candidature as texteCandidature } from '@/lib/content/candidature'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 
 /**
@@ -22,7 +23,7 @@ import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 
 export type EtatOuverture =
   | { statut: 'inactif' }
-  | { statut: 'envoye' }
+  | { statut: 'envoye'; candidature?: 'rattachee' | 'echouee' }
   | { statut: 'erreur'; message: string; valeur?: string }
 
 const schema = z.object({
@@ -59,6 +60,18 @@ export async function ouvrirMonDossier(
 
   const { courriel } = analyse.data
 
+  // Le lien de candidature d'un logement (0070) : le code n'est lu qu'avec
+  // l'accord explicite, et un code mal forme n'ouvre rien.
+  const brut = String(donnees.get('candidature') ?? '')
+  const code = brut === '' ? null : brut
+  if (code !== null && !/^[a-f0-9]{32}$/.test(code)) {
+    return { statut: 'erreur', message: texteCandidature.page.invalideTexte, valeur: saisie }
+  }
+  if (code !== null && donnees.get('accord') !== 'on') {
+    return { statut: 'erreur', message: texteCandidature.erreurs.accord, valeur: saisie }
+  }
+  let rattachement: 'rattachee' | 'echouee' | undefined
+
   try {
     if (
       !(await consommerDebit(await clientServeur(), 'ouverture_dossier', await empreinteAppelant()))
@@ -79,6 +92,17 @@ export async function ouvrirMonDossier(
       }
     }
 
+    if (code !== null) {
+      const { error } = await (
+        await clientServeur()
+      ).rpc('candidater_dossier_neuf', {
+        le_dossier: ouvert.dossierId,
+        le_code: code,
+      })
+      rattachement = error ? 'echouee' : 'rattachee'
+      if (error) console.error('[porte] candidature non rattachee')
+    }
+
     await reprendreLivraisonLiens(ouvert.dossierId)
   } catch {
     console.error('[porte] ouverture impossible')
@@ -89,5 +113,5 @@ export async function ouvrirMonDossier(
     }
   }
 
-  return { statut: 'envoye' }
+  return rattachement ? { statut: 'envoye', candidature: rattachement } : { statut: 'envoye' }
 }
