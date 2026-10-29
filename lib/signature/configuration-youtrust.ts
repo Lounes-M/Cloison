@@ -3,8 +3,13 @@ import { creerClientYoutrust } from './client-youtrust'
 import type { PrestataireSignature } from './prestataire'
 import { creerVerificateurYoutrust, environnementYoutrust } from './youtrust'
 
+/**
+ * Youtrust est conserve en secours de Docage : il ne sert que si
+ * SIGNATURE_PRESTATAIRE=youtrust. L'environnement et les drapeaux sont
+ * communs aux deux prestataires.
+ */
 function configuration() {
-  const environnement = environnementYoutrust.safeParse(process.env.YOUTRUST_ENVIRONMENT)
+  const environnement = environnementYoutrust.safeParse(process.env.SIGNATURE_ENVIRONMENT)
   if (!environnement.success) throw new Error('Configuration Youtrust indisponible')
   return environnement.data
 }
@@ -15,12 +20,11 @@ export function clientYoutrustConfigure(signal?: AbortSignal) {
     {
       environnement: configuration(),
       cleApi: process.env.YOUTRUST_API_KEY ?? '',
-      autoriserMutations: process.env.YOUTRUST_MUTATIONS_ENABLED === 'true',
+      autoriserMutations: process.env.SIGNATURE_MUTATIONS_ENABLED === 'true',
     },
     fetch,
     signal,
   )
-  // Youtrust est la premiere implementation de l'interface prestataire.
   client satisfies PrestataireSignature
   return client
 }

@@ -14,6 +14,7 @@ vi.mock('@/lib/signature/parcours', () => ({ traiterActe: h.traiter, chargerActe
 vi.mock('@/lib/paiement/stripe', () => ({ rapprocherSessionActe: h.rapprocher }))
 vi.mock('@/lib/signature/configuration-parcours', () => ({ configurationParcours: h.config }))
 vi.mock('@/lib/signature/configuration-youtrust', () => ({ clientYoutrustConfigure: () => ({}) }))
+vi.mock('@/lib/signature/configuration-docage', () => ({ clientDocageConfigure: () => ({}) }))
 import { POST as signature } from '@/app/api/signature/traitement/route'
 import { POST as paiement } from '@/app/api/paiement/actes/rapprochement/route'
 const requete = (secret = 'fictif') =>
@@ -263,7 +264,7 @@ const actes = Array.from(
 )
 function fileActes(ids = actes) {
   vi.stubEnv('SIGNATURE_PARCOURS_ENABLED', 'true')
-  vi.stubEnv('YOUTRUST_MUTATIONS_ENABLED', 'true')
+  vi.stubEnv('SIGNATURE_MUTATIONS_ENABLED', 'true')
   const attente = [...ids]
   h.rpc.mockImplementation(async (nom) => ({
     data:
@@ -356,7 +357,7 @@ test('une coupure pendant un acte interdit toute nouvelle reservation', async ()
 
 test('fermer les mutations laisse archiver les autres actes signes', async () => {
   fileActes(actes.slice(0, 2))
-  vi.stubEnv('YOUTRUST_MUTATIONS_ENABLED', 'false')
+  vi.stubEnv('SIGNATURE_MUTATIONS_ENABLED', 'false')
   h.charger.mockResolvedValueOnce({ acte: { etape: 'valide' } })
   const r = await signature(requete())
   expect(r.status).toBe(200)

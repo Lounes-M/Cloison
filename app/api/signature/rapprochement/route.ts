@@ -2,30 +2,33 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
 import { suivreTraitementActes } from '@/lib/exploitation/suivi-actes'
-import { clientYoutrustConfigure } from '@/lib/signature/configuration-youtrust'
-import { environnementYoutrust, identifiantYoutrust } from '@/lib/signature/youtrust'
+import {
+  clientSignatureConfigure,
+  modeSignature,
+  registreSignatureActif,
+} from '@/lib/signature/configuration-prestataire'
 
 export const runtime = 'nodejs'
 export const maxDuration = 55
 const headers = { 'Cache-Control': 'no-store' }
 const reservation = z.strictObject({
-  id: identifiantYoutrust,
-  reference_fournisseur: identifiantYoutrust,
+  id: z.uuid(),
+  reference_fournisseur: z.uuid(),
   revision: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
-  bail: identifiantYoutrust,
+  bail: z.uuid(),
 })
 
 export async function POST(requete: Request) {
   return suivreTraitementActes('signature', requete, executer)
 }
 async function executer(requete: Request) {
-  if (process.env.YOUTRUST_REGISTRY_ENABLED !== 'true')
+  if (!registreSignatureActif())
     return NextResponse.json({ actif: false, traites: 0, echecs: 0 }, { headers })
   let traites = 0,
     echecs = 0
   try {
-    const mode = environnementYoutrust.parse(process.env.YOUTRUST_ENVIRONMENT)
-    const client = clientYoutrustConfigure()
+    const mode = modeSignature()
+    const client = clientSignatureConfigure()
     const signal = AbortSignal.any([requete.signal, AbortSignal.timeout(45000)])
     const db = await clientServeur(signal)
     const file = await db.rpc('reserver_signatures_a_rapprocher', { le_mode: mode })

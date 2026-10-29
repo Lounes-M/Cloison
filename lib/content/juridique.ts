@@ -136,8 +136,12 @@ export const confidentialite = {
   sauvegardes: (jours: number) =>
     `Les sauvegardes techniques sont conservées ${jours} jours au plus, puis écrasées : une donnée effacée disparaît aussi des sauvegardes au plus tard ${jours} jours après son effacement. Elles servent uniquement à rétablir le service après un incident, jamais à consulter un dossier effacé.`,
   facultatifs: {
-    signature:
-      'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
+    signature: {
+      docage:
+        'La signature électronique de l’acte de cautionnement est confiée à Docage, prestataire français de signature électronique. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
+      youtrust:
+        'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
+    },
     ocr: 'À la demande explicite d’une agence, une pièce peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
   },
   droits: {

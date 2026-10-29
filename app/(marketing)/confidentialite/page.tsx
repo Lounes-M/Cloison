@@ -38,7 +38,9 @@ export default function PageConfidentialite() {
               : []),
             ...(section.id === 'prestataires'
               ? [
-                  ...(facultatifs.signature ? [textes.facultatifs.signature] : []),
+                  ...(facultatifs.signature
+                    ? [textes.facultatifs.signature[facultatifs.signature]]
+                    : []),
                   ...(facultatifs.ocr ? [textes.facultatifs.ocr] : []),
                 ]
               : []),
