@@ -294,6 +294,7 @@ export async function parcourirInterface(
   await retrouver.locator('summary').press('Enter')
   await visiter('/candidater/' + 'c'.repeat(32), 'candidater')
   await page.getByText('Agence fictive', { exact: true }).waitFor()
+  await page.getByText('42 m²', { exact: true }).waitFor()
   await visiter('/remise-donnees', 'remise-donnees')
   await visiter('/lien-invalide', 'lien-invalide')
   // Le lien de saut doit rendre le contenu atteignable au clavier.

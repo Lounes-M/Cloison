@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
+import { BoutonCopierLien } from '@/components/forms/BoutonCopierLien'
 import { FormulaireAttributionLogement } from '@/components/forms/FormulaireAttributionLogement'
+import { FormulaireDescriptionLogement } from '@/components/forms/FormulaireDescriptionLogement'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { reglerLaCandidature } from '@/lib/agences/action-logements'
@@ -52,7 +54,9 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
   const [{ data: logement, error: e1 }, { data: dossiers, error: e2 }] = await Promise.all([
     c.supabase
       .from('logements')
-      .select('id, libelle, loyer_cents, archive, code_candidature')
+      .select(
+        'id, libelle, loyer_cents, archive, code_candidature, ville, surface_m2, pieces, meuble, disponible_le',
+      )
       .eq('id', id)
       .maybeSingle(),
     c.supabase
@@ -173,6 +177,9 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                 value={lienCandidature}
                 className="border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[16px] font-medium"
               />
+              <div className="mt-3">
+                <BoutonCopierLien lien={lienCandidature} />
+              </div>
               <p className="text-muted mt-2 text-[13px] font-medium">
                 {tc.agence.renouvelerAide} {tc.agence.archive}
               </p>
@@ -208,6 +215,23 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
               ) : null}
             </div>
           ) : null}
+        </section>
+      ) : null}
+
+      {!logement.archive ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{tc.description.titre}</h2>
+          <p className="text-muted mt-2 mb-5 text-[14px] font-medium">{tc.description.aide}</p>
+          <FormulaireDescriptionLogement
+            logementId={id}
+            description={{
+              ville: logement.ville ?? null,
+              surface_m2: logement.surface_m2 ?? null,
+              pieces: logement.pieces ?? null,
+              meuble: logement.meuble ?? null,
+              disponible_le: logement.disponible_le ?? null,
+            }}
+          />
         </section>
       ) : null}
 

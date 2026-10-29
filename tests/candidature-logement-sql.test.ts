@@ -108,9 +108,31 @@ test("l'agence ouvre un code aleatoire, le renouvelle, le ferme, et l'archivage 
   await devenir(db, 'serveur')
   expect((await db.query('select * from logement_par_code($1)', [code])).rows).toEqual([])
   expect((await db.query('select * from logement_par_code($1)', [rows[0]!.code])).rows).toEqual([
-    { libelle: 'T2 Gerland', loyer_cents: 78000, agence: 'Logis' },
+    {
+      libelle: 'T2 Gerland',
+      loyer_cents: 78000,
+      agence: 'Logis',
+      ville: null,
+      surface_m2: null,
+      pieces: null,
+      meuble: null,
+      disponible_le: null,
+    },
   ])
   await devenir(db, 'authenticated', admin)
+  // La description du bien (0072) sort sur la page publique, et rien d'autre.
+  await db.query(
+    "update logements set ville='Lyon 7e', surface_m2=42, pieces=2, meuble=false, disponible_le='2026-12-01' where id=$1",
+    [id],
+  )
+  await refus('update logements set agence_id=$1 where id=$2', [admin, id])
+  await devenir(db, 'serveur')
+  expect(
+    (await db.query('select * from logement_par_code($1)', [rows[0]!.code])).rows[0],
+  ).toMatchObject({ ville: 'Lyon 7e', surface_m2: 42, pieces: 2, meuble: false })
+  await devenir(db, 'authenticated', admin)
+  await refus("update logements set ville='' where id=$1", [id])
+  await refus('update logements set surface_m2=2 where id=$1', [id])
   expect(
     (await db.query('select regler_candidature_logement($1,false) as code', [id])).rows,
   ).toEqual([{ code: null }])
