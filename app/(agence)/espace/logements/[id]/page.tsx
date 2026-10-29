@@ -5,10 +5,13 @@ import { notFound, redirect } from 'next/navigation'
 import { FormulaireAttributionLogement } from '@/components/forms/FormulaireAttributionLogement'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
+import { reglerLaCandidature } from '@/lib/agences/action-logements'
 import { contexteAgence } from '@/lib/agences/contexte'
+import { candidature as tc } from '@/lib/content/candidature'
 import { statuts } from '@/lib/content/espace'
 import { logements as t } from '@/lib/content/logements'
 import { euros } from '@/lib/content/tarifs'
+import { site } from '@/lib/site'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { cn } from '@/lib/utils'
 
@@ -49,7 +52,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
   const [{ data: logement, error: e1 }, { data: dossiers, error: e2 }] = await Promise.all([
     c.supabase
       .from('logements')
-      .select('id, libelle, loyer_cents, archive')
+      .select('id, libelle, loyer_cents, archive, code_candidature')
       .eq('id', id)
       .maybeSingle(),
     c.supabase
@@ -71,6 +74,8 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
     .map((d) => ({ id: d.id, reference: d.reference }))
   const seuil = c.agence.seuilRatio
   const fmt = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
+  const code = typeof logement.code_candidature === 'string' ? logement.code_candidature : null
+  const lienCandidature = code ? `${site.url}/candidater/${code}` : null
   const loyer =
     logement.loyer_cents == null
       ? ''
@@ -150,6 +155,61 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
           </table>
         )}
       </section>
+
+      {!logement.archive ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{tc.agence.titre}</h2>
+          <p className="text-muted mt-2 mb-5 text-[14px] font-medium">
+            {c.agence.statut === 'verifiee' ? tc.agence.aide : tc.agence.nonVerifiee}
+          </p>
+          {lienCandidature ? (
+            <>
+              <label htmlFor="lien-candidature" className="mb-2 block text-[14px] font-bold">
+                {tc.agence.champ}
+              </label>
+              <input
+                id="lien-candidature"
+                readOnly
+                value={lienCandidature}
+                className="border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[16px] font-medium"
+              />
+              <p className="text-muted mt-2 text-[13px] font-medium">
+                {tc.agence.renouvelerAide} {tc.agence.archive}
+              </p>
+            </>
+          ) : c.agence.statut === 'verifiee' ? (
+            <p className="text-[14px] font-medium">{tc.agence.ferme}</p>
+          ) : null}
+          {c.agence.statut === 'verifiee' || lienCandidature ? (
+            <div className="mt-4 flex flex-wrap gap-3">
+              {c.agence.statut === 'verifiee' ? (
+                <form action={reglerLaCandidature}>
+                  <input type="hidden" name="logement" value={id} />
+                  <input type="hidden" name="candidature" value="ouvrir" />
+                  <button
+                    type="submit"
+                    className="press outlined bg-sun rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
+                  >
+                    {lienCandidature ? tc.agence.renouveler : tc.agence.ouvrir}
+                  </button>
+                </form>
+              ) : null}
+              {lienCandidature ? (
+                <form action={reglerLaCandidature}>
+                  <input type="hidden" name="logement" value={id} />
+                  <input type="hidden" name="candidature" value="fermer" />
+                  <button
+                    type="submit"
+                    className="press outlined bg-paper rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
+                  >
+                    {tc.agence.fermer}
+                  </button>
+                </form>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {!logement.archive && candidats.length > 0 ? (
         <section className="panneau-espace mt-8">

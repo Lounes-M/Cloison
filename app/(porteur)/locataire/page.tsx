@@ -3,6 +3,7 @@ import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { frise } from '@/lib/content/frise'
 import { etapesLocataire } from '@/lib/dossiers/frise'
 import { interfaceEspace } from '@/lib/content/interface'
+import { FormulaireCandidature } from '@/components/forms/FormulaireCandidature'
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import type { Metadata } from 'next'
@@ -154,6 +155,9 @@ export default async function PageLocataire({
             déclaration du garant.
           </p>
         )}
+        {ouvert && !dossier.agence_id && !dossier.demonstration ? (
+          <FormulaireCandidature dossierId={porteur.capacite.dossierId} />
+        ) : null}
         {ouvert && !dossier.agence_id ? (
           <FormulaireContinuite mode="agence" dossierId={porteur.capacite.dossierId} />
         ) : null}
