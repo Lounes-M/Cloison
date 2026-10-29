@@ -7,6 +7,8 @@ import { z } from 'zod'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
+import { tableau } from '@/lib/content/espace'
+import { montantEnCents } from '@/lib/garant/validation'
 import { contexteAgence } from './contexte'
 
 /**
@@ -25,7 +27,7 @@ import { contexteAgence } from './contexte'
 export type EtatNouveauDossier =
   | { statut: 'inactif' }
   | { statut: 'ouvert'; email: string }
-  | { statut: 'erreur'; message: string; valeur?: string }
+  | { statut: 'erreur'; message: string; valeur?: string; loyer?: string }
 
 const schemaLocataire = z.object({
   courriel: z
@@ -54,6 +56,18 @@ export async function ouvrirUnDossier(
     }
   }
 
+  // Le loyer est facultatif a l'ouverture : vide, le locataire le saisira.
+  const saisieLoyer = String(donnees.get('loyer') ?? '')
+  const loyer = montantEnCents(saisieLoyer)
+  if (loyer === 'invalide') {
+    return {
+      statut: 'erreur',
+      message: tableau.nouveauLoyerInvalide,
+      valeur: saisie,
+      loyer: saisieLoyer,
+    }
+  }
+
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
   if (contexte.agence.statut !== 'verifiee') {
@@ -72,6 +86,16 @@ export async function ouvrirUnDossier(
         message: "Le dossier n'a pas pu être ouvert. Réessayez dans un instant.",
         valeur: saisie,
       }
+    }
+
+    if (loyer !== null) {
+      // Le dossier est ouvert : un loyer refuse ne le defait pas, le
+      // locataire pourra le saisir lui-meme.
+      const { error } = await contexte.supabase
+        .from('dossiers')
+        .update({ loyer_cents: loyer })
+        .eq('id', ouvert.dossierId)
+      if (error) console.error('[agence] loyer initial non enregistre')
     }
 
     await reprendreLivraisonLiens(ouvert.dossierId)

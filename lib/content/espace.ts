@@ -43,6 +43,10 @@ export const tableau = {
   nouveauAide:
     'Le locataire reçoit un lien pour désigner son garant. Vous n’avez rien d’autre à envoyer.',
   nouveauChamp: 'Adresse e-mail du locataire',
+  nouveauLoyer: 'Loyer mensuel, charges comprises (facultatif)',
+  nouveauLoyerAide:
+    'Si vous le connaissez, le locataire n’aura pas à le saisir. Il reste modifiable jusqu’à la déclaration du garant.',
+  nouveauLoyerInvalide: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
   nouveauBouton: 'Envoyer le lien',
   nouveauEnvoi: 'Envoi…',
   nouveauSucces: (email: string) => `Dossier ouvert. L’envoi du lien à ${email} est programmé.`,
@@ -136,6 +140,20 @@ export const dossier = {
 } as const
 
 /** Clore un dossier avant son echeance : le geste est definitif. */
+/** Le loyer saisi par l'agence sur un dossier. */
+export const loyerAgence = {
+  titre: 'Loyer du logement',
+  champ: 'Loyer mensuel, charges comprises',
+  bouton: 'Enregistrer le loyer',
+  envoi: 'Enregistrement…',
+  succes: 'Loyer enregistré. Le locataire le voit dans son dossier.',
+  invalide: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
+  erreur:
+    'Le loyer n’a pas pu être enregistré. Il est peut-être déjà figé par la déclaration du garant.',
+  fige: 'Le loyer est figé : le garant a déclaré ses revenus sur cette base.',
+  second: 'Le loyer se saisit sur le dossier du premier garant et se recopie ici.',
+} as const
+
 /** Deux garants, deux dossiers lies (0067). */
 export const groupe = {
   principal: (reference: string) =>
