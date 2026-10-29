@@ -19,6 +19,14 @@ export const candidature = {
     copier: 'Copier le lien',
     copie: 'Lien copié.',
     copieImpossible: 'La copie a échoué. Sélectionnez le lien et copiez-le à la main.',
+    messageTitre: 'Message à envoyer aux candidats',
+    messageAide:
+      'Un texte prêt à coller dans votre annonce ou dans vos réponses aux candidats. Adaptez-le si besoin.',
+    message: (libelle: string, lien: string) =>
+      `Bonjour,\n\nPour candidater au logement « ${libelle} », créez votre dossier de location sur Cloison : ${lien}\n\nVous recevrez un lien par e-mail, sans compte ni mot de passe. Votre garant déposera ses justificatifs de son côté, et le dossier nous parviendra avec votre accord.\n\nBien cordialement`,
+    copierMessage: 'Copier le message',
+    messageCopie: 'Message copié.',
+    messageCopieImpossible: 'La copie a échoué. Sélectionnez le message et copiez-le à la main.',
   },
   description: {
     titre: 'Description du bien',

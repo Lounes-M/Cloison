@@ -4,9 +4,25 @@ import { useState } from 'react'
 
 import { candidature } from '@/lib/content/candidature'
 
-/** Copier le lien de candidature, avec un retour lu par les lecteurs d'ecran. */
-export function BoutonCopierLien({ lien }: { lien: string }) {
-  const [copie, noter] = useState<'ok' | 'erreur' | null>(null)
+const textes = {
+  lien: [candidature.agence.copier, candidature.agence.copie, candidature.agence.copieImpossible],
+  message: [
+    candidature.agence.copierMessage,
+    candidature.agence.messageCopie,
+    candidature.agence.messageCopieImpossible,
+  ],
+} as const
+
+/** Copier le lien de candidature, ou le message qui le porte, avec un retour lu par les lecteurs d'ecran. */
+export function BoutonCopierLien({
+  lien,
+  sorte = 'lien',
+}: {
+  lien: string
+  sorte?: keyof typeof textes
+}) {
+  const [bouton, copie, echec] = textes[sorte]
+  const [etat, noter] = useState<'ok' | 'erreur' | null>(null)
   return (
     <div className="flex flex-wrap items-center gap-3">
       <button
@@ -21,14 +37,10 @@ export function BoutonCopierLien({ lien }: { lien: string }) {
           }
         }}
       >
-        {candidature.agence.copier}
+        {bouton}
       </button>
       <p role="status" className="text-[13px] font-semibold">
-        {copie === 'ok'
-          ? candidature.agence.copie
-          : copie === 'erreur'
-            ? candidature.agence.copieImpossible
-            : ''}
+        {etat === 'ok' ? copie : etat === 'erreur' ? echec : ''}
       </p>
     </div>
   )
