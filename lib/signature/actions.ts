@@ -1,6 +1,9 @@
 'use server'
 import { verifierProjetActe } from './validation-projet'
-import { PAGES_ACTE_MAX } from './position'
+import { PAGES_ACTE_MAX, type PositionSignature } from './position'
+import { projetDepuisDossier } from '@/lib/acte/projet'
+import { MODELE_CAUTIONNEMENT } from '@/lib/acte/modele-cautionnement'
+import { acte } from '@/lib/content/acte'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -18,13 +21,15 @@ import { archiverFichier, ouvrirContexteActe } from './parcours'
 import { contexteActe, dossierActe } from './parcours-types'
 export type EtatActe = { message: string; id?: string }
 const bytea = (b: Buffer) => `\\x${b.toString('hex')}`
-const saisie = z.object({
+const base = z.object({
   dossier: z.uuid(),
   telephone: z.string().regex(/^\+[1-9]\d{7,14}$/),
+  accord: z.literal('on'),
+})
+const saisie = base.extend({
   page: z.coerce.number().int().min(1).max(PAGES_ACTE_MAX),
   x: z.coerce.number().int().min(0).max(10000),
   y: z.coerce.number().int().min(0).max(10000),
-  accord: z.literal('on'),
 })
 export async function preparerActe(_etat: EtatActe, form: FormData): Promise<EtatActe> {
   let cle: Buffer | undefined
@@ -32,9 +37,15 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
   try {
     const config = configurationParcours()
     if (!config) return { message: signature.indisponible }
-    const p = saisie.parse(Object.fromEntries(form))
+    // Le projet vient soit du PDF de l'agence, soit du modele Cloison redige depuis le dossier.
+    const modele = form.get('source') === 'modele'
+    const champs = Object.fromEntries(form)
+    const p = modele ? base.parse(champs) : saisie.parse(champs)
     const fichier = form.get('pdf')
-    if (!(fichier instanceof File) || fichier.size < 8 || fichier.size > 4 * 1024 * 1024)
+    if (
+      !modele &&
+      (!(fichier instanceof File) || fichier.size < 8 || fichier.size > 4 * 1024 * 1024)
+    )
       throw new Error()
     const utilisateur = await contexteAgence()
     if (utilisateur.etat !== 'rattache' || utilisateur.agence.statut !== 'verifiee')
@@ -63,9 +74,20 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
       d.demonstration
     )
       throw new Error()
-    const pdf = Buffer.from(await fichier.arrayBuffer())
+    let pdf: Buffer
+    let position: PositionSignature
+    if (modele) {
+      const projet = await projetDepuisDossier(supabase, p.dossier, form, utilisateur.agence.nom)
+      if (!projet.ok) return { message: acte.refus[projet.motif] ?? signature.erreur }
+      pdf = Buffer.from(projet.pdf)
+      position = projet.signature
+    } else {
+      const s = saisie.parse(champs)
+      pdf = Buffer.from(await (fichier as File).arrayBuffer())
+      position = { page: s.page, x: s.x, y: s.y }
+    }
     try {
-      await verifierProjetActe(pdf, { page: p.page, x: p.x, y: p.y })
+      await verifierProjetActe(pdf, position)
     } catch {
       return { message: signature.pdfInvalide }
     }
@@ -78,9 +100,7 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
       nom: e.nom,
       email: d.email_garant,
       telephone: p.telephone,
-      page: p.page,
-      x: p.x,
-      y: p.y,
+      ...position,
     })
     cle = randomBytes(32)
     const expiration = echeanceActe(d.expire_le)
@@ -88,7 +108,7 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
       le_id: id,
       le_dossier: p.dossier,
       le_mode: config.mode,
-      le_modele: config.modele,
+      le_modele: modele ? MODELE_CAUTIONNEMENT : config.modele,
       la_version: e.version_conditions,
       empreinte: empreintePdf(pdf),
       cle: bytea(scellerMaitresse(cle)),
