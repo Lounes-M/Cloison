@@ -9,13 +9,22 @@ import { cn } from '@/lib/utils'
 const ETAT_INITIAL: EtatNouveauDossier = { statut: 'inactif' }
 
 /** L'agence ouvre un dossier : une adresse, le locataire recoit son lien. */
-export function FormulaireNouveauDossier({ verifiee }: { verifiee: boolean }) {
+export function FormulaireNouveauDossier({
+  verifiee,
+  logementId,
+  loyerParDefaut = '',
+}: {
+  verifiee: boolean
+  logementId?: string
+  loyerParDefaut?: string
+}) {
   const [etat, envoyer, enCours] = useActionState(ouvrirUnDossier, ETAT_INITIAL)
   const idChamp = useId()
   const idLoyer = useId()
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
+      {logementId ? <input type="hidden" name="logement" value={logementId} /> : null}
       {etat.statut === 'ouvert' ? (
         <p
           role="status"
@@ -65,7 +74,7 @@ export function FormulaireNouveauDossier({ verifiee }: { verifiee: boolean }) {
           inputMode="decimal"
           autoComplete="off"
           disabled={!verifiee}
-          defaultValue={etat.statut === 'erreur' ? (etat.loyer ?? '') : ''}
+          defaultValue={etat.statut === 'erreur' ? (etat.loyer ?? '') : loyerParDefaut}
           placeholder="850"
           className={cn(
             'border-ink bg-paper w-full max-w-[220px] rounded-xl border-2 px-4 py-3 text-[15px] font-medium',

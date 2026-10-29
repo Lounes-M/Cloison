@@ -268,7 +268,22 @@ const api = createServer(async (req, res) => {
       revisionResponsable = randomUUID()
       valeur = revisionResponsable
     }
-  } else if (path.endsWith('/rpc/activite_de_mon_agence'))
+  } else if (path.endsWith('/rpc/logements_de_mon_agence'))
+    valeur = [
+      {
+        id,
+        libelle: 'T2 fictif, 3e étage',
+        loyer_cents: 85000,
+        archive: false,
+        cree_le: '2026-01-01T00:00:00Z',
+        candidats: 1,
+        complets: 1,
+        pris: 0,
+      },
+    ]
+  else if (path.endsWith('/logements'))
+    valeur = [{ id, libelle: 'T2 fictif, 3e étage', loyer_cents: 85000, archive: false }]
+  else if (path.endsWith('/rpc/activite_de_mon_agence'))
     valeur = Array.from({ length: 12 }, (_, i) => ({
       mois: `2026-${String(12 - i).padStart(2, '0')}-01`,
       ouverts: i === 0 ? 3 : 0,

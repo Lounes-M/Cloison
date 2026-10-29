@@ -18,6 +18,7 @@ import { collaborateurs } from '@/lib/content/collaborateurs'
 import { rattachement as textesRattachement } from '@/lib/content/rattachement'
 import { activation, statuts, tableau } from '@/lib/content/espace'
 import { activite as texteActivite } from '@/lib/content/activite'
+import { logements as texteLogements } from '@/lib/content/logements'
 import { cn } from '@/lib/utils'
 import {
   responsables as texteResponsables,
@@ -219,6 +220,9 @@ export default async function PageEspace({
         </a>
         <Link href="/espace/activite" className="lien-espace">
           {texteActivite.lien}
+        </Link>
+        <Link href="/espace/logements" className="lien-espace">
+          {texteLogements.lien}
         </Link>
       </div>
 

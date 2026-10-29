@@ -21,6 +21,8 @@ import { notFound, redirect } from 'next/navigation'
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
 import { FormulaireCloture } from '@/components/forms/FormulaireCloture'
 import { FormulaireLoyerAgence } from '@/components/forms/FormulaireLoyerAgence'
+import { FormulaireRattachementLogement } from '@/components/forms/FormulaireRattachementLogement'
+import { logements as texteLogements } from '@/lib/content/logements'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
 import {
@@ -102,11 +104,12 @@ export default async function PageDossier({
     { data: demandes, error: erreurComplements },
     { data: examens, error: erreurExamens },
     { data: groupes, error: erreurGroupe },
+    { data: biens, error: erreurBiens },
   ] = await Promise.all([
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal',
+        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -134,11 +137,17 @@ export default async function PageDossier({
       .order('cree_le', { ascending: true }),
     supabase.rpc('examens_du_dossier', { le_dossier: id }),
     supabase.rpc('groupe_du_dossier', { le_dossier: id }),
+    supabase
+      .from('logements')
+      .select('id, libelle, archive')
+      .order('cree_le', { ascending: false })
+      .limit(200),
   ])
 
   if (
     erreurExamens ||
     erreurGroupe ||
+    erreurBiens ||
     erreurComplements ||
     erreurDossier ||
     erreurEngagement ||
@@ -292,6 +301,29 @@ export default async function PageDossier({
         <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.second}</p>
       ) : d.loyer_verrouille ? (
         <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.fige}</p>
+      ) : null}
+
+      {!d.demonstration && !d.dossier_principal ? (
+        <section className="panneau-espace mt-4">
+          <h2 className="text-lg font-bold">{texteLogements.rattachement.titre}</h2>
+          <div className="mt-3">
+            <FormulaireRattachementLogement
+              dossierId={id}
+              actuel={d.logement_id ? String(d.logement_id) : null}
+              options={(biens ?? [])
+                .filter((b) => !b.archive || b.id === d.logement_id)
+                .map((b) => ({ id: String(b.id), libelle: String(b.libelle) }))}
+            />
+          </div>
+          {d.logement_id ? (
+            <Link
+              href={`/espace/logements/${String(d.logement_id)}`}
+              className="text-cobalt mt-3 inline-block text-[14px] font-bold underline underline-offset-2"
+            >
+              {texteLogements.rattachement.lien}
+            </Link>
+          ) : null}
+        </section>
       ) : null}
 
       {lie ? (
