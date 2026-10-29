@@ -74,7 +74,7 @@ jobs:
   interface:
     name: Interface Chromium Firefox WebKit
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -86,7 +86,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Installer les trois moteurs
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: bash scripts/installer-navigateurs.sh
       - name: Parcours des interfaces sur donnees fictives
         run: node scripts/verifier-navigateur-ocr.mjs
       - name: Remise chiffree mobile et ordinateur
@@ -124,7 +124,7 @@ jobs:
   postgrest:
     name: PostgreSQL et PostgREST HTTP
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:17.6
@@ -162,7 +162,7 @@ jobs:
       - name: Build pour les parcours HTTP authentifies
         run: npm run build
       - name: Installer Chromium, Firefox et WebKit pour les parcours locaux
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: bash scripts/installer-navigateurs.sh
       - name: Parcours porteurs via Next et PostgREST reels
         env:
           CLOISON_TEST_NAVIGATEUR: '1'

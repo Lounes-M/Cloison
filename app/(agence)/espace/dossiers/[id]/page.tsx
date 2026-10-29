@@ -19,9 +19,18 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
+import { FormulaireCloture } from '@/components/forms/FormulaireCloture'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { acteurs, actions, dossier as texte, natures, statuts, tableau } from '@/lib/content/espace'
+import {
+  acteurs,
+  actions,
+  cloture as texteCloture,
+  dossier as texte,
+  natures,
+  statuts,
+  tableau,
+} from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
@@ -151,6 +160,12 @@ export default async function PageDossier({
 
   const peutPrendre = d.statut === 'complet'
   const peutRefuser = ['complet', 'garant_insuffisant', 'transmis'].includes(String(d.statut))
+  // La base tranche (0066) ; l'ecran ne propose le geste que la ou il peut aboutir.
+  const peutClore =
+    !d.demonstration &&
+    ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant', 'refuse'].includes(
+      String(d.statut),
+    )
 
   return (
     <div className="page-espace w-full max-w-[880px] self-start">
@@ -359,6 +374,15 @@ export default async function PageDossier({
             </div>
           ) : null}
         </div>
+        {peutClore ? (
+          <div className="border-ink/15 mt-8 border-t pt-6">
+            <h3 className="text-lg font-bold">{texteCloture.titre}</h3>
+            <p className="text-muted mt-2 mb-4 text-[14px] leading-relaxed font-medium">
+              {texteCloture.aide}
+            </p>
+            <FormulaireCloture dossierId={id} reference={String(d.reference)} />
+          </div>
+        ) : null}
       </section>
 
       <section id="organisation" className="border-ink/15 mt-8 border-t pt-6">

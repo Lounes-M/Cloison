@@ -67,4 +67,18 @@ export const agence: Record<string, { sujet: (reference: string) => string; text
   },
 }
 
+/** La cloture avant echeance : un courriel par porteur, jamais de lien. */
+export const cloture = {
+  locataire: {
+    sujet: 'Ton dossier a été clos',
+    texte:
+      'L’agence a clos ce dossier avant son échéance. Ton lien ne fonctionne plus et les pièces de ton garant sont effacées. Pour un autre logement, ouvre un nouveau dossier.',
+  },
+  garant: {
+    sujet: 'Le dossier a été clos',
+    texte:
+      'L’agence a clos le dossier auquel vous vous portiez garant, avant son échéance. Votre lien ne fonctionne plus et vos pièces sont effacées : la clé qui les protégeait est détruite. Vous n’avez rien à faire.',
+  },
+} as const
+
 export const pied = 'Cloison'
