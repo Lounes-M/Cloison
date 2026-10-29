@@ -2,20 +2,25 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
 import { lireOctetsWebhook } from '@/lib/http/corps-webhook'
+import {
+  modeSignature,
+  prestataireActif,
+  registreSignatureActif,
+} from '@/lib/signature/configuration-prestataire'
 import { verificateurYoutrustConfigure } from '@/lib/signature/configuration-youtrust'
-import { environnementYoutrust } from '@/lib/signature/youtrust'
 
 export const runtime = 'nodejs'
 export const maxDuration = 20
 const headers = { 'Cache-Control': 'no-store' }
 const resultat = z.strictObject({ enregistre: z.literal(true), anomalie: z.boolean() })
 
+/** Notifications Youtrust, prestataire de secours. Docage arrive sur /api/signature/docage. */
 export async function POST(requete: Request) {
-  if (process.env.YOUTRUST_REGISTRY_ENABLED !== 'true')
+  if (!registreSignatureActif() || prestataireActif() !== 'youtrust')
     return NextResponse.json({ recu: false }, { status: 503, headers })
   try {
     const verifier = verificateurYoutrustConfigure()
-    const mode = environnementYoutrust.parse(process.env.YOUTRUST_ENVIRONMENT)
+    const mode = modeSignature()
     const corps = await lireOctetsWebhook(requete)
     if (corps === null) return NextResponse.json({ recu: false }, { status: 413, headers })
     const evenement = verifier(corps, requete.headers.get('x-yousign-signature-256'))

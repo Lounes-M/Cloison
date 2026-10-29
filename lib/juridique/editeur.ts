@@ -99,7 +99,13 @@ export function editeur(): Editeur {
 export function traitementsFacultatifs() {
   return {
     ocr: process.env.OCR_ACTIVE === 'true',
-    signature: process.env.SIGNATURE_PARCOURS_ENABLED === 'true',
+    // Le sous-traitant nomme est celui qui recoit vraiment l'acte : Docage, ou Youtrust en secours.
+    signature:
+      process.env.SIGNATURE_PARCOURS_ENABLED !== 'true'
+        ? null
+        : process.env.SIGNATURE_PRESTATAIRE?.trim() === 'youtrust'
+          ? ('youtrust' as const)
+          : ('docage' as const),
   }
 }
 

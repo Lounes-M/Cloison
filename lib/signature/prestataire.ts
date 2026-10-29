@@ -4,7 +4,8 @@
  * Le traitement des actes (`parcours.ts`) ne connait que cette interface :
  * creer une demande, y deposer le PDF, ajouter la caution comme signataire au
  * champ reserve par le modele, activer, puis recuperer l'acte signe et sa
- * preuve. Youtrust (`client-youtrust.ts`) en est la premiere implementation ;
+ * preuve. Docage (`client-docage.ts`) est l'implementation active, Youtrust
+ * (`client-youtrust.ts`) reste en secours (`configuration-prestataire.ts`) ;
  * un autre prestataire s'ajoute en ecrivant un adaptateur conforme, sans
  * toucher au registre des actes, a l'archivage ni a la facturation.
  *
@@ -13,7 +14,7 @@
  */
 import type { PositionSignature } from './position'
 
-/** Le vocabulaire d'etat du registre, aligne sur celui de Youtrust. */
+/** Le vocabulaire d'etat du registre ; chaque adaptateur y traduit le sien. */
 export type EtatDemandeSignature =
   | 'draft'
   | 'approval'

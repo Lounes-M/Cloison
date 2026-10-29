@@ -18,7 +18,7 @@ Cloison est une application de gestion de la garantie locative qui sépare les a
 - API de statuts pour les intégrateurs, avec clés d'agence révocables.
 - Paiement locataire, rapprochement et outils de suivi opérationnel.
 
-Le produit est en préparation de pilote. La chaîne contractuelle Youtrust et la facturation agence après signature ne sont pas ouvertes de bout en bout. L'OCR ne certifie pas l'authenticité des pièces et ne prend aucune décision sur un dossier.
+Le produit est en préparation de pilote. La chaîne contractuelle (signature Docage, Youtrust en secours) et la facturation agence après signature ne sont pas ouvertes de bout en bout. L'OCR ne certifie pas l'authenticité des pièces et ne prend aucune décision sur un dossier.
 
 ## Développement local
 
