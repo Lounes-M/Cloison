@@ -60,6 +60,7 @@ const BRANCHES_GARANT = [
   'complements.complements.aideGarant',
   'courriels.garant.',
   'courriels.cloture.garant.',
+  'frise.frise.garant.',
   'information-collecte.informationCollecte.garant',
   'interface.interfaceEspace.roles[1]',
   'liens.liens.garant.',
