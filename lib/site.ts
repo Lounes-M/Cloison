@@ -23,6 +23,7 @@ export const footerLinks = [
   { label: 'Produit', href: '/#produit' },
   { label: 'Tarifs', href: '/#tarifs' },
   { label: 'Agences', href: '/agences' },
+  { label: 'Questions fréquentes', href: '/questions' },
   { label: 'Connexion agence', href: '/connexion' },
   { label: 'Retrouver mon dossier', href: '/lien-invalide' },
   { label: 'Mentions légales', href: '/mentions-legales' },
