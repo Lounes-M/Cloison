@@ -27,8 +27,9 @@ function requete(o: unknown = objet(), valide = true) {
 }
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.stubEnv('YOUTRUST_REGISTRY_ENABLED', 'true')
-  vi.stubEnv('YOUTRUST_ENVIRONMENT', 'sandbox')
+  vi.stubEnv('SIGNATURE_REGISTRE_ENABLED', 'true')
+  vi.stubEnv('SIGNATURE_PRESTATAIRE', 'youtrust')
+  vi.stubEnv('SIGNATURE_ENVIRONMENT', 'sandbox')
   vi.stubEnv('YOUTRUST_WEBHOOK_SECRET', secret)
   vi.stubEnv('YOUTRUST_WEBHOOK_SUBSCRIPTION_ID', abonnement)
   h.client.mockResolvedValue({ rpc: h.rpc })
@@ -86,7 +87,12 @@ test('refuse les corps trop grands sans atteindre la base', async () => {
   expect(h.client).not.toHaveBeenCalled()
 })
 test('reste ferme tant que le registre est desactive', async () => {
-  vi.stubEnv('YOUTRUST_REGISTRY_ENABLED', 'false')
+  vi.stubEnv('SIGNATURE_REGISTRE_ENABLED', 'false')
+  expect((await POST(requete())).status).toBe(503)
+  expect(h.client).not.toHaveBeenCalled()
+})
+test('reste ferme tant que Youtrust n est pas le prestataire actif', async () => {
+  vi.stubEnv('SIGNATURE_PRESTATAIRE', '')
   expect((await POST(requete())).status).toBe(503)
   expect(h.client).not.toHaveBeenCalled()
 })

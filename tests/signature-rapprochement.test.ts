@@ -4,10 +4,14 @@ const h = vi.hoisted(() => ({
   rpc: vi.fn(),
   confirmer: vi.fn(),
   distant: vi.fn(),
+  secours: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: h.client }))
+vi.mock('@/lib/signature/configuration-docage', () => ({
+  clientDocageConfigure: () => ({ lirePourRapprochement: h.distant }),
+}))
 vi.mock('@/lib/signature/configuration-youtrust', () => ({
-  clientYoutrustConfigure: () => ({ lirePourRapprochement: h.distant }),
+  clientYoutrustConfigure: () => ({ lirePourRapprochement: h.secours }),
 }))
 import { POST } from '@/app/api/signature/rapprochement/route'
 const id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
@@ -24,13 +28,14 @@ beforeEach(() => {
   vi.stubEnv('CRON_SECRET', 'fictif')
   vi.stubEnv('CRON_ACTES_SECRET', 'dedie')
   h.confirmer.mockResolvedValue({ data: true, error: null })
-  vi.stubEnv('YOUTRUST_REGISTRY_ENABLED', 'true')
-  vi.stubEnv('YOUTRUST_ENVIRONMENT', 'sandbox')
+  vi.stubEnv('SIGNATURE_REGISTRE_ENABLED', 'true')
+  vi.stubEnv('SIGNATURE_ENVIRONMENT', 'sandbox')
   h.client.mockResolvedValue({
     rpc: (nom: string, ...args: unknown[]) =>
       nom === 'confirmer_traitement_actes' ? h.confirmer(nom, ...args) : h.rpc(nom, ...args),
   })
   h.distant.mockResolvedValue({ id: reference, external_id: id, status: 'done' })
+  h.secours.mockResolvedValue({ id: reference, external_id: id, status: 'done' })
   h.rpc.mockImplementation(async (nom: string) => ({
     data:
       nom === 'reserver_signatures_a_rapprocher'
@@ -51,7 +56,7 @@ test('exige le secret cron avant toute configuration', async () => {
   expect(h.client).not.toHaveBeenCalled()
 })
 test('un registre desactive confirme uniquement son passage', async () => {
-  vi.stubEnv('YOUTRUST_REGISTRY_ENABLED', 'false')
+  vi.stubEnv('SIGNATURE_REGISTRE_ENABLED', 'false')
   expect(await (await POST(requete())).json()).toEqual({ actif: false, traites: 0, echecs: 0 })
   expect(h.rpc).not.toHaveBeenCalled()
   expect(h.distant).not.toHaveBeenCalled()
@@ -133,4 +138,14 @@ test('transmet le meme budget au fournisseur et a la base', async () => {
   )
   expect(r.status).toBe(503)
   expect(h.rpc.mock.calls.some(([nom]) => nom === 'confirmer_rapprochement_signature')).toBe(false)
+})
+test('lit chez Docage par defaut, et chez Youtrust seulement s il est choisi', async () => {
+  expect((await POST(requete())).status).toBe(200)
+  expect(h.distant).toHaveBeenCalledOnce()
+  expect(h.secours).not.toHaveBeenCalled()
+  vi.clearAllMocks()
+  vi.stubEnv('SIGNATURE_PRESTATAIRE', 'youtrust')
+  expect((await POST(requete())).status).toBe(200)
+  expect(h.secours).toHaveBeenCalledOnce()
+  expect(h.distant).not.toHaveBeenCalled()
 })

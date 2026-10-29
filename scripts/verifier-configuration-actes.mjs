@@ -3,8 +3,8 @@ import { pathToFileURL } from 'node:url'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DRAPEAUX = [
-  'YOUTRUST_MUTATIONS_ENABLED',
-  'YOUTRUST_REGISTRY_ENABLED',
+  'SIGNATURE_MUTATIONS_ENABLED',
+  'SIGNATURE_REGISTRE_ENABLED',
   'SIGNATURE_PARCOURS_ENABLED',
   'FACTURATION_ACTES_ENABLED',
 ]
@@ -29,19 +29,30 @@ export function verifierConfigurationActes(env, profil) {
       refuser(`${nom} doit valoir true ou false`)
 
   const attendu = profil === 'recette' ? 'sandbox' : 'production'
-  if (env.YOUTRUST_ENVIRONMENT !== attendu) refuser(`YOUTRUST_ENVIRONMENT doit valoir ${attendu}`)
+  if (env.SIGNATURE_ENVIRONMENT !== attendu) refuser(`SIGNATURE_ENVIRONMENT doit valoir ${attendu}`)
   if (env.VERCEL_ENV !== undefined) {
     if (profil === 'production' && env.VERCEL_ENV !== 'production')
-      refuser('Configuration Youtrust de production hors deploiement de production')
+      refuser('Signature de production hors deploiement de production')
     if (profil === 'recette' && env.VERCEL_ENV === 'production')
       refuser('Recette sandbox dans le deploiement de production')
   }
 
-  const youtrustUtilise =
-    actif.YOUTRUST_MUTATIONS_ENABLED ||
-    actif.YOUTRUST_REGISTRY_ENABLED ||
+  // Docage par defaut ; Youtrust reste disponible en secours.
+  const prestataire = (env.SIGNATURE_PRESTATAIRE ?? '').trim() || 'docage'
+  if (prestataire !== 'docage' && prestataire !== 'youtrust')
+    refuser('SIGNATURE_PRESTATAIRE doit valoir docage ou youtrust')
+  const signatureUtilisee =
+    actif.SIGNATURE_MUTATIONS_ENABLED ||
+    actif.SIGNATURE_REGISTRE_ENABLED ||
     actif.SIGNATURE_PARCOURS_ENABLED
-  if (youtrustUtilise) {
+  if (signatureUtilisee && prestataire === 'docage') {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(env.DOCAGE_EMAIL ?? ''))
+      refuser('DOCAGE_EMAIL doit etre une adresse')
+    if (!present(env, 'DOCAGE_API_KEY')) refuser('DOCAGE_API_KEY manquante')
+    if (!/^[A-Za-z0-9_-]{32,256}$/.test(env.DOCAGE_WEBHOOK_TOKEN ?? ''))
+      refuser('DOCAGE_WEBHOOK_TOKEN doit contenir 32 a 256 caracteres sans symbole')
+  }
+  if (signatureUtilisee && prestataire === 'youtrust') {
     for (const nom of ['YOUTRUST_API_KEY', 'YOUTRUST_WEBHOOK_SECRET'])
       if (!present(env, nom)) refuser(`${nom} manquante`)
     if (!UUID.test(env.YOUTRUST_WEBHOOK_SUBSCRIPTION_ID ?? ''))
@@ -49,10 +60,10 @@ export function verifierConfigurationActes(env, profil) {
   }
 
   if (actif.SIGNATURE_PARCOURS_ENABLED) {
-    if (!actif.YOUTRUST_REGISTRY_ENABLED)
-      refuser('YOUTRUST_REGISTRY_ENABLED requis par le parcours')
-    if (!actif.YOUTRUST_MUTATIONS_ENABLED)
-      refuser('YOUTRUST_MUTATIONS_ENABLED requis pour envoyer un acte')
+    if (!actif.SIGNATURE_REGISTRE_ENABLED)
+      refuser('SIGNATURE_REGISTRE_ENABLED requis par le parcours')
+    if (!actif.SIGNATURE_MUTATIONS_ENABLED)
+      refuser('SIGNATURE_MUTATIONS_ENABLED requis pour envoyer un acte')
     const modele = (env.ACTE_MODELE_VERSION ?? '').trim()
     if (modele.length < 1 || modele.length > 120)
       refuser('ACTE_MODELE_VERSION doit contenir 1 a 120 caracteres')
@@ -76,6 +87,7 @@ export function verifierConfigurationActes(env, profil) {
 
   return {
     profil,
+    prestataire,
     conforme: erreurs.length === 0,
     drapeaux: Object.fromEntries(DRAPEAUX.map((n) => [n, actif[n]])),
     erreurs,

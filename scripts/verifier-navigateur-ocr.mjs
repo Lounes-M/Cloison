@@ -391,8 +391,8 @@ const next = spawn(
       SIGNATURE_PARCOURS_ENABLED: 'true',
       // Reglement ouvert sans cle Stripe : la reservation aboutit au refus prudent.
       FACTURATION_ACTES_ENABLED: 'true',
-      YOUTRUST_ENVIRONMENT: 'sandbox',
-      YOUTRUST_REGISTRY_ENABLED: 'true',
+      SIGNATURE_ENVIRONMENT: 'sandbox',
+      SIGNATURE_REGISTRE_ENABLED: 'true',
       ACTE_MODELE_VERSION: 'recette-v1',
       ACTE_CONSERVATION_JOURS: '30',
       OPENROUTER_API_KEY: 'cle-fictive-sans-valeur',

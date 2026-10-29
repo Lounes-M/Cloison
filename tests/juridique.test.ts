@@ -89,16 +89,23 @@ test('les mentions affichent l editeur et l hebergeur de l application', () => {
   expect(html).toContain('href="mailto:contact@example.fr"')
 })
 
-test('la politique ne cite OpenRouter et Youtrust que s ils sont actives', () => {
+test('la politique ne cite OpenRouter et le prestataire de signature que s ils sont actives', () => {
   poser({ ...COMPLET, OCR_ACTIVE: '', SIGNATURE_PARCOURS_ENABLED: '' })
   const coupe = rendre(PageConfidentialite)
   expect(coupe).not.toContain('OpenRouter')
+  expect(coupe).not.toContain('Docage')
   expect(coupe).not.toContain('Youtrust')
 
   poser({ OCR_ACTIVE: 'true', SIGNATURE_PARCOURS_ENABLED: 'true' })
   const actif = rendre(PageConfidentialite)
   expect(actif).toContain('OpenRouter')
-  expect(actif).toContain('Youtrust')
+  expect(actif).toContain('Docage')
+  expect(actif).not.toContain('Youtrust')
+
+  poser({ SIGNATURE_PARCOURS_ENABLED: 'true', SIGNATURE_PRESTATAIRE: 'youtrust' })
+  const secours = rendre(PageConfidentialite)
+  expect(secours).toContain('Youtrust')
+  expect(secours).not.toContain('Docage')
 })
 
 test('les conditions annoncent la retractation au prorata et le mediateur configure', () => {
