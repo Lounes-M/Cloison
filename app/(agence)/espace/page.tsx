@@ -17,6 +17,7 @@ import { contexteAgence } from '@/lib/agences/contexte'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { rattachement as textesRattachement } from '@/lib/content/rattachement'
 import { activation, statuts, tableau } from '@/lib/content/espace'
+import { activite as texteActivite } from '@/lib/content/activite'
 import { cn } from '@/lib/utils'
 import {
   responsables as texteResponsables,
@@ -216,6 +217,9 @@ export default async function PageEspace({
         <a href="#reglages" className="lien-espace">
           {interfaceEspace.reglages}
         </a>
+        <Link href="/espace/activite" className="lien-espace">
+          {texteActivite.lien}
+        </Link>
       </div>
 
       {demandesEnAttente > 0 ? (
