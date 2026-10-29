@@ -27,6 +27,8 @@ type Dossier = {
   email_locataire: string
   email_garant: string | null
   demonstration: boolean
+  /** Dossier d'un second garant (0067) : le locataire et l'agence sont prevenus par le principal. */
+  secondaire?: boolean
 }
 
 /** Ce que chaque statut fait ecrire, et a qui. Pur, donc testable. */
@@ -39,7 +41,7 @@ export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
   }[] = []
   const signature = `\n\nRéférence du dossier : ${dossier.reference}\n\n${pied}`
 
-  const auLocataire = textesLocataire[dossier.statut]
+  const auLocataire = dossier.secondaire ? undefined : textesLocataire[dossier.statut]
   if (auLocataire) {
     envois.push({
       categorie: 'locataire',
@@ -59,7 +61,7 @@ export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
     })
   }
 
-  const aLAgence = textesAgence[dossier.statut]
+  const aLAgence = dossier.secondaire ? undefined : textesAgence[dossier.statut]
   if (aLAgence && contactsAgence.length > 0) {
     envois.push({
       categorie: 'agence',
