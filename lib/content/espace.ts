@@ -136,6 +136,19 @@ export const dossier = {
 } as const
 
 /** Clore un dossier avant son echeance : le geste est definitif. */
+/** Deux garants, deux dossiers lies (0067). */
+export const groupe = {
+  principal: (reference: string) =>
+    `Ce dossier est celui du second garant. Le premier garant est dans le dossier ${reference}.`,
+  second: (reference: string) =>
+    `Un second garant est désigné, dans le dossier ${reference}. Les deux revenus sont jugés ensemble.`,
+  lien: 'Ouvrir l’autre dossier',
+  ratio: (valeur: string) => `Solvabilité des deux garants ensemble : ${valeur}× le loyer.`,
+  ratioAttente:
+    'La solvabilité commune s’affichera quand les deux garants auront déclaré leurs revenus.',
+  decision: 'Prendre, refuser ou clore ce dossier s’applique aux deux garants.',
+} as const
+
 export const cloture = {
   titre: 'Clore le dossier',
   aide: 'Le candidat s’est retiré ou le logement est attribué ? Clore le dossier efface tout de suite l’accès de chacun et détruit la clé de chiffrement des pièces. Les données restantes partent à la prochaine purge. Le locataire et le garant sont prévenus par courriel. Ce geste est définitif.',

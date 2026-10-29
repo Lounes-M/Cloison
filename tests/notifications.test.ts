@@ -42,6 +42,16 @@ describe('courrielsPour', () => {
     expect(auLocataire.texte).not.toMatch(/ratio|seuil|revenu/i)
   })
 
+  test('le dossier d un second garant ne previent que ce garant', () => {
+    for (const statut of ['complet', 'garant_insuffisant', 'transmis', 'refuse']) {
+      const envois = courrielsPour({ ...DOSSIER, statut, secondaire: true }, ['a@b.fr'])
+      expect(envois.every((e) => e.categorie === 'garant')).toBe(true)
+    }
+    expect(
+      courrielsPour({ ...DOSSIER, statut: 'transmis', secondaire: true }, []).map((e) => e.a),
+    ).toEqual(['garant@exemple.fr'])
+  })
+
   test('les statuts sans nouvelle n ecrivent a personne', () => {
     for (const statut of ['ouvert', 'depot_en_cours', 'signe', 'expire']) {
       expect(courrielsPour({ ...DOSSIER, statut }, ['a@b.fr'])).toEqual([])
