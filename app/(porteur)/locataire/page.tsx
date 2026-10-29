@@ -1,4 +1,7 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
+import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
+import { frise } from '@/lib/content/frise'
+import { etapesLocataire } from '@/lib/dossiers/frise'
 import { interfaceEspace } from '@/lib/content/interface'
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
@@ -111,6 +114,11 @@ export default async function PageLocataire({
         <p className="text-xl font-bold">{statut.libelle}</p>
         <p className="mt-2 text-[15px] leading-relaxed font-medium">{statut.explication}</p>
       </div>
+
+      <FriseAvancement
+        titre={frise.locataire.titre}
+        etapes={etapesLocataire(String(dossier.statut), garant !== null)}
+      />
 
       <SommaireDossier
         liens={[
