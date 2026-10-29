@@ -20,6 +20,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
 import { FormulaireCloture } from '@/components/forms/FormulaireCloture'
+import { FormulaireLoyerAgence } from '@/components/forms/FormulaireLoyerAgence'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
 import {
@@ -28,6 +29,7 @@ import {
   cloture as texteCloture,
   dossier as texte,
   groupe as texteGroupe,
+  loyerAgence as texteLoyer,
   natures,
   statuts,
   tableau,
@@ -104,7 +106,7 @@ export default async function PageDossier({
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration',
+        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -164,6 +166,13 @@ export default async function PageDossier({
 
   const lie = Array.isArray(groupes) ? groupes[0] : null
   const ratioGroupe = lie?.ratio_groupe == null ? null : Number(lie.ratio_groupe)
+
+  // La base tranche (0011, 0020, 0067) ; l'ecran ne propose que ce qui peut aboutir.
+  const loyerModifiable =
+    !d.demonstration &&
+    !d.loyer_verrouille &&
+    !d.dossier_principal &&
+    ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(String(d.statut))
 
   const peutPrendre = d.statut === 'complet'
   const peutRefuser = ['complet', 'garant_insuffisant', 'transmis'].includes(String(d.statut))
@@ -262,6 +271,28 @@ export default async function PageDossier({
           </dd>
         </div>
       </dl>
+
+      {loyerModifiable ? (
+        <section className="panneau-espace mt-4">
+          <h2 className="text-lg font-bold">{texteLoyer.titre}</h2>
+          <div className="mt-3">
+            <FormulaireLoyerAgence
+              dossierId={id}
+              loyerActuel={
+                d.loyer_cents == null
+                  ? ''
+                  : (Number(d.loyer_cents) / 100).toLocaleString('fr-FR', {
+                      useGrouping: false,
+                    })
+              }
+            />
+          </div>
+        </section>
+      ) : d.dossier_principal && !d.demonstration ? (
+        <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.second}</p>
+      ) : d.loyer_verrouille ? (
+        <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.fige}</p>
+      ) : null}
 
       {lie ? (
         <div

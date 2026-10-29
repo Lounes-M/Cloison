@@ -239,6 +239,8 @@ export async function parcourirInterface(
     await verifierSurface(page)
     console.log('OK : retour du defilement anime detecte par contre-preuve navigateur')
   }
+  await visiter('/espace/activite', 'activite')
+  await page.getByText('Taux d’acceptation', { exact: true }).waitFor()
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
   await visiter('/espace/notifications', 'notifications')
