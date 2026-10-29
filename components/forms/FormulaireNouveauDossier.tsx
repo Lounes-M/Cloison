@@ -12,6 +12,7 @@ const ETAT_INITIAL: EtatNouveauDossier = { statut: 'inactif' }
 export function FormulaireNouveauDossier({ verifiee }: { verifiee: boolean }) {
   const [etat, envoyer, enCours] = useActionState(ouvrirUnDossier, ETAT_INITIAL)
   const idChamp = useId()
+  const idLoyer = useId()
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
@@ -51,6 +52,27 @@ export function FormulaireNouveauDossier({ verifiee }: { verifiee: boolean }) {
           )}
         />
         <p className="text-muted mt-2 text-[13px] font-medium">{tableau.nouveauAide}</p>
+      </div>
+
+      <div>
+        <label htmlFor={idLoyer} className="mb-2 block text-[14px] font-bold">
+          {tableau.nouveauLoyer}
+        </label>
+        <input
+          id={idLoyer}
+          name="loyer"
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          disabled={!verifiee}
+          defaultValue={etat.statut === 'erreur' ? (etat.loyer ?? '') : ''}
+          placeholder="850"
+          className={cn(
+            'border-ink bg-paper w-full max-w-[220px] rounded-xl border-2 px-4 py-3 text-[15px] font-medium',
+            'placeholder:text-muted placeholder:font-normal disabled:opacity-50',
+          )}
+        />
+        <p className="text-muted mt-2 text-[13px] font-medium">{tableau.nouveauLoyerAide}</p>
       </div>
 
       <button

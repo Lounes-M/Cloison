@@ -48,13 +48,19 @@ export async function cloreLeDossier(_p: EtatCloture, donnees: FormData): Promis
     return { statut: 'erreur', message: texte.erreur }
   }
 
-  const clos = data as { reference?: unknown; email_locataire?: unknown; email_garant?: unknown }
+  const clos = data as {
+    reference?: unknown
+    email_locataire?: unknown
+    email_garant?: unknown
+    email_second_garant?: unknown
+  }
   const signature = `\n\nRéférence du dossier : ${String(clos.reference)}\n\n${pied}`
   try {
     const db = await clientServeur()
     const envois: [string, unknown, { sujet: string; texte: string }][] = [
       ['locataire', clos.email_locataire, courriels.locataire],
       ['garant', clos.email_garant, courriels.garant],
+      ['second', clos.email_second_garant, courriels.garant],
     ]
     for (const [partie, adresse, message] of envois) {
       if (typeof adresse !== 'string' || adresse.length === 0) continue
