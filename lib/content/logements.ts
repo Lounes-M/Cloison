@@ -49,6 +49,28 @@ export const logements = {
     succes: 'Rattachement enregistré.',
     lien: 'Voir les candidats de ce logement',
   },
+  attribution: {
+    titre: 'Attribuer le logement',
+    aide: 'Choisissez le candidat retenu parmi les dossiers pris. Le logement sera archivé, et les autres candidats dont le dossier est complet ou pris recevront le refus habituel, sans motif. Les dossiers encore incomplets restent ouverts : vous pourrez les clore.',
+    attente: 'Prenez d’abord le dossier du candidat retenu pour pouvoir lui attribuer ce logement.',
+    champ: 'Candidat retenu',
+    confirmation:
+      'Je confirme : les autres candidats seront prévenus que leur dossier n’est pas retenu.',
+    bouton: 'Attribuer et prévenir les autres',
+    envoi: 'Attribution…',
+    succes: (refuses: number) =>
+      refuses === 0
+        ? 'Logement attribué et archivé. Aucun autre candidat à prévenir.'
+        : refuses === 1
+          ? 'Logement attribué et archivé. Un autre candidat a été prévenu.'
+          : `Logement attribué et archivé. ${refuses} autres candidats ont été prévenus.`,
+    erreurs: {
+      candidat: 'Ce candidat n’est pas pris pour ce logement, ou ne l’est plus.',
+      confirmation: 'Cochez la confirmation : les autres candidats vont être prévenus.',
+      refus:
+        'Le logement est archivé, mais certains candidats n’ont pas pu être refusés. Réessayez depuis leur dossier.',
+    },
+  },
   erreurs: {
     libelle: 'Le libellé doit faire entre 1 et 120 caractères.',
     loyer: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
