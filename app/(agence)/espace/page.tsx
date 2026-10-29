@@ -10,6 +10,7 @@ import { AttributionsGroupees } from '@/components/dossiers/AttributionsGroupees
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
+import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { bornesEcheance } from '@/lib/agences/echeances'
 import { contexteAgence } from '@/lib/agences/contexte'
@@ -553,6 +554,11 @@ export default async function PageEspace({
         pageEquipe={recherche.equipe}
         baseUrl={lienPage(numero)}
       />
+      {verifiee ? (
+        <div className="mt-8">
+          <ExportRegistre registre="dossiers" />
+        </div>
+      ) : null}
       <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
         <div>
           <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>
