@@ -6,7 +6,8 @@ import { fetchAgence } from '@/lib/http/fetch-agence'
 import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
 
 /**
- * Deux choses, pour l'applicatif seulement.
+ * Deux choses, pour l'applicatif seulement (plus un en-tete qui l'ecarte des
+ * moteurs de recherche).
  *
  * 1. Un nonce par requete, et la Content-Security-Policy qui le porte. Next
  *    lit le nonce dans l'en-tete `Content-Security-Policy` de la requete
@@ -71,6 +72,9 @@ export async function proxy(requete: NextRequest) {
   }
 
   reponse.headers.set('Content-Security-Policy', politique)
+  // Rien de l'applicatif ne doit finir dans un moteur de recherche : ni un
+  // lien porteur de jeton, ni une redirection, ni une route sans metadonnees.
+  reponse.headers.set('X-Robots-Tag', 'noindex, nofollow')
   if (remise) {
     reponse.headers.set('Cache-Control', 'no-store')
     reponse.headers.set('Referrer-Policy', 'no-referrer')
