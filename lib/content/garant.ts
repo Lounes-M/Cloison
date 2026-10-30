@@ -196,3 +196,21 @@ export const mention = {
       'On ne lit pas la renonciation aux bénéfices de discussion et de division, exigée pour une caution solidaire.',
   },
 } as const
+
+/** L'encart du haut : ce qu'il reste, sans verdict et sans chiffre de solvabilite. */
+export const resteAFaire = {
+  titre: 'Ce qu’il vous reste à faire',
+  aide: 'Chaque ligne mène à l’endroit de la page où la compléter.',
+  termine:
+    'Tout ce qu’on attend de vous est là. L’agence examinera vos pièces ; vous pouvez encore les corriger tant que le dossier n’est pas parti.',
+  engagement: 'Indiquez ce que vous couvrez, votre revenu net mensuel et un montant maximum.',
+  complement: (nombre: number) =>
+    nombre > 1
+      ? `Remplacez les ${nombre} pièces que l’agence vous a demandé de redéposer.`
+      : 'Remplacez la pièce que l’agence vous a demandé de redéposer.',
+  piece: (libelle: string, manque: number, attendu: number) =>
+    attendu > 1
+      ? `${libelle} : ${manque} document${manque > 1 ? 's' : ''} manquant${manque > 1 ? 's' : ''} sur ${attendu}.`
+      : `${libelle} : à déposer.`,
+  mention: 'Apposez votre mention, écrite par vous.',
+} as const

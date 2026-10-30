@@ -16,7 +16,7 @@ export function Complements({
 }) {
   if (!demandes.length) return null
   return (
-    <section className="panneau-espace mt-10">
+    <section id="complements" className="panneau-espace mt-10">
       <h2 className="font-display text-2xl uppercase">{t.titre}</h2>
       <p className="text-muted mt-2 text-sm">{agence ? t.aideAgence : t.aideGarant}</p>
       <ul className="mt-4 space-y-4">
