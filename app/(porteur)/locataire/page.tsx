@@ -1,4 +1,6 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
+import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
+import { resteAFaireLocataire } from '@/lib/locataire/reste-a-faire'
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { frise } from '@/lib/content/frise'
 import { etapesLocataire } from '@/lib/dossiers/frise'
@@ -116,6 +118,14 @@ export default async function PageLocataire({
     year: 'numeric',
   })
 
+  const restant = ouvert
+    ? resteAFaireLocataire({
+        loyerDeclare: dossier.loyer_cents != null,
+        aRegler,
+        garantDesigne: garant !== null,
+      })
+    : null
+
   return (
     <div className="page-espace w-full max-w-[560px]">
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
@@ -137,6 +147,8 @@ export default async function PageLocataire({
         titre={frise.locataire.titre}
         etapes={etapesLocataire(String(dossier.statut), garant !== null)}
       />
+
+      {restant ? <ResteAFaireLocataire etapes={restant} /> : null}
 
       <SommaireDossier
         liens={[
