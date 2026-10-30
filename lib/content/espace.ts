@@ -8,7 +8,11 @@
 
 export const tableau = {
   tri: 'Trier les dossiers',
-  tris: { recent: 'Ouverts récemment', echeance: 'Échéance la plus proche' },
+  tris: {
+    recent: 'Ouverts récemment',
+    echeance: 'Échéance la plus proche',
+    activite: 'Sans activité depuis le plus longtemps',
+  },
   horizon: 'Échéance du coffre',
   horizons: {
     tous: 'Toutes les échéances',

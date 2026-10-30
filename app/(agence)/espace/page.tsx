@@ -57,6 +57,14 @@ type Ligne = {
   suivi?: { etat: string }[] | null
 }
 
+// Colonne de tri par choix : l'echeance et l'inactivite se lisent de la plus
+// ancienne a la plus recente, les ouvertures de la plus recente a la plus ancienne.
+const colonnesTri = {
+  recent: 'cree_le',
+  echeance: 'expire_le',
+  activite: 'activite_rappel_le',
+} as const
+
 function dateEcheance(valeur: string): string {
   const date = new Date(valeur)
   return Number.isFinite(date.getTime())
@@ -156,7 +164,8 @@ export default async function PageEspace({
     : ''
   const attribution =
     recherche.responsable === 'mes' ? 'mes' : recherche.responsable === 'sans' ? 'sans' : 'tous'
-  const tri = recherche.tri === 'echeance' ? 'echeance' : 'recent'
+  const tri =
+    recherche.tri === 'echeance' || recherche.tri === 'activite' ? recherche.tri : 'recent'
   const remplacement = recherche.remplacement === '1'
   const sansNouvelles = recherche.sans_nouvelles === '1'
   const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
@@ -182,7 +191,7 @@ export default async function PageEspace({
         ? 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), remplacements:complements_documentaires!inner(id), affecte:affectations_dossiers()'
         : 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), affecte:affectations_dossiers()',
     )
-    .order(tri === 'echeance' ? 'expire_le' : 'cree_le', { ascending: tri === 'echeance' })
+    .order(colonnesTri[tri], { ascending: tri !== 'recent' })
     .order('id', { ascending: false })
   if (bornes) requete = requete.gt('expire_le', bornes.apres).lte('expire_le', bornes.jusqua)
   if (reference) requete = requete.ilike('reference', motif(reference))
@@ -375,6 +384,7 @@ export default async function PageEspace({
                 >
                   <option value="recent">{tableau.tris.recent}</option>
                   <option value="echeance">{tableau.tris.echeance}</option>
+                  <option value="activite">{tableau.tris.activite}</option>
                 </select>
               </div>
               <div className="min-w-0 text-sm font-semibold">
