@@ -429,3 +429,43 @@ test('vingt entrees par passage puis les suivantes sans famine due aux doublons'
   for (const r of await preparer()) await db.query("select mettre_rappel_en_file($1,'x')", [r.id])
   expect(await preparer()).toHaveLength(7)
 })
+test('l agence voit le nombre de relances parties et la date de la derniere, rien de plus', async () => {
+  const lire = async (qui: string) => {
+    await devenir(db, 'authenticated', qui)
+    return (
+      await db.query<{ nombre: number; derniere: Date | null }>(
+        'select * from relances_du_dossier($1)',
+        [dossier],
+      )
+    ).rows[0]!
+  }
+  expect((await lire(membre)).nombre).toBe(0)
+  await devenir(db, 'authenticated', admin)
+  await regler()
+  expect(await programmer()).toBe(1)
+  expect((await lire(membre)).nombre).toBe(0)
+  await enfiler()
+  const apres = await lire(membre)
+  expect(apres.nombre).toBe(1)
+  expect(apres.derniere).toBeInstanceOf(Date)
+  await redevenirProprietaire(db)
+  await db.query(
+    "insert into auth.users(id,email,email_confirmed_at) values(gen_random_uuid(),'autre@autre-agence.invalid',now())",
+  )
+  const autre = (
+    await db.query<{ u: string }>(
+      "with a as (insert into agences(nom,domaine) values('Autre','autre-agence.invalid') returning id) insert into membres_agence(agence_id,utilisateur_id,role) select a.id,u.id,'admin' from a, auth.users u where u.email='autre@autre-agence.invalid' returning utilisateur_id u",
+    )
+  ).rows[0]!.u
+  expect((await lire(autre)).nombre).toBe(0)
+  await redevenirProprietaire(db)
+  for (const role of ['anon', 'porteur_lien', 'depot_piece', 'serveur', 'service_role'])
+    expect(
+      (
+        await db.query<{ p: boolean }>(
+          "select has_function_privilege($1,'public.relances_du_dossier(uuid)','execute') p",
+          [role],
+        )
+      ).rows[0]!.p,
+    ).toBe(false)
+})

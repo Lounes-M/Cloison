@@ -99,6 +99,7 @@ function client() {
       }
       if (nom === 'mon_tarif_paiement' && reponses.tarif) return reponses.tarif
       if (nom === 'agence_de_mon_dossier' && reponses.agence) return reponses.agence
+      if (nom === 'relances_du_dossier' && reponses.relances) return reponses.relances
       return { data: [], error: null }
     }),
   }
@@ -649,4 +650,17 @@ test('la fiche d un dossier dit sa derniere activite et porte ses pastilles', as
   expect(texteVisible(page)).toContain('Dernière activité sur le dossier : 2 janvier 2020')
   const pastilles = elements(page).find((e) => e.type === PastillesSuivi)
   expect(pastilles?.props.pastilles).toEqual(['remplacement', 'sans_nouvelles'])
+  expect(texteVisible(page)).not.toContain('Relances automatiques')
+})
+
+test('la fiche d un dossier dit combien de relances le garant a recues', async () => {
+  reponses.relances = {
+    data: [{ nombre: 2, derniere: '2020-01-05T09:00:00Z' }],
+    error: null,
+  }
+  const page = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(doublures.rpc).toHaveBeenCalledWith('relances_du_dossier', { le_dossier: ID })
+  expect(texteVisible(page)).toContain(
+    'Relances automatiques au garant : 2 sur 3, la dernière le 5 janvier 2020',
+  )
 })

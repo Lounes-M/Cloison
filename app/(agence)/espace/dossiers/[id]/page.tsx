@@ -107,6 +107,7 @@ export default async function PageDossier({
     { data: examens, error: erreurExamens },
     { data: groupes, error: erreurGroupe },
     { data: biens, error: erreurBiens },
+    { data: relances, error: erreurRelances },
   ] = await Promise.all([
     supabase
       .from('dossiers')
@@ -144,10 +145,12 @@ export default async function PageDossier({
       .select('id, libelle, archive')
       .order('cree_le', { ascending: false })
       .limit(200),
+    supabase.rpc('relances_du_dossier', { le_dossier: id }),
   ])
 
   if (
     erreurExamens ||
+    erreurRelances ||
     erreurGroupe ||
     erreurBiens ||
     erreurComplements ||
@@ -162,6 +165,7 @@ export default async function PageDossier({
   // La RLS a decide : un dossier d'une autre agence n'existe pas pour celle-ci.
   if (!d) notFound()
   const historique = pageJournal(journal, id)
+  const relance = (relances as { nombre: number; derniere: string | null }[] | null)?.[0]
 
   const { error: inscription } = await supabase.rpc('journaliser', {
     le_dossier: id,
@@ -212,6 +216,11 @@ export default async function PageDossier({
           {d.activite_rappel_le ? (
             <p className="text-muted mt-1 text-sm">
               {texte.derniereActivite(date(d.activite_rappel_le, true))}
+            </p>
+          ) : null}
+          {relance && relance.nombre > 0 && relance.derniere ? (
+            <p className="text-muted mt-1 text-sm">
+              {texte.relancesGarant(relance.nombre, date(relance.derniere, true))}
             </p>
           ) : null}
           <PastillesSuivi

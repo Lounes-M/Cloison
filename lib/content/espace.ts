@@ -108,6 +108,8 @@ export const activation = {
 
 export const dossier = {
   derniereActivite: (date: string) => `Dernière activité sur le dossier : ${date}.`,
+  relancesGarant: (nombre: number, date: string) =>
+    `Relances automatiques au garant : ${nombre} sur 3, la dernière le ${date}.`,
   retour: 'Tous les dossiers',
   reference: 'Référence',
   locataire: 'Locataire',
