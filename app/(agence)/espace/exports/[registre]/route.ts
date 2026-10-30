@@ -18,6 +18,7 @@ type LigneDossier = {
   statut: string
   email_garant: string | null
   cree_le: string
+  activite_rappel_le: string
   expire_le: string
   engagements: { ratio: unknown } | { ratio: unknown }[] | null
 }
@@ -33,6 +34,7 @@ function versExport(lignes: LigneDossier[]) {
       garant: typeof l.email_garant === 'string' && l.email_garant.length > 0,
       ratio: e?.ratio ?? null,
       cree_le: l.cree_le,
+      activite_le: l.activite_rappel_le,
       expire_le: l.expire_le,
     }
   })
@@ -55,7 +57,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ registre
           // Les droits et l'echeance restent imposes par la RLS (0003, 0033).
           let requete = c.supabase
             .from('dossiers')
-            .select('id, reference, statut, email_garant, cree_le, expire_le, engagements(ratio)')
+            .select(
+              'id, reference, statut, email_garant, cree_le, activite_rappel_le, expire_le, engagements(ratio)',
+            )
             .eq('demonstration', false)
             .order('id', { ascending: true })
             .limit(20)

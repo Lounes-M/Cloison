@@ -38,6 +38,7 @@ const dossier = z.object({
   garant: z.boolean(),
   ratio,
   cree_le: date,
+  activite_le: date,
   expire_le: date,
 })
 
@@ -84,6 +85,7 @@ export async function exporterRegistre(
           ligne.garant ? t.oui : t.non,
           ligne.ratio === null ? '' : Number(ligne.ratio).toFixed(2).replace('.', ','),
           ligne.cree_le,
+          ligne.activite_le,
           ligne.expire_le,
           generation,
         ])
