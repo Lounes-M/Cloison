@@ -13,7 +13,12 @@ import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { bornesEcheance } from '@/lib/agences/echeances'
-import { STATUTS_EN_ATTENTE, limiteSansNouvelles } from '@/lib/agences/inactivite'
+import {
+  STATUTS_EN_ATTENTE,
+  limiteSansNouvelles,
+  pastillesDuDossier,
+} from '@/lib/agences/inactivite'
+import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { rattachement as textesRattachement } from '@/lib/content/rattachement'
@@ -48,6 +53,8 @@ type Ligne = {
   expire_le: string
   demonstration: boolean
   engagements: { ratio: string | null } | { ratio: string | null }[] | null
+  activite_rappel_le?: string | null
+  suivi?: { etat: string }[] | null
 }
 
 function dateEcheance(valeur: string): string {
@@ -172,8 +179,8 @@ export default async function PageEspace({
     .from('dossiers')
     .select(
       remplacement
-        ? 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), remplacements:complements_documentaires!inner(id), affecte:affectations_dossiers()'
-        : 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), affecte:affectations_dossiers()',
+        ? 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), remplacements:complements_documentaires!inner(id), affecte:affectations_dossiers()'
+        : 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), affecte:affectations_dossiers()',
     )
     .order(tri === 'echeance' ? 'expire_le' : 'cree_le', { ascending: tri === 'echeance' })
     .order('id', { ascending: false })
@@ -197,6 +204,7 @@ export default async function PageEspace({
   const resultats = (data ?? []) as unknown as Ligne[]
   const suivante = resultats.length > 50 && numero < 9999
   const lignes = resultats.slice(0, 50)
+  const limiteInactivite = limiteSansNouvelles()
   const affectations = lignes.length
     ? await supabase.rpc('responsables_des_dossiers', { les_dossiers: lignes.map((l) => l.id) })
     : { data: [], error: null }
@@ -481,6 +489,7 @@ export default async function PageEspace({
                           >
                             {statut.libelle}
                           </span>
+                          <PastillesSuivi pastilles={pastillesDuDossier(ligne, limiteInactivite)} />
                         </dd>
                       </div>
                       <div className="col-span-2">
@@ -559,6 +568,7 @@ export default async function PageEspace({
                           >
                             {statut.libelle}
                           </span>
+                          <PastillesSuivi pastilles={pastillesDuDossier(ligne, limiteInactivite)} />
                         </td>
                         <td className="px-4 py-3 text-sm break-all">
                           {responsables.get(ligne.id)?.responsable_id
