@@ -199,7 +199,7 @@ export async function parcourirInterface(
   await filtresAvances.locator('summary').focus()
   await page.keyboard.press('Enter')
   const dossiers = page.getByRole('list', { name: 'Vos dossiers', exact: true })
-  const recherche = page.locator('form[method="get"] input')
+  const recherche = page.locator('form[method="get"] input:not([type="checkbox"])')
   assert.deepEqual(
     await recherche.evaluateAll((elements) =>
       elements.filter((e) => e.getBoundingClientRect().width < 200).map((e) => e.name),

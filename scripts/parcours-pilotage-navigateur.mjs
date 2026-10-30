@@ -3,8 +3,12 @@ import assert from 'node:assert/strict'
 export async function parcourirPilotage(page, site, id, moteur, largeur, simuler) {
   await page.goto(`${site}/espace`)
   const priorites = page.getByRole('region', { name: 'Vos priorités' })
-  await priorites.getByRole('link', { name: /À examiner/ }).waitFor()
-  assert.match(await priorites.getByRole('link', { name: /À examiner/ }).innerText(), /1/)
+  await priorites.getByRole('link', { name: /^À examiner/ }).waitFor()
+  assert.match(await priorites.getByRole('link', { name: /^À examiner/ }).innerText(), /1/)
+  assert.match(
+    await priorites.getByRole('link', { name: /Remplacements à examiner/ }).innerText(),
+    /0/,
+  )
   const section = page.locator('#attributions')
   await section.getByLabel('OCRFICTIF', { exact: true }).check()
   await section.getByRole('combobox').selectOption(id)

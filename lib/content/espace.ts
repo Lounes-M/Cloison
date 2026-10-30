@@ -22,7 +22,8 @@ export const tableau = {
   rechercheReference: 'Référence du dossier',
   rechercheEmail: 'E-mail du locataire',
   rechercher: 'Rechercher',
-  filtresAvances: 'Statut, responsable et échéance',
+  filtresAvances: 'Statut, responsable, échéance et remplacements',
+  remplacement: 'Seulement les dossiers avec un remplacement de pièce à examiner',
   effacer: 'Effacer les filtres',
   aucunResultat:
     'Aucun dossier sur cette page. Modifiez les filtres ou revenez à la page précédente.',

@@ -149,6 +149,7 @@ export default async function PageEspace({
   const attribution =
     recherche.responsable === 'mes' ? 'mes' : recherche.responsable === 'sans' ? 'sans' : 'tous'
   const tri = recherche.tri === 'echeance' ? 'echeance' : 'recent'
+  const remplacement = recherche.remplacement === '1'
   const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
   // Une seule horloge pour les deux bornes ; les droits restent imposes par SQL.
   const bornes = bornesEcheance(horizon)
@@ -161,12 +162,15 @@ export default async function PageEspace({
     if (attribution !== 'tous') params.set('responsable', attribution)
     if (tri !== 'recent') params.set('tri', tri)
     if (horizon) params.set('horizon', horizon)
+    if (remplacement) params.set('remplacement', '1')
     return `/espace?${params.toString()}` as const
   }
   let requete = supabase
     .from('dossiers')
     .select(
-      'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), affecte:affectations_dossiers()',
+      remplacement
+        ? 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), remplacements:complements_documentaires!inner(id), affecte:affectations_dossiers()'
+        : 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), affecte:affectations_dossiers()',
     )
     .order(tri === 'echeance' ? 'expire_le' : 'cree_le', { ascending: tri === 'echeance' })
     .order('id', { ascending: false })
@@ -174,13 +178,16 @@ export default async function PageEspace({
   if (reference) requete = requete.ilike('reference', motif(reference))
   if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
   if (etatRecherche) requete = requete.eq('statut', etatRecherche)
+  if (remplacement) requete = requete.eq('remplacements.etat', 'fourni')
   if (attribution === 'mes')
     requete = requete.eq('affecte.membre_id', contexte.utilisateurId).not('affecte', 'is', null)
   if (attribution === 'sans')
     requete = requete.not('affecte.membre_id', 'is', null).is('affecte', null)
   const { data, error } = await requete.range((numero - 1) * 50, (numero - 1) * 50 + 50)
   if (error) throw new Error('Chargement du dossier indisponible.')
-  const resultats = (data ?? []) as Ligne[]
+  // Deux formes de colonnes selon le filtre : l'analyseur de types de
+  // supabase-js ne sait pas lire leur union, la forme commune reste `Ligne`.
+  const resultats = (data ?? []) as unknown as Ligne[]
   const suivante = resultats.length > 50 && numero < 9999
   const lignes = resultats.slice(0, 50)
   const affectations = lignes.length
@@ -276,6 +283,7 @@ export default async function PageEspace({
             attribution,
             tri,
             horizon,
+            remplacement,
           ])}
           action="/espace"
           method="get"
@@ -300,7 +308,13 @@ export default async function PageEspace({
             />
           </label>
           <details
-            open={Boolean(etatRecherche || attribution !== 'tous' || horizon || tri !== 'recent')}
+            open={Boolean(
+              etatRecherche ||
+              attribution !== 'tous' ||
+              horizon ||
+              tri !== 'recent' ||
+              remplacement,
+            )}
             className="border-ink/15 border-t pt-2 sm:col-span-2"
           >
             <summary className="cursor-pointer text-sm font-bold">{tableau.filtresAvances}</summary>
@@ -363,6 +377,16 @@ export default async function PageEspace({
               <p id="aide-echeance" className="text-muted text-sm sm:col-span-2">
                 {tableau.aideEcheance}
               </p>
+              <label className="flex items-start gap-3 text-sm font-semibold sm:col-span-2">
+                <input
+                  type="checkbox"
+                  name="remplacement"
+                  value="1"
+                  defaultChecked={remplacement}
+                  className="mt-0.5 size-5 shrink-0"
+                />
+                {tableau.remplacement}
+              </label>
             </div>
           </details>
           <button
@@ -376,6 +400,7 @@ export default async function PageEspace({
           etatRecherche ||
           attribution !== 'tous' ||
           horizon ||
+          remplacement ||
           tri !== 'recent' ? (
             <Link href="/espace" className="lien-espace">
               {tableau.effacer}
@@ -391,6 +416,7 @@ export default async function PageEspace({
             etatRecherche ||
             attribution !== 'tous' ||
             horizon ||
+            remplacement ||
             tri !== 'recent'
               ? tableau.aucunResultat
               : tableau.aucun}

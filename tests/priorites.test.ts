@@ -30,13 +30,26 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
     { etat: 'rattache' }
   >
   const resultats = await lirePriorites(contexte)
-  expect(resultats.map((r) => r.nombre)).toEqual([0, null, 2, 3])
-  for (const q of requetes) {
-    expect(q.select).toHaveBeenCalledWith('id', { count: 'exact', head: true })
+  expect(resultats.map((r) => r.cle)).toEqual([
+    'complet',
+    'garant_insuffisant',
+    'transmis',
+    'remplacement',
+    'echeance',
+  ])
+  expect(resultats.map((r) => r.nombre)).toEqual([0, null, 2, 3, 4])
+  for (const [i, q] of requetes.entries()) {
+    expect(q.select).toHaveBeenCalledWith(
+      i === 3 ? 'id, complements_documentaires!inner()' : 'id',
+      { count: 'exact', head: true },
+    )
     expect(q.eq).toHaveBeenCalledWith('agence_id', 'agence')
     expect(q.gt.mock.calls).toEqual(requetes[0]!.gt.mock.calls)
   }
+  // Un remplacement propose par le garant attend l'agence, quel que soit le statut.
+  expect(requetes[3]!.eq).toHaveBeenCalledWith('complements_documentaires.etat', 'fourni')
+  expect(requetes[3]!.eq).not.toHaveBeenCalledWith('statut', expect.anything())
   expect(
-    Date.parse(requetes[3]!.lte.mock.calls[0]![1]) - Date.parse(requetes[0]!.gt.mock.calls[0]![1]),
+    Date.parse(requetes[4]!.lte.mock.calls[0]![1]) - Date.parse(requetes[0]!.gt.mock.calls[0]![1]),
   ).toBe(7 * 86400000)
 })
