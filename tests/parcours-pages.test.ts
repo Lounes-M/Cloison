@@ -421,6 +421,22 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     },
   )
 
+  test.each([
+    ['activite', 'activite_rappel_le', true],
+    ['echeance', 'expire_le', true],
+    ['recent', 'cree_le', false],
+    ['inconnu', 'cree_le', false],
+  ] as const)('le tri %s ordonne par %s', async (tri, colonne, ascending) => {
+    reponses.dossiers!.data = []
+    const arbre = elements(await PageEspace({ searchParams: Promise.resolve({ page: '2', tri }) }))
+    expect(doublures.ordre.mock.calls).toEqual([
+      [colonne, { ascending }],
+      ['id', { ascending: false }],
+    ])
+    const lien = tri === 'activite' || tri === 'echeance' ? `&tri=${tri}` : ''
+    expect(arbre.map((e) => e.props.href)).toContain(`/espace?page=1${lien}`)
+  })
+
   test('le filtre des remplacements ne garde que les dossiers ou une piece attend l agence', async () => {
     reponses.dossiers!.data = []
     const arbre = elements(
