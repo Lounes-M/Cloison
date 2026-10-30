@@ -87,58 +87,62 @@ export default async function PageCandidater({ params }: { params: Promise<{ cod
 
   if (!logement) {
     return (
-      <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[720px]">
-        <EnteteEspace titre={t.page.invalideTitre} etiquette={t.page.etiquette} ton="sun">
-          <p>{t.page.invalideTexte}</p>
-        </EnteteEspace>
-        <Link
-          href="/demarrer"
-          className="press outlined bg-flame shadow-brut rounded-brut inline-block px-8 py-4 text-[17px] font-bold"
-        >
-          {t.page.invalideBouton}
-        </Link>
-      </Section>
+      <main>
+        <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[720px]">
+          <EnteteEspace titre={t.page.invalideTitre} etiquette={t.page.etiquette} ton="sun">
+            <p>{t.page.invalideTexte}</p>
+          </EnteteEspace>
+          <Link
+            href="/demarrer"
+            className="press outlined bg-flame shadow-brut rounded-brut inline-block px-8 py-4 text-[17px] font-bold"
+          >
+            {t.page.invalideBouton}
+          </Link>
+        </Section>
+      </main>
     )
   }
 
   return (
-    <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[720px]">
-      <EnteteEspace titre={t.page.titre} etiquette={t.page.etiquette} ton="mint">
-        <p>{t.page.intro(logement.agence)}</p>
-      </EnteteEspace>
-      <div className="panneau-espace">
-        <p className="font-display text-2xl">{logement.libelle}</p>
-        <dl className="mt-4 grid gap-3 text-[14px] sm:grid-cols-2">
-          <div>
-            <dt className="text-muted font-bold">{t.page.agence}</dt>
-            <dd className="font-semibold">{logement.agence}</dd>
-          </div>
-          {details(logement).map((d) => (
-            <div key={d.terme}>
-              <dt className="text-muted font-bold">{d.terme}</dt>
-              <dd className="font-semibold">{d.valeur}</dd>
+    <main>
+      <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[720px]">
+        <EnteteEspace titre={t.page.titre} etiquette={t.page.etiquette} ton="mint">
+          <p>{t.page.intro(logement.agence)}</p>
+        </EnteteEspace>
+        <div className="panneau-espace">
+          <p className="font-display text-2xl">{logement.libelle}</p>
+          <dl className="mt-4 grid gap-3 text-[14px] sm:grid-cols-2">
+            <div>
+              <dt className="text-muted font-bold">{t.page.agence}</dt>
+              <dd className="font-semibold">{logement.agence}</dd>
             </div>
-          ))}
-          <div>
-            <dt className="text-muted font-bold">{t.page.loyer}</dt>
-            <dd className="font-semibold">
-              {logement.loyer_cents == null
-                ? t.page.sansLoyer
-                : euros(Number(logement.loyer_cents))}
-            </dd>
-          </div>
-        </dl>
-      </div>
-      <div className="panneau-espace mt-6">
-        <FormulaireOuverture candidature={{ code, agence: logement.agence }} />
-      </div>
-      <details className="aide-espace mt-6">
-        <summary>{t.page.dejaTitre}</summary>
-        <p className="mt-3 text-[14px] leading-relaxed">{t.page.dejaTexte}</p>
-        <p className="mt-3 text-[14px]">
-          {t.page.code} : <code className="font-bold break-all">{code}</code>
-        </p>
-      </details>
-    </Section>
+            {details(logement).map((d) => (
+              <div key={d.terme}>
+                <dt className="text-muted font-bold">{d.terme}</dt>
+                <dd className="font-semibold">{d.valeur}</dd>
+              </div>
+            ))}
+            <div>
+              <dt className="text-muted font-bold">{t.page.loyer}</dt>
+              <dd className="font-semibold">
+                {logement.loyer_cents == null
+                  ? t.page.sansLoyer
+                  : euros(Number(logement.loyer_cents))}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <div className="panneau-espace mt-6">
+          <FormulaireOuverture candidature={{ code, agence: logement.agence }} />
+        </div>
+        <details className="aide-espace mt-6">
+          <summary>{t.page.dejaTitre}</summary>
+          <p className="mt-3 text-[14px] leading-relaxed">{t.page.dejaTexte}</p>
+          <p className="mt-3 text-[14px]">
+            {t.page.code} : <code className="font-bold break-all">{code}</code>
+          </p>
+        </details>
+      </Section>
+    </main>
   )
 }
