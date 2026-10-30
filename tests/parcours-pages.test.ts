@@ -3,6 +3,7 @@ import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
+import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import PageLocataire from '@/app/(porteur)/locataire/page'
 import PageGarant from '@/app/(porteur)/garant/page'
@@ -432,9 +433,31 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     vi.clearAllMocks()
     await PageEspace({ searchParams: Promise.resolve({ remplacement: 'oui' }) })
     expect(doublures.colonnes.mock.calls.find(([table]) => table === 'dossiers')![1]).not.toContain(
-      'complements_documentaires',
+      'complements_documentaires!inner',
     )
     expect(doublures.egal).not.toHaveBeenCalledWith('remplacements.etat', 'fourni')
+  })
+
+  test('chaque ligne porte ses pastilles de suivi', async () => {
+    reponses.dossiers!.data = [
+      {
+        id: 'dossier-a',
+        reference: 'REF-A',
+        email_locataire: 'a@example.invalid',
+        statut: 'ouvert',
+        cree_le: '2026-09-01',
+        expire_le: '2099-01-01',
+        activite_rappel_le: '2020-01-01T00:00:00Z',
+        suivi: [{ etat: 'fourni' }],
+        engagements: null,
+      },
+    ]
+    const arbre = elements(await PageEspace())
+    const pastilles = arbre.filter((e) => e.type === PastillesSuivi)
+    expect(pastilles).toHaveLength(2)
+    expect(pastilles[0]!.props.pastilles).toEqual(['remplacement', 'sans_nouvelles'])
+    const colonnes = doublures.colonnes.mock.calls.find(([table]) => table === 'dossiers')![1]
+    expect(colonnes).toContain('activite_rappel_le, suivi:complements_documentaires(etat)')
   })
 
   test('sans nouvelles : dossiers en attente et inactifs depuis sept jours', async () => {

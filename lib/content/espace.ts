@@ -24,6 +24,10 @@ export const tableau = {
   rechercher: 'Rechercher',
   filtresAvances: 'Statut, responsable, échéance et suivi',
   remplacement: 'Seulement les dossiers avec un remplacement de pièce à examiner',
+  pastilles: {
+    remplacement: 'Remplacement à examiner',
+    sans_nouvelles: 'Sans nouvelles depuis 7 jours',
+  },
   sansNouvelles:
     'Seulement les dossiers en attente du locataire ou du garant, sans activité depuis 7 jours',
   effacer: 'Effacer les filtres',
