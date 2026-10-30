@@ -368,6 +368,13 @@ export async function parcourirInterface(
     await page.waitForURL((u) => u.pathname === '/agences')
   }
   await visiter('/agences', 'agences', false)
+  // Le site public a aussi son lien de saut, avant l'en-tete collant.
+  await page.keyboard.press(
+    process.platform === 'darwin' && moteur.name() === 'webkit' ? 'Alt+Tab' : 'Tab',
+  )
+  assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('href')), '#contenu')
+  await page.keyboard.press('Enter')
+  assert.equal(await page.evaluate(() => document.activeElement?.id), 'contenu')
   await visiter('/questions', 'questions', false)
   for (const juridique of ['mentions-legales', 'confidentialite', 'conditions'])
     await visiter('/' + juridique, juridique, false)
