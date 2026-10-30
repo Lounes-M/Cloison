@@ -8,6 +8,11 @@ export const pilotage = {
     { cle: 'garant_insuffisant', titre: 'À revoir', href: '/espace?statut=garant_insuffisant' },
     { cle: 'transmis', titre: 'Transmis', href: '/espace?statut=transmis' },
     {
+      cle: 'remplacement',
+      titre: 'Remplacements à examiner',
+      href: '/espace?remplacement=1',
+    },
+    {
       cle: 'echeance',
       titre: 'Coffres à échéance sous 7 jours',
       href: '/espace?horizon=7&tri=echeance',

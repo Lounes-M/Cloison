@@ -17,6 +17,8 @@ const doublures = vi.hoisted(() => ({
   ordre: vi.fn(),
   borne: vi.fn(),
   rpc: vi.fn(),
+  colonnes: vi.fn(),
+  egal: vi.fn(),
 }))
 vi.mock('@/lib/acces/session', () => ({
   capaciteDepuisCookies: doublures.capacite,
@@ -42,7 +44,10 @@ function client() {
     from(table: string) {
       requetes.push(table)
       const chaine = {
-        select: () => chaine,
+        select: (...args: unknown[]) => {
+          doublures.colonnes(table, ...args)
+          return chaine
+        },
         gt: (...args: unknown[]) => {
           doublures.borne('gt', ...args)
           return chaine
@@ -51,7 +56,10 @@ function client() {
           doublures.borne('lte', ...args)
           return chaine
         },
-        eq: () => chaine,
+        eq: (...args: unknown[]) => {
+          doublures.egal(...args)
+          return chaine
+        },
         not: () => chaine,
         is: () => chaine,
         order: (...args: unknown[]) => {
@@ -401,6 +409,24 @@ describe('la liste des dossiers reste bornee et navigable', () => {
       )
     },
   )
+
+  test('le filtre des remplacements ne garde que les dossiers ou une piece attend l agence', async () => {
+    reponses.dossiers!.data = []
+    const arbre = elements(
+      await PageEspace({ searchParams: Promise.resolve({ page: '2', remplacement: '1' }) }),
+    )
+    const colonnes = doublures.colonnes.mock.calls.find(([table]) => table === 'dossiers')![1]
+    expect(colonnes).toContain('remplacements:complements_documentaires!inner(id)')
+    expect(doublures.egal).toHaveBeenCalledWith('remplacements.etat', 'fourni')
+    expect(arbre.map((e) => e.props.href)).toContain('/espace?page=1&remplacement=1')
+
+    vi.clearAllMocks()
+    await PageEspace({ searchParams: Promise.resolve({ remplacement: 'oui' }) })
+    expect(doublures.colonnes.mock.calls.find(([table]) => table === 'dossiers')![1]).not.toContain(
+      'complements_documentaires',
+    )
+    expect(doublures.egal).not.toHaveBeenCalledWith('remplacements.etat', 'fourni')
+  })
 
   test.each(['0', '-7', '365', ['7', '30'], '7);drop'])(
     'horizon invalide %s ignore',

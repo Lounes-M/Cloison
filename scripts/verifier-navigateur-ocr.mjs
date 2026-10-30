@@ -372,7 +372,12 @@ const api = createServer(async (req, res) => {
       const statut = url.searchParams.get('statut')
       assert.equal(url.searchParams.get('agence_id'), `eq.${id}`)
       assert.match(url.searchParams.getAll('expire_le').join(','), /gt\./)
-      res.setHeader('content-range', `*/${!statut || statut === 'eq.complet' ? 1 : 0}`)
+      const remplacement = url.searchParams.get('complements_documentaires.etat')
+      if (remplacement) assert.equal(remplacement, 'eq.fourni')
+      res.setHeader(
+        'content-range',
+        `*/${!remplacement && (!statut || statut === 'eq.complet') ? 1 : 0}`,
+      )
       res.end()
       return
     }

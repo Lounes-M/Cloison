@@ -7,15 +7,22 @@ export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'r
   return Promise.all(
     pilotage.indicateurs.map(async ({ cle }) => {
       try {
+        // Un dossier compte une fois, quel que soit le nombre de pieces
+        // proposees : l'embarquement `!inner` filtre les dossiers, pas les lignes.
         let requete = contexte.supabase
           .from('dossiers')
-          .select('id', { count: 'exact', head: true })
+          .select(cle === 'remplacement' ? 'id, complements_documentaires!inner()' : 'id', {
+            count: 'exact',
+            head: true,
+          })
           .eq('agence_id', contexte.agence.id)
           .gt('expire_le', new Date(maintenant).toISOString())
         requete =
           cle === 'echeance'
             ? requete.lte('expire_le', new Date(maintenant + 7 * 86400000).toISOString())
-            : requete.eq('statut', cle)
+            : cle === 'remplacement'
+              ? requete.eq('complements_documentaires.etat', 'fourni')
+              : requete.eq('statut', cle)
         const { count, error } = await requete
         return { cle, nombre: !error && Number.isSafeInteger(count) && count! >= 0 ? count : null }
       } catch {
