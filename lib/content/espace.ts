@@ -107,6 +107,7 @@ export const activation = {
 } as const
 
 export const dossier = {
+  derniereActivite: (date: string) => `Dernière activité sur le dossier : ${date}.`,
   retour: 'Tous les dossiers',
   reference: 'Référence',
   locataire: 'Locataire',
