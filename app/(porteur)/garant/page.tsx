@@ -38,6 +38,8 @@ import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournal } from '@/lib/content/journal'
 import { agenceDuDossier } from '@/lib/acces/agence-du-dossier'
 import { agenceDuDossier as texteAgence } from '@/lib/content/agence-du-dossier'
+import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
+import { resteAFaire } from '@/lib/garant/reste-a-faire'
 
 export const metadata: Metadata = {
   title: 'Votre dépôt',
@@ -142,6 +144,22 @@ export default async function PageGarant({
       attendues.some((a) => a.valeur === n.valeur) || deposees.some((p) => p.type === n.valeur),
   )
 
+  const restant = ouvert
+    ? resteAFaire({
+        profil,
+        engagement: engagement
+          ? {
+              revenuDeclare: engagement.revenu_net_mensuel_cents != null,
+              montantDeclare: Number(engagement.montant_max_cents) > 0,
+              mentionApposee: Boolean(engagement.mention_saisie_le),
+            }
+          : null,
+        pieces: deposees,
+        demandes: (demandes ?? []) as Complement[],
+        mentionAttendue: Boolean(mentionAttendue),
+      })
+    : null
+
   const engagementAffiche: EngagementAffiche = engagement
     ? {
         profil,
@@ -191,6 +209,8 @@ export default async function PageGarant({
         etapes={etapesGarant(String(dossier.statut), Boolean(engagement) && deposees.length > 0)}
       />
 
+      {restant ? <ResteAFaireGarant etapes={restant} /> : null}
+
       <SommaireDossier
         liens={[
           { id: 'pieces', titre: interfaceEspace.pieces },
@@ -232,7 +252,11 @@ export default async function PageGarant({
               siennes.reduce((s, p) => s + (p.nombre_documents ?? 1), 0) >= nature.attendu
 
             return (
-              <li key={nature.valeur} className="border-ink border-t-2 pt-6">
+              <li
+                key={nature.valeur}
+                id={`piece-${nature.valeur}`}
+                className="border-ink scroll-mt-6 border-t-2 pt-6"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="flex items-center gap-2 text-[16px] font-bold">
@@ -297,7 +321,7 @@ export default async function PageGarant({
       </section>
 
       {mentionAttendue ? (
-        <section className="panneau-espace mt-8">
+        <section id="mention" className="panneau-espace mt-8">
           <h2 className="text-xl font-bold">{texteMention.titre}</h2>
           <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
           <FormulaireMention

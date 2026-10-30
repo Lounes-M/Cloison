@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
+import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
 import PageLocataire from '@/app/(porteur)/locataire/page'
 import PageGarant from '@/app/(porteur)/garant/page'
 import PageEspace from '@/app/(agence)/espace/page'
@@ -478,3 +479,25 @@ test.each(['garant', 'agence'])(
     expect(texteVisible(page)).not.toContain('sentinelle@example.invalid')
   },
 )
+
+test('le garant voit ce qu il lui reste a faire tant que le depot est ouvert', async () => {
+  function textes(noeud: ReactNode, sortie: string[] = []): string[] {
+    if (typeof noeud === 'string') sortie.push(noeud)
+    if (Array.isArray(noeud)) noeud.forEach((n) => textes(n, sortie))
+    if (isValidElement<{ children?: ReactNode }>(noeud)) {
+      if (noeud.type === ResteAFaireGarant) {
+        textes(ResteAFaireGarant(noeud.props as Parameters<typeof ResteAFaireGarant>[0]), sortie)
+      }
+      textes(noeud.props.children, sortie)
+    }
+    return sortie
+  }
+  const ouvert = textes(await PageGarant()).join(' ')
+  expect(ouvert).toContain('Ce qu’il vous reste à faire')
+  expect(ouvert).toContain('Bulletins de paie : 3 documents manquants sur 3.')
+  reponses.dossiers = {
+    data: { ...(reponses.dossiers!.data as object), statut: 'transmis' },
+    error: null,
+  }
+  expect(textes(await PageGarant()).join(' ')).not.toContain('Ce qu’il vous reste à faire')
+})
