@@ -38,6 +38,8 @@ import {
 } from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
+import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
+import { limiteSansNouvelles, pastillesDuDossier } from '@/lib/agences/inactivite'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournal } from '@/lib/content/journal'
@@ -109,7 +111,7 @@ export default async function PageDossier({
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id',
+        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, activite_rappel_le',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -207,6 +209,21 @@ export default async function PageDossier({
             {texte.reference} {String(d.reference)}
           </h1>
           <p className="text-muted mt-2 text-sm break-all">{String(d.email_locataire)}</p>
+          {d.activite_rappel_le ? (
+            <p className="text-muted mt-1 text-sm">
+              {texte.derniereActivite(date(d.activite_rappel_le, true))}
+            </p>
+          ) : null}
+          <PastillesSuivi
+            pastilles={pastillesDuDossier(
+              {
+                statut: String(d.statut),
+                activite_rappel_le: d.activite_rappel_le ? String(d.activite_rappel_le) : null,
+                suivi: (demandes ?? []) as { etat: string }[],
+              },
+              limiteSansNouvelles(),
+            )}
+          />
         </div>
         <span
           className={cn(

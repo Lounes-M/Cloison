@@ -620,3 +620,33 @@ test('le locataire voit ses propres gestes, jamais les pieces de son garant', as
   expect(apres).toContain('Rien à faire de ton côté pour l’instant.')
   expect(apres).not.toContain('Bulletins')
 })
+
+test('la fiche d un dossier dit sa derniere activite et porte ses pastilles', async () => {
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'depot_en_cours',
+      activite_rappel_le: '2020-01-02T10:00:00Z',
+    },
+    error: null,
+  }
+  reponses.complements_documentaires = {
+    data: [
+      {
+        id: 'c1',
+        nature: 'bulletin_paie',
+        motif: 'illisible',
+        etat: 'fourni',
+        piece_initiale: 'p1',
+        piece_fournie: 'p2',
+        cree_le: '2020-01-01T00:00:00Z',
+        attendu_depuis: '2020-01-01T00:00:00Z',
+      },
+    ],
+    error: null,
+  }
+  const page = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(texteVisible(page)).toContain('Dernière activité sur le dossier : 2 janvier 2020')
+  const pastilles = elements(page).find((e) => e.type === PastillesSuivi)
+  expect(pastilles?.props.pastilles).toEqual(['remplacement', 'sans_nouvelles'])
+})
