@@ -374,6 +374,10 @@ const api = createServer(async (req, res) => {
       assert.match(url.searchParams.getAll('expire_le').join(','), /gt\./)
       const remplacement = url.searchParams.get('complements_documentaires.etat')
       if (remplacement) assert.equal(remplacement, 'eq.fourni')
+      if (statut?.startsWith('in.')) {
+        assert.equal(statut, 'in.(ouvert,depot_en_cours)')
+        assert.match(url.searchParams.get('activite_rappel_le') ?? '', /^lt\./)
+      }
       res.setHeader(
         'content-range',
         `*/${!remplacement && (!statut || statut === 'eq.complet') ? 1 : 0}`,

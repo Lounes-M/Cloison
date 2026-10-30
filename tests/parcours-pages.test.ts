@@ -61,6 +61,14 @@ function client() {
           return chaine
         },
         not: () => chaine,
+        in: (...args: unknown[]) => {
+          doublures.egal('in', ...args)
+          return chaine
+        },
+        lt: (...args: unknown[]) => {
+          doublures.borne('lt', ...args)
+          return chaine
+        },
         is: () => chaine,
         order: (...args: unknown[]) => {
           doublures.ordre(...args)
@@ -426,6 +434,20 @@ describe('la liste des dossiers reste bornee et navigable', () => {
       'complements_documentaires',
     )
     expect(doublures.egal).not.toHaveBeenCalledWith('remplacements.etat', 'fourni')
+  })
+
+  test('sans nouvelles : dossiers en attente et inactifs depuis sept jours', async () => {
+    reponses.dossiers!.data = []
+    const avant = Date.now()
+    const arbre = elements(
+      await PageEspace({ searchParams: Promise.resolve({ page: '2', sans_nouvelles: '1' }) }),
+    )
+    expect(doublures.egal).toHaveBeenCalledWith('in', 'statut', ['ouvert', 'depot_en_cours'])
+    const [, colonne, limite] = doublures.borne.mock.calls.find(([op]) => op === 'lt')!
+    expect(colonne).toBe('activite_rappel_le')
+    expect(avant - Date.parse(limite as string)).toBeGreaterThanOrEqual(7 * 86400000 - 1000)
+    expect(avant - Date.parse(limite as string)).toBeLessThanOrEqual(7 * 86400000)
+    expect(arbre.map((e) => e.props.href)).toContain('/espace?page=1&sans_nouvelles=1')
   })
 
   test.each(['0', '-7', '365', ['7', '30'], '7);drop'])(

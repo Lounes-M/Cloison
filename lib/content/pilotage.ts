@@ -13,6 +13,11 @@ export const pilotage = {
       href: '/espace?remplacement=1',
     },
     {
+      cle: 'sans_nouvelles',
+      titre: 'Sans nouvelles depuis 7 jours',
+      href: '/espace?sans_nouvelles=1',
+    },
+    {
       cle: 'echeance',
       titre: 'Coffres à échéance sous 7 jours',
       href: '/espace?horizon=7&tri=echeance',

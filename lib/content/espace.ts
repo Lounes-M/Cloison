@@ -22,8 +22,10 @@ export const tableau = {
   rechercheReference: 'Référence du dossier',
   rechercheEmail: 'E-mail du locataire',
   rechercher: 'Rechercher',
-  filtresAvances: 'Statut, responsable, échéance et remplacements',
+  filtresAvances: 'Statut, responsable, échéance et suivi',
   remplacement: 'Seulement les dossiers avec un remplacement de pièce à examiner',
+  sansNouvelles:
+    'Seulement les dossiers en attente du locataire ou du garant, sans activité depuis 7 jours',
   effacer: 'Effacer les filtres',
   aucunResultat:
     'Aucun dossier sur cette page. Modifiez les filtres ou revenez à la page précédente.',

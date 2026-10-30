@@ -12,7 +12,7 @@ export async function PrioritesAgence({
   return (
     <section className="panneau-espace mt-8" aria-label={t.titre}>
       <h2 className="text-xl font-bold">{t.titre}</h2>
-      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {t.indicateurs.map((carte) => {
           const nombre = nombres.find((n) => n.cle === carte.cle)?.nombre
           return (

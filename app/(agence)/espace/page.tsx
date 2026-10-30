@@ -13,6 +13,7 @@ import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
 import { bornesEcheance } from '@/lib/agences/echeances'
+import { STATUTS_EN_ATTENTE, limiteSansNouvelles } from '@/lib/agences/inactivite'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { collaborateurs } from '@/lib/content/collaborateurs'
 import { rattachement as textesRattachement } from '@/lib/content/rattachement'
@@ -150,6 +151,7 @@ export default async function PageEspace({
     recherche.responsable === 'mes' ? 'mes' : recherche.responsable === 'sans' ? 'sans' : 'tous'
   const tri = recherche.tri === 'echeance' ? 'echeance' : 'recent'
   const remplacement = recherche.remplacement === '1'
+  const sansNouvelles = recherche.sans_nouvelles === '1'
   const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
   // Une seule horloge pour les deux bornes ; les droits restent imposes par SQL.
   const bornes = bornesEcheance(horizon)
@@ -163,6 +165,7 @@ export default async function PageEspace({
     if (tri !== 'recent') params.set('tri', tri)
     if (horizon) params.set('horizon', horizon)
     if (remplacement) params.set('remplacement', '1')
+    if (sansNouvelles) params.set('sans_nouvelles', '1')
     return `/espace?${params.toString()}` as const
   }
   let requete = supabase
@@ -179,6 +182,10 @@ export default async function PageEspace({
   if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
   if (etatRecherche) requete = requete.eq('statut', etatRecherche)
   if (remplacement) requete = requete.eq('remplacements.etat', 'fourni')
+  if (sansNouvelles)
+    requete = requete
+      .in('statut', [...STATUTS_EN_ATTENTE])
+      .lt('activite_rappel_le', limiteSansNouvelles())
   if (attribution === 'mes')
     requete = requete.eq('affecte.membre_id', contexte.utilisateurId).not('affecte', 'is', null)
   if (attribution === 'sans')
@@ -284,6 +291,7 @@ export default async function PageEspace({
             tri,
             horizon,
             remplacement,
+            sansNouvelles,
           ])}
           action="/espace"
           method="get"
@@ -313,7 +321,8 @@ export default async function PageEspace({
               attribution !== 'tous' ||
               horizon ||
               tri !== 'recent' ||
-              remplacement,
+              remplacement ||
+              sansNouvelles,
             )}
             className="border-ink/15 border-t pt-2 sm:col-span-2"
           >
@@ -387,6 +396,16 @@ export default async function PageEspace({
                 />
                 {tableau.remplacement}
               </label>
+              <label className="flex items-start gap-3 text-sm font-semibold sm:col-span-2">
+                <input
+                  type="checkbox"
+                  name="sans_nouvelles"
+                  value="1"
+                  defaultChecked={sansNouvelles}
+                  className="mt-0.5 size-5 shrink-0"
+                />
+                {tableau.sansNouvelles}
+              </label>
             </div>
           </details>
           <button
@@ -401,6 +420,7 @@ export default async function PageEspace({
           attribution !== 'tous' ||
           horizon ||
           remplacement ||
+          sansNouvelles ||
           tri !== 'recent' ? (
             <Link href="/espace" className="lien-espace">
               {tableau.effacer}
@@ -417,6 +437,7 @@ export default async function PageEspace({
             attribution !== 'tous' ||
             horizon ||
             remplacement ||
+            sansNouvelles ||
             tri !== 'recent'
               ? tableau.aucunResultat
               : tableau.aucun}
