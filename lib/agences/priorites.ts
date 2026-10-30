@@ -1,6 +1,7 @@
 import 'server-only'
 import type { ContexteAgence } from './contexte'
 import { pilotage } from '@/lib/content/pilotage'
+import { STATUTS_EN_ATTENTE, limiteSansNouvelles } from './inactivite'
 
 export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'rattache' }>) {
   const maintenant = Date.now()
@@ -22,7 +23,11 @@ export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'r
             ? requete.lte('expire_le', new Date(maintenant + 7 * 86400000).toISOString())
             : cle === 'remplacement'
               ? requete.eq('complements_documentaires.etat', 'fourni')
-              : requete.eq('statut', cle)
+              : cle === 'sans_nouvelles'
+                ? requete
+                    .in('statut', [...STATUTS_EN_ATTENTE])
+                    .lt('activite_rappel_le', limiteSansNouvelles(maintenant))
+                : requete.eq('statut', cle)
         const { count, error } = await requete
         return { cle, nombre: !error && Number.isSafeInteger(count) && count! >= 0 ? count : null }
       } catch {
