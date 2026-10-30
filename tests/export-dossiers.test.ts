@@ -12,6 +12,7 @@ const ligne = (n: number) => ({
   garant: true,
   ratio: '3.456',
   cree_le: '2026-10-01T10:00:00+02:00',
+  activite_le: '2026-10-20T09:30:00Z',
   expire_le: '2026-12-30T08:00:00Z',
 })
 const signal = () => new AbortController().signal
@@ -26,10 +27,10 @@ test('une ligne par dossier, statut lisible, ratio a deux decimales, sans adress
   )
   const lignes = csv.split('\r\n')
   expect(lignes[0]).toBe(
-    '﻿"Référence";"Statut";"Garant désigné";"Ratio";"Ouvert le (UTC)";"Fin du coffre (UTC)";"Exporté le (UTC)"',
+    '﻿"Référence";"Statut";"Garant désigné";"Ratio";"Ouvert le (UTC)";"Dernière activité (UTC)";"Fin du coffre (UTC)";"Exporté le (UTC)"',
   )
   expect(lignes[1]).toBe(
-    '"CL-1";"Complet";"Oui";"3,46";"2026-10-01T08:00:00.000Z";"2026-12-30T08:00:00.000Z";"2026-10-26T12:00:00.000Z"',
+    '"CL-1";"Complet";"Oui";"3,46";"2026-10-01T08:00:00.000Z";"2026-10-20T09:30:00.000Z";"2026-12-30T08:00:00.000Z";"2026-10-26T12:00:00.000Z"',
   )
   expect(lignes[2]).toContain('"CL-2";"Ouvert";"Non";"";')
   expect(csv).not.toContain('@')
@@ -40,6 +41,7 @@ test.each([
   [{ ...ligne(1), ratio: '=1+1' }],
   [{ ...ligne(1), reference: '' }],
   [{ ...ligne(1), garant: 'oui' }],
+  [{ ...ligne(1), activite_le: null }],
 ])('refuse une page de dossiers invalide', async (...page) => {
   await expect(exporterRegistre('dossiers', async () => page, signal())).rejects.toThrow()
 })
@@ -75,6 +77,7 @@ const brut = (n: number) => ({
   statut: 'depot_en_cours',
   email_garant: 'garant@example.invalid',
   cree_le: '2026-10-01T10:00:00Z',
+  activite_rappel_le: '2026-10-15T07:00:00Z',
   expire_le: '2026-12-30T08:00:00Z',
   engagements: [{ ratio: 2.5 }],
 })
@@ -96,7 +99,9 @@ test('route : demonstrations exclues, curseur par identifiant, adresse du garant
   expect(requete.gt).toHaveBeenCalledWith('id', id(20))
   const csv = await r.text()
   expect(csv).not.toContain('garant@example.invalid')
-  expect(csv).toContain('"CL-1";"Dépôt en cours";"Oui";"2,50"')
+  expect(csv).toContain(
+    '"CL-1";"Dépôt en cours";"Oui";"2,50";"2026-10-01T10:00:00.000Z";"2026-10-15T07:00:00.000Z";',
+  )
   expect(csv).toContain('"CL-21";"Dépôt en cours";"Non";""')
 })
 

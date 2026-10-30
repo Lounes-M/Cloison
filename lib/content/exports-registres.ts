@@ -19,7 +19,7 @@ export const exportsRegistres = {
   ],
   dossiers: {
     titre: 'Exporter vos dossiers',
-    aide: 'Téléchargez la liste de vos dossiers en cours, dans la limite de 1 000 lignes : référence, statut, ratio et dates. Le CSV ne contient ni pièce, ni montant déclaré, ni adresse e-mail. Les dossiers de démonstration sont exclus. Les dates sont en UTC.',
+    aide: 'Téléchargez la liste de vos dossiers en cours, dans la limite de 1 000 lignes : référence, statut, ratio, dates d’ouverture, de dernière activité et de fin du coffre. Le CSV ne contient ni pièce, ni montant déclaré, ni adresse e-mail. Les dossiers de démonstration sont exclus. Les dates sont en UTC.',
     telecharger: 'Télécharger les dossiers en CSV',
     attente: 'Préparation de la liste…',
     erreur: 'La liste est indisponible. Aucun fichier partiel n’a été téléchargé. Réessayez.',
@@ -31,6 +31,7 @@ export const exportsRegistres = {
     'Garant désigné',
     'Ratio',
     'Ouvert le (UTC)',
+    'Dernière activité (UTC)',
     'Fin du coffre (UTC)',
     'Exporté le (UTC)',
   ],
