@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { Section } from '@/components/ui/Section'
 import { juridique } from '@/lib/content/juridique'
 import { questions as t } from '@/lib/content/questions'
+import { DonneesStructurees } from '@/components/seo/DonneesStructurees'
+import { faqStructuree } from '@/lib/seo/faq'
 
 export const metadata: Metadata = {
   title: t.titre,
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
 export default function PageQuestions() {
   return (
     <main>
+      <DonneesStructurees donnees={faqStructuree(t.groupes)} />
       <Section className="bg-cream py-12 md:py-16" innerClassName="max-w-[760px]">
         <h1 className="font-display text-3xl break-words uppercase sm:text-4xl md:text-5xl">
           {t.titre}
