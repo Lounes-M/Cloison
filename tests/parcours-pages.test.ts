@@ -3,6 +3,7 @@ import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
+import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import PageLocataire from '@/app/(porteur)/locataire/page'
 import PageGarant from '@/app/(porteur)/garant/page'
 import PageEspace from '@/app/(agence)/espace/page'
@@ -548,4 +549,51 @@ test('le garant voit ce qu il lui reste a faire tant que le depot est ouvert', a
     error: null,
   }
   expect(textes(await PageGarant()).join(' ')).not.toContain('Ce qu’il vous reste à faire')
+})
+
+test('le locataire voit ses propres gestes, jamais les pieces de son garant', async () => {
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  function textes(noeud: ReactNode, sortie: string[] = []): string[] {
+    if (typeof noeud === 'string') sortie.push(noeud)
+    if (Array.isArray(noeud)) noeud.forEach((n) => textes(n, sortie))
+    if (isValidElement<{ children?: ReactNode }>(noeud)) {
+      if (noeud.type === ResteAFaireLocataire) {
+        textes(
+          ResteAFaireLocataire(noeud.props as Parameters<typeof ResteAFaireLocataire>[0]),
+          sortie,
+        )
+      }
+      textes(noeud.props.children, sortie)
+    }
+    return sortie
+  }
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      agence_id: ID,
+      loyer_cents: null,
+      email_garant: null,
+    },
+    error: null,
+  }
+  const avant = textes(await locataire()).join(' ')
+  expect(avant).toContain('Ce qu’il te reste à faire')
+  expect(avant).toContain('Indique le loyer mensuel, charges comprises.')
+  expect(avant).toContain('Désigne ton garant')
+  expect(avant).not.toContain('Règle le dossier')
+
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      loyer_cents: 90000,
+      email_garant: 'garant@example.test',
+    },
+    error: null,
+  }
+  const apres = textes(await locataire()).join(' ')
+  expect(apres).toContain('Rien à faire de ton côté pour l’instant.')
+  expect(apres).not.toContain('Bulletins')
 })

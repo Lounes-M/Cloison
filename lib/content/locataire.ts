@@ -65,6 +65,19 @@ export const espace = {
   loyerSucces: 'Loyer enregistré.',
 } as const
 
+/** L'encart du haut : tes gestes a toi, jamais ce que depose ton garant. */
+export const resteAFaire = {
+  titre: 'Ce qu’il te reste à faire',
+  aide: 'Chaque ligne mène à l’endroit de la page où le faire.',
+  etapes: {
+    loyer: 'Indique le loyer mensuel, charges comprises.',
+    paiement: 'Règle le dossier pour que ton garant reçoive son lien.',
+    garant: 'Désigne ton garant : il reçoit un lien pour déposer ses pièces.',
+  },
+  attente:
+    'Rien à faire de ton côté pour l’instant. Ton garant dépose ses pièces ; tu verras le dossier avancer ici.',
+} as const
+
 /**
  * Les statuts, tels que le locataire les voit.
  *
