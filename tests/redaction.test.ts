@@ -59,6 +59,7 @@ const GARANT = [
 const BRANCHES_GARANT = [
   'agence-du-dossier.agenceDuDossier.garant',
   'complements.complements.aideGarant',
+  'continuite.continuite.garant.',
   'courriels.garant.',
   'courriels.cloture.garant.',
   'frise.frise.garant.',
