@@ -128,3 +128,15 @@ test('chaque requete porte un nonce neuf identique dans le rendu et la reponse',
   expect(politique).not.toBe(b.headers.get('content-security-policy'))
   expect(politique?.match(/script-src ([^;]+)/)?.[1]).not.toContain("'unsafe-inline'")
 })
+
+for (const chemin of [
+  '/lien/jeton-fictif',
+  '/locataire',
+  '/garant',
+  '/remise-donnees',
+  '/connexion',
+])
+  test(`${chemin} demande aux moteurs de ne rien indexer`, async () => {
+    const reponse = await proxy(new NextRequest(`https://cloison.example.invalid${chemin}`))
+    expect(reponse.headers.get('x-robots-tag')).toBe('noindex, nofollow')
+  })
