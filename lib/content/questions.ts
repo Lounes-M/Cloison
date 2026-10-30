@@ -67,7 +67,7 @@ export const questions = {
         {
           question: 'Mon lien ne fonctionne plus.',
           reponse:
-            'Un seul lien vaut à la fois, sept jours au plus. Demandez au locataire de vous le renvoyer depuis son dossier.',
+            'Un seul lien vaut à la fois, sept jours au plus. Passez par « Retrouver mon dossier » avec votre adresse et la référence reçue dans l’invitation : si le dossier est encore actif, un nouveau lien vous est envoyé. Le locataire peut aussi vous le renvoyer depuis son dossier.',
         },
         {
           question: 'Mes pièces sont-elles protégées ?',

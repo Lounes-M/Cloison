@@ -1,4 +1,5 @@
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
+import { FormulaireRetrouverGarant } from '@/components/forms/FormulaireRetrouverGarant'
 import type { Metadata } from 'next'
 
 import { Button } from '@/components/ui/Button'
@@ -29,6 +30,7 @@ export default function PageLienInvalide() {
           {lienInvalide.bouton}
         </Button>
       </div>
+      <FormulaireRetrouverGarant />
       <p className="bg-sun/30 mt-6 rounded-xl p-4 text-sm leading-relaxed">{lienInvalide.garant}</p>
     </div>
   )

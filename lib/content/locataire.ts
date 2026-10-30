@@ -121,6 +121,6 @@ export const lienInvalide = {
   titre: 'Ce lien ne fonctionne plus',
   texte: 'Il a expiré, a été révoqué ou remplacé par un plus récent. Un seul lien vaut à la fois.',
   locataire: 'Si tu es locataire, ouvre un nouveau dossier ou demande un nouveau lien.',
-  garant: 'Si vous êtes garant, demandez au locataire de vous renvoyer le lien depuis son dossier.',
+  garant: 'Sans la référence, le locataire peut aussi vous renvoyer le lien depuis son dossier.',
   bouton: 'Ouvrir un dossier',
 } as const

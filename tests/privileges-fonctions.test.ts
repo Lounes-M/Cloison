@@ -6,6 +6,7 @@ test('les droits Supabase par defaut ne rouvrent pas les fonctions internes', as
   const interdites = [
     'versionner_conditions()',
     'retrouver_lien_locataire(text,text)',
+    'retrouver_lien_garant(text,text)',
     'purger_les_dossiers_expires()',
     'pieces_suffisantes(uuid)',
     'recalculer_dossier(uuid)',
