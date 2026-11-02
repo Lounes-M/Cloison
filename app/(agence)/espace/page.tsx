@@ -207,13 +207,13 @@ export default async function PageEspace({
     requete = requete
       .in('statut', [...STATUTS_EN_ATTENTE])
       .lt('activite_rappel_le', limiteSansNouvelles())
-  if (relancesEpuisees) {
-    // La fonction rend au plus 500 identifiants, tous de l'agence (0077).
-    const epuises = await supabase.rpc('dossiers_relances_epuisees')
-    if (epuises.error) throw new Error('Chargement du dossier indisponible.')
-    const ids = Array.isArray(epuises.data) ? (epuises.data as string[]) : []
-    requete = requete.in('id', ids.length ? ids : [AUCUN_DOSSIER])
-  }
+  // La fonction rend au plus 500 identifiants, tous de l'agence (0077). Pour
+  // le filtre, une panne arrete la page ; pour les pastilles, elle les tait.
+  const epuises = await supabase.rpc('dossiers_relances_epuisees')
+  if (epuises.error && relancesEpuisees) throw new Error('Chargement du dossier indisponible.')
+  const idsEpuises = !epuises.error && Array.isArray(epuises.data) ? (epuises.data as string[]) : []
+  if (relancesEpuisees) requete = requete.in('id', idsEpuises.length ? idsEpuises : [AUCUN_DOSSIER])
+  const epuisesVus = new Set(idsEpuises)
   if (attribution === 'mes')
     requete = requete.eq('affecte.membre_id', contexte.utilisateurId).not('affecte', 'is', null)
   if (attribution === 'sans')
@@ -525,7 +525,12 @@ export default async function PageEspace({
                           >
                             {statut.libelle}
                           </span>
-                          <PastillesSuivi pastilles={pastillesDuDossier(ligne, limiteInactivite)} />
+                          <PastillesSuivi
+                            pastilles={pastillesDuDossier(
+                              { ...ligne, relances_epuisees: epuisesVus.has(ligne.id) },
+                              limiteInactivite,
+                            )}
+                          />
                         </dd>
                       </div>
                       <div className="col-span-2">
@@ -604,7 +609,12 @@ export default async function PageEspace({
                           >
                             {statut.libelle}
                           </span>
-                          <PastillesSuivi pastilles={pastillesDuDossier(ligne, limiteInactivite)} />
+                          <PastillesSuivi
+                            pastilles={pastillesDuDossier(
+                              { ...ligne, relances_epuisees: epuisesVus.has(ligne.id) },
+                              limiteInactivite,
+                            )}
+                          />
                         </td>
                         <td className="px-4 py-3 text-sm break-all">
                           {responsables.get(ligne.id)?.responsable_id
