@@ -158,6 +158,16 @@ export const dossier = {
 
 /** Clore un dossier avant son echeance : le geste est definitif. */
 /** Le loyer saisi par l'agence sur un dossier. */
+/** Relancer le garant a la main une fois les relances automatiques epuisees (0079). */
+export const relanceGarant = {
+  aide: 'Le garant n’a pas réagi à ses trois relances automatiques. Après un échange avec lui, vous pouvez relancer un nouveau cycle de trois relances : la première part dans les prochaines heures.',
+  bouton: 'Relancer à nouveau le garant',
+  envoi: 'Relance en cours…',
+  succes: 'C’est noté : un nouveau cycle de relances commence.',
+  erreur:
+    'Relance impossible. Seuls un administrateur ou le responsable du dossier peuvent relancer, et seulement un dossier dont les relances sont épuisées.',
+} as const
+
 export const loyerAgence = {
   titre: 'Loyer du logement',
   champ: 'Loyer mensuel, charges comprises',
