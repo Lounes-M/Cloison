@@ -517,3 +517,55 @@ test('les relances epuisees : trois relances parties et aucune activite depuis l
       ).rows[0]!.p,
     ).toBe(false)
 })
+
+async function relancerDepot(jours: number) {
+  await redevenirProprietaire(db)
+  const r = (
+    await db.query<{ id: string }>(
+      `insert into rappels_dossiers(cle,dossier_id,agence_id,nature,revision_dossier,empreinte_email,expiration_dossier,expire_le,cree_le)
+       values(encode(sha256(convert_to(gen_random_uuid()::text,'UTF8')),'hex'),$1,$2,'depot',gen_random_uuid(),repeat('a',64),now()+interval '2 days',now()+interval '1 day',now()-make_interval(days=>$3))
+       returning id`,
+      [dossier, agence, jours],
+    )
+  ).rows[0]!.id
+  await db.query(
+    "insert into courriels_sortants(id,contenu,expire_le,rappel_id) values($1,'chiffre-fictif',now()+interval '1 day',$1)",
+    [r],
+  )
+}
+test('trois relances sans reponse previennent chaque collaborateur une fois, puis plus rien', async () => {
+  await regler()
+  await relancerDepot(7)
+  await relancerDepot(5)
+  await relancerDepot(4)
+  expect(await programmer()).toBe(3)
+  const prets = await preparer()
+  expect(prets.map((r) => r.nature)).toEqual(['epuise', 'epuise', 'epuise'])
+  expect(prets.map((r) => r.email)).not.toContain('garant@example.invalid')
+  expect(await programmer()).toBe(0)
+  // Une activite du dossier rend l'alerte obsolete avant son envoi.
+  await redevenirProprietaire(db)
+  await db.query('update dossiers set revision_rappel=gen_random_uuid() where id=$1', [dossier])
+  expect(await preparer()).toEqual([])
+})
+test('pas d alerte d epuisement si la derniere relance est trop recente ou si le garant a bouge', async () => {
+  await regler()
+  await relancerDepot(7)
+  await relancerDepot(6)
+  await relancerDepot(1)
+  expect(await programmer()).toBe(0)
+  await redevenirProprietaire(db)
+  await db.query("update rappels_dossiers set cree_le=now()-interval '9 days' where nature='depot'")
+  expect(await programmer()).toBe(0)
+})
+test('un collaborateur en mode aucun ne recoit pas l alerte d epuisement', async () => {
+  await regler()
+  await redevenirProprietaire(db)
+  await db.query("insert into preferences_notifications(utilisateur_id,mode) values($1,'aucun')", [
+    membre,
+  ])
+  await relancerDepot(7)
+  await relancerDepot(5)
+  await relancerDepot(4)
+  expect(await programmer()).toBe(2)
+})

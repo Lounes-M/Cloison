@@ -10,7 +10,7 @@ export const rappels = {
   limites:
     'Les relances concernent les dépôts incomplets et les corrections encore attendues. Trois relances maximum par dossier, espacées d’au moins trois jours. Une nouvelle activité reporte le rappel. Aucun nouveau lien n’est créé et aucune échéance n’est prolongée.',
   preferences:
-    'Les rappels d’échéance respectent les préférences personnelles de vos collaborateurs. Ils s’arrêtent après signature, refus ou expiration. Un courriel déjà transmis au fournisseur ne peut pas être rappelé.',
+    'Les rappels d’échéance, et l’alerte envoyée quand les trois relances d’un garant restent sans réponse, respectent les préférences personnelles de vos collaborateurs. Ils s’arrêtent après signature, refus ou expiration. Un courriel déjà transmis au fournisseur ne peut pas être rappelé.',
   cadence:
     'Les envois suivent les passages de maintenance et des limites partagées ; ils ne sont pas garantis à une heure précise.',
   confirmation: 'Je confirme les réglages de rappel de mon agence.',
@@ -34,6 +34,11 @@ export const courrielsRappels = {
     sujet: 'Un dossier Cloison approche de son échéance',
     texte:
       'Ce dossier approche de son échéance de conservation. Consultez-le dans votre espace si une action reste nécessaire. Les justificatifs seront supprimés à l’échéance ; ce rappel ne prolonge pas leur conservation.',
+  },
+  epuise: {
+    sujet: 'Un garant n’a pas répondu aux relances Cloison',
+    texte:
+      'Le garant de ce dossier a reçu ses trois relances automatiques sans reprendre son dépôt. Cloison ne le relancera plus : un contact direct peut débloquer la situation. Le dossier porte la mention « Relances épuisées » dans votre espace.',
   },
   reference: 'Référence du dossier',
   expiration: 'Échéance de conservation',
