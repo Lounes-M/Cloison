@@ -100,6 +100,7 @@ function client() {
       if (nom === 'mon_tarif_paiement' && reponses.tarif) return reponses.tarif
       if (nom === 'agence_de_mon_dossier' && reponses.agence) return reponses.agence
       if (nom === 'relances_du_dossier' && reponses.relances) return reponses.relances
+      if (nom === 'dossiers_relances_epuisees' && reponses.epuises) return reponses.epuises
       return { data: [], error: null }
     }),
   }
@@ -435,6 +436,28 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     ])
     const lien = tri === 'activite' || tri === 'echeance' ? `&tri=${tri}` : ''
     expect(arbre.map((e) => e.props.href)).toContain(`/espace?page=1${lien}`)
+  })
+
+  test('le filtre des relances epuisees ne garde que les dossiers rendus par la fonction', async () => {
+    reponses.dossiers!.data = []
+    reponses.epuises = { data: [ID], error: null }
+    const arbre = elements(
+      await PageEspace({ searchParams: Promise.resolve({ page: '2', relances_epuisees: '1' }) }),
+    )
+    expect(doublures.rpc).toHaveBeenCalledWith('dossiers_relances_epuisees', undefined)
+    expect(doublures.egal).toHaveBeenCalledWith('in', 'id', [ID])
+    expect(arbre.map((e) => e.props.href)).toContain('/espace?page=1&relances_epuisees=1')
+
+    vi.clearAllMocks()
+    reponses.epuises = { data: [], error: null }
+    await PageEspace({ searchParams: Promise.resolve({ relances_epuisees: '1' }) })
+    expect(doublures.egal).toHaveBeenCalledWith('in', 'id', [
+      '00000000-0000-0000-0000-000000000000',
+    ])
+
+    vi.clearAllMocks()
+    await PageEspace({ searchParams: Promise.resolve({ relances_epuisees: 'oui' }) })
+    expect(doublures.rpc).not.toHaveBeenCalledWith('dossiers_relances_epuisees', undefined)
   })
 
   test('le filtre des remplacements ne garde que les dossiers ou une piece attend l agence', async () => {

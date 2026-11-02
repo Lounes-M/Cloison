@@ -361,6 +361,7 @@ const api = createServer(async (req, res) => {
       '/rest/v1/rpc/journal_du_dossier',
       '/rest/v1/rpc/groupe_du_dossier',
       '/rest/v1/rpc/relances_du_dossier',
+      '/rest/v1/rpc/dossiers_relances_epuisees',
       '/rest/v1/rpc/journal_de_mon_agence',
       '/rest/v1/rpc/mon_tarif_paiement',
     ].includes(path)

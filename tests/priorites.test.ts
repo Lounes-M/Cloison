@@ -29,7 +29,8 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
     requetes.push(q)
     return q
   })
-  const contexte = { agence: { id: 'agence' }, supabase: { from } } as unknown as Extract<
+  const rpc = vi.fn(async () => ({ data: ['d1', 'd2', 'd3'], error: null }))
+  const contexte = { agence: { id: 'agence' }, supabase: { from, rpc } } as unknown as Extract<
     ContexteAgence,
     { etat: 'rattache' }
   >
@@ -40,9 +41,12 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
     'transmis',
     'remplacement',
     'sans_nouvelles',
+    'relances_epuisees',
     'echeance',
   ])
-  expect(resultats.map((r) => r.nombre)).toEqual([0, null, 2, 3, 4, 5])
+  // Les relances epuisees passent par la fonction dediee, sans requete directe.
+  expect(rpc).toHaveBeenCalledWith('dossiers_relances_epuisees')
+  expect(resultats.map((r) => r.nombre)).toEqual([0, null, 2, 3, 4, 3, 5])
   for (const [i, q] of requetes.entries()) {
     expect(q.select).toHaveBeenCalledWith(
       i === 3 ? 'id, complements_documentaires!inner()' : 'id',
@@ -63,4 +67,18 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
   expect(
     Date.parse(requetes[5]!.lte.mock.calls[0]![1]) - Date.parse(requetes[0]!.gt.mock.calls[0]![1]),
   ).toBe(7 * 86400000)
+})
+
+test('une panne de la fonction des relances epuisees ne devient pas zero', async () => {
+  const contexte = {
+    agence: { id: 'agence' },
+    supabase: {
+      from: () => {
+        throw new Error('hors sujet')
+      },
+      rpc: async () => ({ data: null, error: { message: 'prive' } }),
+    },
+  } as unknown as Extract<ContexteAgence, { etat: 'rattache' }>
+  const resultats = await lirePriorites(contexte)
+  expect(resultats.find((r) => r.cle === 'relances_epuisees')!.nombre).toBeNull()
 })

@@ -13,6 +13,10 @@ export async function parcourirPilotage(page, site, id, moteur, largeur, simuler
     await priorites.getByRole('link', { name: /Sans nouvelles depuis 7 jours/ }).innerText(),
     /0/,
   )
+  assert.match(
+    await priorites.getByRole('link', { name: /Relances automatiques épuisées/ }).innerText(),
+    /0/,
+  )
   const section = page.locator('#attributions')
   await section.getByLabel('OCRFICTIF', { exact: true }).check()
   await section.getByRole('combobox').selectOption(id)
