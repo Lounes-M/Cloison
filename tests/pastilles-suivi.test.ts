@@ -32,3 +32,15 @@ test('sans nouvelles : en attente d un porteur et au-dela de sept jours seulemen
   )
   expect(pastillesDuDossier({ statut: 'ouvert', activite_rappel_le: null }, limite)).toEqual([])
 })
+
+test('relances epuisees : la pastille suit ce que SQL a decide', () => {
+  expect(
+    pastillesDuDossier(
+      { statut: 'depot_en_cours', activite_rappel_le: ilYa(9), relances_epuisees: true },
+      limite,
+    ),
+  ).toEqual(['sans_nouvelles', 'relances_epuisees'])
+  expect(
+    pastillesDuDossier({ statut: 'depot_en_cours', relances_epuisees: false }, limite),
+  ).toEqual([])
+})

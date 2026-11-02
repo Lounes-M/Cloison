@@ -39,7 +39,11 @@ import {
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
-import { limiteSansNouvelles, pastillesDuDossier } from '@/lib/agences/inactivite'
+import {
+  STATUTS_EN_ATTENTE,
+  limiteSansNouvelles,
+  pastillesDuDossier,
+} from '@/lib/agences/inactivite'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournal } from '@/lib/content/journal'
@@ -229,6 +233,15 @@ export default async function PageDossier({
                 statut: String(d.statut),
                 activite_rappel_le: d.activite_rappel_le ? String(d.activite_rappel_le) : null,
                 suivi: (demandes ?? []) as { etat: string }[],
+                // Meme regle que 0077 : trois relances et rien depuis la derniere.
+                relances_epuisees: Boolean(
+                  relance &&
+                  relance.nombre >= 3 &&
+                  relance.derniere &&
+                  d.activite_rappel_le &&
+                  Date.parse(String(d.activite_rappel_le)) <= Date.parse(relance.derniere) &&
+                  (STATUTS_EN_ATTENTE as readonly string[]).includes(String(d.statut)),
+                ),
               },
               limiteSansNouvelles(),
             )}

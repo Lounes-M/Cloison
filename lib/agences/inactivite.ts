@@ -14,18 +14,20 @@ export function limiteSansNouvelles(maintenant = Date.now()): string {
   return new Date(maintenant - JOURS_SANS_NOUVELLES * 86400000).toISOString()
 }
 
-export type PastilleSuivi = 'remplacement' | 'sans_nouvelles'
+export type PastilleSuivi = 'remplacement' | 'sans_nouvelles' | 'relances_epuisees'
 
 /**
  * Les signaux d'une ligne de la liste, memes regles que les cartes de
  * priorite : un remplacement propose et pas encore examine, ou un dossier en
- * attente qui n'a plus bouge depuis la limite.
+ * attente qui n'a plus bouge depuis la limite. Les relances epuisees viennent
+ * de SQL (0077) : la ligne dit seulement si le dossier en fait partie.
  */
 export function pastillesDuDossier(
   ligne: {
     statut: string
     activite_rappel_le?: string | null
     suivi?: { etat: string }[] | null
+    relances_epuisees?: boolean
   },
   limite: string,
 ): PastilleSuivi[] {
@@ -38,5 +40,6 @@ export function pastillesDuDossier(
     activite < Date.parse(limite)
   )
     pastilles.push('sans_nouvelles')
+  if (ligne.relances_epuisees) pastilles.push('relances_epuisees')
   return pastilles
 }

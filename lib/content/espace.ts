@@ -31,6 +31,7 @@ export const tableau = {
   pastilles: {
     remplacement: 'Remplacement à examiner',
     sans_nouvelles: 'Sans nouvelles depuis 7 jours',
+    relances_epuisees: 'Relances épuisées',
   },
   sansNouvelles:
     'Seulement les dossiers en attente du locataire ou du garant, sans activité depuis 7 jours',
