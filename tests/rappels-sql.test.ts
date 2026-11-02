@@ -569,3 +569,71 @@ test('un collaborateur en mode aucun ne recoit pas l alerte d epuisement', async
   await relancerDepot(4)
   expect(await programmer()).toBe(2)
 })
+test('relancer a nouveau ouvre un nouveau cycle de trois relances, seulement une fois epuisees', async () => {
+  const relancer = async (qui: string) => {
+    await devenir(db, 'authenticated', qui)
+    return (await db.query<{ ok: boolean }>('select relancer_garant($1) ok', [dossier])).rows[0]!.ok
+  }
+  const compter = async () => {
+    await devenir(db, 'authenticated', admin)
+    return (await db.query<{ nombre: number }>('select * from relances_du_dossier($1)', [dossier]))
+      .rows[0]!.nombre
+  }
+  await regler()
+  await relancerDepot(9)
+  await relancerDepot(6)
+  expect(await relancer(admin)).toBe(false)
+  await relancerDepot(4)
+  // Un collaborateur qui n'est ni administrateur ni responsable du dossier.
+  expect(await relancer(membre)).toBe(false)
+  expect(await programmer()).toBe(3)
+  await redevenirProprietaire(db)
+  const revision = (
+    await db.query<{ r: string }>('select revision_rappel r from dossiers where id=$1', [dossier])
+  ).rows[0]!.r
+  expect(await relancer(admin)).toBe(true)
+  expect(await compter()).toBe(0)
+  await devenir(db, 'authenticated', admin)
+  expect((await db.query('select id from dossiers_relances_epuisees() id')).rows).toEqual([])
+  // Les alertes d'epuisement encore en file deviennent obsoletes.
+  expect(await preparer()).toEqual([])
+  await redevenirProprietaire(db)
+  expect(
+    (await db.query<{ r: string }>('select revision_rappel r from dossiers where id=$1', [dossier]))
+      .rows[0]!.r,
+  ).not.toBe(revision)
+  // La premiere relance du nouveau cycle part au prochain passage.
+  expect(await programmer()).toBe(1)
+  const nouvelle = await preparer()
+  expect(nouvelle.map((r) => r.nature)).toEqual(['depot'])
+  expect(await relancer(admin)).toBe(false)
+  await redevenirProprietaire(db)
+  for (const role of ['anon', 'porteur_lien', 'depot_piece', 'serveur', 'service_role'])
+    expect(
+      (
+        await db.query<{ p: boolean }>(
+          "select has_function_privilege($1,'public.relancer_garant(uuid)','execute') p",
+          [role],
+        )
+      ).rows[0]!.p,
+    ).toBe(false)
+  expect(
+    (
+      await db.query<{ p: boolean }>(
+        "select has_column_privilege('authenticated','public.dossiers','relances_depuis','update') p",
+      )
+    ).rows[0]!.p,
+  ).toBe(false)
+})
+test('relancer a nouveau est refuse sur un dossier qui n attend plus le garant', async () => {
+  await regler()
+  await relancerDepot(9)
+  await relancerDepot(6)
+  await relancerDepot(4)
+  await redevenirProprietaire(db)
+  await db.query("update dossiers set statut='complet' where id=$1", [dossier])
+  await devenir(db, 'authenticated', admin)
+  expect(
+    (await db.query<{ ok: boolean }>('select relancer_garant($1) ok', [dossier])).rows[0]!.ok,
+  ).toBe(false)
+})

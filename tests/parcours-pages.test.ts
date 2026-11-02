@@ -3,6 +3,7 @@ import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
+import { FormulaireRelanceGarant } from '@/components/forms/FormulaireRelanceGarant'
 import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import PageLocataire from '@/app/(porteur)/locataire/page'
@@ -718,12 +719,14 @@ test('la fiche porte la pastille des relances epuisees apres trois relances sans
   const page = await PageDossier({ params: Promise.resolve({ id: ID }) })
   const pastilles = elements(page).find((e) => e.type === PastillesSuivi)
   expect(pastilles?.props.pastilles).toContain('relances_epuisees')
+  expect(elements(page).find((e) => e.type === FormulaireRelanceGarant)?.props.dossierId).toBe(ID)
 
   reponses.relances = { data: [{ nombre: 2, derniere: '2020-01-05T09:00:00Z' }], error: null }
   const avant = await PageDossier({ params: Promise.resolve({ id: ID }) })
   expect(elements(avant).find((e) => e.type === PastillesSuivi)?.props.pastilles).not.toContain(
     'relances_epuisees',
   )
+  expect(elements(avant).some((e) => e.type === FormulaireRelanceGarant)).toBe(false)
 })
 
 test('la fiche d un dossier dit combien de relances le garant a recues', async () => {

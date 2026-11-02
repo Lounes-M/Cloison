@@ -21,6 +21,7 @@ import { notFound, redirect } from 'next/navigation'
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
 import { FormulaireCloture } from '@/components/forms/FormulaireCloture'
 import { FormulaireLoyerAgence } from '@/components/forms/FormulaireLoyerAgence'
+import { FormulaireRelanceGarant } from '@/components/forms/FormulaireRelanceGarant'
 import { FormulaireRattachementLogement } from '@/components/forms/FormulaireRattachementLogement'
 import { logements as texteLogements } from '@/lib/content/logements'
 import { Icone } from '@/components/ui/Icone'
@@ -202,6 +203,17 @@ export default async function PageDossier({
       String(d.statut),
     )
 
+  // Meme regle que 0077 : trois relances et rien depuis la derniere. La base
+  // tranche (0079) ; l'ecran ne propose la relance que la ou elle peut aboutir.
+  const relancesEpuisees = Boolean(
+    relance &&
+    relance.nombre >= 3 &&
+    relance.derniere &&
+    d.activite_rappel_le &&
+    Date.parse(String(d.activite_rappel_le)) <= Date.parse(relance.derniere) &&
+    (STATUTS_EN_ATTENTE as readonly string[]).includes(String(d.statut)),
+  )
+
   return (
     <div className="page-espace w-full max-w-[880px] self-start">
       <Link
@@ -233,19 +245,16 @@ export default async function PageDossier({
                 statut: String(d.statut),
                 activite_rappel_le: d.activite_rappel_le ? String(d.activite_rappel_le) : null,
                 suivi: (demandes ?? []) as { etat: string }[],
-                // Meme regle que 0077 : trois relances et rien depuis la derniere.
-                relances_epuisees: Boolean(
-                  relance &&
-                  relance.nombre >= 3 &&
-                  relance.derniere &&
-                  d.activite_rappel_le &&
-                  Date.parse(String(d.activite_rappel_le)) <= Date.parse(relance.derniere) &&
-                  (STATUTS_EN_ATTENTE as readonly string[]).includes(String(d.statut)),
-                ),
+                relances_epuisees: relancesEpuisees,
               },
               limiteSansNouvelles(),
             )}
           />
+          {relancesEpuisees && !d.demonstration ? (
+            <div className="mt-4 max-w-[560px]">
+              <FormulaireRelanceGarant dossierId={id} />
+            </div>
+          ) : null}
         </div>
         <span
           className={cn(
