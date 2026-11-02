@@ -241,11 +241,12 @@ export const actions: Record<string, string> = {
   piece_retiree: 'a retiré une pièce',
   piece_ouverte: 'a ouvert une pièce',
   ocr_demande: 'a demandé une transcription par IA',
-  complement_demande: 'Remplacement demande',
-  complement_fourni: 'Remplacement fourni',
-  complement_valide: 'Remplacement valide',
-  complement_refuse: 'Nouvelle correction demandee',
+  complement_demande: 'a demandé le remplacement d’une pièce',
+  complement_fourni: 'a fourni une pièce de remplacement',
+  complement_valide: 'a validé une pièce de remplacement',
+  complement_refuse: 'a demandé une nouvelle correction',
   dossier_transmis: 'a pris le dossier',
+  relances_reprises: 'a relancé à nouveau le garant',
 }
 
 export const acteurs: Record<string, string> = {
