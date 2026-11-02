@@ -1,0 +1,58 @@
+#cloud-config
+# Hote dedie au moteur documentaire, Ubuntu 24.04 (cgroup v2), n'importe quel
+# hebergeur acceptant cloud-init. Avant creation : remplacer
+# documentaire.exemple.fr par le domaine reel, dont l'entree DNS A pointera
+# vers l'adresse de la machine. Aucun secret ici : il est genere sur l'hote.
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - gnupg
+  - git
+  - ufw
+  - unattended-upgrades
+
+write_files:
+  - path: /etc/systemd/system/caddy.service.d/domaine.conf
+    permissions: '0644'
+    content: |
+      [Service]
+      Environment=DOCUMENTAIRE_DOMAINE=documentaire.exemple.fr
+
+runcmd:
+  - - bash
+    - -euxc
+    - |
+      install -m 0755 -d /etc/apt/keyrings
+      code=$(. /etc/os-release && echo "$VERSION_CODENAME")
+      arch=$(dpkg --print-architecture)
+      # Depots signes des editeurs : BuildKit avec Docker, Node 24, Caddy.
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+      echo "deb [arch=$arch signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $code stable" \
+        >/etc/apt/sources.list.d/docker.list
+      curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key |
+        gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+      echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_24.x nodistro main" \
+        >/etc/apt/sources.list.d/nodesource.list
+      curl -fsSL https://dl.cloudsmith.io/public/caddy/stable/gpg.key |
+        gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      curl -fsSL https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt \
+        >/etc/apt/sources.list.d/caddy-stable.list
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        docker-ce docker-ce-cli containerd.io docker-buildx-plugin nodejs caddy
+
+      # Seuls SSH et le proxy TLS sont joignables ; le service reste en boucle locale.
+      ufw default deny incoming
+      ufw default allow outgoing
+      ufw allow 22/tcp
+      ufw allow 80/tcp
+      ufw allow 443/tcp
+      ufw --force enable
+
+      git clone --depth 1 https://github.com/Lounes-M/Cloison.git /srv/cloison
+      /srv/cloison/infra/documentaire/hote/mettre-en-service.sh
+      install -m 0644 /srv/cloison/infra/documentaire/hote/Caddyfile /etc/caddy/Caddyfile
+      systemctl daemon-reload
+      systemctl restart caddy
