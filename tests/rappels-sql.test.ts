@@ -469,3 +469,51 @@ test('l agence voit le nombre de relances parties et la date de la derniere, rie
       ).rows[0]!.p,
     ).toBe(false)
 })
+test('les relances epuisees : trois relances parties et aucune activite depuis la derniere', async () => {
+  const relancer = async (jours: number) => {
+    await redevenirProprietaire(db)
+    const r = (
+      await db.query<{ id: string }>(
+        `insert into rappels_dossiers(cle,dossier_id,agence_id,nature,revision_dossier,empreinte_email,expiration_dossier,expire_le,cree_le)
+         values(encode(sha256(convert_to(gen_random_uuid()::text,'UTF8')),'hex'),$1,$2,'depot',gen_random_uuid(),repeat('a',64),now()+interval '2 days',now()+interval '1 day',now()-make_interval(days=>$3))
+         returning id`,
+        [dossier, agence, jours],
+      )
+    ).rows[0]!.id
+    await db.query(
+      "insert into courriels_sortants(id,contenu,expire_le,rappel_id) values($1,'chiffre-fictif',now()+interval '1 day',$1)",
+      [r],
+    )
+  }
+  const lire = async (qui: string) => {
+    await devenir(db, 'authenticated', qui)
+    return (
+      await db.query<{ id: string }>('select id from dossiers_relances_epuisees() id')
+    ).rows.map((l) => l.id)
+  }
+  await relancer(6)
+  await relancer(4)
+  expect(await lire(membre)).toEqual([])
+  await relancer(2)
+  expect(await lire(membre)).toEqual([dossier])
+  expect(await lire(admin)).toEqual([dossier])
+  await redevenirProprietaire(db)
+  await db.query("update dossiers set activite_rappel_le=now()-interval '1 day' where id=$1", [
+    dossier,
+  ])
+  expect(await lire(membre)).toEqual([])
+  await redevenirProprietaire(db)
+  await db.query("update dossiers set statut='complet' where id=$1", [dossier])
+  await vieillir()
+  expect(await lire(membre)).toEqual([])
+  await redevenirProprietaire(db)
+  for (const role of ['anon', 'porteur_lien', 'depot_piece', 'serveur', 'service_role'])
+    expect(
+      (
+        await db.query<{ p: boolean }>(
+          "select has_function_privilege($1,'public.dossiers_relances_epuisees()','execute') p",
+          [role],
+        )
+      ).rows[0]!.p,
+    ).toBe(false)
+})

@@ -18,6 +18,11 @@ export const pilotage = {
       href: '/espace?sans_nouvelles=1',
     },
     {
+      cle: 'relances_epuisees',
+      titre: 'Relances automatiques épuisées',
+      href: '/espace?relances_epuisees=1',
+    },
+    {
       cle: 'echeance',
       titre: 'Coffres à échéance sous 7 jours',
       href: '/espace?horizon=7&tri=echeance',
