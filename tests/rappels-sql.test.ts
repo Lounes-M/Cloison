@@ -593,6 +593,15 @@ test('relancer a nouveau ouvre un nouveau cycle de trois relances, seulement une
   ).rows[0]!.r
   expect(await relancer(admin)).toBe(true)
   expect(await compter()).toBe(0)
+  await redevenirProprietaire(db)
+  expect(
+    (
+      await db.query<{ acteur: string; acteur_id: string }>(
+        "select acteur,acteur_id from journal_acces where dossier_id=$1 and action='relances_reprises'",
+        [dossier],
+      )
+    ).rows,
+  ).toEqual([{ acteur: 'agence', acteur_id: admin }])
   await devenir(db, 'authenticated', admin)
   expect((await db.query('select id from dossiers_relances_epuisees() id')).rows).toEqual([])
   // Les alertes d'epuisement encore en file deviennent obsoletes.

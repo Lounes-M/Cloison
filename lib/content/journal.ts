@@ -19,6 +19,8 @@ export const journal = {
     complement_valide: 'Remplacement validé',
     complement_refuse: 'Nouvelle correction demandée',
     dossier_transmis: 'Dossier transmis',
+    relances_reprises: 'Nouvelle série de relances lancée',
+    ocr_demande: 'Transcription d’une pièce par IA demandée',
   } as Record<string, string>,
   acteurs: { agence: 'l’agence', garant: 'le garant', locataire: 'le locataire' } as Record<
     string,
