@@ -31,9 +31,12 @@ export const tableau = {
   pastilles: {
     remplacement: 'Remplacement à examiner',
     sans_nouvelles: 'Sans nouvelles depuis 7 jours',
+    relances_epuisees: 'Relances épuisées',
   },
   sansNouvelles:
     'Seulement les dossiers en attente du locataire ou du garant, sans activité depuis 7 jours',
+  relancesEpuisees:
+    'Seulement les dossiers dont le garant a reçu ses 3 relances automatiques sans rien faire depuis',
   effacer: 'Effacer les filtres',
   aucunResultat:
     'Aucun dossier sur cette page. Modifiez les filtres ou revenez à la page précédente.',
@@ -155,6 +158,16 @@ export const dossier = {
 
 /** Clore un dossier avant son echeance : le geste est definitif. */
 /** Le loyer saisi par l'agence sur un dossier. */
+/** Relancer le garant a la main une fois les relances automatiques epuisees (0079). */
+export const relanceGarant = {
+  aide: 'Le garant n’a pas réagi à ses trois relances automatiques. Après un échange avec lui, vous pouvez relancer un nouveau cycle de trois relances : la première part dans les prochaines heures.',
+  bouton: 'Relancer à nouveau le garant',
+  envoi: 'Relance en cours…',
+  succes: 'C’est noté : un nouveau cycle de relances commence.',
+  erreur:
+    'Relance impossible. Seuls un administrateur ou le responsable du dossier peuvent relancer, et seulement un dossier dont les relances sont épuisées.',
+} as const
+
 export const loyerAgence = {
   titre: 'Loyer du logement',
   champ: 'Loyer mensuel, charges comprises',
@@ -228,11 +241,12 @@ export const actions: Record<string, string> = {
   piece_retiree: 'a retiré une pièce',
   piece_ouverte: 'a ouvert une pièce',
   ocr_demande: 'a demandé une transcription par IA',
-  complement_demande: 'Remplacement demande',
-  complement_fourni: 'Remplacement fourni',
-  complement_valide: 'Remplacement valide',
-  complement_refuse: 'Nouvelle correction demandee',
+  complement_demande: 'a demandé le remplacement d’une pièce',
+  complement_fourni: 'a fourni une pièce de remplacement',
+  complement_valide: 'a validé une pièce de remplacement',
+  complement_refuse: 'a demandé une nouvelle correction',
   dossier_transmis: 'a pris le dossier',
+  relances_reprises: 'a relancé à nouveau le garant',
 }
 
 export const acteurs: Record<string, string> = {

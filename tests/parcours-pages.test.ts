@@ -3,6 +3,7 @@ import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
+import { FormulaireRelanceGarant } from '@/components/forms/FormulaireRelanceGarant'
 import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import PageLocataire from '@/app/(porteur)/locataire/page'
@@ -100,6 +101,7 @@ function client() {
       if (nom === 'mon_tarif_paiement' && reponses.tarif) return reponses.tarif
       if (nom === 'agence_de_mon_dossier' && reponses.agence) return reponses.agence
       if (nom === 'relances_du_dossier' && reponses.relances) return reponses.relances
+      if (nom === 'dossiers_relances_epuisees' && reponses.epuises) return reponses.epuises
       return { data: [], error: null }
     }),
   }
@@ -437,6 +439,36 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     expect(arbre.map((e) => e.props.href)).toContain(`/espace?page=1${lien}`)
   })
 
+  test('le filtre des relances epuisees ne garde que les dossiers rendus par la fonction', async () => {
+    reponses.dossiers!.data = []
+    reponses.epuises = { data: [ID], error: null }
+    const arbre = elements(
+      await PageEspace({ searchParams: Promise.resolve({ page: '2', relances_epuisees: '1' }) }),
+    )
+    expect(doublures.rpc).toHaveBeenCalledWith('dossiers_relances_epuisees', undefined)
+    expect(doublures.egal).toHaveBeenCalledWith('in', 'id', [ID])
+    expect(arbre.map((e) => e.props.href)).toContain('/espace?page=1&relances_epuisees=1')
+
+    vi.clearAllMocks()
+    reponses.epuises = { data: [], error: null }
+    await PageEspace({ searchParams: Promise.resolve({ relances_epuisees: '1' }) })
+    expect(doublures.egal).toHaveBeenCalledWith('in', 'id', [
+      '00000000-0000-0000-0000-000000000000',
+    ])
+
+    vi.clearAllMocks()
+    await PageEspace({ searchParams: Promise.resolve({ relances_epuisees: 'oui' }) })
+    expect(doublures.egal).not.toHaveBeenCalledWith('in', 'id', expect.anything())
+
+    // Hors filtre, une panne de la fonction tait les pastilles sans arreter la liste.
+    vi.clearAllMocks()
+    reponses.epuises = { data: null, error: { message: 'prive' } }
+    await expect(PageEspace({ searchParams: Promise.resolve({}) })).resolves.toBeTruthy()
+    await expect(
+      PageEspace({ searchParams: Promise.resolve({ relances_epuisees: '1' }) }),
+    ).rejects.toThrow()
+  })
+
   test('le filtre des remplacements ne garde que les dossiers ou une piece attend l agence', async () => {
     reponses.dossiers!.data = []
     const arbre = elements(
@@ -469,10 +501,15 @@ describe('la liste des dossiers reste bornee et navigable', () => {
         engagements: null,
       },
     ]
+    reponses.epuises = { data: ['dossier-a'], error: null }
     const arbre = elements(await PageEspace())
     const pastilles = arbre.filter((e) => e.type === PastillesSuivi)
     expect(pastilles).toHaveLength(2)
-    expect(pastilles[0]!.props.pastilles).toEqual(['remplacement', 'sans_nouvelles'])
+    expect(pastilles[0]!.props.pastilles).toEqual([
+      'remplacement',
+      'sans_nouvelles',
+      'relances_epuisees',
+    ])
     const colonnes = doublures.colonnes.mock.calls.find(([table]) => table === 'dossiers')![1]
     expect(colonnes).toContain('activite_rappel_le, suivi:complements_documentaires(etat)')
   })
@@ -667,6 +704,29 @@ test('la fiche d un dossier dit sa derniere activite et porte ses pastilles', as
   const pastilles = elements(page).find((e) => e.type === PastillesSuivi)
   expect(pastilles?.props.pastilles).toEqual(['remplacement', 'sans_nouvelles'])
   expect(texteVisible(page)).not.toContain('Relances automatiques')
+})
+
+test('la fiche porte la pastille des relances epuisees apres trois relances sans activite', async () => {
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'depot_en_cours',
+      activite_rappel_le: '2020-01-01T10:00:00Z',
+    },
+    error: null,
+  }
+  reponses.relances = { data: [{ nombre: 3, derniere: '2020-01-05T09:00:00Z' }], error: null }
+  const page = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  const pastilles = elements(page).find((e) => e.type === PastillesSuivi)
+  expect(pastilles?.props.pastilles).toContain('relances_epuisees')
+  expect(elements(page).find((e) => e.type === FormulaireRelanceGarant)?.props.dossierId).toBe(ID)
+
+  reponses.relances = { data: [{ nombre: 2, derniere: '2020-01-05T09:00:00Z' }], error: null }
+  const avant = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(elements(avant).find((e) => e.type === PastillesSuivi)?.props.pastilles).not.toContain(
+    'relances_epuisees',
+  )
+  expect(elements(avant).some((e) => e.type === FormulaireRelanceGarant)).toBe(false)
 })
 
 test('la fiche d un dossier dit combien de relances le garant a recues', async () => {

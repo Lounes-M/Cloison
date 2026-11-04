@@ -4,6 +4,7 @@ import type { PastilleSuivi } from '@/lib/agences/inactivite'
 const tons: Record<PastilleSuivi, string> = {
   remplacement: 'bg-sun',
   sans_nouvelles: 'bg-paper',
+  relances_epuisees: 'bg-paper',
 }
 
 /** Les signaux de suivi d'un dossier, sous son statut. */

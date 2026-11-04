@@ -57,6 +57,9 @@ type Ligne = {
   suivi?: { etat: string }[] | null
 }
 
+// Un identifiant qu'aucun dossier ne porte : un filtre vide ne doit rien rendre.
+const AUCUN_DOSSIER = '00000000-0000-0000-0000-000000000000'
+
 // Colonne de tri par choix : l'echeance et l'inactivite se lisent de la plus
 // ancienne a la plus recente, les ouvertures de la plus recente a la plus ancienne.
 const colonnesTri = {
@@ -168,6 +171,7 @@ export default async function PageEspace({
     recherche.tri === 'echeance' || recherche.tri === 'activite' ? recherche.tri : 'recent'
   const remplacement = recherche.remplacement === '1'
   const sansNouvelles = recherche.sans_nouvelles === '1'
+  const relancesEpuisees = recherche.relances_epuisees === '1'
   const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
   // Une seule horloge pour les deux bornes ; les droits restent imposes par SQL.
   const bornes = bornesEcheance(horizon)
@@ -182,6 +186,7 @@ export default async function PageEspace({
     if (horizon) params.set('horizon', horizon)
     if (remplacement) params.set('remplacement', '1')
     if (sansNouvelles) params.set('sans_nouvelles', '1')
+    if (relancesEpuisees) params.set('relances_epuisees', '1')
     return `/espace?${params.toString()}` as const
   }
   let requete = supabase
@@ -202,6 +207,13 @@ export default async function PageEspace({
     requete = requete
       .in('statut', [...STATUTS_EN_ATTENTE])
       .lt('activite_rappel_le', limiteSansNouvelles())
+  // La fonction rend au plus 500 identifiants, tous de l'agence (0077). Pour
+  // le filtre, une panne arrete la page ; pour les pastilles, elle les tait.
+  const epuises = await supabase.rpc('dossiers_relances_epuisees')
+  if (epuises.error && relancesEpuisees) throw new Error('Chargement du dossier indisponible.')
+  const idsEpuises = !epuises.error && Array.isArray(epuises.data) ? (epuises.data as string[]) : []
+  if (relancesEpuisees) requete = requete.in('id', idsEpuises.length ? idsEpuises : [AUCUN_DOSSIER])
+  const epuisesVus = new Set(idsEpuises)
   if (attribution === 'mes')
     requete = requete.eq('affecte.membre_id', contexte.utilisateurId).not('affecte', 'is', null)
   if (attribution === 'sans')
@@ -309,6 +321,7 @@ export default async function PageEspace({
             horizon,
             remplacement,
             sansNouvelles,
+            relancesEpuisees,
           ])}
           action="/espace"
           method="get"
@@ -339,7 +352,8 @@ export default async function PageEspace({
               horizon ||
               tri !== 'recent' ||
               remplacement ||
-              sansNouvelles,
+              sansNouvelles ||
+              relancesEpuisees,
             )}
             className="border-ink/15 border-t pt-2 sm:col-span-2"
           >
@@ -424,6 +438,16 @@ export default async function PageEspace({
                 />
                 {tableau.sansNouvelles}
               </label>
+              <label className="flex items-start gap-3 text-sm font-semibold sm:col-span-2">
+                <input
+                  type="checkbox"
+                  name="relances_epuisees"
+                  value="1"
+                  defaultChecked={relancesEpuisees}
+                  className="mt-0.5 size-5 shrink-0"
+                />
+                {tableau.relancesEpuisees}
+              </label>
             </div>
           </details>
           <button
@@ -439,6 +463,7 @@ export default async function PageEspace({
           horizon ||
           remplacement ||
           sansNouvelles ||
+          relancesEpuisees ||
           tri !== 'recent' ? (
             <Link href="/espace" className="lien-espace">
               {tableau.effacer}
@@ -456,6 +481,7 @@ export default async function PageEspace({
             horizon ||
             remplacement ||
             sansNouvelles ||
+            relancesEpuisees ||
             tri !== 'recent'
               ? tableau.aucunResultat
               : tableau.aucun}
@@ -499,7 +525,12 @@ export default async function PageEspace({
                           >
                             {statut.libelle}
                           </span>
-                          <PastillesSuivi pastilles={pastillesDuDossier(ligne, limiteInactivite)} />
+                          <PastillesSuivi
+                            pastilles={pastillesDuDossier(
+                              { ...ligne, relances_epuisees: epuisesVus.has(ligne.id) },
+                              limiteInactivite,
+                            )}
+                          />
                         </dd>
                       </div>
                       <div className="col-span-2">
@@ -578,7 +609,12 @@ export default async function PageEspace({
                           >
                             {statut.libelle}
                           </span>
-                          <PastillesSuivi pastilles={pastillesDuDossier(ligne, limiteInactivite)} />
+                          <PastillesSuivi
+                            pastilles={pastillesDuDossier(
+                              { ...ligne, relances_epuisees: epuisesVus.has(ligne.id) },
+                              limiteInactivite,
+                            )}
+                          />
                         </td>
                         <td className="px-4 py-3 text-sm break-all">
                           {responsables.get(ligne.id)?.responsable_id

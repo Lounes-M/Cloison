@@ -8,6 +8,12 @@ export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'r
   return Promise.all(
     pilotage.indicateurs.map(async ({ cle }) => {
       try {
+        // Les relances epuisees se lisent par une fonction (0077) : la table
+        // des rappels reste fermee aux agences.
+        if (cle === 'relances_epuisees') {
+          const { data, error } = await contexte.supabase.rpc('dossiers_relances_epuisees')
+          return { cle, nombre: !error && Array.isArray(data) ? data.length : null }
+        }
         // Un dossier compte une fois, quel que soit le nombre de pieces
         // proposees : l'embarquement `!inner` filtre les dossiers, pas les lignes.
         let requete = contexte.supabase

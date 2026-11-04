@@ -9,7 +9,7 @@ const rappel = z.object({
   id: z.uuid(),
   dossier_id: z.uuid(),
   reference: z.string().min(8).max(32),
-  nature: z.enum(['depot', 'echeance']),
+  nature: z.enum(['depot', 'echeance', 'epuise']),
   email: z.email().max(180),
   expiration: z.iso.datetime({ offset: true }),
 })
@@ -28,7 +28,7 @@ export async function preparerRappels(db: SupabaseClient, signal?: AbortSignal) 
       dateStyle: 'long',
       timeStyle: 'short',
     })
-    const texte = `${t[r.nature].texte}\n\n${t.reference} : ${r.reference}\n${t.expiration} : ${date}${r.nature === 'echeance' ? `\n\n${adresseDuSite()}/espace/dossiers/${r.dossier_id}` : ''}\n\nCloison`
+    const texte = `${t[r.nature].texte}\n\n${t.reference} : ${r.reference}\n${t.expiration} : ${date}${r.nature !== 'depot' ? `\n\n${adresseDuSite()}/espace/dossiers/${r.dossier_id}` : ''}\n\nCloison`
     const contenu = {
       from: env.emailExpediteur,
       ...(env.emailSupport ? { replyTo: env.emailSupport } : {}),

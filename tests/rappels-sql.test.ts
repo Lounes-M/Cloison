@@ -469,3 +469,180 @@ test('l agence voit le nombre de relances parties et la date de la derniere, rie
       ).rows[0]!.p,
     ).toBe(false)
 })
+test('les relances epuisees : trois relances parties et aucune activite depuis la derniere', async () => {
+  const relancer = async (jours: number) => {
+    await redevenirProprietaire(db)
+    const r = (
+      await db.query<{ id: string }>(
+        `insert into rappels_dossiers(cle,dossier_id,agence_id,nature,revision_dossier,empreinte_email,expiration_dossier,expire_le,cree_le)
+         values(encode(sha256(convert_to(gen_random_uuid()::text,'UTF8')),'hex'),$1,$2,'depot',gen_random_uuid(),repeat('a',64),now()+interval '2 days',now()+interval '1 day',now()-make_interval(days=>$3))
+         returning id`,
+        [dossier, agence, jours],
+      )
+    ).rows[0]!.id
+    await db.query(
+      "insert into courriels_sortants(id,contenu,expire_le,rappel_id) values($1,'chiffre-fictif',now()+interval '1 day',$1)",
+      [r],
+    )
+  }
+  const lire = async (qui: string) => {
+    await devenir(db, 'authenticated', qui)
+    return (
+      await db.query<{ id: string }>('select id from dossiers_relances_epuisees() id')
+    ).rows.map((l) => l.id)
+  }
+  await relancer(6)
+  await relancer(4)
+  expect(await lire(membre)).toEqual([])
+  await relancer(2)
+  expect(await lire(membre)).toEqual([dossier])
+  expect(await lire(admin)).toEqual([dossier])
+  await redevenirProprietaire(db)
+  await db.query("update dossiers set activite_rappel_le=now()-interval '1 day' where id=$1", [
+    dossier,
+  ])
+  expect(await lire(membre)).toEqual([])
+  await redevenirProprietaire(db)
+  await db.query("update dossiers set statut='complet' where id=$1", [dossier])
+  await vieillir()
+  expect(await lire(membre)).toEqual([])
+  await redevenirProprietaire(db)
+  for (const role of ['anon', 'porteur_lien', 'depot_piece', 'serveur', 'service_role'])
+    expect(
+      (
+        await db.query<{ p: boolean }>(
+          "select has_function_privilege($1,'public.dossiers_relances_epuisees()','execute') p",
+          [role],
+        )
+      ).rows[0]!.p,
+    ).toBe(false)
+})
+
+async function relancerDepot(jours: number) {
+  await redevenirProprietaire(db)
+  const r = (
+    await db.query<{ id: string }>(
+      `insert into rappels_dossiers(cle,dossier_id,agence_id,nature,revision_dossier,empreinte_email,expiration_dossier,expire_le,cree_le)
+       values(encode(sha256(convert_to(gen_random_uuid()::text,'UTF8')),'hex'),$1,$2,'depot',gen_random_uuid(),repeat('a',64),now()+interval '2 days',now()+interval '1 day',now()-make_interval(days=>$3))
+       returning id`,
+      [dossier, agence, jours],
+    )
+  ).rows[0]!.id
+  await db.query(
+    "insert into courriels_sortants(id,contenu,expire_le,rappel_id) values($1,'chiffre-fictif',now()+interval '1 day',$1)",
+    [r],
+  )
+}
+test('trois relances sans reponse previennent chaque collaborateur une fois, puis plus rien', async () => {
+  await regler()
+  await relancerDepot(7)
+  await relancerDepot(5)
+  await relancerDepot(4)
+  expect(await programmer()).toBe(3)
+  const prets = await preparer()
+  expect(prets.map((r) => r.nature)).toEqual(['epuise', 'epuise', 'epuise'])
+  expect(prets.map((r) => r.email)).not.toContain('garant@example.invalid')
+  expect(await programmer()).toBe(0)
+  // Une activite du dossier rend l'alerte obsolete avant son envoi.
+  await redevenirProprietaire(db)
+  await db.query('update dossiers set revision_rappel=gen_random_uuid() where id=$1', [dossier])
+  expect(await preparer()).toEqual([])
+})
+test('pas d alerte d epuisement si la derniere relance est trop recente ou si le garant a bouge', async () => {
+  await regler()
+  await relancerDepot(7)
+  await relancerDepot(6)
+  await relancerDepot(1)
+  expect(await programmer()).toBe(0)
+  await redevenirProprietaire(db)
+  await db.query("update rappels_dossiers set cree_le=now()-interval '9 days' where nature='depot'")
+  expect(await programmer()).toBe(0)
+})
+test('un collaborateur en mode aucun ne recoit pas l alerte d epuisement', async () => {
+  await regler()
+  await redevenirProprietaire(db)
+  await db.query("insert into preferences_notifications(utilisateur_id,mode) values($1,'aucun')", [
+    membre,
+  ])
+  await relancerDepot(7)
+  await relancerDepot(5)
+  await relancerDepot(4)
+  expect(await programmer()).toBe(2)
+})
+test('relancer a nouveau ouvre un nouveau cycle de trois relances, seulement une fois epuisees', async () => {
+  const relancer = async (qui: string) => {
+    await devenir(db, 'authenticated', qui)
+    return (await db.query<{ ok: boolean }>('select relancer_garant($1) ok', [dossier])).rows[0]!.ok
+  }
+  const compter = async () => {
+    await devenir(db, 'authenticated', admin)
+    return (await db.query<{ nombre: number }>('select * from relances_du_dossier($1)', [dossier]))
+      .rows[0]!.nombre
+  }
+  await regler()
+  await relancerDepot(9)
+  await relancerDepot(6)
+  expect(await relancer(admin)).toBe(false)
+  await relancerDepot(4)
+  // Un collaborateur qui n'est ni administrateur ni responsable du dossier.
+  expect(await relancer(membre)).toBe(false)
+  expect(await programmer()).toBe(3)
+  await redevenirProprietaire(db)
+  const revision = (
+    await db.query<{ r: string }>('select revision_rappel r from dossiers where id=$1', [dossier])
+  ).rows[0]!.r
+  expect(await relancer(admin)).toBe(true)
+  expect(await compter()).toBe(0)
+  await redevenirProprietaire(db)
+  expect(
+    (
+      await db.query<{ acteur: string; acteur_id: string }>(
+        "select acteur,acteur_id from journal_acces where dossier_id=$1 and action='relances_reprises'",
+        [dossier],
+      )
+    ).rows,
+  ).toEqual([{ acteur: 'agence', acteur_id: admin }])
+  await devenir(db, 'authenticated', admin)
+  expect((await db.query('select id from dossiers_relances_epuisees() id')).rows).toEqual([])
+  // Les alertes d'epuisement encore en file deviennent obsoletes.
+  expect(await preparer()).toEqual([])
+  await redevenirProprietaire(db)
+  expect(
+    (await db.query<{ r: string }>('select revision_rappel r from dossiers where id=$1', [dossier]))
+      .rows[0]!.r,
+  ).not.toBe(revision)
+  // La premiere relance du nouveau cycle part au prochain passage.
+  expect(await programmer()).toBe(1)
+  const nouvelle = await preparer()
+  expect(nouvelle.map((r) => r.nature)).toEqual(['depot'])
+  expect(await relancer(admin)).toBe(false)
+  await redevenirProprietaire(db)
+  for (const role of ['anon', 'porteur_lien', 'depot_piece', 'serveur', 'service_role'])
+    expect(
+      (
+        await db.query<{ p: boolean }>(
+          "select has_function_privilege($1,'public.relancer_garant(uuid)','execute') p",
+          [role],
+        )
+      ).rows[0]!.p,
+    ).toBe(false)
+  expect(
+    (
+      await db.query<{ p: boolean }>(
+        "select has_column_privilege('authenticated','public.dossiers','relances_depuis','update') p",
+      )
+    ).rows[0]!.p,
+  ).toBe(false)
+})
+test('relancer a nouveau est refuse sur un dossier qui n attend plus le garant', async () => {
+  await regler()
+  await relancerDepot(9)
+  await relancerDepot(6)
+  await relancerDepot(4)
+  await redevenirProprietaire(db)
+  await db.query("update dossiers set statut='complet' where id=$1", [dossier])
+  await devenir(db, 'authenticated', admin)
+  expect(
+    (await db.query<{ ok: boolean }>('select relancer_garant($1) ok', [dossier])).rows[0]!.ok,
+  ).toBe(false)
+})

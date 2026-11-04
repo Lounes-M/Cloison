@@ -76,21 +76,28 @@ test('chiffre un rappel sans capacite ni piece et ne livre rien pendant la prepa
   })
   expect(d.envoyer).not.toHaveBeenCalled()
 })
-test('le rappel agence pointe seulement vers son espace authentifie', async () => {
-  d.rpc.mockImplementation(async (n: string) => ({
-    data:
-      n === 'programmer_rappels'
-        ? 1
-        : n === 'rappels_a_preparer'
-          ? [{ ...rappel, nature: 'echeance' }]
-          : 'prepare',
-    error: null,
-  }))
-  await preparerRappels(db)
-  expect(JSON.parse(d.sceller.mock.calls[0]![0].toString()).text).toContain(
-    `https://example.invalid/espace/dossiers/${dossier}`,
-  )
-})
+test.each(['echeance', 'epuise'])(
+  'le rappel agence %s pointe seulement vers son espace authentifie',
+  async (nature) => {
+    d.rpc.mockImplementation(async (n: string) => ({
+      data:
+        n === 'programmer_rappels'
+          ? 1
+          : n === 'rappels_a_preparer'
+            ? [{ ...rappel, nature, email: 'membre@agence.invalid' }]
+            : 'prepare',
+      error: null,
+    }))
+    await preparerRappels(db)
+    const contenu = JSON.parse(d.sceller.mock.calls[0]![0].toString())
+    expect(contenu.text).toContain(`https://example.invalid/espace/dossiers/${dossier}`)
+    expect(contenu.to).toEqual(['membre@agence.invalid'])
+    if (nature === 'epuise') {
+      expect(contenu.subject).toBe('Un garant n’a pas répondu aux relances Cloison')
+      expect(contenu.text).not.toContain('garant@example.invalid')
+    }
+  },
+)
 test.each([null, -1, 21, 1.5, '1'])('refuse un compte de planification %s', async (data) => {
   d.rpc.mockImplementation(async (n: string) => ({
     data: n === 'programmer_rappels' ? data : n === 'rappels_a_preparer' ? [rappel] : 'prepare',
