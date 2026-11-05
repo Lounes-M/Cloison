@@ -33,7 +33,9 @@ export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'r
                 ? requete
                     .in('statut', [...STATUTS_EN_ATTENTE])
                     .lt('activite_rappel_le', limiteSansNouvelles(maintenant))
-                : requete.eq('statut', cle)
+                : cle === 'sans_garant'
+                  ? requete.in('statut', [...STATUTS_EN_ATTENTE]).is('email_garant', null)
+                  : requete.eq('statut', cle)
         const { count, error } = await requete
         return { cle, nombre: !error && Number.isSafeInteger(count) && count! >= 0 ? count : null }
       } catch {

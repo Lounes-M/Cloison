@@ -380,7 +380,8 @@ const api = createServer(async (req, res) => {
       if (remplacement) assert.equal(remplacement, 'eq.fourni')
       if (statut?.startsWith('in.')) {
         assert.equal(statut, 'in.(ouvert,depot_en_cours)')
-        assert.match(url.searchParams.get('activite_rappel_le') ?? '', /^lt\./)
+        if (url.searchParams.get('email_garant') !== 'is.null')
+          assert.match(url.searchParams.get('activite_rappel_le') ?? '', /^lt\./)
       }
       res.setHeader(
         'content-range',
