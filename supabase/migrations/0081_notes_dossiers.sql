@@ -15,7 +15,7 @@ create table public.notes_dossiers (
  id uuid primary key default gen_random_uuid(),
  dossier_id uuid not null references public.dossiers(id) on delete cascade,
  auteur_id uuid not null,
- texte text not null check (char_length(texte) between 1 and 1000 and texte = btrim(texte)),
+ texte text not null check (char_length(texte) >= 1 and char_length(texte) <= 1000 and texte = btrim(texte)),
  cree_le timestamptz not null default clock_timestamp()
 );
 create index notes_dossiers_page on public.notes_dossiers(dossier_id, cree_le desc, id desc);
