@@ -797,3 +797,19 @@ test('la fiche annonce la prochaine relance automatique ou leur desactivation', 
   expect(texteVisible(panne)).not.toContain('Prochaine relance')
   expect(texteVisible(panne)).not.toContain('désactivées')
 })
+
+test('la fiche d un dossier affiche le nom du locataire quand il est connu', async () => {
+  const sansNom = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(texteVisible(sansNom)).toContain('locataire@example.test')
+  reponses.dossiers = {
+    data: { ...(reponses.dossiers!.data as object), locataire_nom: 'Camille Martin' },
+    error: null,
+  }
+  const page = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(doublures.colonnes).toHaveBeenCalledWith(
+    'dossiers',
+    expect.stringContaining('locataire_nom'),
+  )
+  expect(texteVisible(page)).toContain('Camille Martin')
+  expect(texteVisible(page)).toContain('locataire@example.test')
+})
