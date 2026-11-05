@@ -48,6 +48,7 @@ type Ligne = {
   id: string
   reference: string
   email_locataire: string
+  locataire_nom?: string | null
   statut: string
   cree_le: string
   expire_le: string
@@ -195,8 +196,8 @@ export default async function PageEspace({
     .from('dossiers')
     .select(
       remplacement
-        ? 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), remplacements:complements_documentaires!inner(id), affecte:affectations_dossiers()'
-        : 'id, reference, email_locataire, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), affecte:affectations_dossiers()',
+        ? 'id, reference, email_locataire, locataire_nom, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), remplacements:complements_documentaires!inner(id), affecte:affectations_dossiers()'
+        : 'id, reference, email_locataire, locataire_nom, statut, cree_le, expire_le, demonstration, engagements(ratio), activite_rappel_le, suivi:complements_documentaires(etat), affecte:affectations_dossiers()',
     )
     .order(colonnesTri[tri], { ascending: tri !== 'recent' })
     .order('id', { ascending: false })
@@ -521,7 +522,10 @@ export default async function PageEspace({
                         <dt className="text-muted text-xs font-bold">
                           {tableau.colonnes.locataire}
                         </dt>
-                        <dd className="font-medium">
+                        <dd className="font-medium break-all">
+                          {ligne.locataire_nom ? (
+                            <span className="block font-bold">{ligne.locataire_nom}</span>
+                          ) : null}
                           {ligne.email_locataire}
                           {ligne.demonstration ? (
                             <span className="block text-xs font-bold">{tableau.demonstration}</span>
@@ -609,6 +613,9 @@ export default async function PageEspace({
                           </Link>
                         </td>
                         <td className="px-4 py-3 font-medium">
+                          {ligne.locataire_nom ? (
+                            <span className="block font-bold">{ligne.locataire_nom}</span>
+                          ) : null}
                           {ligne.email_locataire}
                           {ligne.demonstration ? (
                             <span className="text-muted ml-2 text-[11px] font-bold tracking-wide uppercase">

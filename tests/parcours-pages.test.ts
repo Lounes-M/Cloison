@@ -357,6 +357,28 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     expect(doublures.ordre).toHaveBeenCalledWith('id', { ascending: false })
   })
 
+  test('le nom du locataire, quand il est connu, precede son e-mail', async () => {
+    reponses.dossiers!.data = [
+      {
+        id: 'dossier-nomme',
+        reference: 'REF-NOM',
+        email_locataire: 'nomme@example.invalid',
+        locataire_nom: 'Camille Martin',
+        statut: 'ouvert',
+        cree_le: '2026-09-01',
+        engagements: null,
+      },
+    ]
+    const arbre = elements(await PageEspace())
+    const noms = arbre.filter((e) => e.type === 'span' && e.props.children === 'Camille Martin')
+    // Une fois en cartes (mobile), une fois dans le tableau.
+    expect(noms).toHaveLength(2)
+    expect(doublures.colonnes).toHaveBeenCalledWith(
+      'dossiers',
+      expect.stringContaining('locataire_nom'),
+    )
+  })
+
   test('la page suivante conserve les filtres litteraux et permet de revenir', async () => {
     reponses.dossiers!.data = []
     const arbre = elements(
