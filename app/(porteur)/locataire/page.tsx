@@ -116,6 +116,7 @@ export default async function PageLocataire({
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: 'Europe/Paris',
   })
 
   const restant = ouvert

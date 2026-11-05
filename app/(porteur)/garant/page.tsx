@@ -92,7 +92,7 @@ export default async function PageGarant({
   ] = await Promise.all([
     supabase
       .from('dossiers')
-      .select('reference, email_locataire, statut')
+      .select('reference, email_locataire, statut, expire_le')
       .eq('id', dossierId)
       .maybeSingle(),
     supabase
@@ -403,6 +403,18 @@ export default async function PageGarant({
           </p>
         )}
       </section>
+      {dossier.expire_le ? (
+        <p className="text-muted mt-10 text-[13px] font-medium">
+          {depot.expire(
+            new Date(String(dossier.expire_le)).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'Europe/Paris',
+            }),
+          )}
+        </p>
+      ) : null}
       <SupportDossier reference={String(dossier.reference)} espace="garant" />
       <SuiviSignature db={supabase} dossier={dossierId} partie="garant" />
     </div>
