@@ -25,6 +25,7 @@ export const tableau = {
   dateIndisponible: 'date indisponible',
   rechercheReference: 'Référence du dossier',
   rechercheEmail: 'E-mail du locataire',
+  rechercheNom: 'Nom du locataire',
   rechercher: 'Rechercher',
   filtresAvances: 'Statut, responsable, échéance et suivi',
   remplacement: 'Seulement les dossiers avec un remplacement de pièce à examiner',
