@@ -162,6 +162,7 @@ export default async function PageEspace({
   const champ = (valeur: unknown) => (typeof valeur === 'string' ? valeur.trim().slice(0, 120) : '')
   const reference = champ(recherche.reference)
   const emailRecherche = champ(recherche.email)
+  const nomRecherche = champ(recherche.nom)
   const etatRecherche = Object.hasOwn(statuts, champ(recherche.statut))
     ? champ(recherche.statut)
     : ''
@@ -180,6 +181,7 @@ export default async function PageEspace({
     const params = new URLSearchParams({ page: String(page) })
     if (reference) params.set('reference', reference)
     if (emailRecherche) params.set('email', emailRecherche)
+    if (nomRecherche) params.set('nom', nomRecherche)
     if (etatRecherche) params.set('statut', etatRecherche)
     if (attribution !== 'tous') params.set('responsable', attribution)
     if (tri !== 'recent') params.set('tri', tri)
@@ -201,6 +203,7 @@ export default async function PageEspace({
   if (bornes) requete = requete.gt('expire_le', bornes.apres).lte('expire_le', bornes.jusqua)
   if (reference) requete = requete.ilike('reference', motif(reference))
   if (emailRecherche) requete = requete.ilike('email_locataire', motif(emailRecherche))
+  if (nomRecherche) requete = requete.ilike('locataire_nom', motif(nomRecherche))
   if (etatRecherche) requete = requete.eq('statut', etatRecherche)
   if (remplacement) requete = requete.eq('remplacements.etat', 'fourni')
   if (sansNouvelles)
@@ -315,6 +318,7 @@ export default async function PageEspace({
           key={JSON.stringify([
             reference,
             emailRecherche,
+            nomRecherche,
             etatRecherche,
             attribution,
             tri,
@@ -347,6 +351,7 @@ export default async function PageEspace({
           </label>
           <details
             open={Boolean(
+              nomRecherche ||
               etatRecherche ||
               attribution !== 'tous' ||
               horizon ||
@@ -359,6 +364,15 @@ export default async function PageEspace({
           >
             <summary className="cursor-pointer text-sm font-bold">{tableau.filtresAvances}</summary>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <label className="min-w-0 text-sm font-semibold">
+                {tableau.rechercheNom}
+                <input
+                  name="nom"
+                  defaultValue={nomRecherche}
+                  maxLength={120}
+                  className="outlined mt-2 w-full rounded-lg px-3 py-2"
+                />
+              </label>
               <label className="min-w-0 text-sm font-semibold">
                 {texteResponsables.statut}
                 <select
@@ -458,6 +472,7 @@ export default async function PageEspace({
           </button>
           {reference ||
           emailRecherche ||
+          nomRecherche ||
           etatRecherche ||
           attribution !== 'tous' ||
           horizon ||
@@ -476,6 +491,7 @@ export default async function PageEspace({
             {numero > 1 ||
             reference ||
             emailRecherche ||
+            nomRecherche ||
             etatRecherche ||
             attribution !== 'tous' ||
             horizon ||

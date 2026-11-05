@@ -365,14 +365,16 @@ describe('la liste des dossiers reste bornee et navigable', () => {
           page: '3',
           reference: ' AB_10% ',
           email: 'test+un@example.invalid',
+          nom: ' Dupont ',
         }),
       }),
     )
     expect(doublures.plage).toHaveBeenCalledWith(100, 150)
     expect(doublures.filtre).toHaveBeenCalledWith('reference', '%AB\\_10\\%%')
     expect(doublures.filtre).toHaveBeenCalledWith('email_locataire', '%test+un@example.invalid%')
+    expect(doublures.filtre).toHaveBeenCalledWith('locataire_nom', '%Dupont%')
     expect(arbre.map((e) => e.props.href)).toContain(
-      '/espace?page=2&reference=AB_10%25&email=test%2Bun%40example.invalid',
+      '/espace?page=2&reference=AB_10%25&email=test%2Bun%40example.invalid&nom=Dupont',
     )
     expect(arbre.filter((e) => e.type === 'form').some((e) => e.props.method === 'get')).toBe(true)
   })
