@@ -849,3 +849,17 @@ test('la fiche d un dossier affiche le nom du locataire quand il est connu', asy
   expect(texteVisible(page)).toContain('Camille Martin')
   expect(texteVisible(page)).toContain('locataire@example.test')
 })
+
+test('le garant voit la date d expiration du dossier, a l heure de Paris', async () => {
+  reponses.dossiers = {
+    data: { ...(reponses.dossiers!.data as object), expire_le: '2026-11-30T23:30:00Z' },
+    error: null,
+  }
+  expect(texteVisible(await PageGarant())).toContain('Ce dossier expire le 1 décembre 2026.')
+  expect(doublures.colonnes).toHaveBeenCalledWith('dossiers', expect.stringContaining('expire_le'))
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  expect(texteVisible(await locataire())).toContain('Ce dossier expire le 1 décembre 2026.')
+})
