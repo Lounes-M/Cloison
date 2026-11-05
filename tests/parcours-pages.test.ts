@@ -72,7 +72,10 @@ function client() {
           doublures.borne('lt', ...args)
           return chaine
         },
-        is: () => chaine,
+        is: (...args: unknown[]) => {
+          doublures.egal('is', ...args)
+          return chaine
+        },
         order: (...args: unknown[]) => {
           doublures.ordre(...args)
           return chaine
@@ -551,6 +554,18 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     expect(avant - Date.parse(limite as string)).toBeGreaterThanOrEqual(7 * 86400000 - 1000)
     expect(avant - Date.parse(limite as string)).toBeLessThanOrEqual(7 * 86400000)
     expect(arbre.map((e) => e.props.href)).toContain('/espace?page=1&sans_nouvelles=1')
+  })
+
+  test('sans garant : dossiers en attente sans adresse de garant', async () => {
+    reponses.dossiers!.data = []
+    const arbre = elements(
+      await PageEspace({ searchParams: Promise.resolve({ page: '2', sans_garant: '1' }) }),
+    )
+    expect(doublures.egal).toHaveBeenCalledWith('in', 'statut', ['ouvert', 'depot_en_cours'])
+    expect(doublures.egal).toHaveBeenCalledWith('is', 'email_garant', null)
+    expect(arbre.map((e) => e.props.href)).toContain('/espace?page=1&sans_garant=1')
+    const coche = arbre.find((e) => e.props.name === 'sans_garant')
+    expect(coche?.props.defaultChecked).toBe(true)
   })
 
   test.each(['0', '-7', '365', ['7', '30'], '7);drop'])(

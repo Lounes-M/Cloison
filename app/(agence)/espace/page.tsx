@@ -173,6 +173,7 @@ export default async function PageEspace({
     recherche.tri === 'echeance' || recherche.tri === 'activite' ? recherche.tri : 'recent'
   const remplacement = recherche.remplacement === '1'
   const sansNouvelles = recherche.sans_nouvelles === '1'
+  const sansGarant = recherche.sans_garant === '1'
   const relancesEpuisees = recherche.relances_epuisees === '1'
   const horizon = recherche.horizon === '7' || recherche.horizon === '30' ? recherche.horizon : ''
   // Une seule horloge pour les deux bornes ; les droits restent imposes par SQL.
@@ -189,6 +190,7 @@ export default async function PageEspace({
     if (horizon) params.set('horizon', horizon)
     if (remplacement) params.set('remplacement', '1')
     if (sansNouvelles) params.set('sans_nouvelles', '1')
+    if (sansGarant) params.set('sans_garant', '1')
     if (relancesEpuisees) params.set('relances_epuisees', '1')
     return `/espace?${params.toString()}` as const
   }
@@ -207,6 +209,7 @@ export default async function PageEspace({
   if (nomRecherche) requete = requete.ilike('locataire_nom', motif(nomRecherche))
   if (etatRecherche) requete = requete.eq('statut', etatRecherche)
   if (remplacement) requete = requete.eq('remplacements.etat', 'fourni')
+  if (sansGarant) requete = requete.in('statut', [...STATUTS_EN_ATTENTE]).is('email_garant', null)
   if (sansNouvelles)
     requete = requete
       .in('statut', [...STATUTS_EN_ATTENTE])
@@ -326,6 +329,7 @@ export default async function PageEspace({
             horizon,
             remplacement,
             sansNouvelles,
+            sansGarant,
             relancesEpuisees,
           ])}
           action="/espace"
@@ -359,6 +363,7 @@ export default async function PageEspace({
               tri !== 'recent' ||
               remplacement ||
               sansNouvelles ||
+              sansGarant ||
               relancesEpuisees,
             )}
             className="border-ink/15 border-t pt-2 sm:col-span-2"
@@ -456,6 +461,16 @@ export default async function PageEspace({
               <label className="flex items-start gap-3 text-sm font-semibold sm:col-span-2">
                 <input
                   type="checkbox"
+                  name="sans_garant"
+                  value="1"
+                  defaultChecked={sansGarant}
+                  className="mt-0.5 size-5 shrink-0"
+                />
+                {tableau.sansGarant}
+              </label>
+              <label className="flex items-start gap-3 text-sm font-semibold sm:col-span-2">
+                <input
+                  type="checkbox"
                   name="relances_epuisees"
                   value="1"
                   defaultChecked={relancesEpuisees}
@@ -479,6 +494,7 @@ export default async function PageEspace({
           horizon ||
           remplacement ||
           sansNouvelles ||
+          sansGarant ||
           relancesEpuisees ||
           tri !== 'recent' ? (
             <Link href="/espace" className="lien-espace">
@@ -498,6 +514,7 @@ export default async function PageEspace({
             horizon ||
             remplacement ||
             sansNouvelles ||
+            sansGarant ||
             relancesEpuisees ||
             tri !== 'recent'
               ? tableau.aucunResultat
