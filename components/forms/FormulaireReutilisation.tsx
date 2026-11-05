@@ -13,7 +13,6 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
   const id = useId()
   const [etat, setEtat] = useState<EtatReutilisation | null>(null)
   const [attente, setAttente] = useState(false)
-  const [lien, setLien] = useState('')
   async function executer(formulaire: HTMLFormElement, copie: boolean) {
     if (attente) return
     setAttente(true)
@@ -47,11 +46,9 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
             id={`${id}-lien`}
             type="url"
             name="lien_source"
-            value={lien}
-            onChange={(event) => {
-              setLien(event.target.value)
-              setEtat(null)
-            }}
+            // Non controle : une adresse collee avant l'hydratation reste dans
+            // le champ au lieu d'etre effacee au premier rendu.
+            onChange={() => setEtat(null)}
             required
             maxLength={4096}
             autoComplete="off"
