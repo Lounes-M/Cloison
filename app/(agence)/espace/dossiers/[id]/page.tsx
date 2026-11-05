@@ -120,7 +120,7 @@ export default async function PageDossier({
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, activite_rappel_le',
+        'id, reference, statut, email_locataire, locataire_nom, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, activite_rappel_le',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -239,7 +239,12 @@ export default async function PageDossier({
           <h1 className="font-display text-2xl break-words md:text-3xl">
             {texte.reference} {String(d.reference)}
           </h1>
-          <p className="text-muted mt-2 text-sm break-all">{String(d.email_locataire)}</p>
+          {d.locataire_nom ? (
+            <p className="mt-2 font-bold break-words">{String(d.locataire_nom)}</p>
+          ) : null}
+          <p className={cn('text-muted text-sm break-all', d.locataire_nom ? 'mt-1' : 'mt-2')}>
+            {String(d.email_locataire)}
+          </p>
           {d.activite_rappel_le ? (
             <p className="text-muted mt-1 text-sm">
               {texte.derniereActivite(date(d.activite_rappel_le, true))}
