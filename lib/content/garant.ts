@@ -125,6 +125,7 @@ export const depot = {
   deposeLe: (date: string) => `déposé le ${date}`,
   fermeTitre: 'Le dépôt est clos',
   fermeTexte: 'Le dossier est parti à l’agence. Vos pièces ne bougent plus : elle décide dessus.',
+  expire: (date: string) => `Ce dossier expire le ${date}.`,
 } as const
 
 export const engagement = {
