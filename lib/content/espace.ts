@@ -117,6 +117,9 @@ export const dossier = {
   derniereActivite: (date: string) => `Dernière activité sur le dossier : ${date}.`,
   relancesGarant: (nombre: number, date: string) =>
     `Relances automatiques au garant : ${nombre} sur 3, la dernière le ${date}.`,
+  prochaineRelance: (date: string) =>
+    `Prochaine relance automatique au garant à partir du ${date}.`,
+  relancesDesactivees: 'Les relances automatiques du garant sont désactivées pour votre agence.',
   retour: 'Tous les dossiers',
   reference: 'Référence',
   locataire: 'Locataire',
