@@ -10,6 +10,7 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
     lte: ReturnType<typeof vi.fn>
     in: ReturnType<typeof vi.fn>
     lt: ReturnType<typeof vi.fn>
+    is: ReturnType<typeof vi.fn>
   }[] = []
   const from = vi.fn(() => {
     const n = requetes.length
@@ -20,12 +21,13 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
       lte: vi.fn(),
       in: vi.fn(),
       lt: vi.fn(),
+      is: vi.fn(),
       then: (resolve: (v: unknown) => unknown) =>
         Promise.resolve(
           n === 1 ? { error: { message: 'prive' }, count: null } : { error: null, count: n },
         ).then(resolve),
     }
-    for (const fn of [q.select, q.eq, q.gt, q.lte, q.in, q.lt]) fn.mockReturnValue(q)
+    for (const fn of [q.select, q.eq, q.gt, q.lte, q.in, q.lt, q.is]) fn.mockReturnValue(q)
     requetes.push(q)
     return q
   })
@@ -41,12 +43,13 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
     'transmis',
     'remplacement',
     'sans_nouvelles',
+    'sans_garant',
     'relances_epuisees',
     'echeance',
   ])
   // Les relances epuisees passent par la fonction dediee, sans requete directe.
   expect(rpc).toHaveBeenCalledWith('dossiers_relances_epuisees')
-  expect(resultats.map((r) => r.nombre)).toEqual([0, null, 2, 3, 4, 3, 5])
+  expect(resultats.map((r) => r.nombre)).toEqual([0, null, 2, 3, 4, 5, 3, 6])
   for (const [i, q] of requetes.entries()) {
     expect(q.select).toHaveBeenCalledWith(
       i === 3 ? 'id, complements_documentaires!inner()' : 'id',
@@ -64,8 +67,12 @@ test('les compteurs restent cloisonnes, bornes et une panne ne devient pas zero'
     Date.parse(requetes[0]!.gt.mock.calls[0]![1]) - Date.parse(requetes[4]!.lt.mock.calls[0]![1]),
   ).toBe(7 * 86400000)
   expect(requetes[4]!.lt.mock.calls[0]![0]).toBe('activite_rappel_le')
+  // Sans garant : en attente, et aucune adresse de garant encore saisie.
+  expect(requetes[5]!.in).toHaveBeenCalledWith('statut', ['ouvert', 'depot_en_cours'])
+  expect(requetes[5]!.is).toHaveBeenCalledWith('email_garant', null)
+  expect(requetes[5]!.eq).not.toHaveBeenCalledWith('statut', expect.anything())
   expect(
-    Date.parse(requetes[5]!.lte.mock.calls[0]![1]) - Date.parse(requetes[0]!.gt.mock.calls[0]![1]),
+    Date.parse(requetes[6]!.lte.mock.calls[0]![1]) - Date.parse(requetes[0]!.gt.mock.calls[0]![1]),
   ).toBe(7 * 86400000)
 })
 

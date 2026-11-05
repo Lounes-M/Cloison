@@ -36,6 +36,8 @@ export const tableau = {
   },
   sansNouvelles:
     'Seulement les dossiers en attente du locataire ou du garant, sans activité depuis 7 jours',
+  sansGarant:
+    'Seulement les dossiers en attente dont le locataire n’a pas encore désigné de garant',
   relancesEpuisees:
     'Seulement les dossiers dont le garant a reçu ses 3 relances automatiques sans rien faire depuis',
   effacer: 'Effacer les filtres',

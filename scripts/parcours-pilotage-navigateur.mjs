@@ -13,6 +13,7 @@ export async function parcourirPilotage(page, site, id, moteur, largeur, simuler
     await priorites.getByRole('link', { name: /Sans nouvelles depuis 7 jours/ }).innerText(),
     /0/,
   )
+  assert.match(await priorites.getByRole('link', { name: /Sans garant désigné/ }).innerText(), /0/)
   assert.match(
     await priorites.getByRole('link', { name: /Relances automatiques épuisées/ }).innerText(),
     /0/,

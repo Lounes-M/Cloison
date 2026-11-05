@@ -18,6 +18,11 @@ export const pilotage = {
       href: '/espace?sans_nouvelles=1',
     },
     {
+      cle: 'sans_garant',
+      titre: 'Sans garant désigné',
+      href: '/espace?sans_garant=1',
+    },
+    {
       cle: 'relances_epuisees',
       titre: 'Relances automatiques épuisées',
       href: '/espace?relances_epuisees=1',
