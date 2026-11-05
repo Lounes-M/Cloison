@@ -102,6 +102,7 @@ function client() {
       if (nom === 'agence_de_mon_dossier' && reponses.agence) return reponses.agence
       if (nom === 'relances_du_dossier' && reponses.relances) return reponses.relances
       if (nom === 'dossiers_relances_epuisees' && reponses.epuises) return reponses.epuises
+      if (nom === 'prochaine_relance_garant' && reponses.prochaine) return reponses.prochaine
       return { data: [], error: null }
     }),
   }
@@ -739,4 +740,36 @@ test('la fiche d un dossier dit combien de relances le garant a recues', async (
   expect(texteVisible(page)).toContain(
     'Relances automatiques au garant : 2 sur 3, la dernière le 5 janvier 2020',
   )
+})
+
+test('la fiche annonce la prochaine relance automatique ou leur desactivation', async () => {
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'depot_en_cours',
+      email_garant: 'garant@example.invalid',
+      demonstration: false,
+    },
+    error: null,
+  }
+  reponses.prochaine = {
+    data: [{ actives: true, prochaine: '2020-01-08T09:00:00Z' }],
+    error: null,
+  }
+  const page = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(doublures.rpc).toHaveBeenCalledWith('prochaine_relance_garant', { le_dossier: ID })
+  expect(texteVisible(page)).toContain(
+    'Prochaine relance automatique au garant à partir du 8 janvier 2020',
+  )
+
+  reponses.prochaine = { data: [{ actives: false, prochaine: null }], error: null }
+  const desactivees = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(texteVisible(desactivees)).toContain(
+    'Les relances automatiques du garant sont désactivées pour votre agence.',
+  )
+
+  reponses.prochaine = { data: null, error: { message: 'boom' } }
+  const panne = await PageDossier({ params: Promise.resolve({ id: ID }) })
+  expect(texteVisible(panne)).not.toContain('Prochaine relance')
+  expect(texteVisible(panne)).not.toContain('désactivées')
 })

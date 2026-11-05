@@ -115,6 +115,7 @@ export default async function PageDossier({
     { data: groupes, error: erreurGroupe },
     { data: biens, error: erreurBiens },
     { data: relances, error: erreurRelances },
+    { data: planification, error: erreurPlanification },
   ] = await Promise.all([
     supabase
       .from('dossiers')
@@ -153,6 +154,11 @@ export default async function PageDossier({
       .order('cree_le', { ascending: false })
       .limit(200),
     supabase.rpc('relances_du_dossier', { le_dossier: id }),
+    // Information d'appoint : une panne ne bloque pas la fiche.
+    Promise.resolve(supabase.rpc('prochaine_relance_garant', { le_dossier: id })).catch(() => ({
+      data: null,
+      error: true,
+    })),
   ])
 
   if (
@@ -173,6 +179,9 @@ export default async function PageDossier({
   if (!d) notFound()
   const historique = pageJournal(journal, id)
   const relance = (relances as { nombre: number; derniere: string | null }[] | null)?.[0]
+  const prevue = erreurPlanification
+    ? undefined
+    : (planification as { actives: boolean; prochaine: string | null }[] | null)?.[0]
 
   const { error: inscription } = await supabase.rpc('journaliser', {
     le_dossier: id,
@@ -240,6 +249,17 @@ export default async function PageDossier({
             <p className="text-muted mt-1 text-sm">
               {texte.relancesGarant(relance.nombre, date(relance.derniere, true))}
             </p>
+          ) : null}
+          {prevue?.prochaine ? (
+            <p className="text-muted mt-1 text-sm">
+              {texte.prochaineRelance(date(prevue.prochaine, true))}
+            </p>
+          ) : prevue &&
+            !prevue.actives &&
+            !d.demonstration &&
+            d.email_garant &&
+            (STATUTS_EN_ATTENTE as readonly string[]).includes(String(d.statut)) ? (
+            <p className="text-muted mt-1 text-sm">{texte.relancesDesactivees}</p>
           ) : null}
           <PastillesSuivi
             pastilles={pastillesDuDossier(

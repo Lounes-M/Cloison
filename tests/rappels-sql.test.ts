@@ -646,3 +646,39 @@ test('relancer a nouveau est refuse sur un dossier qui n attend plus le garant',
     (await db.query<{ ok: boolean }>('select relancer_garant($1) ok', [dossier])).rows[0]!.ok,
   ).toBe(false)
 })
+test('la fiche annonce la prochaine relance automatique, ou aucune', async () => {
+  const lire = async () => {
+    await devenir(db, 'authenticated', membre)
+    const r = (
+      await db.query<{ actives: boolean; prochaine: Date | null; ecart: number | null }>(
+        'select actives, prochaine, extract(epoch from prochaine - now()) / 86400 ecart from prochaine_relance_garant($1)',
+        [dossier],
+      )
+    ).rows
+    return r[0]
+  }
+  expect(await lire()).toMatchObject({ actives: false, prochaine: null })
+  await devenir(db, 'authenticated', admin)
+  await regler()
+  const immediate = (await lire())!
+  expect(immediate.actives).toBe(true)
+  expect(Math.abs(immediate.ecart!)).toBeLessThan(0.01)
+  await relancerDepot(2)
+  expect((await lire())!.ecart).toBeCloseTo(1, 2)
+  await relancerDepot(5)
+  await relancerDepot(9)
+  expect(await lire()).toMatchObject({ actives: true, prochaine: null })
+  // Une relance qui tomberait apres l'echeance n'est pas annoncee.
+  await redevenirProprietaire(db)
+  await db.query('update dossiers set relances_depuis=now() where id=$1', [dossier])
+  await db.query("update dossiers set expire_le=now()+interval '1 day' where id=$1", [dossier])
+  expect(await lire()).toMatchObject({ actives: true, prochaine: null })
+  await redevenirProprietaire(db)
+  expect(
+    (
+      await db.query<{ p: boolean }>(
+        "select has_function_privilege('porteur_lien','public.prochaine_relance_garant(uuid)','execute') p",
+      )
+    ).rows[0]!.p,
+  ).toBe(false)
+})
