@@ -97,6 +97,10 @@ export default async function PageActivite() {
           </tbody>
         </table>
         <p className="text-muted mt-4 text-[13px] font-medium">{t.legende}</p>
+        {/* Un lien simple : la route rend un fichier, pas une page. */}
+        <a href="/espace/activite/export" download className="lien-espace mt-4">
+          {t.exporter}
+        </a>
       </div>
     </div>
   )

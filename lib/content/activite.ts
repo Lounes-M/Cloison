@@ -22,6 +22,16 @@ export const activite = {
     clos: 'Clos',
     delai: 'Délai moyen',
   },
+  exporter: 'Télécharger ces compteurs en CSV',
+  colonnesCSV: [
+    'Mois',
+    'Reçus',
+    'Pris',
+    'Refusés',
+    'Signés',
+    'Clos',
+    'Délai moyen jusqu’à la prise (jours)',
+  ],
   legende:
     'Le taux d’acceptation rapporte les dossiers pris aux décisions rendues (pris et refusés). Les dossiers de démonstration et ceux d’un second garant ne sont pas comptés.',
 } as const
