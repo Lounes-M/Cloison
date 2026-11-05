@@ -10,6 +10,8 @@ import { LectureOcr } from '@/components/dossiers/LectureOcr'
 import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
 import { ResponsableDossier } from '@/components/dossiers/ResponsableDossier'
 import { HistoriqueResponsables } from '@/components/dossiers/HistoriqueResponsables'
+import { NotesDossier } from '@/components/dossiers/NotesDossier'
+import { notesDossier as texteNotes } from '@/lib/content/notes'
 import { examen as texteExamen, type ExamenDocumentaire } from '@/lib/content/examen'
 import { configurationOcr } from '@/lib/ocr/openrouter'
 import { Complements } from '@/components/dossiers/Complements'
@@ -278,6 +280,7 @@ export default async function PageDossier({
           { id: 'engagement', titre: interfaceEspace.engagement },
           { id: 'decision', titre: interfaceEspace.decision },
           { id: 'organisation', titre: interfaceEspace.organisation },
+          { id: 'notes', titre: texteNotes.titre },
           { id: 'journal', titre: interfaceEspace.historique },
         ]}
       />
@@ -548,6 +551,7 @@ export default async function PageDossier({
           position={(await searchParams)?.affectations}
         />
       </section>
+      <NotesDossier dossierId={id} supabase={supabase} modifiable={!d.demonstration} />
       <section id="journal" className="panneau-espace mt-8">
         <h2 className="font-display text-2xl uppercase">{texte.journalTitre}</h2>
         {historique.lignes.length === 0 ? (
