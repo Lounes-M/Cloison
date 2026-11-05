@@ -600,16 +600,34 @@ export default async function PageEspace({
                 )
               })}
             </ul>
-            <div className="border-ink/15 hidden overflow-x-auto rounded-[14px] border lg:block">
+            <div
+              className="border-ink/15 hidden overflow-x-auto rounded-[14px] border lg:block"
+              tabIndex={0}
+              role="region"
+              aria-label={tableau.dossiers}
+            >
               <table className="w-full text-left text-[14px]">
+                <caption className="sr-only">{tableau.dossiers}</caption>
                 <thead className="bg-sky/20 border-ink/15 border-b text-xs font-bold">
                   <tr>
-                    <th className="px-4 py-3">{tableau.colonnes.reference}</th>
-                    <th className="px-4 py-3">{tableau.colonnes.locataire}</th>
-                    <th className="px-4 py-3">{tableau.colonnes.statut}</th>
-                    <th className="px-4 py-3">{texteResponsables.titre}</th>
-                    <th className="px-4 py-3">{tableau.colonnes.ratio}</th>
-                    <th className="px-4 py-3">{tableau.colonnes.ouvert}</th>
+                    <th scope="col" className="px-4 py-3">
+                      {tableau.colonnes.reference}
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      {tableau.colonnes.locataire}
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      {tableau.colonnes.statut}
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      {texteResponsables.titre}
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      {tableau.colonnes.ratio}
+                    </th>
+                    <th scope="col" className="px-4 py-3">
+                      {tableau.colonnes.ouvert}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -621,14 +639,14 @@ export default async function PageEspace({
                         key={ligne.id}
                         className="border-ink/10 hover:bg-cream/60 border-b last:border-0"
                       >
-                        <td className="px-4 py-3 font-bold">
+                        <th scope="row" className="px-4 py-3 font-bold">
                           <Link
                             href={`/espace/dossiers/${ligne.id}`}
                             className="text-cobalt inline-flex min-h-11 items-center underline-offset-4 hover:underline"
                           >
                             {ligne.reference}
                           </Link>
-                        </td>
+                        </th>
                         <td className="px-4 py-3 font-medium">
                           {ligne.locataire_nom ? (
                             <span className="block font-bold">{ligne.locataire_nom}</span>

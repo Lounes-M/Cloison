@@ -382,6 +382,27 @@ describe('la liste des dossiers reste bornee et navigable', () => {
     )
   })
 
+  test('le tableau des dossiers est annonce, ses en-tetes portent leur portee', async () => {
+    reponses.dossiers!.data = [
+      {
+        id: 'dossier-a11y',
+        reference: 'REF-A11Y',
+        email_locataire: 'a11y@example.invalid',
+        statut: 'ouvert',
+        cree_le: '2026-09-01',
+        engagements: null,
+      },
+    ]
+    const arbre = elements(await PageEspace())
+    const zone = arbre.find((e) => e.type === 'div' && e.props.role === 'region')
+    expect(zone?.props).toMatchObject({ tabIndex: 0, 'aria-label': 'Vos dossiers' })
+    expect(arbre.find((e) => e.type === 'caption')?.props.children).toBe('Vos dossiers')
+    const entetes = arbre.filter((e) => e.type === 'th')
+    expect(entetes.filter((e) => e.props.scope === 'col')).toHaveLength(6)
+    expect(entetes.filter((e) => e.props.scope === 'row')).toHaveLength(1)
+    expect(entetes.every((e) => e.props.scope === 'col' || e.props.scope === 'row')).toBe(true)
+  })
+
   test('la page suivante conserve les filtres litteraux et permet de revenir', async () => {
     reponses.dossiers!.data = []
     const arbre = elements(
