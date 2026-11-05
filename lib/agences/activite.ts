@@ -1,3 +1,7 @@
+import { z } from 'zod'
+import { celluleCSV } from '@/lib/agences/exports-registres'
+import { activite as t } from '@/lib/content/activite'
+
 /** Une ligne de `activite_de_mon_agence` (0068). */
 export type MoisActivite = {
   mois: string
@@ -37,4 +41,45 @@ export function libelleMois(mois: string): string {
   return Number.isFinite(date.getTime())
     ? date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'Europe/Paris' })
     : mois
+}
+
+const compteur = z.number().int().min(0).max(1_000_000)
+const moisCSV = z
+  .object({
+    mois: z.string().regex(/^\d{4}-\d{2}(-\d{2})?/),
+    ouverts: compteur,
+    pris: compteur,
+    refuses: compteur,
+    signes: compteur,
+    clos: compteur,
+    delai_prise_moyen_jours: z
+      .union([z.number(), z.string().regex(/^\d{1,6}(\.\d{1,12})?$/)])
+      .nullable(),
+  })
+  .array()
+  .max(24)
+
+/**
+ * Les compteurs de la page en CSV (point-virgule, BOM, CRLF), comme les
+ * registres. Ils ne designent personne : une ligne par mois, aucun dossier.
+ */
+export function activiteCSV(donnees: unknown): string {
+  const lignes = moisCSV
+    .parse(donnees)
+    .map((l) => [
+      l.mois.slice(0, 7),
+      String(l.ouverts),
+      String(l.pris),
+      String(l.refuses),
+      String(l.signes),
+      String(l.clos),
+      l.delai_prise_moyen_jours == null
+        ? ''
+        : (Math.round(Number(l.delai_prise_moyen_jours) * 10) / 10).toString().replace('.', ','),
+    ])
+  return (
+    '\ufeff' +
+    [[...t.colonnesCSV], ...lignes].map((l) => l.map(celluleCSV).join(';')).join('\r\n') +
+    '\r\n'
+  )
 }
