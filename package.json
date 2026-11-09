@@ -42,7 +42,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.13",
+    "@electric-sql/pglite": "^0.5.15",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
@@ -51,13 +51,13 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.3",
     "pg": "^8.23.1",
-    "playwright": "1.64.1",
+    "playwright": "1.65.0",
     "postcss": "^8.5.32",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "overrides": {
     "@next/eslint-plugin-next": {
