@@ -39,69 +39,69 @@ export function Hero() {
           <polygon points="30,0 100,0 100,46 77,52" />
         </svg>
 
-        <div className="relative mx-auto grid max-w-[1440px] gap-10 px-4 pt-[calc(var(--entete-total)+3rem)] pb-[clamp(10rem,22vw,20rem)] md:grid-cols-[1.6fr_1fr] md:px-[5vw] md:pt-[calc(var(--entete-total)+4rem)]">
-          <div className="animate-fade-up min-w-0">
-            <p className="mb-5 inline-block rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium">
-              {hero.eyebrow}
-            </p>
-            <h1 className="font-display text-[clamp(2.4rem,5.4vw,5rem)] leading-[1.08] text-balance">
-              Ton garant t&apos;aide. Il ne te doit{' '}
-              <span className="text-sun">ni sa fiche de paie</span>, ni une signature à
-              l&apos;aveugle.
-            </h1>
+        <div className="gouttiere relative pt-[calc(var(--entete-barre)+11.25rem)] pb-[24rem] max-[479px]:pt-[calc(var(--entete-total)+3rem)] max-[479px]:pb-[12rem]">
+          <div className="conteneur grid gap-10 md:grid-cols-[1fr_22.2rem] md:gap-16">
+            <div className="animate-fade-up min-w-0">
+              <h1 className="titre-84">
+                Ton garant t&apos;aide. Il ne te doit{' '}
+                <span className="text-sun">ni sa fiche de paie</span>, ni une signature à
+                l&apos;aveugle.
+              </h1>
 
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-              <Link
-                href="/demarrer"
-                className="bouton group inline-flex items-stretch gap-1 [--bouton-h:4.5rem]"
-              >
-                <span aria-hidden className="bouton-fleche bouton-fleche-avant bg-sun text-white">
-                  <Icone nom="fleche" />
-                </span>
-                <span className="bg-paper text-ink rounded-brut flex items-center gap-5 px-5 py-3">
-                  <span aria-hidden className="flex flex-col">
-                    <span className="font-display text-2xl leading-none uppercase">
-                      {site.name}
-                    </span>
-                    <span className="text-muted mt-1 text-xs">{hero.eyebrow}</span>
+              <div className="mt-[3rem] flex flex-wrap items-center gap-x-6 gap-y-4 max-[479px]:mt-8">
+                <Link
+                  href="/demarrer"
+                  className="bouton group inline-flex items-stretch gap-[0.22rem] [--bouton-h:max(44px,4.5rem)]"
+                >
+                  <span aria-hidden className="bouton-fleche bouton-fleche-avant bg-sun text-white">
+                    <Icone nom="fleche" />
                   </span>
-                  <span className="text-sm font-medium uppercase">{hero.primaryCta}</span>
-                </span>
-                <span aria-hidden className="bouton-fleche bouton-fleche-apres bg-sun text-white">
-                  <Icone nom="fleche" />
-                </span>
-              </Link>
-              <Link
-                href="/agences"
-                className="text-sm font-medium underline underline-offset-4 opacity-90 hover:opacity-100"
-              >
-                {hero.secondaryCta}
-              </Link>
+                  <span className="bg-paper text-ink rounded-brut flex items-center gap-[1rem] py-2 pr-[1.31rem] pl-[1.31rem]">
+                    <span aria-hidden className="flex flex-col">
+                      <span className="texte-22 leading-[1.52]">{site.name}</span>
+                      <span className="texte-12 text-ink/70 font-semibold">{hero.eyebrow}</span>
+                    </span>
+                    <span className="texte-14 uppercase">{hero.primaryCta}</span>
+                  </span>
+                  <span aria-hidden className="bouton-fleche bouton-fleche-apres bg-sun text-white">
+                    <Icone nom="fleche" />
+                  </span>
+                </Link>
+                <Link
+                  href="/agences"
+                  className="texte-16 inline-flex min-h-[44px] items-center underline underline-offset-4"
+                >
+                  {hero.secondaryCta}
+                </Link>
+              </div>
             </div>
-          </div>
 
-          <p className="animate-fade-up text-ink md:bg-cream max-w-[22rem] text-base leading-relaxed [animation-delay:0.2s] max-md:text-white md:mt-4 md:self-start md:text-lg">
-            {hero.subtitle}
-          </p>
+            <p className="animate-fade-up text-ink md:bg-cream texte-18 max-w-[22.2rem] leading-[1.4] [animation-delay:0.2s] max-md:text-white md:self-start">
+              {hero.subtitle}
+            </p>
+          </div>
         </div>
 
         {/* La bande orange : un liseré rose, puis l'aplat, puis le nom en filigrane. */}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[clamp(9rem,20vw,18rem)]">
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[20rem] max-[479px]:h-[10rem]">
           <div className="bg-sun absolute inset-0 [clip-path:polygon(0_22%,75%_0,100%_32%,100%_100%,0_100%)]" />
           <div className="bg-flame absolute inset-0 top-[3px] overflow-hidden [clip-path:polygon(0_22%,75%_0,100%_32%,100%_100%,0_100%)]">
             <span
               data-mot={site.name}
-              className="font-display absolute inset-x-0 bottom-[-0.2em] text-center text-[clamp(6rem,22vw,20rem)] leading-none tracking-tight text-white/25 uppercase before:content-[attr(data-mot)]"
+              className="font-display absolute inset-x-0 bottom-[-0.12em] text-center text-[20rem] leading-[1.1] font-semibold tracking-[0.01em] text-white/25 uppercase before:content-[attr(data-mot)] max-[479px]:text-[7rem]"
             />
           </div>
         </div>
       </div>
 
       {/* Bandeau defilant : liste quadruplee, translation de -50 %, boucle continue. */}
-      <div aria-hidden className="bg-cobalt relative overflow-hidden py-3 whitespace-nowrap">
-        <div className="animate-marquee flex w-max text-sm font-medium md:text-base">
+      <div
+        aria-hidden
+        className="bg-cobalt relative flex h-[3.9rem] items-center overflow-hidden whitespace-nowrap"
+      >
+        <div className="animate-marquee texte-16 flex w-max">
           {items.map((item, index) => (
-            <span key={`${item}-${index}`} className="flex items-center gap-8 pr-8">
+            <span key={`${item}-${index}`} className="flex items-center gap-[2rem] pr-[2rem]">
               <span className="border-y-[5px] border-r-[8px] border-y-transparent border-r-white" />
               {item}
             </span>

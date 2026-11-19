@@ -21,7 +21,7 @@ export function MenuMobile() {
         }
       }}
     >
-      <summary className="bg-paper text-ink rounded-brut flex min-h-11 cursor-pointer items-center px-4 text-[13px] font-semibold tracking-[0.02em] uppercase">
+      <summary className="bg-paper text-ink rounded-brut flex min-h-[44px] cursor-pointer items-center px-4 text-[13px] font-semibold tracking-[0.02em] uppercase">
         {navigationMobile.menu}
       </summary>
       <div className="bg-paper rounded-brut-lg shadow-brut-lg absolute top-full right-4 left-4 mt-2 grid max-h-[70dvh] gap-1 overflow-y-auto p-3">

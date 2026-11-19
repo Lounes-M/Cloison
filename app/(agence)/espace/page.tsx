@@ -261,7 +261,7 @@ export default async function PageEspace({
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <a
           href="#nouveau-dossier"
-          className="press outlined bg-cobalt text-paper shadow-brut-xs inline-flex min-h-11 items-center rounded-xl px-5 py-3 text-sm font-bold"
+          className="press outlined bg-cobalt text-paper shadow-brut-xs inline-flex min-h-[44px] items-center rounded-xl px-5 py-3 text-sm font-bold"
         >
           {interfaceEspace.nouveauDossier}
         </a>
@@ -530,7 +530,7 @@ export default async function PageEspace({
                   <li key={ligne.id} className="border-ink/15 bg-paper rounded-xl border p-4">
                     <Link
                       href={`/espace/dossiers/${ligne.id}`}
-                      className="text-cobalt border-ink/10 mb-4 flex min-h-11 items-center border-b pb-3 font-bold break-all underline-offset-4 hover:underline"
+                      className="text-cobalt border-ink/10 mb-4 flex min-h-[44px] items-center border-b pb-3 font-bold break-all underline-offset-4 hover:underline"
                     >
                       {ligne.reference}
                     </Link>
@@ -642,7 +642,7 @@ export default async function PageEspace({
                         <th scope="row" className="px-4 py-3 font-bold">
                           <Link
                             href={`/espace/dossiers/${ligne.id}`}
-                            className="text-cobalt inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+                            className="text-cobalt inline-flex min-h-[44px] items-center underline-offset-4 hover:underline"
                           >
                             {ligne.reference}
                           </Link>

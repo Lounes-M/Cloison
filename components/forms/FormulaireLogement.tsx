@@ -77,7 +77,7 @@ export function FormulaireLogement() {
         type="submit"
         disabled={enCours}
         className={cn(
-          'press outlined bg-cobalt shadow-brut-xs min-h-11 cursor-pointer self-start rounded-[10px] px-5 py-3',
+          'press outlined bg-cobalt shadow-brut-xs min-h-[44px] cursor-pointer self-start rounded-[10px] px-5 py-3',
           'text-[14px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
         )}
       >

@@ -17,27 +17,8 @@ export const heroAgences = {
   ancreFormulaire: 'Demander une démonstration',
 } as const
 
-/**
- * L'aperçu de dossier montré à côté du titre.
- *
- * Il montre ce que la page promet plutôt que de le décrire, et c'est le seul
- * endroit du site où l'on voit à quoi ressemble un dossier reçu. Les valeurs
- * sont fictives et le disent : « Garant M. », un ratio arrondi, un identifiant
- * tronqué.
- */
-export const apercuDossier = {
-  badge: 'exemple fictif',
-  url: 'cloison.immo/d/8f2k',
-  titre: 'Dossier · Garant M.',
-  etat: 'à examiner',
-  filigrane: 'Filigrané',
-  pieces: ['Bulletins de paie ×3', "Avis d'imposition"],
-  ratio: { libelle: 'Ratio', valeur: '3,4×' },
-  acte: { libelle: 'Signature', valeur: 'À venir', action: 'Pilote' },
-} as const
-
 export const douleurs = {
-  eyebrow: 'Ce que ça vous coûte aujourd’hui',
+  titre: ['Ce que ça vous coûte', 'aujourd’hui'],
   items: [
     {
       titre: 'Des pièces qui arrivent de partout',
@@ -144,7 +125,7 @@ export const tarifAgence = {
 
 export const formulaire = {
   eyebrow: 'Pilote',
-  titre: 'Notre objectif : vingt agences pilotes.',
+  titre: ['Notre objectif :', 'vingt agences pilotes.'],
   sousTitre:
     "Trois villes tendues, six mois, un accompagnement direct. En échange, on veut vos retours sans filtre : c'est ce qui construit le produit.",
   metriques: [

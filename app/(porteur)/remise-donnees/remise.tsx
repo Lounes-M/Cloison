@@ -178,7 +178,7 @@ export function Remise() {
             {fichiers.map((f) => (
               <li key={f.nom}>
                 <a
-                  className="inline-flex min-h-11 items-center py-2 underline"
+                  className="inline-flex min-h-[44px] items-center py-2 underline"
                   href={f.url}
                   download={f.nom}
                 >
@@ -202,7 +202,7 @@ export function Remise() {
       <p className="text-sm">{texte.confidentialite}</p>
       <p className="text-sm">{texte.limite}</p>
       <button
-        className="inline-flex min-h-11 items-center py-2 underline"
+        className="inline-flex min-h-[44px] items-center py-2 underline"
         onClick={() => location.replace('/remise-donnees')}
       >
         {texte.effacer}

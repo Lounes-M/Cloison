@@ -16,38 +16,38 @@ export function Tarifs() {
   return (
     <section
       id="tarifs"
-      className="bg-cobalt rounded-carte relative z-10 px-4 py-24 text-white md:px-6 md:py-36"
+      className="bg-cobalt rounded-t-carte gouttiere relative z-10 pt-[11.25rem] pb-[6.2rem] text-white max-[767px]:pt-[4.8rem] max-[767px]:pb-[3rem]"
     >
-      <div className="mx-auto max-w-[1280px]">
+      <div className="conteneur">
         <Reveal>
-          <h2 className="font-display mx-auto max-w-[64rem] text-[clamp(2.5rem,6vw,6.5rem)] leading-[1.05] md:pl-[10%]">
+          <h2 className="titre-84 md:pl-[15.8rem]">
             {pricing.headline[0]}
             <br />
             <span className="text-sun">{pricing.headline[1]}</span>
           </h2>
         </Reveal>
 
-        <ul className="mt-20">
+        <ul className="mt-[2.9rem]">
           {lignes.map((ligne, index) => (
-            <li key={ligne.audience} className="border-t border-white/15 first:border-t-0">
-              <Reveal className="grid items-center gap-6 py-10 md:grid-cols-[1fr_1.2fr_1.3fr] md:gap-12">
-                <h3 className="font-display text-sun text-2xl md:text-3xl">
+            <li key={ligne.audience} className="border-b border-[#4e8478]">
+              <Reveal className="grid gap-6 overflow-hidden pt-[4.85rem] max-[767px]:py-8 md:min-h-[18.6rem] md:grid-cols-[18.45rem_25.5rem_1fr] md:gap-0 md:gap-x-[4.4rem]">
+                <h3 className="texte-28 text-sun md:pt-[1.5rem]">
                   {ligne.audience}
                   {ligne.regle && (
-                    <span className="mt-2 block text-sm font-medium text-white/70">
+                    <span className="texte-14 mt-2 block font-normal text-white">
                       {ligne.regle}
                     </span>
                   )}
                 </h3>
                 <p
                   className={cn(
-                    'font-display flex min-h-44 items-end rounded-3xl px-7 pt-14 pb-7 text-[clamp(1.75rem,3vw,2.75rem)] leading-tight [clip-path:polygon(0_22%,100%_0,100%_100%,0_100%)]',
+                    'texte-42 flex min-h-[11rem] items-end self-end rounded-t-[1.5rem] px-[1.75rem] pt-[3.5rem] pb-[1.5rem] [clip-path:polygon(0_22%,100%_0,100%_100%,0_100%)] max-[767px]:rounded-[1.5rem]',
                     pans[index % pans.length],
                   )}
                 >
                   {ligne.price}
                 </p>
-                <p className="text-base leading-relaxed opacity-90">{ligne.detail}</p>
+                <p className="texte-14 text-sun md:max-w-[32.25rem]">{ligne.detail}</p>
               </Reveal>
             </li>
           ))}

@@ -15,6 +15,7 @@ export const questions = {
   introduction:
     'Les réponses courtes aux questions qu’on nous pose le plus. Le détail fait foi dans les conditions et la politique de confidentialité.',
   sommaire: 'Aller aux questions',
+  liste: ['Ce qu’on nous demande', 'le plus'],
   groupes: [
     {
       id: 'locataire',

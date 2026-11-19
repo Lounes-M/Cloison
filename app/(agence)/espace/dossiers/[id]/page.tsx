@@ -496,7 +496,7 @@ export default async function PageDossier({
                   href={`/espace/pieces/${String(p.id)}`}
                   target="_blank"
                   rel="noopener"
-                  className="press outlined bg-paper shadow-brut-xs inline-flex min-h-11 items-center rounded-[10px] px-4 py-2 text-[13px] font-bold"
+                  className="press outlined bg-paper shadow-brut-xs inline-flex min-h-[44px] items-center rounded-[10px] px-4 py-2 text-[13px] font-bold"
                 >
                   {texte.ouvrir}
                 </a>

@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
 import { FormulaireAgence } from '@/components/forms/FormulaireAgence'
-import { ApercuDossier } from '@/components/sections/ApercuDossier'
 import { Button } from '@/components/ui/Button'
 import { Accent, EnTetePage } from '@/components/ui/EnTetePage'
-import { Icone } from '@/components/ui/Icone'
-import { LiveDot } from '@/components/ui/LiveDot'
+import { Icone, type NomIcone } from '@/components/ui/Icone'
+import { Photo } from '@/components/ui/Photo'
 import { Reveal } from '@/components/ui/Reveal'
-import { Section } from '@/components/ui/Section'
 import {
   cequonapporte,
   commentCaMarche,
@@ -23,17 +21,21 @@ export const metadata: Metadata = {
   alternates: { canonical: '/agences' },
 }
 
-/** Une couleur par apport, dans l'ordre des trois espaces du produit. */
-const TONS_APPORT = {
-  sun: 'bg-sun',
-  mint: 'bg-mint',
-  sky: 'bg-sky',
-} as const
+/** Les photos qui flottent dans la section rose, en rem comme la reference. */
+const photosRoses = [
+  { nom: 'intro-3', classe: 'left-[2rem] top-[6rem] -rotate-3' },
+  { nom: 'intro-6', classe: 'left-[5rem] top-[42rem] rotate-2' },
+  { nom: 'intro-1', classe: 'right-[3rem] top-[12rem] rotate-3' },
+  { nom: 'intro-4', classe: 'right-[2rem] top-[48rem] -rotate-2' },
+] as const
+
+/** Une icone par ligne du tarif. */
+const ICONES_TARIF: NomIcone[] = ['fichier', 'acte', 'coche', 'cadenas']
 
 export default function AgencesPage() {
+  const [lienDebut, ...lienFin] = commentCaMarche.titre[1].split(' ')
   return (
     <main>
-      {/* HERO : rose a rayons, centre, puis l'apercu en grand */}
       <EnTetePage
         surtitre={heroAgences.eyebrow}
         titre={
@@ -42,6 +44,15 @@ export default function AgencesPage() {
           </>
         }
         sousTitre={<p>{heroAgences.sousTitre}</p>}
+        visuel={
+          <Photo
+            src="/accueil/espace-agence.jpg"
+            sizes="(min-width: 768px) 85rem, 100vw"
+            cadrage="object-[70%_40%]"
+            priority
+            className="h-[41rem] rounded-[1.5rem] max-[479px]:h-[16rem]"
+          />
+        }
       >
         <div className="flex justify-center">
           <Button href="#demander" tone="paper">
@@ -50,279 +61,153 @@ export default function AgencesPage() {
         </div>
       </EnTetePage>
 
-      <Section className="bg-cream pb-20">
-        <div className="bg-paper shadow-brut-lg rounded-carte relative z-10 -mt-12 grid place-items-center p-6 md:p-14">
-          <div className="w-full max-w-[560px]">
-            <ApercuDossier />
-          </div>
-        </div>
-      </Section>
-
-      {/* CE QUE ÇA COÛTE AUJOURD'HUI : une liste qui se lit, pas trois cartes */}
-      <Section className="bg-cream py-20">
-        <Reveal>
-          <h2 className="font-display text-flame-texte mb-10 text-[15px] tracking-[0.06em]">
-            {douleurs.eyebrow}
-          </h2>
-        </Reveal>
-        <ul className="flex flex-col gap-6">
-          {douleurs.items.map((item, index) => (
-            <li key={item.titre}>
-              <Reveal delay={index * 0.08}>
-                <article className="border-ink flex flex-wrap items-start gap-x-6 gap-y-3 border-t-2 pt-6">
-                  <span className="font-display text-muted text-2xl tabular-nums">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div className="min-w-0 flex-1 basis-64">
-                    <h3 className="font-display mb-2 text-lg">{item.titre}</h3>
-                    <p className="max-w-[62ch] text-[15px] leading-relaxed font-medium">
-                      {item.texte}
-                    </p>
-                  </div>
-                  {/* Le tampon nomme le coût en trois mots, pour qui parcourt
-                      la page sans lire les paragraphes. */}
-                  <span className="border-flame text-flame-texte shrink-0 -rotate-2 rounded-lg border-2 px-3 py-1.5 text-[11px] font-bold tracking-[0.08em] uppercase">
-                    {item.tampon}
-                  </span>
-                </article>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      {/* UN LIEN : bloc sombre, et la garantie occupe la quatrieme case */}
-      <Section className="bg-cobalt rounded-carte py-24 text-white">
-        <Reveal>
-          <h2 className="font-display mb-12 text-[clamp(2rem,5vw,46px)]">
-            {cequonapporte.titre[0]} <span className="text-sun">{cequonapporte.titre[1]}</span>
-          </h2>
-        </Reveal>
-
-        {/* Les trois apports et la garantie forment une seule grille : la carte
-            rose n'est pas une note ajoutee sous la liste, c'est le quatrieme
-            element, et sa couleur pleine dit qu'il ne se lit pas comme les
-            autres. */}
-        <ul className="grid gap-x-12 gap-y-10 md:grid-cols-2">
-          {cequonapporte.items.map((item, index) => (
-            <li key={item.titre}>
-              <Reveal delay={index * 0.08}>
-                <div className="border-cream border-t-2 pt-5">
-                  <div className="mb-2.5 flex items-center gap-3">
-                    <span
-                      className={cn(
-                        'text-ink grid size-7 shrink-0 place-items-center rounded-full',
-                        TONS_APPORT[item.ton],
-                      )}
-                    >
-                      <Icone nom="coche" className="size-4" />
+      {/* CE QUE ÇA COÛTE AUJOURD'HUI : trois cartes blanches numerotees */}
+      <section className="bg-cream gouttiere pt-[6.9rem] pb-[11.25rem] max-[767px]:py-[3.75rem]">
+        <div className="conteneur">
+          <Reveal>
+            <h2 className="titre-84 text-center">
+              {douleurs.titre[0]} <Accent>{douleurs.titre[1]}</Accent>
+            </h2>
+          </Reveal>
+          <ul className="mt-[5.7rem] grid gap-[1.66rem] max-[767px]:mt-10 md:grid-cols-3">
+            {douleurs.items.map((item, index) => (
+              <li key={item.titre}>
+                <Reveal delay={index * 0.08} className="h-full">
+                  <article className="lift bg-paper flex h-full min-h-[21.5rem] flex-col rounded-[1.5rem] p-[1.5rem]">
+                    <span className="texte-18 tabular-nums">
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                    <h3 className="font-display text-lg">{item.titre}</h3>
-                  </div>
-                  <p className="max-w-[46ch] text-[14.5px] leading-relaxed font-medium opacity-70">
-                    {item.texte}
-                  </p>
-                </div>
-              </Reveal>
-            </li>
-          ))}
-
-          <li>
-            <Reveal delay={0.24} tilt={-1}>
-              <div className="bg-sun text-ink border-ink shadow-brut h-full rounded-[18px] border-2 px-6 py-5">
-                <h3 className="font-display mb-2 text-[17px]">{cequonapporte.garantie.titre}</h3>
-                <p className="text-[14.5px] leading-relaxed font-medium">
-                  {cequonapporte.garantie.texte}
-                </p>
-              </div>
-            </Reveal>
-          </li>
-        </ul>
-      </Section>
-
-      {/* TROIS ÉTAPES : une descente, pas trois colonnes côte à côte */}
-      <Section className="py-20">
-        <Reveal>
-          <h2 className="font-display mb-12 text-center text-[clamp(2rem,5vw,46px)]">
-            {commentCaMarche.titre[0]}{' '}
-            <span className="text-cobalt">{commentCaMarche.titre[1]}</span>
-          </h2>
-        </Reveal>
-
-        <ol className="relative mx-auto max-w-[900px]">
-          {/* Le fil vertical relie les trois pastilles. Masqué quand les étapes
-              s'empilent en une colonne, où il ne relierait plus rien. */}
-          <span
-            aria-hidden
-            data-fil
-            className="absolute top-6 bottom-6 left-1/2 hidden w-[3px] -translate-x-1/2 bg-[repeating-linear-gradient(to_bottom,var(--color-ink)_0_10px,transparent_10px_23px)] md:block"
-          />
-
-          {commentCaMarche.etapes.map((etape, index) => {
-            const aGauche = index % 2 === 0
-            return (
-              <li key={etape.numero} className="relative">
-                <Reveal delay={index * 0.08}>
-                  <div
-                    className={cn(
-                      'flex items-center gap-6 py-5 md:gap-10',
-                      aGauche ? 'md:flex-row' : 'md:flex-row-reverse',
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'flex-1',
-                        aGauche ? 'md:text-right' : 'md:text-left',
-                        'order-2 md:order-none',
-                      )}
-                    >
-                      <h3 className="font-display mb-2 text-[19px] leading-tight">{etape.titre}</h3>
-                      <p className="text-[15px] leading-relaxed font-medium">{etape.texte}</p>
-                      <p
-                        className={cn(
-                          'mt-3 flex items-center gap-2 text-[12.5px] font-bold',
-                          aGauche ? 'md:justify-end' : 'md:justify-start',
-                        )}
-                      >
-                        <LiveDot className="border-ink border-2" />
-                        {etape.puce}
-                      </p>
-                    </div>
-
-                    <span className="bg-paper border-ink shadow-brut-xs font-display z-10 order-1 grid size-11 shrink-0 place-items-center rounded-full border-2 text-lg md:order-none">
-                      {etape.numero}
-                    </span>
-
-                    {/* Colonne vide en vis-à-vis : elle tient l'alternance
-                        gauche/droite sans dupliquer le contenu. */}
-                    <div aria-hidden className="hidden flex-1 md:block" />
-                  </div>
+                    <h3 className="texte-28 mt-[1rem]">{item.titre}</h3>
+                    <p className="mt-auto pt-6">{item.texte}</p>
+                  </article>
                 </Reveal>
               </li>
-            )
-          })}
-        </ol>
-      </Section>
-
-      {/* TARIF : un ticket de caisse, parce que la dernière ligne est un zéro */}
-      <Section className="bg-cream py-20">
-        <div className="mx-auto grid max-w-[1000px] items-center gap-14 md:grid-cols-[1fr_400px]">
-          <Reveal>
-            <h2 className="font-display text-[clamp(2rem,5vw,48px)] leading-[1.05]">
-              {tarifAgence.titre[0]}
-              <br />
-              {tarifAgence.titre[1]}{' '}
-              <span className="text-flame-texte">{tarifAgence.titre[2]}</span>
-            </h2>
-            <div className="bg-sun border-ink shadow-brut-sm mt-7 max-w-[420px] -rotate-1 rounded-2xl border-2 px-6 py-5">
-              <p className="text-[14.5px] leading-relaxed font-bold">{tarifAgence.regleOr}</p>
-            </div>
-          </Reveal>
-
-          <Reveal className="relative" tilt={1}>
-            <span className="bg-flame border-ink font-display text-ink absolute -top-4 right-5.5 z-10 rotate-4 rounded-full border-2 px-3.5 py-1.5 text-[11px]">
-              {tarifAgence.tampon}
-            </span>
-            <div className="bg-cream border-ink shadow-brut rounded-t-md rounded-b-[18px] border-[2.5px] p-7">
-              <div className="border-ink mb-4 border-b-2 border-dashed pb-4 text-center">
-                <span className="font-display inline-flex items-center text-base">
-                  CLOI
-                  <span
-                    aria-hidden
-                    className="bg-flame mx-0.5 inline-block h-[17px] w-[5px] rotate-6 rounded-[3px]"
-                  />
-                  SON
-                </span>
-                <p className="text-muted mt-1 text-[11px] font-semibold">{tarifAgence.entete}</p>
-              </div>
-
-              <dl>
-                {tarifAgence.lignes.map((ligne) => (
-                  <div
-                    key={ligne.libelle}
-                    className="flex items-baseline justify-between py-2.5 text-[14.5px] font-semibold"
-                  >
-                    <dt>{ligne.libelle}</dt>
-                    {/* Les pointillés conduisent l'oeil du libellé au montant,
-                        comme sur un vrai ticket. */}
-                    <span
-                      aria-hidden
-                      className="border-ink mx-2.5 flex-1 border-b-2 border-dotted"
-                    />
-                    <dd
-                      className={cn(
-                        'font-display text-base',
-                        'ton' in ligne && ligne.ton === 'vert' && 'text-cobalt',
-                      )}
-                    >
-                      {ligne.valeur}
-                    </dd>
-                  </div>
-                ))}
-
-                <div className="border-ink mt-3 flex items-baseline justify-between border-t-2 border-dashed pt-3.5 text-[14.5px] font-bold">
-                  <dt>{tarifAgence.total.libelle}</dt>
-                  <span aria-hidden className="border-ink mx-2.5 flex-1 border-b-2 border-dotted" />
-                  <dd className="bg-ink text-sun font-display rounded-md px-2.5 py-0.5 text-base">
-                    {tarifAgence.total.valeur}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </Reveal>
+            ))}
+          </ul>
         </div>
-      </Section>
+      </section>
 
-      {/* PILOTE : le bandeau qui amène au formulaire */}
-      <Section
-        contained={false}
-        className="bg-cobalt rounded-carte relative overflow-hidden py-24 text-white"
-      >
-        <Icone
-          nom="asterisque"
-          className="animate-spin-slow absolute -top-8 -right-5 size-32 text-white/15"
-        />
-        <div className="relative mx-auto max-w-[1000px] px-6 md:px-10">
+      {/* TROIS ÉTAPES : des lignes, comme un programme */}
+      <section className="bg-cream gouttiere pb-[11.25rem] max-[767px]:pb-[3.75rem]">
+        <div className="conteneur">
           <Reveal>
-            <p className="bg-sun text-ink border-ink font-display inline-block -rotate-2 rounded-full border-2 px-4.5 py-1.5 text-xs">
-              {formulaire.eyebrow}
+            <h2 className="titre-84">
+              {commentCaMarche.titre[0]} <Accent>{lienDebut}</Accent> {lienFin.join(' ')}
+            </h2>
+          </Reveal>
+          <ol className="mt-[4rem] max-[767px]:mt-8">
+            {commentCaMarche.etapes.map((etape, index) => (
+              <li key={etape.numero} className="border-b border-[#d6dfdd]">
+                <Reveal
+                  delay={index * 0.08}
+                  className="grid gap-4 py-[2.5rem] md:grid-cols-[31rem_14rem_1fr] md:gap-[2rem]"
+                >
+                  <h3 className="texte-42 text-cobalt">{etape.titre}</h3>
+                  <p className="texte-16 md:pt-[0.6rem]">{etape.puce}</p>
+                  <p className="md:pt-[0.3rem]">{etape.texte}</p>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* UN LIEN : section rose, titre au centre et photos qui flottent */}
+      <section className="bg-sun rounded-b-carte relative overflow-clip">
+        <div className="relative mx-auto max-w-[95rem] md:min-h-[72rem]">
+          {photosRoses.map((photo) => (
+            <Photo
+              key={photo.nom}
+              src={`/accueil/${photo.nom}.jpg`}
+              sizes="(min-width: 1024px) 17vw, 1px"
+              className={cn(
+                'absolute hidden h-[16.25rem] w-[16.4rem] rounded-[1.5rem] lg:block',
+                photo.classe,
+              )}
+            />
+          ))}
+          <div className="gouttiere relative py-[3.75rem] text-center md:pt-[9.3rem] md:pb-[9.3rem]">
+            <Reveal>
+              <h2 className="titre-84 text-cobalt mx-auto max-w-[58rem]">
+                {cequonapporte.titre[0]} {cequonapporte.titre[1]}
+              </h2>
+            </Reveal>
+            <ul className="mx-auto mt-[3rem] grid max-w-[42rem] gap-[2.5rem]">
+              {[...cequonapporte.items, cequonapporte.garantie].map((item, index) => (
+                <li key={item.titre}>
+                  <Reveal delay={index * 0.06}>
+                    <h3 className="texte-32">{item.titre}</h3>
+                    <p className="mt-[0.75rem]">{item.texte}</p>
+                  </Reveal>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* CE QUE ÇA VOUS COÛTE : titre centre, regle d'or, quatre cartes */}
+      <section className="bg-cream gouttiere section-espace">
+        <div className="conteneur">
+          <Reveal className="mx-auto max-w-[56rem] text-center">
+            <h2 className="titre-84">
+              {tarifAgence.titre[0]} {tarifAgence.titre[1]} <Accent>{tarifAgence.titre[2]}</Accent>
+            </h2>
+            <p className="mt-[1.5rem]">{tarifAgence.regleOr}</p>
+          </Reveal>
+          <ul className="mt-[4rem] grid gap-[1.66rem] md:grid-cols-2">
+            {[...tarifAgence.lignes, tarifAgence.total].map((ligne, index) => (
+              <li key={ligne.libelle}>
+                <Reveal delay={index * 0.06} className="h-full">
+                  <article className="bg-paper h-full rounded-[1.5rem] p-[2rem]">
+                    <Icone
+                      nom={ICONES_TARIF[index % ICONES_TARIF.length]!}
+                      className="size-[2rem]"
+                    />
+                    <p className="texte-28 text-cobalt mt-[1.5rem]">{ligne.valeur}</p>
+                    <h3 className="mt-[0.75rem]">{ligne.libelle}</h3>
+                  </article>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* LE PILOTE ET LE FORMULAIRE : section verte, comme l'inscription */}
+      <section
+        id="demander"
+        className="bg-cobalt rounded-t-carte gouttiere relative z-10 pt-[11.25rem] pb-[6.2rem] text-white max-[767px]:pt-[4.8rem] max-[767px]:pb-[3rem]"
+      >
+        <div className="conteneur">
+          <Reveal>
+            <h2 className="titre-84 md:pl-[15.8rem]">
+              {formulaire.titre[0]}
+              <br />
+              <span className="text-sun">{formulaire.titre[1]}</span>
+            </h2>
+            <p className="mt-[1.5rem] max-w-[42rem] md:max-w-[58rem] md:pl-[15.8rem]">
+              {formulaire.sousTitre}
             </p>
           </Reveal>
-          <Reveal delay={0.08}>
-            <div className="mt-5 grid items-end gap-10 md:grid-cols-[1fr_auto]">
-              <div>
-                <h2 className="font-display text-[clamp(1.75rem,4.5vw,42px)] leading-tight">
-                  {formulaire.titre}
-                </h2>
-                <p className="mt-4 max-w-[560px] text-base leading-relaxed font-medium opacity-95">
-                  {formulaire.sousTitre}
-                </p>
+          <dl className="mt-[2.9rem] grid border-t border-[#4e8478] sm:grid-cols-3">
+            {formulaire.metriques.map((metrique) => (
+              <div
+                key={metrique.libelle}
+                className="flex items-baseline gap-[1rem] border-b border-[#4e8478] py-[2rem] sm:flex-col sm:gap-[0.5rem]"
+              >
+                <dt className="texte-18">{metrique.libelle}</dt>
+                <dd className="text-sun order-first text-[6.25rem] leading-none font-semibold max-[479px]:text-[3.5rem]">
+                  {metrique.valeur}
+                </dd>
               </div>
-              <dl className="flex gap-3">
-                {formulaire.metriques.map((metrique) => (
-                  <div
-                    key={metrique.libelle}
-                    className="rounded-xl border-[1.5px] border-white/40 bg-white/12 px-4.5 py-3.5 text-center"
-                  >
-                    <dt className="sr-only">{metrique.libelle}</dt>
-                    <dd>
-                      <span className="font-display block text-[26px]">{metrique.valeur}</span>
-                      <span className="text-[11.5px] font-semibold">{metrique.libelle}</span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </Reveal>
+            ))}
+          </dl>
+          <div className="bg-paper text-ink mx-auto mt-[5rem] max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
+            <FormulaireAgence />
+          </div>
         </div>
-      </Section>
-
-      {/* LE FORMULAIRE, inchangé */}
-      <Section id="demander" className="scroll-mt-28 py-20">
-        <div className="bg-paper outlined shadow-brut-lg mx-auto max-w-[860px] rounded-[24px] p-5 sm:p-8 md:p-12">
-          <FormulaireAgence />
-        </div>
-      </Section>
+      </section>
     </main>
   )
 }

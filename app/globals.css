@@ -41,10 +41,10 @@
   --shadow-brut-raised: 0 14px 34px rgb(30 30 30 / 0.12);
 
   /* Rayons */
-  --radius-brut: 10px;
+  --radius-brut: 0.625rem;
   --radius-brut-lg: 16px;
   --radius-brut-xl: 24px;
-  --radius-carte: 40px; /* grandes sections arrondies */
+  --radius-carte: 2rem; /* grandes sections arrondies */
 
   /* Animations */
   --animate-marquee: marquee 30s linear infinite;
@@ -283,9 +283,8 @@
     align-items: center;
     gap: 1.5rem;
     padding: clamp(1.5rem, 5vw, 3.5rem);
-    border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
-    border-top: 4px solid var(--color-cobalt);
-    border-radius: var(--radius-brut-xl);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+    border-radius: 1.5rem;
     background: var(--color-paper);
     text-align: center;
   }
@@ -370,8 +369,8 @@
   .panneau-espace {
     min-width: 0;
     padding: clamp(1.15rem, 3vw, 2rem);
-    border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
-    border-radius: var(--radius-brut-lg);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+    border-radius: 1.5rem;
     background: var(--color-paper);
   }
 
@@ -388,12 +387,12 @@
     gap: 0.5rem;
     min-height: 44px;
     padding: 0.6rem 1rem;
-    border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
-    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+    border-radius: 0.625rem;
     background: var(--color-paper);
     color: var(--color-ink);
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
     transition:
       translate 0.15s ease,
@@ -401,8 +400,6 @@
   }
 
   .lien-espace:hover:not(:disabled) {
-    translate: 2px 2px;
-    box-shadow: var(--shadow-brut-pressed);
     background: var(--color-sun);
   }
 
@@ -434,7 +431,7 @@
     min-height: 44px;
     align-items: center;
     padding: 0.5rem 0.85rem;
-    border-radius: 10px;
+    border-radius: 0.625rem;
     background: var(--color-paper);
     border: 1px solid color-mix(in srgb, var(--color-ink) 20%, transparent);
     font-size: 0.875rem;
@@ -589,7 +586,7 @@
   input:not([type='hidden']):not([type='checkbox']):not([type='radio']),
   select,
   textarea {
-    font-size: 1rem;
+    font-size: max(16px, 1rem);
     scroll-margin-top: 11rem;
   }
 
@@ -616,8 +613,8 @@
 }
 
 .bouton-fleche svg {
-  width: 1.1em;
-  height: 1.1em;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .bouton-fleche-avant {
@@ -650,9 +647,16 @@
 /*  En-tete du site public (voir layout/SiteHeader.tsx)                 */
 /* ------------------------------------------------------------------ */
 :root {
-  --entete-barre: 2.5rem;
-  --entete-nav: 4.75rem;
+  --entete-barre: 2.8rem;
+  --entete-nav: 5.25rem;
   --entete-total: calc(var(--entete-barre) + var(--entete-nav));
+}
+
+@media (max-width: 479px) {
+  :root {
+    --entete-barre: 2.4rem;
+    --entete-nav: 4.15rem;
+  }
 }
 
 .entete-fond {
@@ -697,10 +701,12 @@
   border-color: color-mix(in srgb, var(--color-ink) 14%, transparent);
 }
 
-/* Une scene unique rend visible la separation des espaces, sans triptyque de cartes. */
+/* Une scene unique rend visible la separation des espaces : a gauche les
+   trois roles en lignes, comme un programme ; a droite la carte blanche de
+   l'espace choisi. */
 .vues-produit {
   display: grid;
-  gap: 2rem;
+  gap: 2.5rem;
   align-items: start;
 }
 .vues-produit-choix {
@@ -709,16 +715,16 @@
 .vues-produit-choix label {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  min-height: 68px;
-  padding: 1rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
+  gap: 1.5rem;
+  min-height: max(44px, 6.5rem);
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #d6dfdd;
   cursor: pointer;
-  color: var(--color-muted);
+  color: color-mix(in srgb, var(--color-ink) 75%, transparent);
   transition: color 0.2s;
 }
 .vue-produit-numero {
-  font: 1rem var(--font-display);
+  font: 600 1rem/1 var(--font-display);
 }
 .vue-produit-fleche {
   margin-left: auto;
@@ -748,49 +754,47 @@
   display: block;
 }
 .vue-produit-fenetre {
-  --vue-accent: var(--color-mint);
-  background: var(--color-ink);
-  border: 1px solid var(--color-ink);
-  border-radius: 24px;
+  --vue-fond: var(--color-sun);
+  --vue-texte: var(--color-cobalt);
+  border-radius: 2rem;
   overflow: hidden;
-  padding: 0 10px 10px;
+  background: var(--vue-fond);
+  color: var(--vue-texte);
 }
 [data-vue-produit='garant'] .vue-produit-fenetre {
-  --vue-accent: var(--color-sun);
+  --vue-fond: var(--color-cobalt);
+  --vue-texte: var(--color-paper);
 }
 [data-vue-produit='agence'] .vue-produit-fenetre {
-  --vue-accent: var(--color-sky);
+  --vue-fond: var(--color-ink);
+  --vue-texte: var(--color-paper);
 }
 .vue-produit-barre {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.6rem;
-  padding: 18px 14px;
-  color: var(--color-paper);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.vue-produit-barre > :last-child {
-  color: var(--vue-accent);
+  padding: 2.5rem 2.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
 }
 .vue-produit-ecran {
-  padding: 24px 18px;
-  border-radius: 16px;
-  background: var(--color-cream);
+  margin: 1.5rem 2.5rem 2.5rem;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 .vue-produit-repere {
   display: inline-block;
-  padding: 6px 10px;
-  border-radius: 30px;
-  background: var(--vue-accent);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: var(--color-sun);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 .vue-produit-donnees {
-  margin-top: 26px;
+  margin-top: 1.75rem;
 }
 .vue-produit-donnees > div {
   display: flex;
@@ -798,9 +802,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem 1rem;
-  padding: 16px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
-  font-size: 0.85rem;
+  padding: 1rem 0;
+  border-top: 1px solid #d6dfdd;
 }
 .vue-produit-donnees dt {
   display: flex;
@@ -809,39 +812,201 @@
   font-weight: 600;
 }
 .vue-produit-donnees dd {
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--color-cobalt);
 }
 .vue-produit-frontiere {
   display: flex;
   align-items: flex-start;
   gap: 0.7rem;
-  margin-top: 24px;
-  color: var(--color-muted);
-  font-size: 0.8rem;
-  line-height: 1.6;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
 }
 .vue-produit-frontiere svg {
   margin-top: 0.2em;
 }
 .vue-produit-description {
-  margin-top: 20px;
-  max-width: 600px;
-  font-size: 0.95rem;
-  line-height: 1.7;
+  margin-top: 1.5rem;
+  max-width: 42rem;
 }
 @media (min-width: 768px) {
   .vues-produit {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr);
-    gap: 4rem;
+    gap: 5rem;
   }
-  .vues-produit-choix label {
-    min-height: 110px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Site public : echelle fluide                                        */
+/* ------------------------------------------------------------------ */
+/* Tout le site public est dessine sur une page de 1440 px a 15 px de base,
+   et sur un ecran de 375 px a 16 px de base sur telephone. La taille de base
+   suit la largeur de la fenetre : chaque `rem` grandit et retrecit avec elle,
+   textes, marges et rayons compris. Un plancher de 10 px garde le texte
+   lisible sur tablette, ou la regle pure le ferait tomber a 7 px.
+   Les espaces connectes ne sont pas concernes : ils gardent 16 px. */
+html:has(.site-public) {
+  font-size: max(10px, calc(15 * (100vw / 1440)));
+}
+
+@media (max-width: 479px) {
+  html:has(.site-public) {
+    font-size: calc(16 * (100vw / 375));
   }
-  .vue-produit-ecran {
-    padding: 32px;
-    min-height: 390px;
+}
+
+.site-public {
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 479px) {
+  .site-public {
+    font-size: 1rem;
+    line-height: 1.4;
   }
-  .vue-produit-description {
-    min-height: 5rem;
+}
+
+/* Gouttieres et largeur du contenu. */
+@utility gouttiere {
+  padding-inline: 2.375rem;
+  @media (max-width: 479px) {
+    padding-inline: 1rem;
   }
+}
+
+@utility conteneur {
+  width: 100%;
+  max-width: 85rem;
+  margin-inline: auto;
+}
+
+/* Respiration verticale d'une section. */
+@utility section-espace {
+  padding-block: 11.25rem;
+  @media (max-width: 767px) {
+    padding-block: 3.75rem;
+  }
+}
+
+/* Echelle typographique. Le nombre est la taille de reference a 1440 px
+   de large, avant mise a l'echelle. */
+@utility titre-84 {
+  font-family: var(--font-display);
+  font-size: 5.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  @media (max-width: 479px) {
+    font-size: 2rem;
+    letter-spacing: -0.026em;
+  }
+}
+
+@utility texte-128 {
+  font-family: var(--font-display);
+  font-size: 8rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  @media (max-width: 479px) {
+    font-size: 3rem;
+  }
+}
+
+@utility texte-60 {
+  font-family: var(--font-display);
+  font-size: 3.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  @media (max-width: 479px) {
+    font-size: 1.5rem;
+  }
+}
+
+@utility texte-42 {
+  font-family: var(--font-display);
+  font-size: 2.625rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  @media (max-width: 479px) {
+    font-size: 1.625rem;
+    letter-spacing: 0.032em;
+  }
+}
+
+@utility texte-32 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  @media (max-width: 479px) {
+    font-size: 1.375rem;
+    letter-spacing: -0.029em;
+  }
+}
+
+@utility texte-28 {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  @media (max-width: 479px) {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.024em;
+  }
+}
+
+@utility texte-24 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@utility texte-22 {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.52;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+@utility texte-18 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  @media (max-width: 479px) {
+    font-size: 1rem;
+  }
+}
+
+@utility texte-16 {
+  font-size: 1rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+@utility texte-14 {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+@utility texte-12 {
+  font-size: 0.75rem;
+  line-height: 1.52;
+  letter-spacing: -0.02em;
+}
+
+/* Les commandes du site public gardent 44 px au moins, quelle que soit la
+   largeur, et les champs 16 px de texte sur telephone : en dessous, iOS
+   zoome a la saisie. */
+.site-public :is(input, select, textarea) {
+  font-size: max(16px, 1rem);
 }

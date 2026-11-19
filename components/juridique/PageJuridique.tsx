@@ -1,5 +1,4 @@
 import { EnTetePage } from '@/components/ui/EnTetePage'
-import { Section } from '@/components/ui/Section'
 import { juridique } from '@/lib/content/juridique'
 
 /**
@@ -20,15 +19,20 @@ export function PageJuridique({
 }) {
   return (
     <main {...(incomplet ? { 'data-editeur-incomplet': '' } : {})}>
-      <EnTetePage titre={titre} sousTitre={<p className="text-sm">{juridique.miseAJour}</p>} />
-      <Section className="bg-cream py-16 md:py-24" innerClassName="max-w-[760px]">
-        {incomplet ? (
-          <p role="note" className="bg-sun rounded-brut-lg mb-10 px-5 py-4 text-sm font-semibold">
-            {juridique.avertissementIncomplet}
-          </p>
-        ) : null}
-        <div className="space-y-12 text-base leading-relaxed">{children}</div>
-      </Section>
+      <EnTetePage titre={titre} sousTitre={<p>{juridique.miseAJour}</p>} />
+      <section className="bg-cream gouttiere pt-[6.8rem] pb-[11.25rem] max-[767px]:py-[3.75rem]">
+        <div className="bg-paper mx-auto max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
+          {incomplet ? (
+            <p
+              role="note"
+              className="bg-sun texte-16 mb-[2.5rem] rounded-[1rem] px-5 py-4 font-semibold"
+            >
+              {juridique.avertissementIncomplet}
+            </p>
+          ) : null}
+          <div className="space-y-[2.5rem]">{children}</div>
+        </div>
+      </section>
     </main>
   )
 }
@@ -44,8 +48,8 @@ export function SectionJuridique({
 }) {
   return (
     <section>
-      <h2 className="font-display text-cobalt text-2xl md:text-3xl">{titre}</h2>
-      <div className="mt-3 space-y-3">
+      <h2 className="texte-28 text-cobalt">{titre}</h2>
+      <div className="mt-[0.75rem] space-y-[0.75rem]">
         {paragraphes?.map((p) => (
           <p key={p}>{p}</p>
         ))}
