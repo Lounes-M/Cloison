@@ -29,30 +29,32 @@ export default function Error({
   }, [error])
 
   return (
-    <>
+    <div className="site-public">
       <SiteHeader />
-      <main className="ecran-reprise">
-        <div className="carte-reprise">
-          <span aria-hidden="true" className="repere-reprise">
-            !
-          </span>
-          <h1>{erreurs.titreChargement}</h1>
-          <p className="description-reprise">{erreurs.chargement}</p>
-          <div className="actions-reprise">
-            <Button onClick={() => window.location.reload()}>{erreurs.reessayer}</Button>
-            <Button href="/" tone="paper">
-              {erreurs.accueil}
-            </Button>
+      <div className="sous-entete-fixe">
+        <main className="ecran-reprise">
+          <div className="carte-reprise">
+            <span aria-hidden="true" className="repere-reprise">
+              !
+            </span>
+            <h1>{erreurs.titreChargement}</h1>
+            <p className="description-reprise">{erreurs.chargement}</p>
+            <div className="actions-reprise">
+              <Button onClick={() => window.location.reload()}>{erreurs.reessayer}</Button>
+              <Button href="/" tone="paper">
+                {erreurs.accueil}
+              </Button>
+            </div>
+            <NavigationReprise />
+            {error.digest ? (
+              <p className="reference-reprise">
+                {erreurs.reference} : <code>{error.digest}</code>
+              </p>
+            ) : null}
           </div>
-          <NavigationReprise />
-          {error.digest ? (
-            <p className="reference-reprise">
-              {erreurs.reference} : <code>{error.digest}</code>
-            </p>
-          ) : null}
-        </div>
-      </main>
+        </main>
+      </div>
       <SiteFooter />
-    </>
+    </div>
   )
 }

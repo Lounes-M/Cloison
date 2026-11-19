@@ -43,7 +43,15 @@ export function Logo({ variant = 'default', asLink = true, className }: LogoProp
   }
 
   return (
-    <Link href="/" className={classes} aria-label="Cloison, accueil">
+    <Link
+      href="/"
+      // La zone de toucher deborde du mot pour atteindre 44 px de haut.
+      className={cn(
+        classes,
+        "relative after:absolute after:-inset-x-2 after:-inset-y-[10px] after:content-['']",
+      )}
+      aria-label="Cloison, accueil"
+    >
       {content}
     </Link>
   )

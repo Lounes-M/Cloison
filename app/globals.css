@@ -1046,6 +1046,20 @@ html:has(.site-public) {
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  @media (max-width: 479px) {
+    font-size: 1.125rem;
+  }
+}
+
+/* Les grands chiffres des compteurs. */
+@utility chiffre-100 {
+  font-family: var(--font-display);
+  font-size: 6.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  @media (max-width: 479px) {
+    font-size: 4rem;
+  }
 }
 
 @utility texte-22 {
@@ -1089,14 +1103,55 @@ html:has(.site-public) {
   font-size: max(16px, 1rem);
 }
 
+/* Les formulaires viennent des espaces connectes, ou leurs tailles sont en
+   pixels. Sur un grand ecran, le reste de la page grandit avec la fenetre :
+   ils suivent la meme echelle, pour ne pas rester petits dans leur carte.
+   En dessous de 1440 px ils gardent leurs tailles, deja lisibles. */
+@media (min-width: 1441px) {
+  .site-public :is(form, .espace-shell) [class~='text-[12.5px]'] {
+    font-size: 0.8333rem;
+  }
+  .site-public :is(form, .espace-shell) [class~='text-[13px]'] {
+    font-size: 0.8667rem;
+  }
+  .site-public :is(form, .espace-shell) [class~='text-[13.5px]'] {
+    font-size: 0.9rem;
+  }
+  .site-public :is(form, .espace-shell) [class~='text-[14px]'] {
+    font-size: 0.9333rem;
+  }
+  .site-public :is(form, .espace-shell) [class~='text-[15px]'] {
+    font-size: 1rem;
+  }
+  .site-public :is(form, .espace-shell) [class~='text-[17px]'] {
+    font-size: 1.1333rem;
+  }
+}
+
+/* La page introuvable reprend l'echelle du site public. */
+.site-public .carte-reprise h1 {
+  font-size: 2.625rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 479px) {
+  .site-public .carte-reprise h1 {
+    font-size: 1.625rem;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Site public : mouvement                                             */
 /* ------------------------------------------------------------------ */
 /* Entree de la premiere section de l'accueil : le pan creme glisse depuis la
    droite, la bande orange monte, le nom en filigrane la suit. */
 @keyframes entree-pan {
+  /* Trois rem au plus : le pan reste sous le sous-titre pendant toute
+     l'entree, et le texte n'apparait qu'une fois le pan en place. */
   from {
-    transform: translateX(12%);
+    transform: translateX(3rem);
     opacity: 0;
   }
 }
@@ -1112,7 +1167,7 @@ html:has(.site-public) {
   }
 }
 .entree-pan {
-  animation: entree-pan 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: entree-pan 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .entree-hero {
   animation: entree-bande 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;

@@ -82,9 +82,7 @@ export function Pourquoi() {
                       carte.classe,
                     )}
                   >
-                    <h3 className={cn('texte-24 max-[479px]:text-[1.125rem]', carte.titre)}>
-                      {useCase.label}
-                    </h3>
+                    <h3 className={cn('texte-24', carte.titre)}>{useCase.label}</h3>
                     <Icone
                       nom={carte.icone}
                       className="my-auto size-[4.5rem] self-center max-[479px]:size-[3rem]"

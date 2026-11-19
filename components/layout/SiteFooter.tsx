@@ -17,9 +17,7 @@ export function SiteFooter() {
         <div className="conteneur grid gap-3 md:grid-cols-[7.45rem_1fr]">
           <p className="texte-16 text-ink/75 font-semibold">{pilote.statut}</p>
           <div className="max-w-[44rem]">
-            <p className="texte-24 max-[479px]:text-[1.125rem] max-[479px]:leading-[1.4]">
-              {pilote.avantOuverture}
-            </p>
+            <p className="texte-24 max-[479px]:leading-[1.4]">{pilote.avantOuverture}</p>
             <p className="texte-14 mt-3">{pilote.signature}</p>
           </div>
         </div>
@@ -43,8 +41,8 @@ export function SiteFooter() {
       </div>
 
       <div className="bg-cobalt text-white">
-        <div className="gouttiere flex min-h-[4.76rem] flex-col gap-4 py-3 text-[0.95rem] max-[1023px]:py-8 lg:flex-row lg:items-center lg:justify-between">
-          <p className="flex items-center gap-3">
+        <div className="gouttiere texte-14 flex min-h-[4.76rem] flex-col gap-4 py-3 max-[1023px]:py-8 max-[479px]:text-[1rem] lg:flex-row lg:items-center lg:justify-between">
+          <p className="flex items-center gap-3 whitespace-nowrap">
             <Logo variant="white" className="text-[1.15rem]" />
             <span>{site.tagline}</span>
           </p>
@@ -62,7 +60,7 @@ export function SiteFooter() {
               </a>
             ))}
           </nav>
-          <p>
+          <p className="whitespace-nowrap">
             © {new Date().getFullYear()} {site.name}
           </p>
         </div>

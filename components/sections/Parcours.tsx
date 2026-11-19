@@ -27,12 +27,14 @@ export function Parcours() {
         <Reveal delay={0.1}>
           <dl
             aria-label={goToMarket.eyebrow}
-            className="mt-[3.6rem] grid gap-[1.75rem] sm:grid-cols-3"
+            className="mt-[3.6rem] grid grid-cols-3 gap-[1.75rem] max-[479px]:mt-[2.5rem] max-[479px]:gap-[1rem]"
           >
             {goToMarket.metrics.map((metric) => (
-              <div key={metric.label} className="flex flex-col-reverse">
-                <dt className="texte-18 pt-[1.2rem]">{metric.label}</dt>
-                <dd className="text-cobalt font-display border-b border-[#d6dfdd] pb-[1.1rem] text-[6.25rem] leading-[1.1] font-semibold max-[479px]:text-[4rem]">
+              <div key={metric.label} className="flex flex-col-reverse justify-end">
+                <dt className="texte-18 pt-[1.2rem] max-[479px]:pt-[0.75rem] max-[479px]:text-[0.875rem]">
+                  {metric.label}
+                </dt>
+                <dd className="chiffre-100 text-cobalt border-b border-[#d6dfdd] pb-[1.1rem]">
                   <Compteur valeur={metric.value} />
                 </dd>
               </div>

@@ -106,12 +106,14 @@ export default async function PageCandidater({ params }: { params: Promise<{ cod
         <div className="gouttiere pt-[calc(var(--entete-total)+4.5rem)] pb-[6rem] max-[767px]:pt-[calc(var(--entete-total)+1.25rem)] max-[767px]:pb-[2.5rem]">
           <div className="conteneur flex flex-col gap-[1.5rem] md:grid md:grid-cols-[1fr_32rem] md:items-start md:gap-[4rem]">
             <div>
-              <p className="texte-16 flex items-center gap-[0.6rem] font-semibold">
+              <p className="texte-14 flex items-center gap-[0.6rem] font-semibold uppercase">
                 <span aria-hidden className="bg-flame size-[0.6rem] rounded-full" />
                 {t.page.etiquette}
               </p>
               <h1 className="titre-84 mt-[1rem]">{t.page.titre}</h1>
-              <p className="texte-24 mt-[1.5rem]">{t.page.intro(logement.agence)}</p>
+              <p className="texte-24 mt-[1.5rem] max-[479px]:leading-[1.4]">
+                {t.page.intro(logement.agence)}
+              </p>
               <div className="mt-[2.5rem] border-t border-[#4e8478]">
                 <p className="texte-42 text-sun py-[1.5rem]">{logement.libelle}</p>
                 <dl className="grid border-t border-[#4e8478] sm:grid-cols-2">
