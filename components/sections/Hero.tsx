@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Icone } from '@/components/ui/Icone'
-import { VisuelProvisoire } from '@/components/ui/VisuelProvisoire'
+import { VideoFond } from '@/components/ui/VideoFond'
 import { hero, marqueeItems } from '@/lib/content/home'
 import { site } from '@/lib/site'
 
@@ -19,10 +19,10 @@ export function Hero() {
       data-premiere-section="sombre"
       className="passe-sous-entete bg-night relative overflow-hidden text-white"
     >
-      <VisuelProvisoire
-        nom="accueil-hero-video"
-        fond="nuit"
-        className="absolute inset-0 opacity-90"
+      <VideoFond
+        sources={{ large: '/accueil/hero-1920.mp4', reduite: '/accueil/hero-960.mp4' }}
+        poster="/accueil/hero-poster.jpg"
+        className="absolute inset-0 size-full opacity-45"
       />
 
       <div className="relative">

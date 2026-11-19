@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/Button'
-import { VisuelProvisoire } from '@/components/ui/VisuelProvisoire'
+import { Photo } from '@/components/ui/Photo'
 import { espacesAccueil, spaces } from '@/lib/content/home'
 import { cn } from '@/lib/utils'
 
@@ -11,19 +11,23 @@ const habillages = [
   {
     carte: 'bg-sun text-ink',
     titre: 'text-cobalt',
-    fond: 'nuit',
   },
   {
     carte: 'bg-cobalt text-white',
     titre: 'text-sun',
-    fond: 'orange',
   },
   {
     carte: 'bg-ink text-white',
     titre: 'text-white',
-    fond: 'vert',
   },
 ] as const
+
+/** Ou tombe le sujet de chaque photo, la carte coupant a gauche et en haut. */
+const cadrages: Record<(typeof spaces)[number]['id'], string> = {
+  locataire: 'object-[45%_50%]',
+  garant: 'object-[55%_50%]',
+  agence: 'object-[80%_50%]',
+}
 
 export function Espaces() {
   return (
@@ -69,9 +73,10 @@ export function Espaces() {
                     </Button>
                   </div>
                 </div>
-                <VisuelProvisoire
-                  nom={`espace-${space.id}`}
-                  fond={habillage.fond}
+                <Photo
+                  src={`/accueil/espace-${space.id}.jpg`}
+                  sizes="(min-width: 768px) 640px, 100vw"
+                  cadrage={cadrages[space.id]}
                   className="min-h-64 md:mt-10 md:-mr-6 md:-mb-6 md:rounded-tl-[3rem] md:[clip-path:polygon(8%_0,100%_14%,100%_100%,0_100%)]"
                 />
               </article>

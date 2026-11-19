@@ -1,7 +1,7 @@
 import type { Route } from 'next'
 import { Button } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
-import { VisuelProvisoire } from '@/components/ui/VisuelProvisoire'
+import { Photo } from '@/components/ui/Photo'
 import { goToMarket, parcours } from '@/lib/content/home'
 
 /**
@@ -39,9 +39,9 @@ export function Parcours() {
 
         <div className="mt-24 grid items-start gap-12 md:grid-cols-[1fr_1.4fr] md:gap-20">
           <Reveal>
-            <VisuelProvisoire
-              nom="parcours-photo"
-              fond="orange"
+            <Photo
+              src="/accueil/parcours.jpg"
+              sizes="(min-width: 768px) 40vw, 100vw"
               className="aspect-[4/3] rounded-3xl md:sticky md:top-[calc(var(--entete-total)+2rem)]"
             />
           </Reveal>

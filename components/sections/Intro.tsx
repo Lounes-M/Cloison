@@ -1,17 +1,17 @@
 import { Reveal } from '@/components/ui/Reveal'
-import { VisuelProvisoire } from '@/components/ui/VisuelProvisoire'
+import { Photo } from '@/components/ui/Photo'
 import { problem, product } from '@/lib/content/home'
 import { cn } from '@/lib/utils'
 
-/** Les photos qui passent autour du titre : position, taille, couleur d'attente. */
+/** Les photos qui passent autour du titre : position et taille. */
 const photos = [
-  { nom: 'intro-1', classe: 'left-[2%] top-[4%] w-[17%]', fond: 'vert' },
-  { nom: 'intro-2', classe: 'left-[26%] top-[10%] w-[17%]', fond: 'orange' },
-  { nom: 'intro-3', classe: 'right-[7%] top-[6%] w-[17%]', fond: 'nuit' },
-  { nom: 'intro-4', classe: 'right-[7%] top-[38%] w-[17%]', fond: 'orange' },
-  { nom: 'intro-5', classe: 'left-[8%] top-[46%] w-[17%]', fond: 'orange' },
-  { nom: 'intro-6', classe: 'left-[18%] top-[78%] w-[17%]', fond: 'creme' },
-  { nom: 'intro-7', classe: 'right-[18%] top-[70%] w-[17%]', fond: 'nuit' },
+  { nom: 'intro-1', classe: 'left-[2%] top-[4%] w-[17%]' },
+  { nom: 'intro-2', classe: 'left-[26%] top-[10%] w-[17%]' },
+  { nom: 'intro-3', classe: 'right-[7%] top-[6%] w-[17%]' },
+  { nom: 'intro-4', classe: 'right-[7%] top-[38%] w-[17%]' },
+  { nom: 'intro-5', classe: 'left-[8%] top-[46%] w-[17%]' },
+  { nom: 'intro-6', classe: 'left-[18%] top-[78%] w-[17%]' },
+  { nom: 'intro-7', classe: 'right-[18%] top-[70%] w-[17%]' },
 ] as const
 
 /**
@@ -24,10 +24,10 @@ export function Intro() {
     <section className="bg-sun rounded-b-carte relative z-10 overflow-clip px-4 md:px-6">
       <div className="relative mx-auto max-w-[1440px] md:min-h-[190vh]">
         {photos.map((photo) => (
-          <VisuelProvisoire
+          <Photo
             key={photo.nom}
-            nom={photo.nom}
-            fond={photo.fond}
+            src={`/accueil/${photo.nom}.jpg`}
+            sizes="(min-width: 768px) 17vw, 1px"
             className={cn('absolute hidden aspect-square rounded-3xl md:block', photo.classe)}
           />
         ))}
