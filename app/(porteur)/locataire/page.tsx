@@ -132,7 +132,7 @@ export default async function PageLocataire({
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
         {espace.reference} {String(dossier.reference)}
       </p>
-      <h1 className="font-display mt-2 text-3xl uppercase md:text-4xl">{espace.titre}</h1>
+      <h1 className="font-display mt-2 text-3xl md:text-4xl">{espace.titre}</h1>
 
       <div className={cn('outlined shadow-brut mt-8 rounded-[18px] p-6', tons[statut.ton])}>
         <p className="text-xl font-bold">{statut.libelle}</p>

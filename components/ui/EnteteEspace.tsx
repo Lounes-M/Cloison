@@ -20,7 +20,7 @@ export function EnteteEspace({
       >
         {etiquette}
       </p>
-      <h1 className="font-display text-[clamp(1.25rem,6.25vw,2rem)] leading-tight break-words uppercase">
+      <h1 className="font-display text-[clamp(1.25rem,6.25vw,2rem)] leading-tight break-words">
         {titre}
       </h1>
       {children ? (

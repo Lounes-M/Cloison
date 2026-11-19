@@ -182,7 +182,7 @@ export default async function PageGarant({
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
         {depot.reference} {String(dossier.reference)}
       </p>
-      <h1 className="font-display mt-2 text-3xl uppercase md:text-4xl">{depot.titre}</h1>
+      <h1 className="font-display mt-2 text-3xl md:text-4xl">{depot.titre}</h1>
       <p className="mt-3 text-[15px] leading-relaxed font-medium">
         {depot.demandePar(String(dossier.email_locataire))}
       </p>
@@ -199,7 +199,7 @@ export default async function PageGarant({
 
       {!ouvert ? (
         <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">
-          <p className="font-display text-xl uppercase">{depot.fermeTitre}</p>
+          <p className="font-display text-xl">{depot.fermeTitre}</p>
           <p className="mt-2 text-[15px] leading-relaxed font-medium">{depot.fermeTexte}</p>
         </div>
       ) : null}

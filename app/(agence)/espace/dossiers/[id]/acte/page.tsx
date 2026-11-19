@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <p className="mb-6 font-bold">{t.mention}</p>
 
       <section className="panneau-espace mb-8">
-        <h2 className="font-display text-xl uppercase">{t.conditions}</h2>
+        <h2 className="font-display text-xl">{t.conditions}</h2>
         {e ? (
           <dl className="mt-3 grid gap-1">
             <div>

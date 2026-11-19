@@ -578,7 +578,7 @@ export default async function PageDossier({
       </section>
       <NotesDossier dossierId={id} supabase={supabase} modifiable={!d.demonstration} />
       <section id="journal" className="panneau-espace mt-8">
-        <h2 className="font-display text-2xl uppercase">{texte.journalTitre}</h2>
+        <h2 className="font-display text-2xl">{texte.journalTitre}</h2>
         {historique.lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">{texte.journalAucun}</p>
         ) : (
@@ -611,7 +611,7 @@ export default async function PageDossier({
       <SupportDossier reference={String(d.reference)} espace="agence" />
       {d.statut === 'transmis' && !d.demonstration ? (
         <section className="panneau-espace mt-8">
-          <h2 className="font-display text-2xl uppercase">{texteActe.etiquette}</h2>
+          <h2 className="font-display text-2xl">{texteActe.etiquette}</h2>
           <p className="mt-2">{texteActe.mention}</p>
           <Link className="lien-espace mt-4 inline-block" href={`/espace/dossiers/${id}/acte`}>
             {texteActe.titre}

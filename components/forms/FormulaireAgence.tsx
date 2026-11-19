@@ -49,7 +49,7 @@ export function FormulaireAgence() {
         tabIndex={-1}
         className="bg-mint outlined shadow-brut scroll-mt-28 rounded-[18px] p-8 text-center"
       >
-        <p className="font-display text-2xl uppercase">{formulaire.merci}</p>
+        <p className="font-display text-2xl">{formulaire.merci}</p>
         <p className="mx-auto mt-3 max-w-[420px] text-[15px] leading-relaxed font-medium">
           {formulaire.suite}
         </p>

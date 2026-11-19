@@ -24,12 +24,12 @@ export default function LayoutMarketing({ children }: { children: React.ReactNod
     <>
       <a
         href="#contenu"
-        className="bg-sun outlined fixed top-3 left-3 z-[60] -translate-y-32 rounded-lg px-4 py-3 font-bold focus:translate-y-0"
+        className="bg-paper text-ink fixed top-3 left-3 z-[60] -translate-y-32 rounded-lg px-4 py-3 font-semibold shadow-lg focus:translate-y-0"
       >
         {interfaceEspace.principal}
       </a>
       <SiteHeader />
-      <div id="contenu" tabIndex={-1}>
+      <div id="contenu" tabIndex={-1} className="sous-entete-fixe">
         {children}
       </div>
       <SiteFooter />

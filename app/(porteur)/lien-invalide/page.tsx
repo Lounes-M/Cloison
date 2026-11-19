@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function PageLienInvalide() {
   return (
     <div className="panneau-espace w-full max-w-[540px] self-start">
-      <h1 className="font-display text-2xl uppercase md:text-3xl">{lienInvalide.titre}</h1>
+      <h1 className="font-display text-2xl md:text-3xl">{lienInvalide.titre}</h1>
       <p className="mt-4 text-[15px] leading-relaxed font-medium">{lienInvalide.texte}</p>
       <p className="text-muted mt-6 text-[14px] font-medium">{lienInvalide.locataire}</p>
       <FormulaireContinuite mode="retrouver" />

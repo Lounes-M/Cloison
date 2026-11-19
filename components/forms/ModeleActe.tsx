@@ -94,7 +94,7 @@ export function ModeleActe({
       <input type="hidden" name="source" value="modele" />
 
       <fieldset disabled={occupe} className="grid min-w-0 gap-4">
-        <legend className="font-display mb-2 text-xl uppercase">{t.sections.caution}</legend>
+        <legend className="font-display mb-2 text-xl">{t.sections.caution}</legend>
         <label>
           {t.champs.civilite}
           <select className={champ} name="civilite" required defaultValue="">
@@ -108,7 +108,7 @@ export function ModeleActe({
       </fieldset>
 
       <fieldset disabled={occupe} className="grid min-w-0 gap-4">
-        <legend className="font-display mb-2 text-xl uppercase">{t.sections.bail}</legend>
+        <legend className="font-display mb-2 text-xl">{t.sections.bail}</legend>
         <Texte nom="locataire" libelle={t.champs.locataire} defaut={locataire} maxLength={240} />
         <Texte nom="bailleur_nom" libelle={t.champs.bailleurNom} maxLength={240} />
         <Texte nom="bailleur_adresse" libelle={t.champs.bailleurAdresse} maxLength={400} />
@@ -120,7 +120,7 @@ export function ModeleActe({
       </fieldset>
 
       <fieldset disabled={occupe} className="grid min-w-0 gap-4">
-        <legend className="font-display mb-2 text-xl uppercase">{t.sections.loyer}</legend>
+        <legend className="font-display mb-2 text-xl">{t.sections.loyer}</legend>
         <Texte
           nom="loyer"
           libelle={t.champs.loyer}
@@ -167,7 +167,7 @@ export function ModeleActe({
       </fieldset>
 
       <fieldset disabled={occupe} className="grid min-w-0 gap-4">
-        <legend className="font-display mb-2 text-xl uppercase">{t.sections.acte}</legend>
+        <legend className="font-display mb-2 text-xl">{t.sections.acte}</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <Texte nom="fait_lieu" libelle={t.champs.faitLieu} maxLength={120} />
           <Texte nom="fait_le" libelle={t.champs.faitLe} type="date" defaut={aujourdHui} />

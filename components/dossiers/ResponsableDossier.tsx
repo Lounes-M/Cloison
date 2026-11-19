@@ -49,7 +49,7 @@ export async function ResponsableDossier({
     choix.unshift({ id: courant.responsable_id, email: courant.responsable_email })
   return (
     <section id="responsable" className="panneau-espace bg-sky/20 mt-8">
-      <h2 className="font-display text-xl uppercase">{t.titre}</h2>
+      <h2 className="font-display text-xl">{t.titre}</h2>
       <p className="mt-2 font-semibold break-all">
         {courant.responsable_id ? (courant.responsable_email ?? t.indisponible) : t.aucun}
       </p>

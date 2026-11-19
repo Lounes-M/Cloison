@@ -84,7 +84,7 @@ export default async function PageCollaborateurs({
           </Link>
         ) : null}
       </nav>
-      <h2 className="font-display mt-10 text-xl uppercase">{textes.journal}</h2>
+      <h2 className="font-display mt-10 text-xl">{textes.journal}</h2>
       {!traces.length ? (
         <p className="mt-3 text-sm">{textes.journalVide}</p>
       ) : (
