@@ -94,7 +94,10 @@ export default function PageQuestions() {
                 </h3>
                 <div>
                   {g.questions.map((q) => (
-                    <details key={q.question} className="border-b border-[#d6dfdd] last:border-b-0">
+                    <details
+                      key={q.question}
+                      className="question-faq border-b border-[#d6dfdd] last:border-b-0"
+                    >
                       <summary className="hover:text-cobalt flex min-h-[max(44px,3.5rem)] cursor-pointer list-none items-center justify-between gap-4 py-[0.75rem] font-semibold transition-colors [&::-webkit-details-marker]:hidden">
                         <span>{insecable(q.question)}</span>
                         <span

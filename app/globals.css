@@ -639,7 +639,7 @@
   .entree-mot {
     animation: none;
   }
-  .site-public details::details-content {
+  .site-public details.question-faq::details-content {
     transition: none;
   }
   .press:hover,
@@ -1124,10 +1124,10 @@ html:has(.site-public) {
 /* Une reponse de la FAQ se deplie au lieu d'apparaitre d'un coup, la ou le
    navigateur sait animer une hauteur automatique. Ailleurs, rien ne change. */
 @supports (interpolate-size: allow-keywords) {
-  .site-public details {
+  .site-public details.question-faq {
     interpolate-size: allow-keywords;
   }
-  .site-public details::details-content {
+  .site-public details.question-faq::details-content {
     height: 0;
     overflow: clip;
     opacity: 0;
@@ -1136,16 +1136,16 @@ html:has(.site-public) {
       opacity 0.35s ease,
       content-visibility 0.35s allow-discrete;
   }
-  .site-public details[open]::details-content {
+  .site-public details.question-faq[open]::details-content {
     height: auto;
     opacity: 1;
   }
 }
 
 /* Le chevron d'une question tourne a l'ouverture. */
-.site-public details > summary .chevron-question {
+.site-public details.question-faq > summary .chevron-question {
   transition: rotate 0.3s ease;
 }
-.site-public details[open] > summary .chevron-question {
+.site-public details.question-faq[open] > summary .chevron-question {
   rotate: 45deg;
 }
