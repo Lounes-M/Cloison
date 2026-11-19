@@ -6,6 +6,11 @@ set -u
 for essai in 1 2 3; do
   timeout 240 npx playwright install --with-deps chromium firefox webkit && exit 0
   echo "Installation des navigateurs interrompue (essai $essai)"
-  sleep 5
+  # Le delai coupe npx, pas l'apt-get lance en root : il garde le verrou dpkg
+  # et ferait echouer l'essai suivant d'emblee. On le laisse finir, trois minutes au plus.
+  for _ in $(seq 36); do
+    pgrep -x apt-get >/dev/null || pgrep -x dpkg >/dev/null || break
+    sleep 5
+  done
 done
 exit 1
