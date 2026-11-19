@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/Button'
 import { VisuelProvisoire } from '@/components/ui/VisuelProvisoire'
-import { spaces } from '@/lib/content/home'
+import { espacesAccueil, spaces } from '@/lib/content/home'
 import { cn } from '@/lib/utils'
 
 /**
@@ -12,28 +12,26 @@ const habillages = [
     carte: 'bg-sun text-ink',
     titre: 'text-cobalt',
     fond: 'nuit',
-    lien: { href: '/demarrer', libelle: 'Créer mon dossier' },
   },
   {
     carte: 'bg-cobalt text-white',
     titre: 'text-sun',
     fond: 'orange',
-    lien: { href: '/demarrer', libelle: 'Créer mon dossier' },
   },
   {
     carte: 'bg-ink text-white',
     titre: 'text-white',
     fond: 'vert',
-    lien: { href: '/agences', libelle: 'Je suis une agence' },
   },
 ] as const
 
 export function Espaces() {
   return (
-    <section aria-label="Les trois espaces" className="bg-cream px-4 pb-24 md:px-6 md:pb-36">
+    <section aria-label={espacesAccueil.aria} className="bg-cream px-4 pb-24 md:px-6 md:pb-36">
       <ol className="mx-auto max-w-[1280px]">
         {spaces.map((space, index) => {
           const habillage = habillages[index % habillages.length]!
+          const lien = espacesAccueil.liens[index % espacesAccueil.liens.length]!
           return (
             <li
               key={space.id}
@@ -47,7 +45,9 @@ export function Espaces() {
                 )}
               >
                 <div className="flex flex-col justify-center p-8 md:p-14">
-                  <p className="font-display text-3xl opacity-25 md:text-4xl">Étape {space.step}</p>
+                  <p className="font-display text-3xl opacity-25 md:text-4xl">
+                    {espacesAccueil.etape} {space.step}
+                  </p>
                   <h3
                     className={cn(
                       'font-display mt-2 text-[clamp(2rem,4vw,3.25rem)] leading-tight',
@@ -64,8 +64,8 @@ export function Espaces() {
                     {'right' in space.footnote && ` · ${space.footnote.right}`}
                   </p>
                   <div className="mt-8">
-                    <Button href={habillage.lien.href} tone="paper">
-                      {habillage.lien.libelle}
+                    <Button href={lien.href} tone="paper">
+                      {lien.libelle}
                     </Button>
                   </div>
                 </div>

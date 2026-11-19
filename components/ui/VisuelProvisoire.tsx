@@ -1,11 +1,11 @@
 import { cn } from '@/lib/utils'
 
 const fonds = {
-  nuit: 'from-[#2a2a2a] via-[#151515] to-[#3a2116]',
-  vert: 'from-[#0b6b55] via-cobalt to-[#023b2f]',
-  orange: 'from-[#ff7a3d] via-flame to-[#b83a00]',
-  rose: 'from-[#f6d3e6] via-sun to-[#d98fb8]',
-  creme: 'from-paper via-cream to-[#eadfce]',
+  nuit: 'from-ink via-night to-[color-mix(in_srgb,var(--color-flame)_22%,var(--color-night))]',
+  vert: 'from-[color-mix(in_srgb,var(--color-cobalt)_80%,white)] via-cobalt to-[color-mix(in_srgb,var(--color-cobalt)_70%,black)]',
+  orange: 'from-[color-mix(in_srgb,var(--color-flame)_75%,white)] via-flame to-flame-texte',
+  rose: 'from-[color-mix(in_srgb,var(--color-sun)_60%,white)] via-sun to-[color-mix(in_srgb,var(--color-sun)_80%,black)]',
+  creme: 'from-paper via-cream to-[color-mix(in_srgb,var(--color-cream)_90%,black)]',
 } as const
 
 type VisuelProvisoireProps = {

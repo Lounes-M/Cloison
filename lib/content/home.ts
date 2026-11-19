@@ -261,3 +261,14 @@ export const productViews = {
     },
   },
 } as const
+
+/** Les libelles de la section des trois espaces empiles. */
+export const espacesAccueil = {
+  aria: 'Les trois espaces',
+  etape: 'Étape',
+  liens: [
+    { href: '/demarrer', libelle: 'Créer mon dossier' },
+    { href: '/demarrer', libelle: 'Créer mon dossier' },
+    { href: '/agences', libelle: 'Je suis une agence' },
+  ],
+} as const
