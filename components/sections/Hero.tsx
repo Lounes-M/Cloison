@@ -72,7 +72,7 @@ export function Hero() {
                 aria-hidden
                 className="bg-cream entree-pan pointer-events-none absolute top-[calc(-1*(var(--entete-barre)+11.25rem))] right-[-100vw] bottom-[-8.5rem] left-[-10rem] hidden [clip-path:polygon(0_0,100%_0,100%_calc(100%-5rem),8rem_100%)] lg:block"
               />
-              <p className="animate-fade-up text-ink texte-18 relative max-w-[22.2rem] leading-[1.4] [animation-delay:0.2s] max-lg:max-w-[32rem] max-lg:text-white lg:[animation-delay:0.55s]">
+              <p className="animate-fade-up text-ink texte-18 relative max-w-[22.2rem] leading-[1.4] text-pretty [animation-delay:0.2s] max-lg:max-w-[32rem] max-lg:text-white lg:[animation-delay:0.55s]">
                 {hero.subtitle}
               </p>
             </div>
