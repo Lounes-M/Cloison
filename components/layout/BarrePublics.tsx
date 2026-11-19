@@ -14,7 +14,7 @@ export function BarrePublics() {
   const chemin = usePathname()
   return (
     <div className="bg-cobalt text-white">
-      <div className="flex h-[var(--entete-barre)] items-center justify-between gap-4 px-[1.7rem] text-[0.95rem] max-[479px]:px-4">
+      <div className="flex h-[var(--entete-barre)] items-center justify-between gap-4 px-[1.7rem] text-[1rem] max-[479px]:px-4">
         <nav aria-label={barrePublics.aria} className="flex min-w-0 items-center gap-1">
           <span className="mr-2 hidden sm:inline">{barrePublics.libelle}</span>
           {barrePublics.liens.map((lien) => {
@@ -25,7 +25,7 @@ export function BarrePublics() {
                 href={lien.href as Route}
                 aria-current={actif ? 'page' : undefined}
                 className={cn(
-                  'rounded-full px-[0.9rem] py-2 text-[1rem] leading-none whitespace-nowrap transition-colors hover:bg-white/10 max-[479px]:text-[0.875rem]',
+                  "relative rounded-full px-[0.9rem] py-2 text-[1rem] leading-none whitespace-nowrap transition-colors after:absolute after:inset-x-0 after:-inset-y-[10px] after:content-[''] hover:bg-white/10 max-[479px]:text-[0.875rem]",
                   actif && 'bg-white/20 font-semibold hover:bg-white/20',
                   lien.href === '/questions' && 'hidden sm:inline',
                 )}

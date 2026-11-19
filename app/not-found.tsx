@@ -18,7 +18,7 @@ export default async function NotFound() {
   await connection()
 
   return (
-    <>
+    <div className="site-public">
       <SiteHeader />
       <div className="sous-entete-fixe">
         <main className="ecran-reprise">
@@ -36,6 +36,6 @@ export default async function NotFound() {
         </main>
       </div>
       <SiteFooter />
-    </>
+    </div>
   )
 }

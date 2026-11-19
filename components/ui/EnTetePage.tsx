@@ -37,12 +37,12 @@ export function EnTetePage({
         className="absolute inset-0 bg-[repeating-conic-gradient(from_0deg_at_50%_55%,var(--color-cream)_0deg_14deg,transparent_14deg_40deg)] opacity-70"
       />
       <div className="relative mx-auto max-w-[54.75rem]">
-        {surtitre && <p className="animate-fade-up texte-14 uppercase">{surtitre}</p>}
+        {surtitre && <p className="animate-fade-up texte-14 font-semibold uppercase">{surtitre}</p>}
         <h1 className="titre-84 animate-fade-up mt-[1rem] text-balance [animation-delay:0.1s]">
           {titre}
         </h1>
         {sousTitre && (
-          <div className="animate-fade-up texte-24 mt-[2rem] [animation-delay:0.2s] max-[479px]:mt-[1.25rem] max-[479px]:text-[1.125rem] max-[479px]:leading-[1.4]">
+          <div className="animate-fade-up texte-24 mt-[2rem] [animation-delay:0.2s] max-[479px]:mt-[1.25rem] max-[479px]:leading-[1.4]">
             {sousTitre}
           </div>
         )}

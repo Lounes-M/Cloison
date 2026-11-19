@@ -40,13 +40,15 @@ export default async function PageConnexion({
           <div className="conteneur flex flex-col gap-[1.5rem] md:grid md:grid-cols-[1fr_32rem] md:items-start md:gap-[4rem]">
             {/* Sur mobile, le formulaire remonte juste sous le titre. */}
             <div className="max-md:contents">
-              <p className="texte-16 flex items-center gap-[0.6rem] font-semibold max-md:hidden">
+              <p className="texte-14 flex items-center gap-[0.6rem] font-semibold uppercase max-md:hidden">
                 <span aria-hidden className="bg-flame size-[0.6rem] rounded-full" />
                 {interfaceEspace.connexion}
               </p>
               <h1 className="titre-84 md:mt-[1rem]">{interfaceEspace.connexionTitre}</h1>
               <div className="max-md:order-3">
-                <p className="texte-24 md:mt-[1.5rem]">{interfaceEspace.connexionTexte}</p>
+                <p className="texte-24 max-[479px]:leading-[1.4] md:mt-[1.5rem]">
+                  {interfaceEspace.connexionTexte}
+                </p>
                 <Photo
                   src="/accueil/espace-agence.jpg"
                   sizes="(min-width: 768px) 40vw, 1px"

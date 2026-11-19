@@ -63,7 +63,7 @@ export default function PageQuestions() {
             <a
               key={g.id}
               href={`#${g.id}`}
-              className="bg-paper hover:text-cobalt rounded-brut inline-flex min-h-[44px] items-center px-[0.75rem] text-[0.875rem] font-semibold uppercase transition-colors"
+              className="bg-paper hover:text-cobalt rounded-brut texte-14 inline-flex min-h-[44px] items-center px-[0.75rem] font-semibold uppercase transition-colors"
             >
               {g.titre}
             </a>

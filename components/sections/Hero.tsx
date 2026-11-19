@@ -38,17 +38,17 @@ export function Hero() {
               <div className="mt-[3rem] flex flex-wrap items-center gap-x-6 gap-y-4 max-[479px]:mt-8">
                 <Link
                   href="/demarrer"
-                  className="bouton group inline-flex items-stretch gap-[0.22rem] [--bouton-h:max(44px,4.5rem)]"
+                  className="bouton group inline-flex items-stretch gap-[0.22rem] [--bouton-h:max(44px,4.5rem)] max-[479px]:[--bouton-h:max(44px,3.75rem)]"
                 >
                   <span aria-hidden className="bouton-fleche bouton-fleche-avant bg-sun text-white">
                     <Icone nom="fleche" />
                   </span>
-                  <span className="bg-paper text-ink rounded-brut flex items-center gap-[1rem] py-2 pr-[1.31rem] pl-[1.31rem]">
+                  <span className="bg-paper text-ink rounded-brut flex items-center gap-[1rem] py-2 pr-[1.31rem] pl-[1.31rem] max-[479px]:gap-[0.75rem] max-[479px]:px-[0.9rem]">
                     <span aria-hidden className="flex flex-col">
                       <span className="texte-22 leading-[1.52]">{site.name}</span>
                       <span className="texte-12 text-ink/70 font-semibold">{hero.eyebrow}</span>
                     </span>
-                    <span className="texte-14 uppercase">{hero.primaryCta}</span>
+                    <span className="texte-14 whitespace-nowrap uppercase">{hero.primaryCta}</span>
                   </span>
                   <span aria-hidden className="bouton-fleche bouton-fleche-apres bg-sun text-white">
                     <Icone nom="fleche" />
