@@ -71,7 +71,7 @@ export default async function PageConnexion({
             {interfaceEspace.roles.map((role, index) => (
               <li key={role.nom}>
                 <Reveal delay={index * 0.08} className="h-full">
-                  <article className="bg-paper flex h-full min-h-[18rem] flex-col rounded-[1.5rem] p-[1.5rem]">
+                  <article className="lift bg-paper flex h-full min-h-[18rem] flex-col rounded-[1.5rem] p-[1.5rem] max-[767px]:min-h-0">
                     <span className="texte-16">{String(index + 1).padStart(2, '0')}</span>
                     <h3 className="texte-28 text-cobalt mt-[0.75rem]">{role.nom}</h3>
                     <p className="mt-auto pt-6">{role.texte}</p>

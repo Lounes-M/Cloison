@@ -165,6 +165,68 @@
     transform: rotate(var(--reveal-tilt, 0deg));
     animation: none;
   }
+
+  /* Variantes d'entree : une photo grossit legerement, un bloc glisse. */
+  &[data-variante='zoom']:not([data-shown]) {
+    transform: rotate(var(--reveal-tilt, 0deg)) scale(0.9);
+  }
+  &[data-variante='gauche']:not([data-shown]) {
+    transform: rotate(var(--reveal-tilt, 0deg)) translateX(-48px);
+  }
+  &[data-variante='droite']:not([data-shown]) {
+    transform: rotate(var(--reveal-tilt, 0deg)) translateX(48px);
+  }
+  &[data-variante='zoom'],
+  &[data-variante='gauche'],
+  &[data-variante='droite'] {
+    transition-duration: 0.9s;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
+/* Carte penchee qui se redresse et se souleve au survol. */
+@utility redresse {
+  transition:
+    rotate 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    translate 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.45s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      rotate: calc(-1 * var(--reveal-tilt, 0deg));
+      translate: 0 -0.75rem;
+      box-shadow: 0 1.5rem 3rem -1rem rgb(0 0 0 / 0.25);
+    }
+  }
+}
+
+/* Photo qui avance doucement dans son cadre au survol de la carte. */
+@utility photo-vivante {
+  & img {
+    transition: scale 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  @media (hover: hover) {
+    &:hover img,
+    .group:hover & img {
+      scale: 1.05;
+    }
+  }
+}
+
+/* Trait qui se trace sous un lien de texte. */
+@utility lien-trace {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  transition: background-size 0.35s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      background-size: 0 1px;
+      background-position: 100% 100%;
+    }
+  }
 }
 
 /* Titre en lettrage plein, la signature typographique de la marque. */
@@ -565,6 +627,21 @@
   .entete-espace {
     animation: none;
   }
+  .redresse:hover {
+    rotate: none;
+    translate: none;
+  }
+  .photo-vivante img {
+    scale: none !important;
+  }
+  .entree-hero,
+  .entree-pan,
+  .entree-mot {
+    animation: none;
+  }
+  .site-public details.question-faq::details-content {
+    transition: none;
+  }
   .press:hover,
   .lien-espace:hover:not(:disabled) {
     translate: none;
@@ -842,11 +919,12 @@
 /* Tout le site public est dessine sur une page de 1440 px a 15 px de base,
    et sur un ecran de 375 px a 16 px de base sur telephone. La taille de base
    suit la largeur de la fenetre : chaque `rem` grandit et retrecit avec elle,
-   textes, marges et rayons compris. Un plancher de 10 px garde le texte
-   lisible sur tablette, ou la regle pure le ferait tomber a 7 px.
+   textes, marges et rayons compris. Un plancher de 12 px garde le texte
+   lisible sur tablette, ou la regle pure le ferait tomber a 7 px, et un
+   plafond de 20 px evite une page geante sur un tres grand ecran.
    Les espaces connectes ne sont pas concernes : ils gardent 16 px. */
 html:has(.site-public) {
-  font-size: max(10px, calc(15 * (100vw / 1440)));
+  font-size: clamp(12px, calc(15 * (100vw / 1440)), 20px);
 }
 
 @media (max-width: 479px) {
@@ -1009,4 +1087,65 @@ html:has(.site-public) {
    zoome a la saisie. */
 .site-public :is(input, select, textarea) {
   font-size: max(16px, 1rem);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Site public : mouvement                                             */
+/* ------------------------------------------------------------------ */
+/* Entree de la premiere section de l'accueil : le pan creme glisse depuis la
+   droite, la bande orange monte, le nom en filigrane la suit. */
+@keyframes entree-pan {
+  from {
+    transform: translateX(12%);
+    opacity: 0;
+  }
+}
+@keyframes entree-bande {
+  from {
+    transform: translateY(40%);
+  }
+}
+@keyframes entree-mot {
+  from {
+    transform: translateY(35%);
+    opacity: 0;
+  }
+}
+.entree-pan {
+  animation: entree-pan 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.entree-hero {
+  animation: entree-bande 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;
+}
+.entree-mot {
+  animation: entree-mot 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.45s both;
+}
+
+/* Une reponse de la FAQ se deplie au lieu d'apparaitre d'un coup, la ou le
+   navigateur sait animer une hauteur automatique. Ailleurs, rien ne change. */
+@supports (interpolate-size: allow-keywords) {
+  .site-public details.question-faq {
+    interpolate-size: allow-keywords;
+  }
+  .site-public details.question-faq::details-content {
+    height: 0;
+    overflow: clip;
+    opacity: 0;
+    transition:
+      height 0.35s ease,
+      opacity 0.35s ease,
+      content-visibility 0.35s allow-discrete;
+  }
+  .site-public details.question-faq[open]::details-content {
+    height: auto;
+    opacity: 1;
+  }
+}
+
+/* Le chevron d'une question tourne a l'ouverture. */
+.site-public details.question-faq > summary .chevron-question {
+  transition: rotate 0.3s ease;
+}
+.site-public details.question-faq[open] > summary .chevron-question {
+  rotate: 45deg;
 }

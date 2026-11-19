@@ -8,7 +8,7 @@ export function Product() {
   return (
     <section id="produit" className="bg-cream gouttiere section-espace">
       <div className="conteneur">
-        <Reveal className="mb-[4.5rem] grid items-start gap-8 max-[767px]:mb-10 md:grid-cols-[1fr_39.4rem]">
+        <Reveal className="mb-[4.5rem] grid items-start gap-8 max-[767px]:mb-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_39.4rem]">
           <h2 className="titre-84">
             {product.headline[0]}
             <br />

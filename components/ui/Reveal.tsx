@@ -10,6 +10,8 @@ type RevealProps = {
   delay?: number
   /** Rotation à conserver une fois l'élément révélé (cartes penchées). */
   tilt?: number
+  /** Entree : par defaut le bloc monte ; une photo peut grossir ou glisser. */
+  variante?: 'zoom' | 'gauche' | 'droite'
 }
 
 /**
@@ -31,7 +33,7 @@ type RevealProps = {
  * 2. Si JavaScript ne s'exécute pas du tout, une animation CSS retardée
  *    révèle l'élément toute seule.
  */
-export function Reveal({ children, className, delay = 0, tilt }: RevealProps) {
+export function Reveal({ children, className, delay = 0, tilt, variante }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -58,6 +60,7 @@ export function Reveal({ children, className, delay = 0, tilt }: RevealProps) {
     <div
       ref={ref}
       className={cn('reveal', className)}
+      data-variante={variante}
       style={
         {
           '--reveal-tilt': tilt ? `${tilt}deg` : undefined,

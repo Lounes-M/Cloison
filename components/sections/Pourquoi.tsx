@@ -50,7 +50,7 @@ const cartes: {
 export function Pourquoi() {
   return (
     <section className="bg-cream gouttiere section-espace overflow-hidden">
-      <div className="conteneur grid items-center gap-8 md:grid-cols-[1fr_39.4rem]">
+      <div className="conteneur grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_39.4rem]">
         <Reveal>
           <h2 className="titre-84">{whyNow.eyebrow}</h2>
         </Reveal>
@@ -71,16 +71,27 @@ export function Pourquoi() {
             const carte = cartes[index % cartes.length]!
             return (
               <li key={useCase.label} className={carte.decalage}>
-                <Reveal delay={index * 0.08} tilt={carte.inclinaison}>
+                <Reveal
+                  delay={index * 0.08}
+                  tilt={carte.inclinaison}
+                  className="max-[1023px]:[--reveal-tilt:0deg]!"
+                >
                   <article
                     className={cn(
-                      'lift flex min-h-[22rem] flex-col rounded-[1.5rem] p-[1.5rem] sm:min-h-[29rem] lg:-mx-[0.75rem] lg:p-[2.3rem]',
+                      'redresse flex min-h-[19rem] flex-col rounded-[1.5rem] p-[1.25rem] sm:min-h-[29rem] sm:p-[1.5rem] lg:-mx-[0.75rem] lg:p-[2.3rem]',
                       carte.classe,
                     )}
                   >
-                    <h3 className={cn('texte-24', carte.titre)}>{useCase.label}</h3>
-                    <Icone nom={carte.icone} className="my-auto size-[4.5rem] self-center" />
-                    <p className="texte-18 border-t border-current pt-[1.1rem]">{useCase.texte}</p>
+                    <h3 className={cn('texte-24 max-[479px]:text-[1.125rem]', carte.titre)}>
+                      {useCase.label}
+                    </h3>
+                    <Icone
+                      nom={carte.icone}
+                      className="my-auto size-[4.5rem] self-center max-[479px]:size-[3rem]"
+                    />
+                    <p className="texte-18 border-t border-current pt-[1.1rem] max-[479px]:text-[0.875rem]">
+                      {useCase.texte}
+                    </p>
                   </article>
                 </Reveal>
               </li>
