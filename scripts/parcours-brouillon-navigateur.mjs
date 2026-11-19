@@ -17,12 +17,22 @@ export async function parcourirBrouillon(page, site, moteur, largeur, fixture) {
   assert(!Buffer.from(fixture.lire().chiffre.slice(2), 'hex').toString().includes('1234,56'))
   await page.reload()
   assert.equal(await revenu.inputValue(), '', 'Pas de reprise implicite')
-  await page.getByRole('button', { name: 'Reprendre mon brouillon', exact: true }).click()
   const confirmer = page.getByRole('button', {
     name: 'Remplacer ma saisie par le brouillon',
     exact: true,
   })
-  await confirmer.waitFor()
+  // Le bouton est rendu par le serveur mais n'agit qu'apres l'hydratation :
+  // juste apres un rechargement, WebKit peut recevoir le clic trop tot. On
+  // reclique tant que la confirmation n'est pas apparue.
+  for (let essai = 0; ; essai += 1) {
+    await page.getByRole('button', { name: 'Reprendre mon brouillon', exact: true }).click()
+    try {
+      await confirmer.waitFor({ timeout: 2000 })
+      break
+    } catch (erreur) {
+      if (essai >= 4) throw erreur
+    }
+  }
   assert.equal(await revenu.inputValue(), '')
   await confirmer.focus()
   await page.keyboard.press('Enter')
@@ -54,8 +64,16 @@ export async function parcourirBrouillon(page, site, moteur, largeur, fixture) {
     'La suppression du brouillon preserve la saisie courante',
   )
   await page.reload()
-  await page.getByRole('button', { name: 'Reprendre mon brouillon', exact: true }).click()
-  await page.getByRole('status').filter({ hasText: 'Aucun brouillon enregistré.' }).waitFor()
+  const aucun = page.getByRole('status').filter({ hasText: 'Aucun brouillon enregistré.' })
+  for (let essai = 0; ; essai += 1) {
+    await page.getByRole('button', { name: 'Reprendre mon brouillon', exact: true }).click()
+    try {
+      await aucun.waitFor({ timeout: 2000 })
+      break
+    } catch (erreur) {
+      if (essai >= 4) throw erreur
+    }
+  }
   assert.equal(await confirmer.count(), 0)
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
   console.log(
