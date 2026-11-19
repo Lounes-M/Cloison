@@ -9,7 +9,7 @@ const cartes: { classe: string; titre: string; icone: NomIcone; inclinaison: num
   { classe: 'bg-cobalt text-white', titre: 'text-sun', icone: 'cadenas', inclinaison: -8 },
   { classe: 'bg-sun text-ink', titre: 'text-cobalt', icone: 'acte', inclinaison: 0 },
   { classe: 'bg-ink text-white', titre: 'text-sun', icone: 'fichier', inclinaison: -4 },
-  { classe: 'bg-flame text-ink', titre: 'text-white', icone: 'etoile', inclinaison: 6 },
+  { classe: 'bg-flame text-ink', titre: 'text-ink', icone: 'etoile', inclinaison: 6 },
 ]
 
 /**
@@ -37,10 +37,9 @@ export function Pourquoi() {
       <div className="relative mx-auto mt-20 max-w-[1280px] md:mt-28">
         <p
           aria-hidden
-          className="font-display text-cobalt/20 pointer-events-none absolute inset-x-0 -top-[0.45em] text-center text-[clamp(4rem,10vw,10rem)] leading-none whitespace-nowrap"
-        >
-          {vision.headline[2]}
-        </p>
+          data-mot={vision.headline[2]}
+          className="font-display text-cobalt/20 pointer-events-none absolute inset-x-0 -top-[0.45em] text-center text-[clamp(4rem,10vw,10rem)] leading-none whitespace-nowrap before:content-[attr(data-mot)]"
+        />
         <ul className="relative grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-0">
           {vision.useCases.map((useCase, index) => {
             const carte = cartes[index % cartes.length]!

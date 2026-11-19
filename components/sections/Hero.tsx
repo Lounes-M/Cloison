@@ -26,11 +26,18 @@ export function Hero() {
       />
 
       <div className="relative">
-        {/* Le pan creme : un polygone, pour garder l'angle franc a toute largeur. */}
-        <div
+        {/* Le pan creme : un polygone SVG, pour garder l'angle franc a toute
+            largeur. Un SVG plutot qu'un bloc decoupe : un bloc garderait sa
+            boite rectangulaire derriere le titre, et faussait la mesure des
+            contrastes. */}
+        <svg
           aria-hidden
-          className="bg-cream absolute inset-0 hidden [clip-path:polygon(30%_0,100%_0,100%_46%,77%_52%)] md:block"
-        />
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="fill-cream pointer-events-none absolute inset-0 hidden size-full md:block"
+        >
+          <polygon points="30,0 100,0 100,46 77,52" />
+        </svg>
 
         <div className="relative mx-auto grid max-w-[1440px] gap-10 px-4 pt-[calc(var(--entete-total)+3rem)] pb-[clamp(10rem,22vw,20rem)] md:grid-cols-[1.6fr_1fr] md:px-[5vw] md:pt-[calc(var(--entete-total)+4rem)]">
           <div className="animate-fade-up min-w-0">
@@ -52,7 +59,7 @@ export function Hero() {
                   <Icone nom="fleche" />
                 </span>
                 <span className="bg-paper text-ink rounded-brut flex items-center gap-5 px-5 py-3">
-                  <span className="flex flex-col">
+                  <span aria-hidden className="flex flex-col">
                     <span className="font-display text-2xl leading-none uppercase">
                       {site.name}
                     </span>
@@ -73,7 +80,7 @@ export function Hero() {
             </div>
           </div>
 
-          <p className="animate-fade-up text-ink max-w-[22rem] text-base leading-relaxed [animation-delay:0.2s] max-md:text-white md:mt-4 md:text-lg">
+          <p className="animate-fade-up text-ink md:bg-cream max-w-[22rem] text-base leading-relaxed [animation-delay:0.2s] max-md:text-white md:mt-4 md:self-start md:text-lg">
             {hero.subtitle}
           </p>
         </div>
@@ -82,9 +89,10 @@ export function Hero() {
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-[clamp(9rem,20vw,18rem)]">
           <div className="bg-sun absolute inset-0 [clip-path:polygon(0_22%,75%_0,100%_32%,100%_100%,0_100%)]" />
           <div className="bg-flame absolute inset-0 top-[3px] overflow-hidden [clip-path:polygon(0_22%,75%_0,100%_32%,100%_100%,0_100%)]">
-            <span className="font-display absolute inset-x-0 bottom-[-0.2em] text-center text-[clamp(6rem,22vw,20rem)] leading-none tracking-tight text-white/25 uppercase">
-              {site.name}
-            </span>
+            <span
+              data-mot={site.name}
+              className="font-display absolute inset-x-0 bottom-[-0.2em] text-center text-[clamp(6rem,22vw,20rem)] leading-none tracking-tight text-white/25 uppercase before:content-[attr(data-mot)]"
+            />
           </div>
         </div>
       </div>

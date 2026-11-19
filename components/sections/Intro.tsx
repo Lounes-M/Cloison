@@ -21,10 +21,7 @@ const photos = [
  */
 export function Intro() {
   return (
-    <section
-      id="produit"
-      className="bg-sun rounded-b-carte relative z-10 overflow-clip px-4 md:px-6"
-    >
+    <section className="bg-sun rounded-b-carte relative z-10 overflow-clip px-4 md:px-6">
       <div className="relative mx-auto max-w-[1440px] md:min-h-[190vh]">
         {photos.map((photo) => (
           <VisuelProvisoire

@@ -337,7 +337,11 @@ export async function parcourirInterface(
   await visiter('/connexion/securite', 'securite')
   assert.equal(new URL(page.url()).pathname, '/connexion/securite')
   await visiter('/', 'home-reference', false)
-  const creation = page.getByRole('link', { name: 'Créer mon dossier →', exact: true }).first()
+  // L'action principale du hero, et non le bouton de l'en-tete qui porte le meme nom.
+  const creation = page
+    .locator('main')
+    .getByRole('link', { name: 'Créer mon dossier', exact: true })
+    .first()
   await page.emulateMedia({ reducedMotion: 'reduce' })
   assert(
     await creation.evaluate((e) => e.getBoundingClientRect().bottom <= innerHeight),

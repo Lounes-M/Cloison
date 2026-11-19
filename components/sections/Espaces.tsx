@@ -45,7 +45,7 @@ export function Espaces() {
                 )}
               >
                 <div className="flex flex-col justify-center p-8 md:p-14">
-                  <p className="font-display text-3xl opacity-25 md:text-4xl">
+                  <p className="font-display text-3xl opacity-60 md:text-4xl">
                     {espacesAccueil.etape} {space.step}
                   </p>
                   <h3

@@ -12,7 +12,7 @@ export function Pilote() {
   return (
     <section className="bg-sun -mt-[var(--radius-carte)] px-4 pt-[calc(var(--radius-carte)+4rem)] md:px-6">
       <div className="mx-auto grid max-w-[1280px] gap-4 md:grid-cols-[8rem_1fr] md:gap-10">
-        <p className="text-muted text-sm">{pilote.statut}</p>
+        <p className="text-sm font-medium">{pilote.statut}</p>
         <div className="max-w-[44rem]">
           <p className="font-display text-xl md:text-2xl">{pilote.avantOuverture}</p>
           <p className="mt-4 text-sm leading-relaxed">{pilote.signature}</p>

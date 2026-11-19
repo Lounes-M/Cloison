@@ -252,7 +252,7 @@ export default function AgencesPage() {
                     <dd
                       className={cn(
                         'font-display text-base',
-                        'ton' in ligne && ligne.ton === 'vert' && 'text-[#158242]',
+                        'ton' in ligne && ligne.ton === 'vert' && 'text-cobalt',
                       )}
                     >
                       {ligne.valeur}
