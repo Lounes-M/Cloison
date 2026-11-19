@@ -7,20 +7,29 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 export const alt = `${site.name} · ${site.tagline}`
 
+/** Charte de novembre 2026, alignee sur `app/globals.css`. */
+const VERT = '#035946'
+const ORANGE = '#fe5000'
+const ROSE = '#edb8d5'
+const CREME = '#faf4ec'
+const ENCRE = '#1e1e1e'
+const MENTHE = '#d5e3dc'
+
 /**
  * Image de partage generee a la demande, pour que le wordmark reste
  * vectoriel et suive la marque sans qu'on ait a re-exporter un PNG.
- * La police est lue depuis `assets/fonts/` : aucun appel reseau au build.
+ * Les polices sont lues depuis `assets/fonts/` : aucun appel reseau au build.
  */
 export default async function OpengraphImage() {
-  const archivoBlack = await readFile(
-    join(process.cwd(), 'assets', 'fonts', 'ArchivoBlack-Regular.ttf'),
-  )
+  const [demiGras, moyen] = await Promise.all([
+    readFile(join(process.cwd(), 'assets', 'fonts', 'Poppins-SemiBold.ttf')),
+    readFile(join(process.cwd(), 'assets', 'fonts', 'Poppins-Medium.ttf')),
+  ])
 
   const chips = [
-    { label: 'Le garant', color: '#ffd23f' },
-    { label: 'Le locataire', color: '#7de08a' },
-    { label: "L'agence", color: '#9db8ff' },
+    { label: 'Le garant', color: ROSE },
+    { label: 'Le locataire', color: MENTHE },
+    { label: "L'agence", color: CREME },
   ]
 
   return new ImageResponse(
@@ -29,55 +38,111 @@ export default async function OpengraphImage() {
         width: '100%',
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 40,
-        backgroundColor: '#fff6e8',
-        fontFamily: 'Archivo Black',
-        border: '16px solid #141414',
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: VERT,
+        fontFamily: 'Poppins',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', fontSize: 128, color: '#141414' }}>
-        <span>CLOI</span>
+      {/* Carte rose aux coins de 40 px qui deborde du cadre, comme les sections
+          du site, portant la barre du logo en grand. */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 880,
+          top: 64,
+          width: 420,
+          height: 640,
+          display: 'flex',
+          alignItems: 'center',
+          paddingLeft: 120,
+          backgroundColor: ROSE,
+          borderRadius: 40,
+        }}
+      >
         <div
           style={{
-            width: 41,
-            height: 160,
-            margin: '0 10px',
-            borderRadius: 20,
-            backgroundColor: '#ffd23f',
-            border: '9px solid #141414',
+            width: 76,
+            height: 300,
+            borderRadius: 38,
+            backgroundColor: ORANGE,
             transform: 'rotate(6deg)',
+            marginTop: -60,
           }}
         />
-        <span>SON</span>
       </div>
-
-      <div style={{ display: 'flex', fontSize: 38, color: '#2b3ef0' }}>{site.tagline}</div>
-
-      <div style={{ display: 'flex', gap: 20 }}>
-        {chips.map((chip) => (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 36,
+          padding: '0 96px',
+          width: '100%',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 132,
+            fontWeight: 600,
+            lineHeight: 1,
+            color: CREME,
+          }}
+        >
+          <span>CLOI</span>
           <div
-            key={chip.label}
             style={{
-              display: 'flex',
-              padding: '14px 32px',
-              fontSize: 26,
-              color: '#141414',
-              backgroundColor: chip.color,
-              border: '4px solid #141414',
-              borderRadius: 999,
+              width: 37,
+              height: 145,
+              margin: '0 21px',
+              borderRadius: 18,
+              backgroundColor: ORANGE,
+              transform: 'rotate(6deg)',
             }}
-          >
-            {chip.label}
-          </div>
-        ))}
+          />
+          <span>SON</span>
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 52,
+            fontWeight: 600,
+            letterSpacing: '-0.02em',
+            color: ROSE,
+          }}
+        >
+          {site.tagline}
+        </div>
+
+        <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+          {chips.map((chip) => (
+            <div
+              key={chip.label}
+              style={{
+                display: 'flex',
+                padding: '12px 28px',
+                fontSize: 26,
+                fontWeight: 500,
+                color: ENCRE,
+                backgroundColor: chip.color,
+                borderRadius: 10,
+              }}
+            >
+              {chip.label}
+            </div>
+          ))}
+        </div>
       </div>
     </div>,
     {
       ...size,
-      fonts: [{ name: 'Archivo Black', data: archivoBlack, style: 'normal', weight: 400 }],
+      fonts: [
+        { name: 'Poppins', data: demiGras, style: 'normal', weight: 600 },
+        { name: 'Poppins', data: moyen, style: 'normal', weight: 500 },
+      ],
     },
   )
 }
