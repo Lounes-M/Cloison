@@ -42,7 +42,7 @@ export function EnTetePage({
           {titre}
         </h1>
         {sousTitre && (
-          <div className="animate-fade-up texte-24 mt-[2rem] [animation-delay:0.2s]">
+          <div className="animate-fade-up texte-24 mt-[2rem] [animation-delay:0.2s] max-[479px]:mt-[1.25rem] max-[479px]:text-[1.125rem] max-[479px]:leading-[1.4]">
             {sousTitre}
           </div>
         )}

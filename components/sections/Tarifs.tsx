@@ -41,7 +41,7 @@ export function Tarifs() {
                 </h3>
                 <p
                   className={cn(
-                    'texte-42 flex min-h-[11rem] items-end self-end rounded-t-[1.5rem] px-[1.75rem] pt-[3.5rem] pb-[1.5rem] [clip-path:polygon(0_22%,100%_0,100%_100%,0_100%)] max-[767px]:rounded-[1.5rem]',
+                    'texte-60 flex min-h-[11rem] items-end self-end rounded-t-[1.5rem] px-[1.75rem] pt-[3.5rem] pb-[1.5rem] [clip-path:polygon(0_22%,100%_0,100%_100%,0_100%)] max-[767px]:min-h-[8rem] max-[767px]:rounded-[1.5rem] max-[767px]:pt-[2.5rem] max-[479px]:text-[2.25rem]',
                     pans[index % pans.length],
                   )}
                 >

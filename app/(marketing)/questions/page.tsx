@@ -30,6 +30,11 @@ const eventail = [
  * Des `details` natifs : chaque reponse s'ouvre au clavier et sans
  * JavaScript, et reste trouvable par la recherche du navigateur.
  */
+/** Garde le point d'interrogation colle au dernier mot, a la francaise. */
+function insecable(texte: string) {
+  return texte.replace(/ ([?!:;])/g, '\u00a0$1')
+}
+
 export default function PageQuestions() {
   return (
     <main>
@@ -50,7 +55,10 @@ export default function PageQuestions() {
           </div>
         }
       >
-        <nav aria-label={t.sommaire} className="flex flex-wrap justify-center gap-[0.375rem]">
+        <nav
+          aria-label={t.sommaire}
+          className="flex flex-wrap justify-center gap-[0.375rem] max-[767px]:pb-[2.5rem]"
+        >
           {t.groupes.map((g) => (
             <a
               key={g.id}
@@ -78,14 +86,23 @@ export default function PageQuestions() {
                 aria-labelledby={`titre-${g.id}`}
                 className="grid gap-4 border-b border-[#d6dfdd] py-[2.5rem] md:grid-cols-[26rem_1fr] md:gap-[4rem]"
               >
-                <h3 id={`titre-${g.id}`} className="texte-42 text-cobalt">
+                <h3
+                  id={`titre-${g.id}`}
+                  className="texte-42 text-cobalt md:sticky md:top-[calc(var(--entete-total)+2rem)] md:self-start"
+                >
                   {g.titre}
                 </h3>
                 <div>
                   {g.questions.map((q) => (
                     <details key={q.question} className="border-b border-[#d6dfdd] last:border-b-0">
-                      <summary className="flex min-h-[max(44px,3.5rem)] cursor-pointer items-center py-[0.75rem] font-semibold">
-                        {q.question}
+                      <summary className="hover:text-cobalt flex min-h-[max(44px,3.5rem)] cursor-pointer list-none items-center justify-between gap-4 py-[0.75rem] font-semibold transition-colors [&::-webkit-details-marker]:hidden">
+                        <span>{insecable(q.question)}</span>
+                        <span
+                          aria-hidden
+                          className="chevron-question text-cobalt shrink-0 text-[1.5rem] leading-none font-normal"
+                        >
+                          +
+                        </span>
                       </summary>
                       <p className="pb-[1.25rem]">{q.reponse}</p>
                     </details>

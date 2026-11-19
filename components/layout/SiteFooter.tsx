@@ -17,7 +17,9 @@ export function SiteFooter() {
         <div className="conteneur grid gap-3 md:grid-cols-[7.45rem_1fr]">
           <p className="texte-16 text-ink/75 font-semibold">{pilote.statut}</p>
           <div className="max-w-[44rem]">
-            <p className="texte-24">{pilote.avantOuverture}</p>
+            <p className="texte-24 max-[479px]:text-[1.125rem] max-[479px]:leading-[1.4]">
+              {pilote.avantOuverture}
+            </p>
             <p className="texte-14 mt-3">{pilote.signature}</p>
           </div>
         </div>

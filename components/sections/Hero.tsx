@@ -34,15 +34,15 @@ export function Hero() {
           aria-hidden
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
-          className="fill-cream pointer-events-none absolute inset-0 hidden size-full md:block"
+          className="fill-cream entree-pan pointer-events-none absolute inset-0 hidden size-full lg:block"
         >
-          <polygon points="30,0 100,0 100,46 77,52" />
+          <polygon points="56,0 100,0 100,46 78,52" />
         </svg>
 
         <div className="gouttiere relative pt-[calc(var(--entete-barre)+11.25rem)] pb-[24rem] max-[479px]:pt-[calc(var(--entete-total)+3rem)] max-[479px]:pb-[12rem]">
-          <div className="conteneur grid gap-10 md:grid-cols-[1fr_22.2rem] md:gap-16">
+          <div className="conteneur grid gap-10 lg:grid-cols-[1fr_22.2rem] lg:gap-16">
             <div className="animate-fade-up min-w-0">
-              <h1 className="titre-84">
+              <h1 className="titre-84 max-w-[50rem]">
                 Ton garant t&apos;aide. Il ne te doit{' '}
                 <span className="text-sun">ni sa fiche de paie</span>, ni une signature à
                 l&apos;aveugle.
@@ -69,26 +69,29 @@ export function Hero() {
                 </Link>
                 <Link
                   href="/agences"
-                  className="texte-16 inline-flex min-h-[44px] items-center underline underline-offset-4"
+                  className="texte-16 lien-trace inline-flex min-h-[44px] items-center"
                 >
                   {hero.secondaryCta}
                 </Link>
               </div>
             </div>
 
-            <p className="animate-fade-up text-ink md:bg-cream texte-18 max-w-[22.2rem] leading-[1.4] [animation-delay:0.2s] max-md:text-white md:self-start">
+            <p className="animate-fade-up text-ink texte-18 max-w-[22.2rem] leading-[1.4] [animation-delay:0.2s] max-lg:max-w-[32rem] max-lg:text-white lg:self-start">
               {hero.subtitle}
             </p>
           </div>
         </div>
 
         {/* La bande orange : un liseré rose, puis l'aplat, puis le nom en filigrane. */}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[20rem] max-[479px]:h-[10rem]">
+        <div
+          aria-hidden
+          className="entree-hero absolute inset-x-0 bottom-0 h-[20rem] max-[479px]:h-[10rem]"
+        >
           <div className="bg-sun absolute inset-0 [clip-path:polygon(0_22%,75%_0,100%_32%,100%_100%,0_100%)]" />
           <div className="bg-flame absolute inset-0 top-[3px] overflow-hidden [clip-path:polygon(0_22%,75%_0,100%_32%,100%_100%,0_100%)]">
             <span
               data-mot={site.name}
-              className="font-display absolute inset-x-0 bottom-[-0.12em] text-center text-[20rem] leading-[1.1] font-semibold tracking-[0.01em] text-white/25 uppercase before:content-[attr(data-mot)] max-[479px]:text-[7rem]"
+              className="font-display entree-mot absolute inset-x-0 bottom-[-0.12em] text-center text-[20rem] leading-[1.1] font-semibold tracking-[0.01em] text-white/25 uppercase before:content-[attr(data-mot)] max-[479px]:text-[7rem]"
             />
           </div>
         </div>

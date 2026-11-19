@@ -20,17 +20,21 @@ export default async function NotFound() {
   return (
     <>
       <SiteHeader />
-      <main className="ecran-reprise">
-        <div className="carte-reprise">
-          <p className="font-display text-cobalt text-[clamp(4rem,12vw,7rem)] leading-none">404</p>
-          <h1>{erreurs.titreIntrouvable}</h1>
-          <p className="description-reprise">{erreurs.adresse}</p>
-          <div className="actions-reprise">
-            <Button href="/">{erreurs.accueil}</Button>
+      <div className="sous-entete-fixe">
+        <main className="ecran-reprise">
+          <div className="carte-reprise">
+            <p className="font-display text-cobalt text-[clamp(4rem,12vw,7rem)] leading-none">
+              404
+            </p>
+            <h1>{erreurs.titreIntrouvable}</h1>
+            <p className="description-reprise">{erreurs.adresse}</p>
+            <div className="actions-reprise">
+              <Button href="/">{erreurs.accueil}</Button>
+            </div>
+            <NavigationReprise />
           </div>
-          <NavigationReprise />
-        </div>
-      </main>
+        </main>
+      </div>
       <SiteFooter />
     </>
   )

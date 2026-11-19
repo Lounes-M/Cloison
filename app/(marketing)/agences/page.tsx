@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { FormulaireAgence } from '@/components/forms/FormulaireAgence'
 import { Button } from '@/components/ui/Button'
+import { Compteur } from '@/components/ui/Compteur'
 import { Accent, EnTetePage } from '@/components/ui/EnTetePage'
 import { Icone, type NomIcone } from '@/components/ui/Icone'
 import { Photo } from '@/components/ui/Photo'
@@ -73,7 +74,7 @@ export default function AgencesPage() {
             {douleurs.items.map((item, index) => (
               <li key={item.titre}>
                 <Reveal delay={index * 0.08} className="h-full">
-                  <article className="lift bg-paper flex h-full min-h-[21.5rem] flex-col rounded-[1.5rem] p-[1.5rem]">
+                  <article className="lift bg-paper flex h-full min-h-[21.5rem] flex-col rounded-[1.5rem] p-[1.5rem] max-[767px]:min-h-0">
                     <span className="texte-18 tabular-nums">
                       {String(index + 1).padStart(2, '0')}
                     </span>
@@ -100,7 +101,7 @@ export default function AgencesPage() {
               <li key={etape.numero} className="border-b border-[#d6dfdd]">
                 <Reveal
                   delay={index * 0.08}
-                  className="grid gap-4 py-[2.5rem] md:grid-cols-[31rem_14rem_1fr] md:gap-[2rem]"
+                  className="grid gap-4 py-[2.5rem] md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.5fr)_minmax(0,1.1fr)] md:gap-[2rem] lg:grid-cols-[31rem_14rem_1fr]"
                 >
                   <h3 className="texte-42 text-cobalt">{etape.titre}</h3>
                   <p className="texte-16 md:pt-[0.6rem]">{etape.puce}</p>
@@ -159,7 +160,7 @@ export default function AgencesPage() {
             {[...tarifAgence.lignes, tarifAgence.total].map((ligne, index) => (
               <li key={ligne.libelle}>
                 <Reveal delay={index * 0.06} className="h-full">
-                  <article className="bg-paper h-full rounded-[1.5rem] p-[2rem]">
+                  <article className="lift bg-paper h-full rounded-[1.5rem] p-[2rem]">
                     <Icone
                       nom={ICONES_TARIF[index % ICONES_TARIF.length]!}
                       className="size-[2rem]"
@@ -198,7 +199,7 @@ export default function AgencesPage() {
               >
                 <dt className="texte-18">{metrique.libelle}</dt>
                 <dd className="text-sun order-first text-[6.25rem] leading-none font-semibold max-[479px]:text-[3.5rem]">
-                  {metrique.valeur}
+                  <Compteur valeur={metrique.valeur} />
                 </dd>
               </div>
             ))}

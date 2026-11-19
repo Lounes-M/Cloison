@@ -47,7 +47,7 @@ export function Espaces() {
             >
               <article
                 className={cn(
-                  'rounded-carte mb-[1.5rem] grid overflow-hidden md:min-h-[37.6rem] md:grid-cols-[40.75rem_1fr]',
+                  'rounded-carte group mb-[1.5rem] grid overflow-hidden md:min-h-[37.6rem] md:grid-cols-[minmax(0,40.75rem)_minmax(16rem,1fr)]',
                   habillage.carte,
                 )}
               >
@@ -71,7 +71,7 @@ export function Espaces() {
                   src={`/accueil/espace-${space.id}.jpg`}
                   sizes="(min-width: 768px) 640px, 100vw"
                   cadrage={cadrages[space.id]}
-                  className="min-h-64 md:mt-[4.25rem] md:rounded-tl-[2rem] md:[clip-path:polygon(8%_0,100%_14%,100%_100%,0_100%)]"
+                  className="photo-vivante min-h-64 md:mt-[4.25rem] md:rounded-tl-[2rem] md:[clip-path:polygon(8%_0,100%_14%,100%_100%,0_100%)]"
                 />
               </article>
             </li>
