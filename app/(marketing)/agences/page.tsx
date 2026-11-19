@@ -100,7 +100,7 @@ export default function AgencesPage() {
         </Reveal>
 
         {/* Les trois apports et la garantie forment une seule grille : la carte
-            jaune n'est pas une note ajoutee sous la liste, c'est le quatrieme
+            rose n'est pas une note ajoutee sous la liste, c'est le quatrieme
             element, et sa couleur pleine dit qu'il ne se lit pas comme les
             autres. */}
         <ul className="grid gap-x-12 gap-y-10 md:grid-cols-2">

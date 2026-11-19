@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Logo Cloison : snippet d'intégration</title>
+    <!-- 1. Charger la police (une fois, dans le <head> de votre site) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* 2. Styles du logo : copier tel quel. Même géométrie que components/brand/Logo.tsx. */
+      .cloison-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.08em;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: #1e1e1e;
+        font-size: 32px;
+        line-height: 1;
+        text-decoration: none;
+        user-select: none;
+      }
+      .cloison-logo .barre {
+        display: inline-block;
+        width: 0.28em;
+        height: 1.1em;
+        margin: 0 0.08em;
+        background: #fe5000;
+        border-radius: 0.14em;
+        transform: rotate(6deg);
+      }
+      /* Variantes */
+      .cloison-logo--inverse {
+        color: #faf4ec;
+      } /* fond vert ou noir */
+      .cloison-logo--blanc {
+        color: #fff;
+      } /* sur photo */
+      .cloison-logo--mono .barre {
+        background: currentColor;
+      } /* impression une couleur */
+
+      /* Démo uniquement */
+      body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background: #faf4ec;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: flex-start;
+      }
+      .demo {
+        padding: 24px 32px;
+        border-radius: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 3. Le logo : la taille se règle uniquement via font-size -->
+    <div class="demo">
+      <a class="cloison-logo" href="/" aria-label="Cloison">CLOI<span class="barre"></span>SON</a>
+    </div>
+    <div class="demo" style="background: #035946">
+      <a
+        class="cloison-logo cloison-logo--inverse"
+        href="/"
+        aria-label="Cloison"
+        style="font-size: 48px"
+        >CLOI<span class="barre"></span>SON</a
+      >
+    </div>
+    <div class="demo" style="background: #edb8d5">
+      <a class="cloison-logo" href="/" aria-label="Cloison">CLOI<span class="barre"></span>SON</a>
+    </div>
+    <div class="demo" style="background: #000">
+      <a class="cloison-logo cloison-logo--inverse" href="/" aria-label="Cloison"
+        >CLOI<span class="barre"></span>SON</a
+      >
+    </div>
+    <div class="demo" style="background: #fff">
+      <a
+        class="cloison-logo cloison-logo--mono"
+        href="/"
+        aria-label="Cloison"
+        style="font-size: 16px"
+        >CLOI<span class="barre"></span>SON</a
+      >
+    </div>
+  </body>
+</html>
