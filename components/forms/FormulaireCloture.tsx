@@ -77,7 +77,7 @@ export function FormulaireCloture({
           type="submit"
           disabled={enCours}
           className={cn(
-            'press outlined bg-paper shadow-brut-xs min-h-11 cursor-pointer rounded-[10px] px-5 py-3',
+            'press outlined bg-paper shadow-brut-xs min-h-[44px] cursor-pointer rounded-[10px] px-5 py-3',
             'text-flame-texte text-[14px] font-bold disabled:cursor-wait disabled:opacity-70',
           )}
         >

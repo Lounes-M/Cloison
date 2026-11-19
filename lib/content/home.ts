@@ -46,21 +46,19 @@ export const marqueeItems = [
   'Plus jamais ça',
 ] as const
 
+/**
+ * La section rose sous le hero : un titre, sa suite, le constat, puis un
+ * second temps plus court.
+ */
 export const problem = {
-  eyebrow: 'Le problème',
-  conversation: {
-    from: 'WhatsApp · Tonton Marc',
-    messages: [
-      { fichier: 'bulletin_paie_mars.pdf' },
-      { fichier: 'avis_imposition_2025.pdf' },
-      { texte: "c'est bon là ??" },
-    ],
-    stamp: 'Rescanné. Refait.',
-  },
-  title: 'Un proche se porte caution. Ses papiers font le tour.',
+  titre: 'Un proche se porte caution.',
+  sousTitre: 'Ses papiers font le tour.',
   body: "Ses bulletins de paie sur ton WhatsApp. Son avis d'imposition dans ton Drive. Un acte imprimé, mal rempli, rescanné. Aider un proche à louer ne devrait pas ressembler à ça.",
-  punchline:
-    'Trois personnes gênées. Zéro processus. Et des documents sensibles qui traînent partout.',
+  suite: {
+    titre: 'Trois personnes gênées.',
+    texte:
+      'Zéro processus, et des documents sensibles qui traînent partout. Cloison donne à chacun son espace, et à personne les pièces des autres.',
+  },
 } as const
 
 /**
@@ -208,10 +206,22 @@ export const vision = {
   ],
   body: "Quelqu'un s'engage pour toi sans te montrer ses papiers. Même gêne, même besoin, même coffre.",
   useCases: [
-    { label: 'Caution bancaire', tone: 'paper', tilt: -2 },
-    { label: 'Hébergeant pour un visa', tone: 'sun', tilt: 1.5 },
-    { label: 'Parents pour le Crous', tone: 'mint', tilt: -1 },
-    { label: 'Grands-parents pour la crèche', tone: 'sky', tilt: 2 },
+    {
+      label: 'Caution bancaire',
+      texte: 'Garantir un prêt sans montrer ses comptes à tout le monde.',
+    },
+    {
+      label: 'Hébergeant pour un visa',
+      texte: 'Attester d’un hébergement en déposant ses pièces une seule fois.',
+    },
+    {
+      label: 'Parents pour le Crous',
+      texte: 'Appuyer le dossier d’un étudiant sans lui confier ses papiers.',
+    },
+    {
+      label: 'Grands-parents pour la crèche',
+      texte: 'Aider pour une place en gardant ses documents pour soi.',
+    },
   ],
   cta: 'Créer mon dossier',
 } as const

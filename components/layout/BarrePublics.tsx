@@ -14,9 +14,9 @@ export function BarrePublics() {
   const chemin = usePathname()
   return (
     <div className="bg-cobalt text-white">
-      <div className="mx-auto flex h-10 max-w-[1440px] items-center justify-between gap-4 px-4 text-[13px] md:px-6 md:text-sm">
+      <div className="flex h-[var(--entete-barre)] items-center justify-between gap-4 px-[1.7rem] text-[0.95rem] max-[479px]:px-4">
         <nav aria-label={barrePublics.aria} className="flex min-w-0 items-center gap-1">
-          <span className="mr-2 hidden opacity-80 sm:inline">{barrePublics.libelle}</span>
+          <span className="mr-2 hidden sm:inline">{barrePublics.libelle}</span>
           {barrePublics.liens.map((lien) => {
             const actif = lien.href === '/' ? chemin === '/' : chemin.startsWith(lien.href)
             return (
@@ -25,7 +25,7 @@ export function BarrePublics() {
                 href={lien.href as Route}
                 aria-current={actif ? 'page' : undefined}
                 className={cn(
-                  'rounded-full px-3 py-1 whitespace-nowrap transition-colors hover:bg-white/10',
+                  'rounded-full px-[0.9rem] py-2 text-[1rem] leading-none whitespace-nowrap transition-colors hover:bg-white/10 max-[479px]:text-[0.875rem]',
                   actif && 'bg-white/20 font-semibold hover:bg-white/20',
                   lien.href === '/questions' && 'hidden sm:inline',
                 )}
@@ -37,7 +37,7 @@ export function BarrePublics() {
         </nav>
         <Link
           href={barrePublics.connexion.href as Route}
-          className="hidden shrink-0 whitespace-nowrap underline-offset-4 opacity-90 hover:underline hover:opacity-100 sm:inline"
+          className="hidden shrink-0 whitespace-nowrap underline-offset-4 hover:underline sm:inline"
         >
           {barrePublics.connexion.label}
         </Link>

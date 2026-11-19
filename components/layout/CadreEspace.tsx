@@ -74,7 +74,7 @@ export function CadreEspace({
           <a
             key={lien.href}
             href={lien.href}
-            className="inline-flex min-h-11 items-center underline-offset-4 hover:underline"
+            className="inline-flex min-h-[44px] items-center underline-offset-4 hover:underline"
           >
             {lien.label}
           </a>

@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { cache } from 'react'
 
 import { FormulaireOuverture } from '@/components/forms/FormulaireOuverture'
-import { EnteteEspace } from '@/components/ui/EnteteEspace'
-import { Section } from '@/components/ui/Section'
+import { Button } from '@/components/ui/Button'
+import { EnTetePage } from '@/components/ui/EnTetePage'
 import { clientServeur } from '@/lib/acces/serveur'
 import { candidature as t } from '@/lib/content/candidature'
 import { euros } from '@/lib/content/tarifs'
@@ -88,61 +87,66 @@ export default async function PageCandidater({ params }: { params: Promise<{ cod
   if (!logement) {
     return (
       <main>
-        <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[720px]">
-          <EnteteEspace titre={t.page.invalideTitre} etiquette={t.page.etiquette} ton="sun">
-            <p>{t.page.invalideTexte}</p>
-          </EnteteEspace>
-          <Link
-            href="/demarrer"
-            className="press outlined bg-flame shadow-brut rounded-brut inline-block px-8 py-4 text-[17px] font-bold"
-          >
+        <EnTetePage
+          surtitre={t.page.etiquette}
+          titre={t.page.invalideTitre}
+          sousTitre={t.page.invalideTexte}
+        >
+          <Button href="/demarrer" className="mt-[2rem]">
             {t.page.invalideBouton}
-          </Link>
-        </Section>
+          </Button>
+        </EnTetePage>
       </main>
     )
   }
 
   return (
     <main>
-      <Section className="espace-shell bg-cream py-6 md:py-12" innerClassName="max-w-[720px]">
-        <EnteteEspace titre={t.page.titre} etiquette={t.page.etiquette} ton="mint">
-          <p>{t.page.intro(logement.agence)}</p>
-        </EnteteEspace>
-        <div className="panneau-espace">
-          <p className="font-display text-2xl">{logement.libelle}</p>
-          <dl className="mt-4 grid gap-3 text-[14px] sm:grid-cols-2">
+      <section data-premiere-section="sombre" className="passe-sous-entete bg-cobalt text-white">
+        <div className="gouttiere pt-[calc(var(--entete-total)+4.5rem)] pb-[6rem] max-[767px]:pt-[calc(var(--entete-total)+1.25rem)] max-[767px]:pb-[2.5rem]">
+          <div className="conteneur flex flex-col gap-[1.5rem] md:grid md:grid-cols-[1fr_32rem] md:items-start md:gap-[4rem]">
             <div>
-              <dt className="text-muted font-bold">{t.page.agence}</dt>
-              <dd className="font-semibold">{logement.agence}</dd>
-            </div>
-            {details(logement).map((d) => (
-              <div key={d.terme}>
-                <dt className="text-muted font-bold">{d.terme}</dt>
-                <dd className="font-semibold">{d.valeur}</dd>
+              <p className="texte-16 flex items-center gap-[0.6rem] font-semibold">
+                <span aria-hidden className="bg-flame size-[0.6rem] rounded-full" />
+                {t.page.etiquette}
+              </p>
+              <h1 className="titre-84 mt-[1rem]">{t.page.titre}</h1>
+              <p className="texte-24 mt-[1.5rem]">{t.page.intro(logement.agence)}</p>
+              <div className="mt-[2.5rem] border-t border-[#4e8478]">
+                <p className="texte-42 text-sun py-[1.5rem]">{logement.libelle}</p>
+                <dl className="grid border-t border-[#4e8478] sm:grid-cols-2">
+                  {[
+                    { terme: t.page.agence, valeur: logement.agence },
+                    ...details(logement),
+                    {
+                      terme: t.page.loyer,
+                      valeur:
+                        logement.loyer_cents == null
+                          ? t.page.sansLoyer
+                          : euros(Number(logement.loyer_cents)),
+                    },
+                  ].map((d) => (
+                    <div key={d.terme} className="border-b border-[#4e8478] py-[1rem]">
+                      <dt className="texte-14 opacity-80">{d.terme}</dt>
+                      <dd className="texte-22 mt-[0.25rem] font-semibold">{d.valeur}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
-            ))}
-            <div>
-              <dt className="text-muted font-bold">{t.page.loyer}</dt>
-              <dd className="font-semibold">
-                {logement.loyer_cents == null
-                  ? t.page.sansLoyer
-                  : euros(Number(logement.loyer_cents))}
-              </dd>
             </div>
-          </dl>
+            <div className="espace-shell bg-cream text-ink rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
+              <FormulaireOuverture candidature={{ code, agence: logement.agence }} />
+              <details className="aide-espace mt-6">
+                <summary>{t.page.dejaTitre}</summary>
+                <p className="mt-3 text-[14px] leading-relaxed">{t.page.dejaTexte}</p>
+                <p className="mt-3 text-[14px]">
+                  {t.page.code} : <code className="font-bold break-all">{code}</code>
+                </p>
+              </details>
+            </div>
+          </div>
         </div>
-        <div className="panneau-espace mt-6">
-          <FormulaireOuverture candidature={{ code, agence: logement.agence }} />
-        </div>
-        <details className="aide-espace mt-6">
-          <summary>{t.page.dejaTitre}</summary>
-          <p className="mt-3 text-[14px] leading-relaxed">{t.page.dejaTexte}</p>
-          <p className="mt-3 text-[14px]">
-            {t.page.code} : <code className="font-bold break-all">{code}</code>
-          </p>
-        </details>
-      </Section>
+      </section>
     </main>
   )
 }

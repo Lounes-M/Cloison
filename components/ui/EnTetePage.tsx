@@ -7,6 +7,8 @@ type EnTetePageProps = {
   titre: React.ReactNode
   sousTitre?: React.ReactNode
   children?: React.ReactNode
+  /** Grande photo arrondie sous le titre, comme les pages de la reference. */
+  visuel?: React.ReactNode
   className?: string
 }
 
@@ -14,11 +16,19 @@ type EnTetePageProps = {
  * Premiere section des pages interieures du site public : fond rose traverse
  * de rayons creme, tout centre. Elle passe sous l'en-tete fixe.
  */
-export function EnTetePage({ surtitre, titre, sousTitre, children, className }: EnTetePageProps) {
+export function EnTetePage({
+  surtitre,
+  titre,
+  sousTitre,
+  children,
+  visuel,
+  className,
+}: EnTetePageProps) {
   return (
     <section
       className={cn(
-        'passe-sous-entete bg-sun relative overflow-hidden px-4 pt-[calc(var(--entete-total)+3rem)] pb-20 text-center md:px-6 md:pt-[calc(var(--entete-total)+4rem)] md:pb-28',
+        'passe-sous-entete bg-sun gouttiere relative overflow-hidden pt-[calc(var(--entete-barre)+9.25rem)] pb-[7.5rem] text-center max-[479px]:pt-[calc(var(--entete-total)+3rem)] max-[479px]:pb-[3.75rem]',
+        visuel && 'pb-0 max-[479px]:pb-0',
         className,
       )}
     >
@@ -26,22 +36,31 @@ export function EnTetePage({ surtitre, titre, sousTitre, children, className }: 
         aria-hidden
         className="absolute inset-0 bg-[repeating-conic-gradient(from_0deg_at_50%_55%,var(--color-cream)_0deg_14deg,transparent_14deg_40deg)] opacity-70"
       />
-      <div className="relative mx-auto max-w-[64rem]">
-        {surtitre && (
-          <p className="animate-fade-up text-xs font-medium tracking-[0.06em] uppercase md:text-sm">
-            {surtitre}
-          </p>
-        )}
-        <h1 className="font-display animate-fade-up mt-4 text-[clamp(2.25rem,5.5vw,5.25rem)] leading-[1.08] text-balance [animation-delay:0.1s]">
+      <div className="relative mx-auto max-w-[54.75rem]">
+        {surtitre && <p className="animate-fade-up texte-14 uppercase">{surtitre}</p>}
+        <h1 className="titre-84 animate-fade-up mt-[1rem] text-balance [animation-delay:0.1s]">
           {titre}
         </h1>
         {sousTitre && (
-          <div className="animate-fade-up mx-auto mt-8 max-w-[44rem] text-base leading-relaxed font-medium [animation-delay:0.2s] md:text-xl">
+          <div className="animate-fade-up texte-24 mt-[2rem] [animation-delay:0.2s]">
             {sousTitre}
           </div>
         )}
-        {children && <div className="animate-fade-up mt-10 [animation-delay:0.3s]">{children}</div>}
+        {children && (
+          <div className="animate-fade-up mt-[2.5rem] [animation-delay:0.3s]">{children}</div>
+        )}
       </div>
+      {visuel && (
+        <div
+          aria-hidden
+          className="bg-cream absolute inset-x-0 bottom-0 h-[16rem] max-[479px]:h-[6rem]"
+        />
+      )}
+      {visuel && (
+        <div className="conteneur animate-fade-up relative mt-[4rem] [animation-delay:0.3s]">
+          {visuel}
+        </div>
+      )}
     </section>
   )
 }

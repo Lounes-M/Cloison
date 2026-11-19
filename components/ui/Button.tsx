@@ -11,9 +11,10 @@ const tones = {
   sun: 'bg-sun text-ink',
 } as const
 
+/** Hauteur de la commande : 3,25 rem comme la reference, jamais moins de 44 px. */
 const sizes = {
-  sm: 'text-sm [--bouton-h:2.75rem]',
-  md: 'text-base md:text-lg [--bouton-h:3.25rem] md:[--bouton-h:3.5rem]',
+  sm: 'text-sm font-semibold [--bouton-h:max(44px,2.75rem)]',
+  md: 'text-[1.125rem] leading-[1.4] font-semibold [--bouton-h:max(44px,3.25rem)] max-[479px]:text-[1rem]',
 } as const
 
 type CommonProps = {
@@ -68,7 +69,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const classes = cn(
-    'bouton group inline-flex max-w-full cursor-pointer items-stretch gap-1 text-left font-medium',
+    'bouton group inline-flex max-w-full cursor-pointer items-stretch gap-[0.22rem] text-left',
     sizes[size],
     className,
   )
@@ -80,7 +81,7 @@ export function Button({
       </span>
       <span
         className={cn(
-          'rounded-brut flex min-h-[var(--bouton-h)] items-center px-4 leading-tight md:px-5',
+          'rounded-brut flex min-h-[var(--bouton-h)] items-center px-[0.625rem] leading-tight',
           tones[tone],
         )}
       >

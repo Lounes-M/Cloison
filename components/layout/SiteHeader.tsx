@@ -35,16 +35,16 @@ export function SiteHeader() {
       <div className="entete-fond">
         <nav
           aria-label="Navigation principale"
-          className="relative mx-auto flex h-[var(--entete-nav)] max-w-[1440px] items-center justify-between gap-3 px-4 md:px-6"
+          className="gouttiere relative flex h-[var(--entete-nav)] items-center justify-between gap-3"
         >
-          <Logo className="entete-logo text-lg md:text-xl" />
+          <Logo className="entete-logo text-[1.6rem] max-[479px]:text-[1.4rem]" />
 
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-[0.375rem] lg:flex">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="bg-paper text-ink hover:text-cobalt rounded-brut inline-flex min-h-11 items-center px-3 text-[13px] font-semibold tracking-[0.02em] uppercase transition-colors"
+                className="bg-paper text-ink hover:text-cobalt rounded-brut inline-flex items-center p-[0.625rem] text-[0.875rem] leading-[1.4] font-semibold uppercase transition-colors"
               >
                 {link.label}
               </a>
@@ -52,7 +52,7 @@ export function SiteHeader() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button href="/demarrer" tone="paper" size="sm" className="hidden sm:inline-flex">
+            <Button href="/demarrer" tone="paper" className="hidden sm:inline-flex">
               {barrePublics.cta}
             </Button>
             <MenuMobile />

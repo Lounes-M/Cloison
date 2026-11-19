@@ -31,8 +31,11 @@ const cadrages: Record<(typeof spaces)[number]['id'], string> = {
 
 export function Espaces() {
   return (
-    <section aria-label={espacesAccueil.aria} className="bg-cream px-4 pb-24 md:px-6 md:pb-36">
-      <ol className="mx-auto max-w-[1280px]">
+    <section
+      aria-label={espacesAccueil.aria}
+      className="bg-cream gouttiere pt-[11.25rem] pb-[11.25rem] max-[767px]:py-[3.75rem]"
+    >
+      <ol className="conteneur">
         {spaces.map((space, index) => {
           const habillage = habillages[index % habillages.length]!
           const lien = espacesAccueil.liens[index % espacesAccueil.liens.length]!
@@ -40,34 +43,25 @@ export function Espaces() {
             <li
               key={space.id}
               className="md:sticky"
-              style={{ top: `calc(var(--entete-total) + ${1 + index * 3}rem)` }}
+              style={{ top: `calc(var(--entete-total) + ${1.5 + index * 2.5}rem)` }}
             >
               <article
                 className={cn(
-                  'rounded-carte mb-8 grid min-h-[70vh] overflow-hidden md:grid-cols-2',
+                  'rounded-carte mb-[1.5rem] grid overflow-hidden md:min-h-[37.6rem] md:grid-cols-[40.75rem_1fr]',
                   habillage.carte,
                 )}
               >
-                <div className="flex flex-col justify-center p-8 md:p-14">
-                  <p className="font-display text-3xl opacity-60 md:text-4xl">
+                <div className="flex flex-col px-[2.5rem] pt-[4.25rem] pb-[3rem] max-[479px]:px-6 max-[479px]:pt-8">
+                  <p className="texte-42 opacity-80">
                     {espacesAccueil.etape} {space.step}
                   </p>
-                  <h3
-                    className={cn(
-                      'font-display mt-2 text-[clamp(2rem,4vw,3.25rem)] leading-tight',
-                      habillage.titre,
-                    )}
-                  >
-                    {space.title}
-                  </h3>
-                  <p className="mt-5 max-w-[42ch] text-base leading-relaxed md:text-lg">
-                    {space.body}
-                  </p>
-                  <p className="mt-4 text-sm font-medium opacity-80">
+                  <h3 className={cn('texte-42 mt-[1.4rem]', habillage.titre)}>{space.title}</h3>
+                  <p className="mt-[1.1rem] max-w-[35.6rem]">{space.body}</p>
+                  <p className="texte-14 mt-[0.75rem] font-medium">
                     {space.footnote.left}
                     {'right' in space.footnote && ` · ${space.footnote.right}`}
                   </p>
-                  <div className="mt-8">
+                  <div className="mt-[2rem]">
                     <Button href={lien.href} tone="paper">
                       {lien.libelle}
                     </Button>
@@ -77,7 +71,7 @@ export function Espaces() {
                   src={`/accueil/espace-${space.id}.jpg`}
                   sizes="(min-width: 768px) 640px, 100vw"
                   cadrage={cadrages[space.id]}
-                  className="min-h-64 md:mt-10 md:-mr-6 md:-mb-6 md:rounded-tl-[3rem] md:[clip-path:polygon(8%_0,100%_14%,100%_100%,0_100%)]"
+                  className="min-h-64 md:mt-[4.25rem] md:rounded-tl-[2rem] md:[clip-path:polygon(8%_0,100%_14%,100%_100%,0_100%)]"
                 />
               </article>
             </li>

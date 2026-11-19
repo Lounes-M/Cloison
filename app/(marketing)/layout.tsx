@@ -21,7 +21,7 @@ import { interfaceEspace } from '@/lib/content/interface'
  */
 export default function LayoutMarketing({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div className="site-public">
       <a
         href="#contenu"
         className="bg-paper text-ink fixed top-3 left-3 z-[60] -translate-y-32 rounded-lg px-4 py-3 font-semibold shadow-lg focus:translate-y-0"
@@ -33,6 +33,6 @@ export default function LayoutMarketing({ children }: { children: React.ReactNod
         {children}
       </div>
       <SiteFooter />
-    </>
+    </div>
   )
 }

@@ -46,12 +46,12 @@ export default async function Page({
           {liste.map((a) => (
             <li className="panneau-espace" key={a.id}>
               <div className="flex items-start gap-4">
-                <span className="bg-sky/20 text-cobalt grid size-11 shrink-0 place-items-center rounded-xl">
+                <span className="bg-sky/20 text-cobalt grid size-[44px] shrink-0 place-items-center rounded-xl">
                   <Icone nom="acte" className="size-5" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <Link
-                    className="text-cobalt inline-flex min-h-11 items-center font-bold break-words underline-offset-4 hover:underline"
+                    className="text-cobalt inline-flex min-h-[44px] items-center font-bold break-words underline-offset-4 hover:underline"
                     href={`/espace/actes/${a.id}`}
                   >
                     {a.modele} · {new Date(a.archive_le).toLocaleDateString('fr-FR')}
