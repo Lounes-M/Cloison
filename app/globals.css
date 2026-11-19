@@ -1095,8 +1095,10 @@ html:has(.site-public) {
 /* Entree de la premiere section de l'accueil : le pan creme glisse depuis la
    droite, la bande orange monte, le nom en filigrane la suit. */
 @keyframes entree-pan {
+  /* Trois rem au plus : le pan reste sous le sous-titre pendant toute
+     l'entree, et le texte n'apparait qu'une fois le pan en place. */
   from {
-    transform: translateX(12%);
+    transform: translateX(3rem);
     opacity: 0;
   }
 }
@@ -1112,7 +1114,7 @@ html:has(.site-public) {
   }
 }
 .entree-pan {
-  animation: entree-pan 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: entree-pan 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .entree-hero {
   animation: entree-bande 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both;
