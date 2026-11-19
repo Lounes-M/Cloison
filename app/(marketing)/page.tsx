@@ -1,23 +1,23 @@
+import { Espaces } from '@/components/sections/Espaces'
 import { Hero } from '@/components/sections/Hero'
-import { Marquee } from '@/components/sections/Marquee'
+import { Intro } from '@/components/sections/Intro'
 import { Parcours } from '@/components/sections/Parcours'
-import { Pricing } from '@/components/sections/Pricing'
-import { Problem } from '@/components/sections/Problem'
+import { Pilote } from '@/components/sections/Pilote'
 import { Product } from '@/components/sections/Product'
-import { Vision } from '@/components/sections/Vision'
-import { WhyNow } from '@/components/sections/WhyNow'
+import { Pourquoi } from '@/components/sections/Pourquoi'
+import { Tarifs } from '@/components/sections/Tarifs'
 
 export default function HomePage() {
   return (
     <main>
       <Hero />
-      <Marquee />
-      <Problem />
+      <Intro />
       <Parcours />
+      <Espaces />
       <Product />
-      <Pricing />
-      <WhyNow />
-      <Vision />
+      <Pourquoi />
+      <Tarifs />
+      <Pilote />
     </main>
   )
 }

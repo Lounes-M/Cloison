@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { FormulaireAgence } from '@/components/forms/FormulaireAgence'
 import { ApercuDossier } from '@/components/sections/ApercuDossier'
+import { Button } from '@/components/ui/Button'
+import { Accent, EnTetePage } from '@/components/ui/EnTetePage'
 import { Icone } from '@/components/ui/Icone'
 import { LiveDot } from '@/components/ui/LiveDot'
 import { Reveal } from '@/components/ui/Reveal'
@@ -31,42 +33,35 @@ const TONS_APPORT = {
 export default function AgencesPage() {
   return (
     <main>
-      {/* HERO : le texte a gauche, ce qu'il decrit a droite */}
-      <Section
-        className="pt-16 pb-20"
-        innerClassName="grid grid-cols-1 items-center gap-14 md:grid-cols-[1.1fr_1fr]"
+      {/* HERO : rose a rayons, centre, puis l'apercu en grand */}
+      <EnTetePage
+        surtitre={heroAgences.eyebrow}
+        titre={
+          <>
+            {heroAgences.titre[0]} <Accent>{heroAgences.titre[1]}</Accent> {heroAgences.titre[2]}
+          </>
+        }
+        sousTitre={<p>{heroAgences.sousTitre}</p>}
       >
-        <div>
-          <p className="bg-ink text-sun animate-fade-up inline-block rounded-full px-5 py-2 text-[13px] font-bold tracking-[0.08em] uppercase">
-            {heroAgences.eyebrow}
-          </p>
-          <h1 className="font-display animate-fade-up mt-6 text-[clamp(2rem,5.5vw,56px)] leading-[1.04] uppercase [animation-delay:0.15s]">
-            {heroAgences.titre[0]} <span className="text-cobalt">{heroAgences.titre[1]}</span>
-            <br />
-            <span className="border-ink shadow-brut-sm bg-flame text-ink mt-2 inline-block -rotate-[1.5deg] rounded-xl border-[3px] px-4">
-              {heroAgences.titre[2]}
-            </span>
-          </h1>
-          <p className="animate-fade-up mt-7 max-w-[460px] text-[17px] leading-relaxed font-medium [animation-delay:0.3s]">
-            {heroAgences.sousTitre}
-          </p>
-          <div className="animate-fade-up mt-8 [animation-delay:0.45s]">
-            <a
-              href="#demander"
-              className="press bg-flame outlined rounded-brut shadow-brut text-ink inline-flex items-center justify-center px-8 py-4 text-base font-bold"
-            >
-              {heroAgences.ancreFormulaire} →
-            </a>
+        <div className="flex justify-center">
+          <Button href="#demander" tone="paper">
+            {heroAgences.ancreFormulaire}
+          </Button>
+        </div>
+      </EnTetePage>
+
+      <Section className="bg-cream pb-20">
+        <div className="bg-paper shadow-brut-lg rounded-carte relative z-10 -mt-12 grid place-items-center p-6 md:p-14">
+          <div className="w-full max-w-[560px]">
+            <ApercuDossier />
           </div>
         </div>
-
-        <ApercuDossier />
       </Section>
 
       {/* CE QUE ÇA COÛTE AUJOURD'HUI : une liste qui se lit, pas trois cartes */}
-      <Section className="border-ink bg-paper border-y-[3px] py-20">
+      <Section className="bg-cream py-20">
         <Reveal>
-          <h2 className="font-display text-flame-texte mb-10 text-[15px] tracking-[0.06em] uppercase">
+          <h2 className="font-display text-flame-texte mb-10 text-[15px] tracking-[0.06em]">
             {douleurs.eyebrow}
           </h2>
         </Reveal>
@@ -97,7 +92,7 @@ export default function AgencesPage() {
       </Section>
 
       {/* UN LIEN : bloc sombre, et la garantie occupe la quatrieme case */}
-      <Section className="bg-ink text-cream py-20">
+      <Section className="bg-cobalt rounded-carte py-24 text-white">
         <Reveal>
           <h2 className="font-display mb-12 text-[clamp(2rem,5vw,46px)]">
             {cequonapporte.titre[0]} <span className="text-sun">{cequonapporte.titre[1]}</span>
@@ -135,9 +130,7 @@ export default function AgencesPage() {
           <li>
             <Reveal delay={0.24} tilt={-1}>
               <div className="bg-sun text-ink border-ink shadow-brut h-full rounded-[18px] border-2 px-6 py-5">
-                <h3 className="font-display mb-2 text-[17px] uppercase">
-                  {cequonapporte.garantie.titre}
-                </h3>
+                <h3 className="font-display mb-2 text-[17px]">{cequonapporte.garantie.titre}</h3>
                 <p className="text-[14.5px] leading-relaxed font-medium">
                   {cequonapporte.garantie.texte}
                 </p>
@@ -212,7 +205,7 @@ export default function AgencesPage() {
       </Section>
 
       {/* TARIF : un ticket de caisse, parce que la dernière ligne est un zéro */}
-      <Section className="border-ink bg-paper border-t-[3px] py-20">
+      <Section className="bg-cream py-20">
         <div className="mx-auto grid max-w-[1000px] items-center gap-14 md:grid-cols-[1fr_400px]">
           <Reveal>
             <h2 className="font-display text-[clamp(2rem,5vw,48px)] leading-[1.05]">
@@ -227,7 +220,7 @@ export default function AgencesPage() {
           </Reveal>
 
           <Reveal className="relative" tilt={1}>
-            <span className="bg-flame border-ink font-display text-ink absolute -top-4 right-5.5 z-10 rotate-4 rounded-full border-2 px-3.5 py-1.5 text-[11px] uppercase">
+            <span className="bg-flame border-ink font-display text-ink absolute -top-4 right-5.5 z-10 rotate-4 rounded-full border-2 px-3.5 py-1.5 text-[11px]">
               {tarifAgence.tampon}
             </span>
             <div className="bg-cream border-ink shadow-brut rounded-t-md rounded-b-[18px] border-[2.5px] p-7">
@@ -236,7 +229,7 @@ export default function AgencesPage() {
                   CLOI
                   <span
                     aria-hidden
-                    className="bg-sun border-ink mx-0.5 inline-block h-[19px] w-[5px] rotate-6 rounded-[3px] border-[1.5px]"
+                    className="bg-flame mx-0.5 inline-block h-[17px] w-[5px] rotate-6 rounded-[3px]"
                   />
                   SON
                 </span>
@@ -259,7 +252,7 @@ export default function AgencesPage() {
                     <dd
                       className={cn(
                         'font-display text-base',
-                        'ton' in ligne && ligne.ton === 'vert' && 'text-[#158242]',
+                        'ton' in ligne && ligne.ton === 'vert' && 'text-cobalt',
                       )}
                     >
                       {ligne.valeur}
@@ -283,7 +276,7 @@ export default function AgencesPage() {
       {/* PILOTE : le bandeau qui amène au formulaire */}
       <Section
         contained={false}
-        className="bg-cobalt border-ink relative overflow-hidden border-t-[3px] py-18 text-white"
+        className="bg-cobalt rounded-carte relative overflow-hidden py-24 text-white"
       >
         <Icone
           nom="asterisque"
@@ -291,7 +284,7 @@ export default function AgencesPage() {
         />
         <div className="relative mx-auto max-w-[1000px] px-6 md:px-10">
           <Reveal>
-            <p className="bg-sun text-ink border-ink font-display inline-block -rotate-2 rounded-full border-2 px-4.5 py-1.5 text-xs uppercase">
+            <p className="bg-sun text-ink border-ink font-display inline-block -rotate-2 rounded-full border-2 px-4.5 py-1.5 text-xs">
               {formulaire.eyebrow}
             </p>
           </Reveal>

@@ -27,7 +27,7 @@ export async function SuiviSignature({
     .safeParse(r.data)
   return (
     <section className="panneau-espace mt-8">
-      <h2 className="font-display text-2xl uppercase">{t.titre}</h2>
+      <h2 className="font-display text-2xl">{t.titre}</h2>
       {r.error || !liste.success ? (
         <p>{t.erreur}</p>
       ) : (

@@ -3,35 +3,30 @@ import { footerLinks, site } from '@/lib/site'
 
 export function SiteFooter() {
   return (
-    <footer className="bg-ink text-cream overflow-hidden px-6 pt-12 pb-9 md:px-10">
-      <div className="mx-auto flex max-w-[1200px] flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-        <Logo variant="inverse" className="text-lg" />
+    <footer className="bg-cobalt text-white">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-8 md:px-6 lg:flex-row lg:items-center lg:justify-between">
+        <p className="flex items-center gap-3 text-sm">
+          <Logo variant="inverse" className="text-base" />
+          <span className="opacity-80">{site.tagline}</span>
+        </p>
         <nav
           aria-label="Navigation de pied de page"
-          className="grid grid-cols-2 gap-x-6 gap-y-1 text-[13.5px] font-semibold sm:flex sm:flex-wrap"
+          className="flex flex-wrap gap-x-6 gap-y-1 text-sm"
         >
           {footerLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-cream/80 hover:text-sun focus-visible:outline-sun inline-flex min-h-11 items-center underline-offset-4 transition-colors hover:underline"
+              className="focus-visible:outline-sun inline-flex min-h-11 items-center underline underline-offset-4 opacity-90 transition-opacity hover:opacity-100"
             >
               {link.label}
             </a>
           ))}
         </nav>
+        <p className="text-sm opacity-80">
+          © {new Date().getFullYear()} {site.name}
+        </p>
       </div>
-
-      {/* Lettrage geant en contour seul : signature de bas de page. Le logotype
-          decoratif est genere en CSS pour rester hors du texte de la page. */}
-      <div
-        aria-hidden
-        className="font-display mt-9 text-center text-[clamp(3rem,18vw,150px)] leading-none text-transparent select-none [-webkit-text-stroke:2px_#3a3a3a] before:content-['CLOISON']"
-      />
-
-      <p className="text-cream/70 mx-auto mt-6 max-w-[1200px] border-t border-white/15 pt-6 text-xs leading-relaxed">
-        © {new Date().getFullYear()} {site.name} · {site.tagline}.
-      </p>
     </footer>
   )
 }

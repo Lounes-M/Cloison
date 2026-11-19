@@ -14,6 +14,9 @@ import { cn } from '@/lib/utils'
  */
 
 const traces = {
+  /** Fleche de bouton : aller plus loin. */
+  fleche: <path d="M4 12h15M13 6l6 6-6 6" />,
+
   /** Passage vers une autre perspective. */
   direction: <path d="M5 19 19 5M5 5h14v14" />,
 

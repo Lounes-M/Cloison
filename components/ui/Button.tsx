@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import type { Route } from 'next'
+import { Icone } from '@/components/ui/Icone'
 import { cn } from '@/lib/utils'
 
+/** Couleur de l'etiquette. La case de la fleche reste orange, sauf sur `flame`. */
 const tones = {
   cobalt: 'bg-cobalt text-white',
   flame: 'bg-flame text-ink',
@@ -10,8 +12,8 @@ const tones = {
 } as const
 
 const sizes = {
-  sm: 'px-5 py-2.5 text-sm rounded-[10px] shadow-brut-xs',
-  md: 'px-8 py-4 text-[17px] rounded-brut shadow-brut',
+  sm: 'text-sm [--bouton-h:2.75rem]',
+  md: 'text-base md:text-lg [--bouton-h:3.25rem] md:[--bouton-h:3.5rem]',
 } as const
 
 type CommonProps = {
@@ -51,8 +53,9 @@ type InerteProps = CommonProps & {
 type ButtonProps = LinkProps | ActionProps | InerteProps
 
 /**
- * CTA « neo-brutaliste » : contour plein, ombre decalee qui se retracte au survol
- * pendant que le bouton glisse de 4 px : il s'enfonce litteralement dans la page.
+ * Le bouton de la marque : une etiquette pleine et, collee a elle, une case
+ * orange qui porte la fleche. Au survol, la fleche passe de l'autre cote de
+ * l'etiquette : le mouvement dit qu'on avance, sans rien deplacer d'autre.
  *
  * Rend l'element juste : `<button>` pour une action, `<a>` pour une ancre de la
  * meme page (rien a prefetcher), `<Link>` pour une vraie navigation.
@@ -65,16 +68,34 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const classes = cn(
-    'press inline-flex min-h-11 max-w-full cursor-pointer items-center justify-center text-center font-bold outlined',
-    tones[tone],
+    'bouton group inline-flex max-w-full cursor-pointer items-stretch gap-1 text-left font-medium',
     sizes[size],
     className,
+  )
+  const fleche = tone === 'flame' ? 'bg-ink text-white' : 'bg-flame text-white'
+  const content = (
+    <>
+      <span aria-hidden className={cn('bouton-fleche bouton-fleche-avant', fleche)}>
+        <Icone nom="fleche" />
+      </span>
+      <span
+        className={cn(
+          'rounded-brut flex min-h-[var(--bouton-h)] items-center px-4 leading-tight md:px-5',
+          tones[tone],
+        )}
+      >
+        {children}
+      </span>
+      <span aria-hidden className={cn('bouton-fleche bouton-fleche-apres', fleche)}>
+        <Icone nom="fleche" />
+      </span>
+    </>
   )
 
   if ('inerte' in rest) {
     return (
       <button type="button" className={classes}>
-        {children}
+        {content}
       </button>
     )
   }
@@ -82,7 +103,7 @@ export function Button({
   if (rest.onClick) {
     return (
       <button type={rest.type ?? 'button'} onClick={rest.onClick} className={classes}>
-        {children}
+        {content}
       </button>
     )
   }
@@ -90,14 +111,14 @@ export function Button({
   if (rest.href.startsWith('#')) {
     return (
       <a href={rest.href} className={classes}>
-        {children}
+        {content}
       </a>
     )
   }
 
   return (
     <Link href={rest.href as Route} className={classes}>
-      {children}
+      {content}
     </Link>
   )
 }

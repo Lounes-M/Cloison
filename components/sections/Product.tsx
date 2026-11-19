@@ -7,14 +7,18 @@ import { product, spaces, productViews } from '@/lib/content/home'
 /** Une seule scene, trois perspectives. Les radios restent utilisables sans JavaScript. */
 export function Product() {
   return (
-    <Section id="produit" className="border-ink/15 bg-paper border-y py-16 md:py-22">
+    <Section
+      id="produit"
+      className="bg-cream py-24 md:py-36"
+      innerClassName="mx-auto max-w-[1280px]"
+    >
       <Reveal className="mb-11 flex flex-wrap items-end justify-between gap-8">
-        <h2 className="font-display text-[clamp(2rem,5vw,46px)]">
+        <h2 className="font-display text-[clamp(2.5rem,6vw,6.5rem)] leading-[1.05]">
           {product.headline[0]}
           <br />
           <span className="text-cobalt">{product.headline[1]}</span>
         </h2>
-        <p className="max-w-[380px] text-base leading-relaxed font-semibold">{product.intro}</p>
+        <p className="max-w-[380px] text-base leading-relaxed md:text-lg">{product.intro}</p>
       </Reveal>
       <div className="vues-produit">
         <fieldset className="min-w-0">
@@ -102,7 +106,7 @@ export function Product() {
         </div>
       </div>
       <p className="text-muted mt-10 max-w-[850px] text-sm leading-relaxed">
-        {product.outro} <span className="text-ink font-bold">{product.outroHighlight}</span>
+        {product.outro} <span className="text-ink font-semibold">{product.outroHighlight}</span>
       </p>
     </Section>
   )

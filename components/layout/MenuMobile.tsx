@@ -1,11 +1,14 @@
 'use client'
 
 import { useRef } from 'react'
+import { barrePublics, navigationMobile } from '@/lib/content/navigation'
 import { navLinks } from '@/lib/site'
-import { navigationMobile } from '@/lib/content/navigation'
 
 export function MenuMobile() {
   const menu = useRef<HTMLDetailsElement>(null)
+  const fermer = () => {
+    if (menu.current) menu.current.open = false
+  }
   return (
     <details
       ref={menu}
@@ -18,22 +21,27 @@ export function MenuMobile() {
         }
       }}
     >
-      <summary className="bg-sun min-h-11 cursor-pointer rounded-lg px-2 py-3 text-xs font-bold sm:px-3 sm:text-sm">
+      <summary className="bg-paper text-ink rounded-brut flex min-h-11 cursor-pointer items-center px-4 text-[13px] font-semibold tracking-[0.02em] uppercase">
         {navigationMobile.menu}
       </summary>
-      <div className="bg-paper outlined shadow-brut-sm absolute top-full right-0 left-0 mt-3 grid max-h-[70dvh] gap-1 overflow-y-auto rounded-xl p-3">
+      <div className="bg-paper rounded-brut-lg shadow-brut-lg absolute top-full right-4 left-4 mt-2 grid max-h-[70dvh] gap-1 overflow-y-auto p-3">
         {navLinks.map((link) => (
           <a
             key={link.href}
             href={link.href}
-            onClick={() => {
-              if (menu.current) menu.current.open = false
-            }}
-            className="hover:bg-sun rounded-lg px-4 py-3 text-sm font-semibold"
+            onClick={fermer}
+            className="hover:bg-cream rounded-brut px-4 py-3 text-sm font-semibold tracking-[0.02em] uppercase"
           >
             {link.label}
           </a>
         ))}
+        <a
+          href="/demarrer"
+          onClick={fermer}
+          className="bg-flame text-ink rounded-brut mt-2 px-4 py-3 text-sm font-semibold"
+        >
+          {barrePublics.cta}
+        </a>
       </div>
     </details>
   )

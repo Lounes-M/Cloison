@@ -55,7 +55,7 @@ export function ApercuDossier() {
                 <span
                   aria-hidden="true"
                   data-filigrane={apercuDossier.filigrane}
-                  className="font-display text-ink/15 absolute top-1.5 right-16 -rotate-12 text-[10px] tracking-[0.2em] uppercase before:content-[attr(data-filigrane)]"
+                  className="font-display text-ink/15 absolute top-1.5 right-16 -rotate-12 text-[10px] tracking-[0.2em] before:content-[attr(data-filigrane)]"
                 />
                 <Icone nom="coche" className="text-live size-3.5" />
               </div>

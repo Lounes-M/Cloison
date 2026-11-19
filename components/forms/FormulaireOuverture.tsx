@@ -37,7 +37,7 @@ export function FormulaireOuverture({
         tabIndex={-1}
         className="bg-mint outlined shadow-brut rounded-[18px] p-8 text-center"
       >
-        <p className="font-display text-2xl uppercase">{porte.succesTitre}</p>
+        <p className="font-display text-2xl">{porte.succesTitre}</p>
         <p className="mx-auto mt-3 max-w-[380px] text-[15px] leading-relaxed font-medium">
           {porte.succesTexte}
         </p>

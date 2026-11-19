@@ -109,7 +109,7 @@ export default async function PageEspace({
     if (rattachement.etat === 'nom-requis') {
       return (
         <div className="page-espace w-full max-w-[440px]">
-          <h1 className="font-display text-3xl uppercase md:text-4xl">
+          <h1 className="font-display text-3xl md:text-4xl">
             {textesRattachement.nomRequis.titre}
           </h1>
           <p className="text-muted mt-3 mb-8 text-[15px] leading-relaxed font-medium">
@@ -125,7 +125,7 @@ export default async function PageEspace({
     if (rattachement.etat === 'en-attente') {
       return (
         <div className="page-espace w-full max-w-[440px] text-center">
-          <h1 className="font-display text-3xl uppercase">{collaborateurs.demande.titre}</h1>
+          <h1 className="font-display text-3xl">{collaborateurs.demande.titre}</h1>
           <p className="mt-4 text-[15px] leading-relaxed font-medium">
             {collaborateurs.demande.texte(email.split('@')[1] ?? '')}
           </p>
@@ -137,7 +137,7 @@ export default async function PageEspace({
     if (rattachement.etat === 'refus') {
       return (
         <div className="page-espace w-full max-w-[440px] text-center">
-          <h1 className="font-display text-3xl uppercase">{textesRattachement.refus.titre}</h1>
+          <h1 className="font-display text-3xl">{textesRattachement.refus.titre}</h1>
           <p className="mt-4 text-[15px] leading-relaxed font-medium">{rattachement.message}</p>
           <p className="text-muted mt-4 text-[14px] font-medium">{textesRattachement.refus.aide}</p>
         </div>
@@ -146,7 +146,7 @@ export default async function PageEspace({
 
     return (
       <div className="page-espace w-full max-w-[440px] text-center">
-        <h1 className="font-display text-3xl uppercase">{textesRattachement.panne.titre}</h1>
+        <h1 className="font-display text-3xl">{textesRattachement.panne.titre}</h1>
         <p className="text-muted mt-4 text-[15px] font-medium">{textesRattachement.panne.texte}</p>
       </div>
     )
@@ -252,7 +252,7 @@ export default async function PageEspace({
 
   return (
     <div className="page-espace w-full max-w-[1040px] self-start">
-      <h1 className="font-display text-3xl uppercase md:text-4xl">{agence.nom}</h1>
+      <h1 className="font-display text-3xl md:text-4xl">{agence.nom}</h1>
       <p className="text-muted mt-2 text-[14px] font-medium">
         Connecté en tant que <strong className="text-ink">{email}</strong>
         {role === 'admin' ? ', administrateur' : ''}.
@@ -290,11 +290,11 @@ export default async function PageEspace({
 
       {!verifiee ? (
         <div className="bg-sun outlined shadow-brut mt-8 rounded-[18px] p-6">
-          <p className="font-display text-xl uppercase">{tableau.nonVerifieeTitre}</p>
+          <p className="font-display text-xl">{tableau.nonVerifieeTitre}</p>
           <p className="mt-3 text-[15px] leading-relaxed font-medium">{tableau.nonVerifieeTexte}</p>
 
           <div className="border-ink mt-6 border-t-2 pt-6">
-            <p className="font-display text-lg uppercase">{activation.titre}</p>
+            <p className="font-display text-lg">{activation.titre}</p>
             <p className="mt-2 mb-5 text-[14px] leading-relaxed font-medium">{activation.texte}</p>
             {agence.activationDemandeeLe ? (
               <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
@@ -730,13 +730,13 @@ export default async function PageEspace({
       ) : null}
       <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
         <div>
-          <h2 className="font-display text-2xl uppercase">{tableau.nouveau}</h2>
+          <h2 className="font-display text-2xl">{tableau.nouveau}</h2>
           <div className="mt-6">
             <FormulaireNouveauDossier verifiee={verifiee} />
           </div>
 
           <div className="bg-sky outlined shadow-brut mt-10 rounded-[18px] p-6">
-            <p className="font-display text-lg uppercase">{tableau.demoTitre}</p>
+            <p className="font-display text-lg">{tableau.demoTitre}</p>
             <p className="mt-2 text-[14px] leading-relaxed font-medium">{tableau.demoAide}</p>
             {/* Une action serveur sans etat : elle se termine toujours par une
                 redirection, vers le dossier de demonstration ou vers l'espace. */}
@@ -752,7 +752,7 @@ export default async function PageEspace({
         </div>
 
         <div>
-          <h2 className="font-display text-2xl uppercase">{tableau.seuilTitre}</h2>
+          <h2 className="font-display text-2xl">{tableau.seuilTitre}</h2>
           <p className="text-muted mt-2 mb-6 text-[13px] leading-relaxed font-medium">
             {tableau.seuilAide}
           </p>

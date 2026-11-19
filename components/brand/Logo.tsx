@@ -10,7 +10,7 @@ type LogoProps = {
 }
 
 /**
- * Le logo Cloison est du texte, pas une image : Archivo Black + une barre CSS.
+ * Le logo Cloison est du texte, pas une image : Poppins demi-gras + une barre orange en CSS.
  * Il reste vectoriel à toute taille, pèse 0 Ko et hérite de la couleur du fond.
  * Sa taille se règle uniquement via `font-size` (classe `text-*`).
  */
@@ -20,10 +20,7 @@ export function Logo({ variant = 'default', asLink = true, className }: LogoProp
       CLOI
       <span
         aria-hidden
-        className={cn(
-          'bg-sun mx-[0.08em] inline-block h-[1.25em] w-[0.32em] rotate-6 rounded-[0.16em] border-[0.07em]',
-          variant === 'inverse' ? 'border-cream' : 'border-ink',
-        )}
+        className="bg-flame mx-[0.08em] inline-block h-[1.1em] w-[0.28em] rotate-6 rounded-[0.14em]"
       />
       SON
     </>

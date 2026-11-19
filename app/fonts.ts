@@ -1,22 +1,18 @@
-import { Archivo, Archivo_Black } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 
 /**
- * Les deux faces de la marque, partagees par le layout racine et par
- * `global-error.tsx`, qui remplace ce layout et doit donc les redeclarer.
+ * La face de la marque, partagee par le layout racine et par
+ * `global-error.tsx`, qui remplace ce layout et doit donc la redeclarer.
+ *
+ * Poppins, en quatre graisses : 400 pour le texte, 500 et 600 pour les
+ * titres et les boutons, 700 pour les rares mises en avant.
  */
-
-export const archivo = Archivo({
+export const poppins = Poppins({
   subsets: ['latin'],
-  variable: '--font-archivo',
-  display: 'swap',
-})
-
-export const archivoBlack = Archivo_Black({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-archivo-black',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins',
   display: 'swap',
 })
 
 /** A poser sur `<html>` pour exposer les variables CSS de police. */
-export const fontVariables = `${archivo.variable} ${archivoBlack.variable}`
+export const fontVariables = poppins.variable

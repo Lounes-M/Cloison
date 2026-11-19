@@ -55,7 +55,7 @@ export async function AttributionsGroupees({
   })
   return (
     <section id="attributions" className="panneau-espace mt-8">
-      <h2 className="font-display text-xl uppercase">{t.lotTitre}</h2>
+      <h2 className="font-display text-xl">{t.lotTitre}</h2>
       <p className="mt-2 text-sm">{t.lotAide}</p>
       {!disponible ? (
         <p role="status" className="mt-3">

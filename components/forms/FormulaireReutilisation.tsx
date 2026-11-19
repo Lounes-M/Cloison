@@ -27,7 +27,7 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
   }
   return (
     <section className="bg-sky outlined shadow-brut mt-8 rounded-[18px] p-5">
-      <h3 className="font-display text-xl uppercase">{texte.titre}</h3>
+      <h3 className="font-display text-xl">{texte.titre}</h3>
       <p className="mt-3 text-sm leading-relaxed">{texte.aide}</p>
       <p className="mt-3 text-sm leading-relaxed">{texte.separation}</p>
       <form
