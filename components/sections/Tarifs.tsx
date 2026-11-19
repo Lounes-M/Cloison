@@ -1,12 +1,15 @@
 import { Reveal } from '@/components/ui/Reveal'
-import { pricing } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, type Langue } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
  * Qui paie quoi : une ligne par personne. Au centre, le prix dans un pan
  * incline, a l'endroit ou la charte pose une photo ; a droite, le detail.
  */
-export function Tarifs() {
+export function Tarifs({ langue = 'fr' }: { langue?: Langue }) {
+  const { pricing } = choisir(langue, fr, en)
   const lignes = [
     ...pricing.plans.map((plan) => ({ ...plan, regle: undefined })),
     { ...pricing.goldenRule, regle: pricing.goldenRule.tag },

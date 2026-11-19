@@ -6,10 +6,15 @@
 
 import { commentCaMarche } from './agences'
 import { prixLocataire, prixActe } from './tarifs'
-import { pilote } from './pilote'
 
 export const hero = {
-  eyebrow: pilote.statut,
+  eyebrow: 'Trois espaces',
+  /** Le titre en trois morceaux, celui du milieu en couleur. */
+  titre: [
+    'Ton garant t\u2019aide. Il ne te doit',
+    'ni sa fiche de paie',
+    ', ni une signature à l\u2019aveugle.',
+  ],
   badges: [
     { label: 'accès par lien', tone: 'sun', position: 'top-[70px] left-[6%]', tilt: -8, delay: 0 },
     {
@@ -142,7 +147,6 @@ export const parcours = {
         },
       ],
       cta: { label: 'Créer mon dossier', href: '/demarrer' },
-      note: pilote.signature,
     },
     {
       id: 'agence',
@@ -157,8 +161,8 @@ export const product = {
   headline: ['Chacun sa vue.', "Rien d'autre."],
   intro:
     'Trois espaces séparés pour préparer le dossier de caution, transmettre les pièces et examiner la demande.',
-  outro: pilote.signature,
-  outroHighlight: 'Un pilote accompagné.',
+  outro: 'Un même dossier, trois accès. Chaque consultation de pièce laisse une trace.',
+  outroHighlight: 'Rien ne sort de son espace.',
 } as const
 export const pricing = {
   headline: ['Qui paie', 'quoi ?'],
@@ -171,7 +175,7 @@ export const pricing = {
     {
       audience: "L'agence",
       price: 'Gratuit pour lire',
-      detail: `${prixActe} par acte signé et archivé, lorsque la signature sera disponible`,
+      detail: `${prixActe} par acte signé et archivé`,
     },
   ],
   goldenRule: {
@@ -189,12 +193,11 @@ export const whyNow = {
 } as const
 
 export const goToMarket = {
-  eyebrow: 'Objectifs du pilote',
-  body: 'Nous préparons un pilote avec des agences pour confronter le coffre aux besoins réels de la location.',
+  eyebrow: 'Cloison en chiffres',
   metrics: [
-    { value: '3', label: 'villes tendues' },
-    { value: '20', label: 'agences pilotes' },
-    { value: '6', label: 'mois' },
+    { value: '3', label: 'espaces séparés' },
+    { value: '7', label: 'jours par lien' },
+    { value: '3', label: 'mois de conservation' },
   ],
 } as const
 

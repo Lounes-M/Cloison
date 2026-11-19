@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/Button'
 import { Icone, type NomIcone } from '@/components/ui/Icone'
 import { Reveal } from '@/components/ui/Reveal'
-import { vision, whyNow } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, lien, type Langue } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /** Une carte par cas d'usage : couleurs, inclinaison, decalage, icone. */
@@ -47,7 +49,8 @@ const cartes: {
  * engagements qu'un proche prend pour quelqu'un. Le nom du produit passe en
  * filigrane geant derriere les cartes.
  */
-export function Pourquoi() {
+export function Pourquoi({ langue = 'fr' }: { langue?: Langue }) {
+  const { vision, whyNow } = choisir(langue, fr, en)
   return (
     <section className="bg-cream gouttiere section-espace overflow-hidden">
       <div className="conteneur grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_39.4rem]">
@@ -105,7 +108,7 @@ export function Pourquoi() {
         </p>
         <p className="mt-[1.25rem]">{vision.body}</p>
         <div className="mt-[2.5rem] flex justify-center">
-          <Button href="/demarrer" tone="paper">
+          <Button href={lien(langue, '/demarrer')} tone="paper">
             {vision.cta}
           </Button>
         </div>

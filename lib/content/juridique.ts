@@ -17,8 +17,7 @@ export const versionConditions = 'conditions-2026-10-21'
 
 export const juridique = {
   aCompleter: 'À compléter',
-  avertissementIncomplet:
-    'Certaines informations sur l’éditeur sont en cours de publication. Elles figureront ici avant l’ouverture du service au public.',
+  avertissementIncomplet: 'Certaines informations sur l’éditeur sont en cours de publication.',
   miseAJour: 'Dernière mise à jour : 21 octobre 2026.',
   navigation: 'Informations légales',
   liens: {
@@ -203,7 +202,7 @@ export const conditions = {
       id: 'responsabilite',
       titre: 'Disponibilité et responsabilité',
       paragraphes: [
-        'Cloison est en phase de pilote. Le service peut être interrompu pour maintenance. Cloison met en œuvre les mesures décrites dans la page Confidentialité pour protéger les pièces ; sa responsabilité ne couvre pas la décision prise par l’agence ni le contenu des pièces déposées.',
+        'Le service peut être interrompu pour maintenance. Cloison met en œuvre les mesures décrites dans la page Confidentialité pour protéger les pièces ; sa responsabilité ne couvre pas la décision prise par l’agence ni le contenu des pièces déposées.',
       ],
     },
     {

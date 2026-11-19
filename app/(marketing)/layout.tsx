@@ -1,6 +1,4 @@
-import { SiteFooter } from '@/components/layout/SiteFooter'
-import { SiteHeader } from '@/components/layout/SiteHeader'
-import { interfaceEspace } from '@/lib/content/interface'
+import { ChromePublic } from '@/components/layout/ChromePublic'
 
 /**
  * Le site public : accueil et page agences.
@@ -20,19 +18,5 @@ import { interfaceEspace } from '@/lib/content/interface'
  * connait pas.
  */
 export default function LayoutMarketing({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="site-public">
-      <a
-        href="#contenu"
-        className="bg-paper text-ink fixed top-3 left-3 z-[60] inline-flex min-h-[44px] -translate-y-32 items-center rounded-lg px-4 py-3 font-semibold shadow-lg focus:translate-y-0"
-      >
-        {interfaceEspace.principal}
-      </a>
-      <SiteHeader />
-      <div id="contenu" tabIndex={-1} className="sous-entete-fixe">
-        {children}
-      </div>
-      <SiteFooter />
-    </div>
-  )
+  return <ChromePublic langue="fr">{children}</ChromePublic>
 }

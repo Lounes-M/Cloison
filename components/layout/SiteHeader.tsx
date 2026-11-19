@@ -5,8 +5,11 @@ import { Logo } from '@/components/brand/Logo'
 import { Button } from '@/components/ui/Button'
 import { BarrePublics } from '@/components/layout/BarrePublics'
 import { MenuMobile } from '@/components/layout/MenuMobile'
-import { barrePublics } from '@/lib/content/navigation'
-import { navLinks } from '@/lib/site'
+import * as navEn from '@/lib/content/en/navigation'
+import * as siteEn from '@/lib/content/en/site'
+import * as navFr from '@/lib/content/navigation'
+import { choisir, lien, type Langue } from '@/lib/i18n'
+import * as siteFr from '@/lib/site'
 
 /**
  * En-tete du site public, pose par-dessus la premiere section.
@@ -15,7 +18,9 @@ import { navLinks } from '@/lib/site'
  * JavaScript pose `data-defile` ; la couleur du logo au repos se regle en CSS
  * selon la premiere section de la page (voir `.entete` dans globals.css).
  */
-export function SiteHeader() {
+export function SiteHeader({ langue = 'fr' }: { langue?: Langue }) {
+  const { barrePublics } = choisir(langue, navFr, navEn)
+  const { navLinks, chrome } = choisir(langue, siteFr, siteEn)
   const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -31,19 +36,19 @@ export function SiteHeader() {
 
   return (
     <header ref={ref} className="entete fixed inset-x-0 top-0 z-50">
-      <BarrePublics />
+      <BarrePublics langue={langue} />
       <div className="entete-fond">
         <nav
-          aria-label="Navigation principale"
+          aria-label={chrome.navigationPrincipale}
           className="gouttiere relative flex h-[var(--entete-nav)] items-center justify-between gap-3"
         >
-          <Logo className="entete-logo text-[1.6rem] max-[479px]:text-[1.4rem]" />
+          <Logo langue={langue} className="entete-logo text-[1.6rem] max-[479px]:text-[1.4rem]" />
 
           <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-[0.375rem] lg:flex">
             {navLinks.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={lien(langue, link.href)}
                 className="bg-paper text-ink hover:text-cobalt rounded-brut inline-flex items-center p-[0.625rem] text-[0.875rem] leading-[1.4] font-semibold uppercase transition-colors"
               >
                 {link.label}
@@ -52,10 +57,10 @@ export function SiteHeader() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button href="/demarrer" tone="paper" className="hidden sm:inline-flex">
+            <Button href={lien(langue, '/demarrer')} tone="paper" className="hidden sm:inline-flex">
               {barrePublics.cta}
             </Button>
-            <MenuMobile />
+            <MenuMobile langue={langue} />
           </div>
         </nav>
       </div>

@@ -1,10 +1,15 @@
 'use client'
 
 import { useRef } from 'react'
-import { barrePublics, navigationMobile } from '@/lib/content/navigation'
-import { navLinks } from '@/lib/site'
+import * as navEn from '@/lib/content/en/navigation'
+import * as siteEn from '@/lib/content/en/site'
+import * as navFr from '@/lib/content/navigation'
+import { choisir, lien, type Langue } from '@/lib/i18n'
+import * as siteFr from '@/lib/site'
 
-export function MenuMobile() {
+export function MenuMobile({ langue = 'fr' }: { langue?: Langue }) {
+  const { barrePublics, navigationMobile } = choisir(langue, navFr, navEn)
+  const { navLinks } = choisir(langue, siteFr, siteEn)
   const menu = useRef<HTMLDetailsElement>(null)
   const fermer = () => {
     if (menu.current) menu.current.open = false
@@ -28,7 +33,7 @@ export function MenuMobile() {
         {navLinks.map((link) => (
           <a
             key={link.href}
-            href={link.href}
+            href={lien(langue, link.href)}
             onClick={fermer}
             className="hover:bg-cream rounded-brut flex min-h-[44px] items-center px-4 py-3 text-[0.875rem] font-semibold tracking-[0.02em] uppercase"
           >
@@ -36,7 +41,7 @@ export function MenuMobile() {
           </a>
         ))}
         <a
-          href="/demarrer"
+          href={lien(langue, '/demarrer')}
           onClick={fermer}
           className="bg-flame text-ink rounded-brut mt-2 flex min-h-[44px] items-center px-4 py-3 text-[1rem] font-semibold"
         >

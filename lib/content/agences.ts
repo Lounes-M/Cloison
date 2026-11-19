@@ -7,10 +7,9 @@
  */
 
 import { prixActe } from './tarifs'
-import { pilote } from './pilote'
 
 export const heroAgences = {
-  eyebrow: 'Pilote pour les agences',
+  eyebrow: 'Pour les agences',
   titre: ['La caution vous arrive', 'complète.', 'Ou pas du tout.'],
   sousTitre:
     'Les pièces du garant sont réunies dans un espace séparé. Vous les consultez filigranées, avec un ratio calculé à partir du revenu déclaré. Vous restez responsable de leur examen.',
@@ -58,8 +57,9 @@ export const cequonapporte = {
     },
     {
       ton: 'sky',
-      titre: 'La signature, prochaine étape',
-      texte: pilote.signature,
+      titre: 'Un acte signé et archivé',
+      texte:
+        'L’acte de cautionnement se signe en ligne, puis s’archive avec sa preuve, à part des justificatifs.',
     },
   ],
   garantie: {
@@ -117,23 +117,50 @@ export const tarifAgence = {
   entete: 'tarif agences',
   lignes: [
     { libelle: 'Consulter un dossier', valeur: 'Gratuit', ton: 'vert' },
-    { libelle: 'Signature à venir, par acte signé et archivé', valeur: prixActe },
+    { libelle: 'Par acte signé et archivé', valeur: prixActe },
     { libelle: 'Engagement de durée', valeur: 'Aucun' },
   ],
   total: { libelle: 'Le garant', valeur: '0 €' },
 } as const
 
 export const formulaire = {
-  eyebrow: 'Pilote',
-  titre: ['Notre objectif :', 'vingt agences pilotes.'],
+  eyebrow: 'Démonstration',
+  titre: ['Voyez-le sur', 'un dossier réel.'],
   sousTitre:
-    "Trois villes tendues, six mois, un accompagnement direct. En échange, on veut vos retours sans filtre : c'est ce qui construit le produit.",
+    'Nous vous montrons le parcours complet sur un dossier réel, puis nous vous accompagnons sur vos premiers dossiers.',
   metriques: [
-    { valeur: '3', libelle: 'villes' },
-    { valeur: '20', libelle: 'agences' },
-    { valeur: '6', libelle: 'mois' },
+    { valeur: '3', libelle: 'espaces séparés' },
+    { valeur: '7', libelle: 'jours par lien' },
+    { valeur: '3', libelle: 'mois de conservation' },
   ],
   merci: 'C’est noté.',
   suite:
     'Nous revenons vers vous sous 48 heures ouvrées, avec une démonstration sur un dossier réel : pas une plaquette.',
+} as const
+
+/** Les libelles du formulaire de demande de demonstration. */
+export const demande = {
+  nom: 'Nom de l’agence',
+  nomExemple: 'Agence Bellevue',
+  ville: 'Ville',
+  villeExemple: 'Lyon',
+  email: 'E-mail professionnel',
+  emailExemple: 'contact@agence-bellevue.fr',
+  volume: 'Dossiers de location par an',
+  volumes: {
+    'moins-de-10': 'Moins de 10',
+    '10-50': 'Entre 10 et 50',
+    '50-200': 'Entre 50 et 200',
+    'plus-de-200': 'Plus de 200',
+  } as Record<string, string>,
+  message: 'Un mot sur votre fonctionnement',
+  facultatif: '(facultatif)',
+  messageExemple: 'Quel outil de signature utilisez-vous ? Où bloque la caution aujourd’hui ?',
+  siteWeb: 'Site web',
+  envoi: 'Envoi…',
+  bouton: 'Demander une démonstration →',
+  collecte:
+    'Ces informations servent uniquement à vous recontacter au sujet de Cloison. Elles ne sont ni revendues, ni utilisées pour de la prospection tierce, et sont conservées le temps de traiter votre demande. Pour y accéder, les corriger ou les faire supprimer, il suffit de répondre à l’e-mail que vous recevrez.',
+  merci: formulaire.merci,
+  suite: formulaire.suite,
 } as const

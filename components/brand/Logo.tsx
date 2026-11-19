@@ -1,12 +1,16 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
+import { lien, type Langue } from '@/lib/i18n'
+
 type LogoProps = {
   /** `default` sur fond clair, `inverse` sur fond sombre, `white` sur cobalt. */
   variant?: 'default' | 'inverse' | 'white'
   /** Rendu en lien vers l'accueil. Mettre `false` pour un usage décoratif. */
   asLink?: boolean
   className?: string
+  /** La langue du lien vers l'accueil et de son libelle. */
+  langue?: Langue
 }
 
 /**
@@ -14,7 +18,7 @@ type LogoProps = {
  * Il reste vectoriel à toute taille, pèse 0 Ko et hérite de la couleur du fond.
  * Sa taille se règle uniquement via `font-size` (classe `text-*`).
  */
-export function Logo({ variant = 'default', asLink = true, className }: LogoProps) {
+export function Logo({ variant = 'default', asLink = true, className, langue = 'fr' }: LogoProps) {
   const content = (
     <>
       CLOI
@@ -44,13 +48,13 @@ export function Logo({ variant = 'default', asLink = true, className }: LogoProp
 
   return (
     <Link
-      href="/"
+      href={lien(langue, '/')}
       // La zone de toucher deborde du mot pour atteindre 44 px de haut.
       className={cn(
         classes,
         "relative after:absolute after:-inset-x-2 after:-inset-y-[10px] after:content-['']",
       )}
-      aria-label="Cloison, accueil"
+      aria-label={langue === 'en' ? 'Cloison, home' : 'Cloison, accueil'}
     >
       {content}
     </Link>

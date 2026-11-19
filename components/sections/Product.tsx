@@ -1,10 +1,13 @@
 import { Fragment } from 'react'
 import { Icone } from '@/components/ui/Icone'
 import { Reveal } from '@/components/ui/Reveal'
-import { product, spaces, productViews } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, type Langue } from '@/lib/i18n'
 
 /** Une seule scene, trois perspectives. Les radios restent utilisables sans JavaScript. */
-export function Product() {
+export function Product({ langue = 'fr' }: { langue?: Langue }) {
+  const { product, spaces, productViews } = choisir(langue, fr, en)
   return (
     <section id="produit" className="bg-cream gouttiere section-espace">
       <div className="conteneur">

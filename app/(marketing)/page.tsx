@@ -1,21 +1,8 @@
-import { Espaces } from '@/components/sections/Espaces'
-import { Hero } from '@/components/sections/Hero'
-import { Intro } from '@/components/sections/Intro'
-import { Parcours } from '@/components/sections/Parcours'
-import { Product } from '@/components/sections/Product'
-import { Pourquoi } from '@/components/sections/Pourquoi'
-import { Tarifs } from '@/components/sections/Tarifs'
+import { PageAccueil } from '@/components/pages/PageAccueil'
+import { metadonnees } from '@/lib/seo/pages'
 
-export default function HomePage() {
-  return (
-    <main>
-      <Hero />
-      <Intro />
-      <Parcours />
-      <Espaces />
-      <Product />
-      <Pourquoi />
-      <Tarifs />
-    </main>
-  )
+export const metadata = metadonnees('fr', 'accueil')
+
+export default function Page() {
+  return <PageAccueil langue="fr" />
 }

@@ -1,24 +1,28 @@
 import { Logo } from '@/components/brand/Logo'
 import { Button } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
-import { hero } from '@/lib/content/home'
-import { pilote } from '@/lib/content/pilote'
-import { footerLinks, site } from '@/lib/site'
+import * as homeEn from '@/lib/content/en/home'
+import * as siteEn from '@/lib/content/en/site'
+import * as homeFr from '@/lib/content/home'
+import { choisir, lien, type Langue } from '@/lib/i18n'
+import * as siteFr from '@/lib/site'
 
 /**
- * Pied de page du site public, sur toutes les pages : un bloc rose qui dit
- * ou en est le pilote, un dernier appel sur deux bandes inclinees, puis la
+ * Pied de page du site public, sur toutes les pages : un bloc rose qui redit
+ * le principe du produit, un dernier appel sur deux bandes inclinees, puis la
  * barre verte des liens.
  */
-export function SiteFooter() {
+export function SiteFooter({ langue = 'fr' }: { langue?: Langue }) {
+  const { hero } = choisir(langue, homeFr, homeEn)
+  const { footerLinks, site, chrome } = choisir(langue, siteFr, siteEn)
   return (
     <footer className="bg-sun text-ink">
       <div className="gouttiere pt-[5.125rem] max-[479px]:pt-12">
         <div className="conteneur grid gap-3 md:grid-cols-[7.45rem_1fr]">
-          <p className="texte-16 text-ink/75 font-semibold">{pilote.statut}</p>
+          <p className="texte-16 text-ink/75 font-semibold">{chrome.principe}</p>
           <div className="max-w-[44rem]">
-            <p className="texte-24 max-[479px]:leading-[1.4]">{pilote.avantOuverture}</p>
-            <p className="texte-14 mt-3">{pilote.signature}</p>
+            <p className="texte-24 max-[479px]:leading-[1.4]">{chrome.principeTexte}</p>
+            <p className="texte-14 mt-3">{chrome.principeNote}</p>
           </div>
         </div>
 
@@ -33,7 +37,7 @@ export function SiteFooter() {
           />
           <div className="bg-cream relative flex flex-col items-start justify-between gap-8 rounded-t-[1.5rem] px-[5.9rem] pt-[6rem] pb-[6.5rem] max-[767px]:px-6 max-[767px]:pt-14 max-[767px]:pb-14 md:flex-row md:items-center">
             <h2 className="texte-60 text-cobalt">{site.tagline}</h2>
-            <Button href="/demarrer" tone="paper">
+            <Button href={lien(langue, '/demarrer')} tone="paper">
               {hero.primaryCta}
             </Button>
           </div>
@@ -43,17 +47,14 @@ export function SiteFooter() {
       <div className="bg-cobalt text-white">
         <div className="gouttiere texte-14 flex min-h-[4.76rem] flex-col gap-4 py-3 max-[1023px]:py-8 max-[479px]:text-[1rem] lg:flex-row lg:items-center lg:justify-between">
           <p className="flex items-center gap-3 whitespace-nowrap">
-            <Logo variant="white" className="text-[1.15rem]" />
+            <Logo langue={langue} variant="white" className="text-[1.15rem]" />
             <span>{site.tagline}</span>
           </p>
-          <nav
-            aria-label="Navigation de pied de page"
-            className="flex flex-wrap gap-x-[1.5rem] gap-y-0"
-          >
+          <nav aria-label={chrome.navigationPied} className="flex flex-wrap gap-x-[1.5rem] gap-y-0">
             {footerLinks.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={lien(langue, link.href)}
                 className="focus-visible:outline-sun inline-flex min-h-[44px] items-center underline underline-offset-4"
               >
                 {link.label}

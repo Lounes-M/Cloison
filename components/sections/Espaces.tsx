@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/Button'
 import { Photo } from '@/components/ui/Photo'
-import { espacesAccueil, spaces } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, lien, type Langue } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
@@ -23,13 +25,14 @@ const habillages = [
 ] as const
 
 /** Ou tombe le sujet de chaque photo, la carte coupant a gauche et en haut. */
-const cadrages: Record<(typeof spaces)[number]['id'], string> = {
+const cadrages: Record<(typeof fr.spaces)[number]['id'], string> = {
   locataire: 'object-[45%_50%]',
   garant: 'object-[55%_50%]',
   agence: 'object-[80%_50%]',
 }
 
-export function Espaces() {
+export function Espaces({ langue = 'fr' }: { langue?: Langue }) {
+  const { espacesAccueil, spaces } = choisir(langue, fr, en)
   return (
     <section
       aria-label={espacesAccueil.aria}
@@ -38,7 +41,7 @@ export function Espaces() {
       <ol className="conteneur">
         {spaces.map((space, index) => {
           const habillage = habillages[index % habillages.length]!
-          const lien = espacesAccueil.liens[index % espacesAccueil.liens.length]!
+          const cible = espacesAccueil.liens[index % espacesAccueil.liens.length]!
           return (
             <li
               key={space.id}
@@ -62,8 +65,8 @@ export function Espaces() {
                     {'right' in space.footnote && ` · ${space.footnote.right}`}
                   </p>
                   <div className="mt-[2rem]">
-                    <Button href={lien.href} tone="paper">
-                      {lien.libelle}
+                    <Button href={lien(langue, cible.href)} tone="paper">
+                      {cible.libelle}
                     </Button>
                   </div>
                 </div>

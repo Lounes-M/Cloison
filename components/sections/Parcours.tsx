@@ -1,16 +1,18 @@
-import type { Route } from 'next'
 import { Button } from '@/components/ui/Button'
 import { Reveal } from '@/components/ui/Reveal'
 import { Compteur } from '@/components/ui/Compteur'
 import { Photo } from '@/components/ui/Photo'
-import { goToMarket, parcours } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, lien, type Langue } from '@/lib/i18n'
 
 /**
- * Le parcours du locataire : le titre, les chiffres du pilote, puis une photo
+ * Le parcours du locataire : le titre, les chiffres du produit, puis une photo
  * et les trois etapes en colonne. Le parcours agence a sa propre page, vers
  * laquelle pointe le second bouton.
  */
-export function Parcours() {
+export function Parcours({ langue = 'fr' }: { langue?: Langue }) {
+  const { goToMarket, parcours } = choisir(langue, fr, en)
   const [locataire, agence] = parcours.pistes
   const [debut, ...fin] = parcours.headline[1].split(' ')
   return (
@@ -62,14 +64,13 @@ export function Parcours() {
               ))}
             </ol>
             <div className="mt-[2.5rem] flex flex-wrap gap-3">
-              <Button href={locataire.cta.href as Route} tone="paper">
+              <Button href={lien(langue, locataire.cta.href)} tone="paper">
                 {locataire.cta.label}
               </Button>
-              <Button href={agence.cta.href as Route} tone="paper">
+              <Button href={lien(langue, agence.cta.href)} tone="paper">
                 {agence.cta.label}
               </Button>
             </div>
-            {'note' in locataire && <p className="texte-14 mt-[1.5rem]">{locataire.note}</p>}
           </div>
         </div>
       </div>

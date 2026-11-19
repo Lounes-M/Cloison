@@ -1,0 +1,42 @@
+import { PageJuridique, SectionJuridique } from '@/components/juridique/PageJuridique'
+import * as en from '@/lib/content/en/juridique'
+import * as fr from '@/lib/content/juridique'
+import { choisir, type Langue } from '@/lib/i18n'
+import { editeur } from '@/lib/juridique/editeur'
+
+/** Les conditions des trois espaces, et le recours du consommateur. */
+export function PageConditions({ langue = 'fr' }: { langue?: Langue }) {
+  const textes = choisir(langue, fr.conditions, en.conditions)
+  const { mentionTva } = choisir(langue, fr, en)
+  const e = editeur()
+
+  return (
+    <PageJuridique langue={langue} titre={textes.titre} incomplet={e.manquants.length > 0}>
+      <p>{textes.introduction}</p>
+      {textes.sections.map((section) => (
+        <SectionJuridique key={section.id} titre={section.titre} paragraphes={section.paragraphes}>
+          {section.id === 'locataire' ? (
+            <p>{e.tva ? mentionTva.ttc : mentionTva.franchise}</p>
+          ) : null}
+          {section.id === 'litiges' ? (
+            <>
+              {e.mediateur ? (
+                <p>
+                  {textes.mediateur(e.mediateur.nom)}{' '}
+                  <a
+                    href={e.mediateur.site}
+                    className="underline underline-offset-4"
+                    rel="noopener"
+                  >
+                    {new URL(e.mediateur.site).host}
+                  </a>
+                </p>
+              ) : null}
+              <p>{textes.tribunaux}</p>
+            </>
+          ) : null}
+        </SectionJuridique>
+      ))}
+    </PageJuridique>
+  )
+}

@@ -1,11 +1,25 @@
 'use client'
 import { useActionState } from 'react'
 import { retrouverMonDossier, rattacherMonDossier } from '@/lib/locataire/action-continuite'
-import { continuite } from '@/lib/content/continuite'
+import { continuite as continuiteFr } from '@/lib/content/continuite'
+import { continuite as continuiteEn } from '@/lib/content/en/formulaires'
+import type { Langue } from '@/lib/i18n'
 export function FormulaireContinuite({
   mode,
   dossierId,
-}: { mode: 'retrouver'; dossierId?: never } | { mode: 'agence'; dossierId: string }) {
+  langue = 'fr',
+}: ({ mode: 'retrouver'; dossierId?: never } | { mode: 'agence'; dossierId: string }) & {
+  langue?: Langue
+}) {
+  // Seul le mode « retrouver » existe en anglais : le rattachement a une
+  // agence se fait depuis l'espace du locataire, qui reste en francais.
+  const continuite = { ...continuiteFr, ...(langue === 'en' ? continuiteEn : {}) }
+  const traduit = (message: string) =>
+    langue !== 'en'
+      ? message
+      : message === continuiteFr.resultat
+        ? continuiteEn.resultat
+        : continuiteEn.erreur
   const [etat, action, pending] = useActionState(
     mode === 'retrouver' ? retrouverMonDossier : rattacherMonDossier,
     {},
@@ -57,7 +71,7 @@ export function FormulaireContinuite({
         <button disabled={pending} className="bg-ink text-paper rounded-lg p-3 font-bold">
           {mode === 'retrouver' ? continuite.envoyer : continuite.transmettre}
         </button>
-        {etat.message ? <p role="status">{etat.message}</p> : null}
+        {etat.message ? <p role="status">{traduit(etat.message)}</p> : null}
       </form>
     </section>
   )
