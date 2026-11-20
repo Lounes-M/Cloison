@@ -30,9 +30,12 @@ test('le HTML et le texte disent la meme chose, dans la langue demandee', () => 
   expect(corps.text).toContain(`${SITE}/lien/abc`)
   expect(corps.html).toContain(`href="${SITE}/lien/abc"`)
   expect(corps.html).toContain('<html lang="en">')
-  expect(corps.html).toContain('Guarantor space')
+  expect(corps.html).toContain('Open my space')
   expect(corps.html).toContain(`${SITE}/en/mentions-legales`)
-  expect(corps.html).not.toContain('Espace garant')
+  expect(corps.html).not.toContain('Ouvrir mon espace')
+  // Le style du site : ni pastille, ni carte arrondie.
+  expect(corps.html).not.toContain('border-radius:999px')
+  expect(corps.html).not.toContain('border-radius:24px')
 })
 
 test('rien de distant ne se charge a l’ouverture : ni image, ni script, ni feuille de style', () => {
@@ -99,7 +102,7 @@ test('chaque destinataire lit sa langue, et les contacts d’une agence sont gro
   expect(locataire.html).toContain('<html lang="en">')
   // Aucun lien de capacite, et aucun bouton, pour un porteur.
   expect(locataire.texte).not.toContain('/lien/')
-  expect(locataire.html).not.toContain('border-radius:999px;background:#035946')
+  expect(locataire.html).not.toContain('&rarr;')
   const agence = envois.filter((e) => e.categorie === 'agence')
   expect(agence.map((e) => e.a)).toEqual([['a@agence.invalid'], ['b@agence.invalid']])
   expect(agence[0]!.sujet).toBe(courrielsFr.agence.complet!.sujet('ABCD1234'))

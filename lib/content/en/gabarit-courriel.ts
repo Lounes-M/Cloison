@@ -3,7 +3,6 @@ import type { gabaritCourriel as Fr } from '../gabarit-courriel'
 
 export const gabaritCourriel: Textes<typeof Fr> = {
   signature: 'One shared file. Separate spaces.',
-  espaces: { locataire: 'Tenant space', garant: 'Guarantor space', agence: 'Agency space' },
   reference: 'File reference',
   echeance: 'End of vault',
   heure: 'Paris time',
