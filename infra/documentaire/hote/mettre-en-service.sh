@@ -27,12 +27,22 @@ fichiers=(
 [ -S /var/run/docker.sock ] || refuser "socket Docker local absent"
 docker info --format '{{json .SecurityOptions}}' | grep -q 'name=seccomp' ||
   refuser "seccomp Docker inactif"
+# Sans BuildKit, Dockerfile.dockerignore serait ignore et tout le clone entrerait
+# dans le contexte de construction.
+docker buildx version >/dev/null 2>&1 || refuser "BuildKit (docker buildx) requis"
 /usr/bin/node --version | grep -q '^v24\.' || refuser "Node 24 requis dans /usr/bin/node"
 git -C "$racine" diff --quiet HEAD -- infra/documentaire workers scripts lib/coffre ||
   refuser "modifications locales non relues"
 
 echo "Construction de l'image depuis $(git -C "$racine" rev-parse HEAD)"
 install -d -m 0755 "$conf"
+export DOCKER_BUILDKIT=1
+contexte=$(mktemp -d)
+trap 'rm -rf "$contexte"' EXIT
+docker build -f "$racine/infra/documentaire/Dockerfile" --target contexte \
+  --output "type=local,dest=$contexte" "$racine"
+/usr/bin/node "$racine/scripts/verifier-contexte-documentaire.mjs" "$contexte" ||
+  refuser "contexte de construction non minimal"
 docker build --iidfile "$conf/image-id.tmp" -f "$racine/infra/documentaire/Dockerfile" "$racine"
 image=$(cat "$conf/image-id.tmp")
 rm -f "$conf/image-id.tmp"
