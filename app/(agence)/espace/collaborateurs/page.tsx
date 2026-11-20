@@ -8,7 +8,7 @@ import { collaborateurs as textesFr } from '@/lib/content/collaborateurs'
 import { FormulaireCollaborateur } from '@/components/forms/FormulaireCollaborateur'
 import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
 import { collaborateurs as textesEn } from '@/lib/content/en/collaborateurs'
-import { choisir, locale } from '@/lib/i18n'
+import { choisir, locale, deuxPoints } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -100,7 +100,7 @@ export default async function PageCollaborateurs({
               <time>
                 {new Date(e.quand).toLocaleString(locale(langue), { timeZone: 'Europe/Paris' })}
               </time>
-              {' : '}
+              {deuxPoints(langue)}
               {textes.actions[e.action as keyof typeof textes.actions] ?? e.action}
               {' / '}
               {e.cible ?? textes.cible}

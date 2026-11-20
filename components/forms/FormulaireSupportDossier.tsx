@@ -8,7 +8,7 @@ import {
 } from '@/lib/content/support-dossier'
 import { preparerMessageSupport } from '@/lib/support/message'
 import { aideDossier as tEn } from '@/lib/content/en/support-dossier'
-import { choisir as choisirTexte } from '@/lib/i18n'
+import { choisir as choisirTexte, deuxPoints } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireSupportDossier({
   adresse,
@@ -38,7 +38,9 @@ export function FormulaireSupportDossier({
           {tutoie ? t.confidentialiteLocataire : t.confidentialite}
         </p>
         <p className="min-w-0 break-words">
-          {t.destinataire} : {adresse}
+          {t.destinataire}
+          {deuxPoints(langue)}
+          {adresse}
         </p>
         <label htmlFor={`${id}-categorie`} className="font-bold">
           {t.categorie}

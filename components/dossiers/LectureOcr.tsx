@@ -5,7 +5,7 @@ import { analyserPagesOcr } from '@/lib/ocr/selection'
 import { lireResultatOcr } from '@/lib/ocr/lecture-resultat'
 import type { ResultatOcr } from '@/lib/ocr/resultat'
 import { ocr as ocrEn } from '@/lib/content/en/ocr'
-import { choisir as choisirTexte } from '@/lib/i18n'
+import { choisir as choisirTexte, deuxPoints } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
 
 /** Une autre piece ne reutilise ni consentement, ni requete, ni transcription. */
@@ -174,10 +174,14 @@ function LecturePiece({ pieceId }: { pieceId: string }) {
       {resultat && (
         <div className="mt-3 break-words">
           <p className="text-xs">
-            {ocr.modele} : {resultat.modele}
+            {ocr.modele}
+            {deuxPoints(langue)}
+            {resultat.modele}
           </p>
           <p className="text-xs break-all">
-            {ocr.empreinte} : {resultat.empreinte}
+            {ocr.empreinte}
+            {deuxPoints(langue)}
+            {resultat.empreinte}
           </p>
           <label className="mt-3 block text-sm font-bold">
             {ocr.rechercher}

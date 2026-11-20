@@ -16,7 +16,7 @@ export const pilotage: Textes<typeof Fr> = {
     { cle: 'transmis', titre: 'Accepted', href: '/espace?statut=transmis' },
     {
       cle: 'remplacement',
-      titre: 'Replacements to review',
+      titre: 'New files to review',
       href: '/espace?remplacement=1',
     },
     {

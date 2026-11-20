@@ -52,7 +52,7 @@ import {
 } from '@/lib/content/en/garant'
 import { journal as texteJournalEn } from '@/lib/content/en/journal'
 import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
-import { choisir, locale } from '@/lib/i18n'
+import { choisir, locale, deuxPoints } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -397,7 +397,7 @@ export default async function PageGarant({
                       timeZone: 'Europe/Paris',
                     })}
                   </time>
-                  {' : '}
+                  {deuxPoints(langue)}
                   {texteJournal.actions[entree.action] ?? texteJournal.acces}
                   {texteJournal.par}
                   {entree.identite ?? texteJournal.acteurs[entree.acteur] ?? texteJournal.inconnu}.

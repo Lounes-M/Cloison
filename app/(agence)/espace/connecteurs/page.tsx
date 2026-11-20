@@ -9,7 +9,7 @@ import { connecteurs as tFr } from '@/lib/content/connecteurs'
 import { FormulaireConnecteur } from '@/components/forms/FormulaireConnecteur'
 import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
 import { connecteurs as tEn } from '@/lib/content/en/connecteurs'
-import { choisir, locale } from '@/lib/i18n'
+import { choisir, locale, deuxPoints } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 export default async function PageConnecteurs() {
@@ -47,7 +47,9 @@ export default async function PageConnecteurs() {
               <h2 className="font-bold">{k.nom}</h2>
               <p>{k.revoque_le ? t.revoque : active ? t.actif : t.expire}</p>
               <p className="text-sm">
-                {t.expiration} : {date(k.expire_le)}
+                {t.expiration}
+                {deuxPoints(langue)}
+                {date(k.expire_le)}
               </p>
               <p className="text-sm">
                 {t.utilisation} : {k.utilise_le ? date(k.utilise_le) : t.jamais}

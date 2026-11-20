@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react'
 import { attribuerPlusieurs, type EtatAttributions } from '@/lib/agences/action-attributions'
 import { pilotage as tFr } from '@/lib/content/pilotage'
 import { pilotage as tEn } from '@/lib/content/en/pilotage'
-import { choisir } from '@/lib/i18n'
+import { deuxPoints, choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
 
 export type ChoixDossier = { id: string; revision: string | null; reference: string }
@@ -115,7 +115,9 @@ export function FormulaireAttributions({
           <ul className="mt-2 grid gap-2">
             {etat.resultats.map((r) => (
               <li key={r.id} className="break-all">
-                {recu.find((d) => d.id === r.id)?.reference ?? r.id} : {t.etats[r.etat]}
+                {recu.find((d) => d.id === r.id)?.reference ?? r.id}
+                {deuxPoints(langue)}
+                {t.etats[r.etat]}
               </li>
             ))}
           </ul>

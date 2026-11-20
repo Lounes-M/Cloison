@@ -11,7 +11,7 @@ import { FormulaireActe } from '@/components/forms/FormulaireActe'
 
 import { signature as tFr } from '@/lib/content/signature'
 import { signature as tEn } from '@/lib/content/en/signature'
-import { choisir } from '@/lib/i18n'
+import { choisir, deuxPoints } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -47,7 +47,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <EnteteEspace titre={t.preparation} etiquette={t.etiquette} />
       <p className="my-6">{t.explication}</p>
       <p className="mb-6">
-        {t.modele} : {config.modele}
+        {t.modele}
+        {deuxPoints(langue)}
+        {config.modele}
       </p>
       {config.mode === 'sandbox' ? <p className="mb-6 font-bold">{t.sandbox}</p> : null}
       <FormulaireActe dossier={id} />

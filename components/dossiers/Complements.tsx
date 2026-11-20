@@ -3,7 +3,7 @@ import { complements as tFr, type Complement } from '@/lib/content/complements'
 import { natures as naturesFr } from '@/lib/content/espace'
 import { complements as tEn } from '@/lib/content/en/complements'
 import { natures as naturesEn } from '@/lib/content/en/espace'
-import { choisir, locale } from '@/lib/i18n'
+import { deuxPoints, choisir, locale } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
 export async function Complements({
   dossierId,
@@ -44,7 +44,9 @@ export async function Complements({
           return (
             <li key={d.id} className="outlined bg-sun/20 rounded-xl p-4 text-sm">
               <p className="font-bold">
-                {natures[d.nature] ?? d.nature} : {t.motifs[d.motif]}
+                {natures[d.nature] ?? d.nature}
+                {deuxPoints(langue)}
+                {t.motifs[d.motif]}
               </p>
               <p className="mt-1">{t.etats[d.etat]}</p>
               {d.piece_fournie && pieces.some((p) => p.id === d.piece_fournie) ? (

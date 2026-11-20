@@ -102,3 +102,8 @@ export function cheminDansLangue(chemin: string, cible: Langue): Route {
   if (!estTraduite(nu)) return (cible === 'en' ? '/en' : '/') as Route
   return lien(cible, nu)
 }
+
+/** Le deux-points entre un libelle et sa valeur : espace avant en francais, pas en anglais. */
+export function deuxPoints(langue: Langue): string {
+  return langue === 'fr' ? ' : ' : ': '
+}

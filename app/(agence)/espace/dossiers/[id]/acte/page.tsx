@@ -7,7 +7,7 @@ import { ModeleActe } from '@/components/forms/ModeleActe'
 import { acte as tFr } from '@/lib/content/acte'
 import { dateLongue, euros } from '@/lib/acte/modele-cautionnement'
 import { acte as tEn } from '@/lib/content/en/acte'
-import { choisir } from '@/lib/i18n'
+import { choisir, deuxPoints } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -58,12 +58,18 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             </div>
             {e.montant_max_cents ? (
               <div>
-                <dt className="inline">{t.plafond} : </dt>
+                <dt className="inline">
+                  {t.plafond}
+                  {deuxPoints(langue)}
+                </dt>
                 <dd className="inline">{euros(Number(e.montant_max_cents))}</dd>
               </div>
             ) : null}
             <div>
-              <dt className="inline">{t.duree} : </dt>
+              <dt className="inline">
+                {t.duree}
+                {deuxPoints(langue)}
+              </dt>
               <dd className="inline">
                 {e.jusqu_au ? `${t.jusquAu} ${dateLongue(String(e.jusqu_au))}` : t.indeterminee}
               </dd>

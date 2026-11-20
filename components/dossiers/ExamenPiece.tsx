@@ -1,7 +1,7 @@
 import { FormulaireExamen } from '@/components/forms/FormulaireExamen'
 import { examen as tFr, type ExamenDocumentaire } from '@/lib/content/examen'
 import { examen as tEn } from '@/lib/content/en/examen'
-import { choisir, locale } from '@/lib/i18n'
+import { choisir, locale, deuxPoints } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
 
 export async function ExamenPiece({
@@ -24,7 +24,9 @@ export async function ExamenPiece({
   return (
     <details className="outlined bg-sky/20 w-full min-w-0 rounded-xl p-4">
       <summary className="cursor-pointer font-semibold">
-        {t.titre} : {t.etats[precedent?.etat ?? 'a_examiner']}
+        {t.titre}
+        {deuxPoints(langue)}
+        {t.etats[precedent?.etat ?? 'a_examiner']}
       </summary>
       {precedent ? (
         <p className="mt-2 text-sm break-all">
