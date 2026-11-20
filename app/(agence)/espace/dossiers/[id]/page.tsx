@@ -39,6 +39,7 @@ import {
   tableau as tableauFr,
 } from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
+import { Repere } from '@/components/ui/Repere'
 import { cn } from '@/lib/utils'
 import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
 import {
@@ -80,14 +81,6 @@ import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
 
 export const generateMetadata = () => titreEspace(titresFr.dossier, titresEn.dossier)
-
-const tons = {
-  sky: 'bg-sky',
-  sun: 'bg-sun',
-  mint: 'bg-mint',
-  flame: 'bg-flame text-ink',
-  paper: 'bg-paper',
-} as const
 
 function eurosDe(cents: unknown, langue: Langue): string {
   const montant = (Number(cents) / 100).toLocaleString(locale(langue))
@@ -329,14 +322,9 @@ export default async function PageDossier({
             </div>
           ) : null}
         </div>
-        <span
-          className={cn(
-            'border-ink inline-block rounded-full border-2 px-4 py-1.5 text-[13px] font-bold',
-            tons[statut.ton],
-          )}
-        >
+        <Repere ton={statut.ton} className="text-[15px]">
           {statut.libelle}
-        </span>
+        </Repere>
       </div>
 
       {d.demonstration ? (

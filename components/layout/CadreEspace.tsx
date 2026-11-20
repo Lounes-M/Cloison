@@ -55,7 +55,7 @@ export async function CadreEspace({
           <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8 lg:px-12">
             <div className="flex flex-wrap items-center gap-4">
               <Logo className="text-xl" langue={langue} />
-              <span className="badge-espace rounded-full px-3 py-1 text-[11px] font-bold tracking-wide uppercase">
+              <span className="border-ink/25 text-muted border-l pl-4 text-[13px] font-semibold tracking-wide uppercase">
                 {agence ? t.agence : t.porteur}
               </span>
             </div>
