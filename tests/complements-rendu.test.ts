@@ -1,5 +1,4 @@
 import { expect, test, vi } from 'vitest'
-import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
