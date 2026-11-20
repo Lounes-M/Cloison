@@ -1,5 +1,6 @@
 'use client'
 
+import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
 import { useActionState, useId } from 'react'
 
 import { secondGarant as texteFr } from '@/lib/content/locataire'
@@ -69,6 +70,7 @@ export function FormulaireSecondGarant({
           )}
         />
       </div>
+      {secondActuel ? null : <ChoixLangueDestinataire name="langueGarant" destinataire="garant" />}
       <button
         type="submit"
         disabled={enCours}

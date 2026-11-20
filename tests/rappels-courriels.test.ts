@@ -69,7 +69,9 @@ test('chiffre un rappel sans capacite ni piece et ne livre rien pendant la prepa
   expect(contenu.to).toEqual(['garant@example.invalid'])
   expect(contenu.text).toContain('ABCD1234')
   expect(contenu.text).not.toContain('https://')
-  expect(Object.keys(contenu)).toEqual(['from', 'replyTo', 'to', 'subject', 'text'])
+  expect(Object.keys(contenu)).toEqual(['from', 'replyTo', 'to', 'subject', 'text', 'html'])
+  // Le HTML ne porte que les liens publics du pied : ni capacite, ni dossier.
+  expect(contenu.html).not.toMatch(/\/lien\/|\/espace\//)
   expect(d.rpc).toHaveBeenCalledWith('mettre_rappel_en_file', {
     identifiant: id,
     chiffre: Buffer.from('chiffre').toString('base64'),

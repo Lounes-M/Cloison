@@ -10,6 +10,15 @@ export const interfaceEspace: Textes<typeof Fr> = {
   tableau: 'My files',
   principal: 'Skip to content',
   langue: 'Language',
+  langueTitre: 'Your language',
+  langueAide:
+    'The language chosen here is the one used for your space and for the emails Cloison sends you. It follows you from one device to the next.',
+  invitation: {
+    garant: 'Guarantor’s language',
+    locataire: 'Tenant’s language',
+    aide: 'Their link and emails will arrive in this language. They can change it from their own space.',
+    langues: { fr: 'Français', en: 'English' },
+  },
   signature: 'One shared file. Separate spaces.',
   ouverture: 'Start here',
   retrouver: 'Already have a file?',

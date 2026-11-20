@@ -1,5 +1,6 @@
 'use client'
 
+import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
 import { useActionState, useId } from 'react'
 
 import { tableau as tableauFr } from '@/lib/content/espace'
@@ -68,6 +69,12 @@ export function FormulaireNouveauDossier({
         />
         <p className="text-muted mt-2 text-[13px] font-medium">{tableau.nouveauAide}</p>
       </div>
+
+      <ChoixLangueDestinataire
+        name="langueLocataire"
+        destinataire="locataire"
+        disabled={!verifiee}
+      />
 
       <div>
         <label htmlFor={idLoyer} className="mb-2 block text-[14px] font-bold">

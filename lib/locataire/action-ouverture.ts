@@ -13,6 +13,7 @@ import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 import { candidature as texteCandidatureEn } from '@/lib/content/en/candidature'
 import { choisir } from '@/lib/i18n'
 import { langueAction } from '@/lib/langue-espace'
+import { reglerLangueDossier } from '@/lib/langue-preferee'
 
 /**
  * La porte principale du produit : une adresse, un dossier, un lien.
@@ -112,6 +113,9 @@ export async function ouvrirMonDossier(
       if (error) console.error('[porte] candidature non rattachee')
     }
 
+    // La langue de la page devient celle du dossier, donc celle du lien
+    // qui part juste apres et de l'espace ou il mene.
+    await reglerLangueDossier(ouvert.dossierId, 'locataire', langue)
     await reprendreLivraisonLiens(ouvert.dossierId)
     if (rattachement === 'rattachee') {
       await prevenirSiLeStatutAChange(await clientServeur(), ouvert.dossierId, null)

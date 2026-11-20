@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { BasculeLangue } from '@/components/langue/BasculeLangue'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { FormulairePreferences } from '@/components/forms/FormulairePreferences'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
@@ -37,6 +38,15 @@ export default async function PageNotifications() {
           <p className="mt-3">{t.mes}</p>
         </details>
       </div>
+      <section className="panneau-espace mt-6" aria-labelledby="langue-preferee">
+        <h2 id="langue-preferee" className="text-xl font-bold">
+          {interfaceEspace.langueTitre}
+        </h2>
+        <p className="text-muted mt-2 mb-4 text-[14px] leading-relaxed font-medium">
+          {interfaceEspace.langueAide}
+        </p>
+        <BasculeLangue langue={langue} libelle={interfaceEspace.langue} />
+      </section>
     </div>
   )
 }

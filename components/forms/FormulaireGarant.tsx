@@ -7,6 +7,7 @@ import { designerMonGarant, type EtatGarant } from '@/lib/locataire/action-garan
 import { cn } from '@/lib/utils'
 import { espace as espaceEn } from '@/lib/content/en/locataire'
 import { choisir } from '@/lib/i18n'
+import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
 import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatGarant = { statut: 'inactif' }
@@ -79,6 +80,8 @@ export function FormulaireGarant({
           {espace.garantAide}
         </p>
       </div>
+
+      {verrouille ? null : <ChoixLangueDestinataire name="langueGarant" destinataire="garant" />}
 
       <button
         type="submit"

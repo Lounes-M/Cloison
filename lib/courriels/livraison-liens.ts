@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { clientServeur } from '@/lib/acces/serveur'
 import { signerJeton, type Partie } from '@/lib/acces/jeton'
 import { urlDuLien } from '@/lib/acces/session'
+import { languesCourriels } from '@/lib/langue-preferee'
 import { envoyerLienGarant, envoyerLienLocataire } from './liens'
 
 /** Reprend les intentions enregistrees avec le jeton, meme apres un arret serveur. */
@@ -22,8 +23,10 @@ export async function livrerLiens(
       const expireLe = new Date(lien.expire_le)
       if (!Number.isFinite(expireLe.getTime()) || expireLe.getTime() <= Date.now()) continue
       const jeton = await signerJeton(lien.dossier_id, lien.partie as Partie, lien.id, expireLe)
+      const langueDe = await languesCourriels(db, lien.dossier_id, [lien.destinataire])
       const envoi = {
         a: lien.destinataire,
+        langue: langueDe(lien.destinataire),
         reference: lien.reference,
         url: urlDuLien(jeton),
         expireLe,

@@ -1,6 +1,6 @@
 'use server'
 
-import { langueAction } from '@/lib/langue-espace'
+import { langueAction, poserLangue } from '@/lib/langue-espace'
 import { traducteur } from '@/lib/messages'
 import { headers } from 'next/headers'
 import { z } from 'zod'
@@ -87,6 +87,9 @@ export async function envoyerLienDeConnexion(
         valeur: saisie,
       }
     }
+
+    // La langue de la page de connexion suit le collaborateur dans son espace.
+    await poserLangue(langue)
 
     const supabase = await clientAgence()
     const { error } = await supabase.auth.signInWithOtp({

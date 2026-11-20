@@ -2,7 +2,13 @@ import { PageJuridique, SectionJuridique } from '@/components/juridique/PageJuri
 import * as en from '@/lib/content/en/juridique'
 import * as fr from '@/lib/content/juridique'
 import { choisir, type Langue } from '@/lib/i18n'
-import { editeur, retentionSauvegardes, traitementsFacultatifs } from '@/lib/juridique/editeur'
+import {
+  editeur,
+  editeurAffiche,
+  retentionAffichee,
+  retentionSauvegardes,
+  traitementsFacultatifs,
+} from '@/lib/juridique/editeur'
 
 /**
  * L'information des articles 13 et 14 du RGPD, pour les trois espaces.
@@ -13,10 +19,10 @@ import { editeur, retentionSauvegardes, traitementsFacultatifs } from '@/lib/jur
 export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
   const textes = choisir(langue, fr.confidentialite, en.confidentialite)
   const { juridique } = choisir(langue, fr, en)
-  const e = editeur()
+  const declare = editeur()
+  const e = editeurAffiche(langue)
   const facultatifs = traitementsFacultatifs()
-  const sauvegardes = retentionSauvegardes()
-  const incomplet = !e.denomination || !e.courriel || sauvegardes === null
+  const incomplet = !declare.denomination || !declare.courriel || retentionSauvegardes() === null
 
   return (
     <PageJuridique langue={langue} titre={textes.titre} incomplet={incomplet}>
@@ -29,9 +35,7 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
           titre={section.titre}
           paragraphes={[
             ...section.paragraphes,
-            ...(section.id === 'durees'
-              ? [sauvegardes === null ? juridique.aCompleter : textes.sauvegardes(sauvegardes)]
-              : []),
+            ...(section.id === 'durees' ? [textes.sauvegardes(retentionAffichee())] : []),
             ...(section.id === 'prestataires'
               ? [
                   ...(facultatifs.signature

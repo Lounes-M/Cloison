@@ -6,6 +6,15 @@ export const interfaceEspace = {
   tableau: 'Mes dossiers',
   principal: 'Aller au contenu',
   langue: 'Langue',
+  langueTitre: 'Votre langue',
+  langueAide:
+    'La langue choisie ici est celle de votre espace et des courriels que Cloison vous envoie. Elle vous suit d’un appareil à l’autre.',
+  invitation: {
+    garant: 'Langue du garant',
+    locataire: 'Langue du locataire',
+    aide: 'Son lien et ses courriels arriveront dans cette langue. Cette personne pourra la changer depuis son espace.',
+    langues: { fr: 'Français', en: 'English' },
+  },
   signature: 'Un dossier commun. Des espaces séparés.',
   ouverture: 'On commence ici',
   retrouver: 'Tu as déjà un dossier ?',

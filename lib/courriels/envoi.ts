@@ -6,18 +6,21 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { scellerMaitresse } from '@/lib/coffre/rotation-maitresse'
 
 import { distribuerCourriels } from './file'
+import type { Corps } from './gabarit'
 
 import { env } from '@/lib/env'
 
 /**
  * Retourne vrai des que le courriel est durablement accepte en file.
+ * Un courriel adresse a une personne porte ses deux versions, texte et HTML ;
+ * un courriel interne, destine a l'exploitant, reste en texte seul.
  * Les notifications differees seront distribuees par la maintenance ; les
  * liens tentent aussi une livraison immediate apres leur sauvegarde.
  */
 export async function envoyer(
   a: string | string[],
   sujet: string,
-  texte: string,
+  texte: string | Corps,
   identifiant?: string,
   repondreA?: string,
   differer = false,
@@ -34,7 +37,7 @@ export async function envoyer(
       ...((repondreA ?? env.emailSupport) ? { replyTo: repondreA ?? env.emailSupport } : {}),
       to: destinataires,
       subject: sujet,
-      text: texte,
+      ...(typeof texte === 'string' ? { text: texte } : { text: texte.text, html: texte.html }),
     }
     const { data, error } = await db.rpc(
       contexte?.lien ? 'mettre_lien_en_file' : 'mettre_courriel_en_file',

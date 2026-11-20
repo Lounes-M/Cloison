@@ -4,13 +4,14 @@ import { clientServeur } from '@/lib/acces/serveur'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import {
-  agence as textesAgence,
-  garant as textesGarant,
-  locataire as textesLocataire,
-  pied,
-} from '@/lib/content/courriels'
+import * as textesFr from '@/lib/content/courriels'
+import * as textesEn from '@/lib/content/en/courriels'
+import { gabaritCourriel as gabaritEn } from '@/lib/content/en/gabarit-courriel'
+import { gabaritCourriel as gabaritFr } from '@/lib/content/gabarit-courriel'
+import { choisir, LANGUES, type Langue } from '@/lib/i18n'
+import { languesCourriels } from '@/lib/langue-preferee'
 import { adresseDuSite, envoyer } from './envoi'
+import { composerCourriel } from './gabarit'
 
 /**
  * Les changements de statut sont programmes dans la transaction SQL.
@@ -18,6 +19,7 @@ import { adresseDuSite, envoyer } from './envoi'
  * chiffree, avec une cle stable par evenement, categorie et destinataire.
  * La distribution reseau revient au lot borne de la maintenance.
  * Aucun courriel de statut aux porteurs ne contient de lien de capacite.
+ * Chaque destinataire lit le sien dans sa langue (migration 0083).
  */
 
 type Dossier = {
@@ -31,44 +33,76 @@ type Dossier = {
   secondaire?: boolean
 }
 
-/** Ce que chaque statut fait ecrire, et a qui. Pur, donc testable. */
-export function courrielsPour(dossier: Dossier, contactsAgence: string[]) {
+/**
+ * Ce que chaque statut fait ecrire, et a qui. Pur, donc testable.
+ *
+ * `langueDe` donne la langue de chaque destinataire ; sans elle, le francais.
+ * Les contacts d'une agence sont regroupes par langue : un envoi par langue.
+ */
+export function courrielsPour(
+  dossier: Dossier,
+  contactsAgence: string[],
+  langueDe: (adresse: string) => Langue = () => 'fr',
+) {
   const envois: {
     categorie: 'locataire' | 'garant' | 'agence'
     a: string | string[]
     sujet: string
     texte: string
+    html: string
   }[] = []
-  const signature = `\n\nRéférence du dossier : ${dossier.reference}\n\n${pied}`
-
-  const auLocataire = dossier.secondaire ? undefined : textesLocataire[dossier.statut]
-  if (auLocataire) {
-    envois.push({
-      categorie: 'locataire',
-      a: dossier.email_locataire,
-      sujet: auLocataire.sujet,
-      texte: auLocataire.texte + signature,
-    })
+  const site = adresseDuSite()
+  const ajouter = (
+    categorie: 'locataire' | 'garant' | 'agence',
+    a: string | string[],
+    langue: Langue,
+    message: { sujet: string; texte: string },
+    url?: string,
+  ) => {
+    const corps = composerCourriel(
+      {
+        langue,
+        espace: categorie,
+        sujet: message.sujet,
+        paragraphes: [message.texte],
+        ...(url ? { bouton: { url } } : {}),
+        details: [
+          {
+            libelle: choisir(langue, gabaritFr, gabaritEn).reference,
+            valeur: dossier.reference,
+          },
+        ],
+      },
+      site,
+    )
+    envois.push({ categorie, a, sujet: message.sujet, texte: corps.text, html: corps.html })
   }
 
-  const auGarant = textesGarant[dossier.statut]
-  if (auGarant && dossier.email_garant) {
-    envois.push({
-      categorie: 'garant',
-      a: dossier.email_garant,
-      sujet: auGarant.sujet,
-      texte: auGarant.texte + signature,
-    })
+  if (!dossier.secondaire) {
+    const langue = langueDe(dossier.email_locataire)
+    const message = choisir(langue, textesFr.locataire, textesEn.locataire)[dossier.statut]
+    if (message) ajouter('locataire', dossier.email_locataire, langue, message)
   }
 
-  const aLAgence = dossier.secondaire ? undefined : textesAgence[dossier.statut]
-  if (aLAgence && contactsAgence.length > 0) {
-    envois.push({
-      categorie: 'agence',
-      a: contactsAgence,
-      sujet: aLAgence.sujet(dossier.reference),
-      texte: `${aLAgence.texte}\n\n${adresseDuSite()}/espace/dossiers/${dossier.id}${signature}`,
-    })
+  if (dossier.email_garant) {
+    const langue = langueDe(dossier.email_garant)
+    const message = choisir(langue, textesFr.garant, textesEn.garant)[dossier.statut]
+    if (message) ajouter('garant', dossier.email_garant, langue, message)
+  }
+
+  if (!dossier.secondaire && contactsAgence.length > 0) {
+    for (const langue of LANGUES) {
+      const contacts = contactsAgence.filter((adresse) => langueDe(adresse) === langue)
+      const message = choisir(langue, textesFr.agence, textesEn.agence)[dossier.statut]
+      if (!message || contacts.length === 0) continue
+      ajouter(
+        'agence',
+        contacts,
+        langue,
+        { sujet: message.sujet(dossier.reference), texte: message.texte },
+        `${site}/espace/dossiers/${dossier.id}`,
+      )
+    }
   }
 
   return envois
@@ -104,7 +138,16 @@ export async function livrerNotifications(
   for (const evenement of data ?? []) {
     signal?.throwIfAborted()
     let accepte = true
-    for (const envoi of courrielsPour(evenement.dossier as Dossier, evenement.contacts ?? [])) {
+    const dossier = evenement.dossier as Dossier
+    const contacts: string[] = evenement.contacts ?? []
+    const langueDe = await languesCourriels(
+      db,
+      dossier.id,
+      [dossier.email_locataire, dossier.email_garant, ...contacts].filter(
+        (adresse): adresse is string => typeof adresse === 'string' && adresse.length > 0,
+      ),
+    )
+    for (const envoi of courrielsPour(dossier, contacts, langueDe)) {
       for (const adresse of Array.isArray(envoi.a) ? envoi.a : [envoi.a]) {
         signal?.throwIfAborted()
         const hex = createHash('sha256')
@@ -113,7 +156,15 @@ export async function livrerNotifications(
           .slice(0, 32)
         const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
         if (
-          !(await envoyer(adresse, envoi.sujet, envoi.texte, id, undefined, true, { db, signal }))
+          !(await envoyer(
+            adresse,
+            envoi.sujet,
+            { text: envoi.texte, html: envoi.html },
+            id,
+            undefined,
+            true,
+            { db, signal },
+          ))
         )
           accepte = false
       }

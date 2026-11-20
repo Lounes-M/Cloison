@@ -12,7 +12,8 @@ import { tableau as tableauFr } from '@/lib/content/espace'
 import { montantEnCents } from '@/lib/garant/validation'
 import { contexteAgence } from './contexte'
 import { tableau as tableauEn } from '@/lib/content/en/espace'
-import { choisir } from '@/lib/i18n'
+import { choisir, versLangue } from '@/lib/i18n'
+import { reglerLangueDossier } from '@/lib/langue-preferee'
 import { langueAction, langueEspace } from '@/lib/langue-espace'
 
 /**
@@ -134,6 +135,13 @@ export async function ouvrirUnDossier(
       if (error) console.error('[agence] complement d ouverture non enregistre')
     }
 
+    // La langue du locataire, choisie par l'agence : celle de son lien et de
+    // son espace, qu'il pourra changer lui-meme.
+    await reglerLangueDossier(
+      ouvert.dossierId,
+      'locataire',
+      versLangue(donnees.get('langueLocataire') ?? langue),
+    )
     await reprendreLivraisonLiens(ouvert.dossierId)
   } catch {
     console.error('[agence] ouverture impossible')

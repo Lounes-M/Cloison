@@ -19,6 +19,9 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
 
+    // La langue des espaces se lit dans un cookie : hors requete, le francais.
+    setupFiles: ['tests/doublures/langue.ts'],
+
     // Chaque test construit sa propre base Postgres en WebAssembly. C'est
     // rapide, mais pas gratuit : un fichier par processus evite que plusieurs
     // instances se disputent la memoire sur une machine modeste.

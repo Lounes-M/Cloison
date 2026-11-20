@@ -17,14 +17,32 @@ export const versionConditions = 'conditions-2026-10-21'
 
 export const juridique = {
   aCompleter: 'À compléter',
-  avertissementIncomplet: 'Certaines informations sur l’éditeur sont en cours de publication.',
-  miseAJour: 'Dernière mise à jour : 21 octobre 2026.',
+  immatriculation: 'En cours d’immatriculation',
+  miseAJour: 'Dernière mise à jour : 20 novembre 2026.',
   navigation: 'Informations légales',
   liens: {
     mentions: { label: 'Mentions légales', href: '/mentions-legales' },
     confidentialite: { label: 'Confidentialité', href: '/confidentialite' },
     conditions: { label: 'Conditions', href: '/conditions' },
   },
+} as const
+
+/**
+ * L'identite de l'editeur tant que la societe n'est pas immatriculee.
+ *
+ * Ce sont les choix du projet, pas des faits enregistres : la societe sera
+ * creee d'apres eux. Chaque variable `EDITEUR_*` posee les remplace. Aucun
+ * numero n'est invente : SIREN, RCS et TVA n'existent qu'apres
+ * l'immatriculation, et la page le dit.
+ */
+export const editeurEnProjet = {
+  denomination: 'Cloison SAS',
+  forme: 'Société par actions simplifiée (SAS), en cours de formation',
+  capital: '1 000 €',
+  adresse: 'Paris, France',
+  courriel: 'contact@cloison.immo',
+  directeurPublication: 'Le président de Cloison SAS',
+  sauvegardeJours: 7,
 } as const
 
 /** La mention fiscale du prix, selon que l'editeur facture la TVA ou non. */
@@ -64,6 +82,9 @@ export const mentionsLegales = {
       site: 'https://supabase.com',
     },
   ],
+  donnees: 'Données personnelles et cookies',
+  donneesTexte:
+    'Cloison traite des données personnelles en qualité de responsable de traitement. La page Confidentialité détaille les données concernées, leur durée de conservation, leurs destinataires et la manière d’exercer vos droits. Le site ne dépose que les cookies strictement nécessaires à son fonctionnement : aucun cookie publicitaire, aucune mesure d’audience.',
   autres: 'Propriété et signalement',
   propriete:
     'Le code, les textes, la marque et les éléments graphiques de Cloison sont protégés. Aucune licence n’est accordée par la consultation du site.',
@@ -89,6 +110,7 @@ export const confidentialite = {
         'Locataire : adresse e-mail, nom, montant du loyer, statut du dossier, et, si vous réglez le dossier, la trace du paiement transmise par Stripe. Cloison ne reçoit jamais votre numéro de carte.',
         'Garant : adresse e-mail, nom, prénom, adresse postale, revenu net mensuel déclaré, étendue de l’engagement, mention de cautionnement que vous saisissez vous-même, et les justificatifs que vous déposez (bulletins de paie, avis d’imposition, pièce d’identité, justificatif de domicile, contrat de travail).',
         'Agence : adresse e-mail professionnelle de chaque collaborateur, rôle dans l’agence, et pour la vérification de l’agence, son SIREN et son numéro de carte professionnelle.',
+        'Pour tous : la langue choisie, français ou anglais, pour afficher votre espace et vous écrire dans cette langue.',
         'Pour tous : un journal des consultations (qui a ouvert quoi, et quand) et, contre les abus, des empreintes d’adresse IP et d’adresse e-mail calculées avec une clé secrète, sans l’adresse elle-même.',
         'Aucune donnée de santé, d’opinion ou biométrique n’est demandée. La pièce d’identité n’est ni lue automatiquement ni comparée à un visage.',
       ],
@@ -129,6 +151,15 @@ export const confidentialite = {
       paragraphes: [
         'Vercel exécute l’application dans la région de Francfort. Supabase héberge la base de données et les pièces chiffrées dans l’Union européenne. Resend achemine les courriels. Stripe traite le paiement par carte du locataire.',
         'Ces prestataires agissent sur instruction de Cloison, dans le cadre d’accords de traitement. Lorsqu’un prestataire relève d’un pays hors de l’Union européenne, le transfert est encadré par les clauses contractuelles types de la Commission européenne ou par le cadre de protection des données entre l’Union européenne et les États-Unis.',
+      ],
+    },
+    {
+      id: 'cookies',
+      titre: 'Cookies et courriels',
+      paragraphes: [
+        'Cloison ne dépose aucun cookie publicitaire, aucun cookie de mesure d’audience et aucun traceur tiers. Les seuls cookies utilisés sont strictement nécessaires au service : celui qui porte votre lien d’accès au dossier, celui qui maintient la session d’un collaborateur d’agence, et celui qui retient la langue choisie. Ils sont exemptés de consentement, ce qui explique l’absence de bandeau.',
+        'Le cookie d’accès au dossier dure sept jours au plus, celui de la langue un an. Vous pouvez les supprimer depuis votre navigateur : il faudra alors rouvrir votre lien ou vous reconnecter.',
+        'Les courriels envoyés par Cloison ne contiennent ni image distante ni pixel de suivi : leur ouverture n’est signalée à personne. Cloison ne demande jamais de pièce ni de mot de passe par courriel.',
       ],
     },
   ] satisfies readonly Section[],
@@ -215,6 +246,8 @@ export const conditions = {
   ] satisfies readonly Section[],
   mediateur: (nom: string) =>
     `Si vous êtes consommateur et que votre réclamation n’a pas abouti, vous pouvez recourir gratuitement au médiateur de la consommation : ${nom}.`,
+  mediation:
+    'Si vous êtes consommateur et que votre réclamation écrite n’a pas abouti dans un délai de deux mois, vous pouvez recourir gratuitement à un médiateur de la consommation, conformément à l’article L. 612-1 du code de la consommation. Ses coordonnées vous sont communiquées avec la réponse à votre réclamation, et à tout moment sur simple demande à l’adresse de contact.',
   tribunaux:
     'Vous pouvez aussi saisir les tribunaux compétents ; un consommateur peut saisir celui de son domicile.',
 } as const

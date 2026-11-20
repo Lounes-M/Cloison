@@ -15,7 +15,8 @@ import { signerJeton } from '@/lib/acces/jeton'
 import { envoyerLienGarant } from '@/lib/courriels/liens'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
-import { choisir } from '@/lib/i18n'
+import { choisir, estLangue } from '@/lib/i18n'
+import { reglerLangueDossier } from '@/lib/langue-preferee'
 import { langueEspace } from '@/lib/langue-espace'
 
 /**
@@ -140,6 +141,11 @@ export async function designerMonGarant(
         valeur: saisie,
       }
     }
+    // La langue du garant, choisie par le locataire qui le connait : celle
+    // de son lien et de son espace, qu'il pourra changer lui-meme.
+    // Un renvoi de lien ne porte pas ce champ : le choix du garant reste.
+    const langueGarant = donnees.get('langueGarant')
+    if (estLangue(langueGarant)) await reglerLangueDossier(dossierId, 'garant', langueGarant)
     if (!dossier.demonstration) {
       await reprendreLivraisonLiens(dossierId)
     } else {
@@ -152,6 +158,7 @@ export async function designerMonGarant(
         url: urlDuLien(lien.jeton),
         reference: String(dossier.reference),
         demandePar: String(dossier.email_locataire),
+        langue: estLangue(langueGarant) ? langueGarant : langue,
       })
 
       if (!envoye) {

@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { clientAgence } from '@/lib/acces/agence'
+import { COOKIE_LANGUE, estLangue } from '@/lib/i18n'
+import { optionsCookieLangue } from '@/lib/langue-espace'
 
 /**
  * Le retour du lien de connexion.
@@ -15,6 +17,29 @@ import { clientAgence } from '@/lib/acces/agence'
  * pose des questions ; `/espace` s'en charge, et il le fera aussi bien a la
  * dixieme visite qu'a la premiere.
  */
+/**
+ * La langue suit le collaborateur. S'il en a deja choisi une, elle s'impose a
+ * ce navigateur. Sinon celle du navigateur, choisie sur la page de connexion,
+ * devient sa preference, donc la langue de ses courriels. Jamais bloquant.
+ */
+async function accorderLangue(
+  supabase: Awaited<ReturnType<typeof clientAgence>>,
+  requete: NextRequest,
+  reponse: NextResponse,
+) {
+  try {
+    const { data } = await supabase.rpc('ma_langue')
+    if (estLangue(data)) {
+      reponse.cookies.set(optionsCookieLangue(data))
+      return
+    }
+    const choisie = requete.cookies.get(COOKIE_LANGUE)?.value
+    if (estLangue(choisie)) await supabase.rpc('regler_ma_langue', { la_langue: choisie })
+  } catch {
+    // L'affichage reste celui du navigateur.
+  }
+}
+
 export async function GET(requete: NextRequest) {
   const url = new URL(requete.url)
   const code = url.searchParams.get('code')
@@ -33,7 +58,11 @@ export async function GET(requete: NextRequest) {
   try {
     const supabase = await clientAgence()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return NextResponse.redirect(versEspace)
+    if (!error) {
+      const reponse = NextResponse.redirect(versEspace)
+      await accorderLangue(supabase, requete, reponse)
+      return reponse
+    }
     console.error('[connexion] echange refuse')
   } catch {
     // Une panne Auth ne doit pas transmettre son erreur brute au framework.

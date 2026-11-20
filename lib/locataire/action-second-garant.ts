@@ -13,7 +13,8 @@ import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteu
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { secondGarant as texteEn } from '@/lib/content/en/locataire'
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
-import { choisir } from '@/lib/i18n'
+import { choisir, versLangue } from '@/lib/i18n'
+import { reglerLangueDossier } from '@/lib/langue-preferee'
 import { langueEspace } from '@/lib/langue-espace'
 
 /**
@@ -83,6 +84,12 @@ export async function designerSecondGarant(
     if (error || !emis?.dossier || !emis.jti) {
       return { statut: 'erreur', message: texte.erreurs.refus, valeur: saisie }
     }
+    await reglerLangueDossier(String(emis.dossier), 'locataire', langue)
+    await reglerLangueDossier(
+      String(emis.dossier),
+      'garant',
+      versLangue(donnees.get('langueGarant') ?? langue),
+    )
     await reprendreLivraisonLiens(String(emis.dossier))
   } catch {
     console.error('[locataire] second garant impossible')
