@@ -7,9 +7,15 @@ import {
   ouvrirRemise,
   reponseRemise,
 } from '@/lib/droits/remise-format'
-import { remiseDroits as texte } from '@/lib/content/remise-droits'
+import { remiseDroits as texteFr } from '@/lib/content/remise-droits'
+import { remiseDroits as texteEn } from '@/lib/content/en/remise-droits'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function Remise() {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const acces = useRef<{ id: string; jeton: string; preuve?: string } | null>(null)
   const liens = useRef<string[]>([])
   const expiration = useRef<ReturnType<typeof setTimeout> | null>(null)

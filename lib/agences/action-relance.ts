@@ -1,10 +1,14 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { revalidatePath } from 'next/cache'
 
-import { relanceGarant as texte } from '@/lib/content/espace'
+import { relanceGarant as texteFr } from '@/lib/content/espace'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
+import { relanceGarant as texteEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatRelance =
   { statut: 'inactif' } | { statut: 'relance' } | { statut: 'erreur'; message: string }
@@ -18,11 +22,15 @@ export type EtatRelance =
  * habituel des rappels.
  */
 export async function relancerLeGarant(_p: EtatRelance, donnees: FormData): Promise<EtatRelance> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const id = String(donnees.get('dossier') ?? '')
   if (!estUuidCanonique(id)) return { statut: 'erreur', message: texte.erreur }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase.rpc('relancer_garant', { le_dossier: id })
   if (error || data !== true) {

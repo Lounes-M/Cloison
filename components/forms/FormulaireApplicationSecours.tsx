@@ -2,10 +2,18 @@
 import { useActionState } from 'react'
 import { ConfigurationAuthentification } from '@/components/forms/ConfigurationAuthentification'
 import { gererApplicationSecours } from '@/lib/agences/action-application-secours'
-import { applicationSecours as t } from '@/lib/content/application-secours'
-import { securite } from '@/lib/content/securite'
+import { applicationSecours as tFr } from '@/lib/content/application-secours'
+import { securite as securiteFr } from '@/lib/content/securite'
+import { applicationSecours as tEn } from '@/lib/content/en/application-secours'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function FormulaireApplicationSecours({ facteur }: { facteur?: string }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+  const securite = choisir(langue, securiteFr, securiteEn)
+
   const [etat, action, pending] = useActionState(gererApplicationSecours, { facteur })
   return (
     <form action={action} className="flex flex-col gap-4">

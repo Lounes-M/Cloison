@@ -2,12 +2,18 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { collaborateurs as textes } from '@/lib/content/collaborateurs'
+import { collaborateurs as textesFr } from '@/lib/content/collaborateurs'
+import { collaborateurs as textesEn } from '@/lib/content/en/collaborateurs'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export type EtatCollaborateur = { message?: string; erreur?: boolean }
 export async function modifierCollaborateur(
   _etat: EtatCollaborateur,
   form: FormData,
 ): Promise<EtatCollaborateur> {
+  const langue = await langueEspace()
+  const textes = choisir(langue, textesFr, textesEn)
+
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache' || contexte.role !== 'admin')
     return { erreur: true, message: textes.session }

@@ -2,7 +2,10 @@
 import { useActionState } from 'react'
 import { ConfigurationAuthentification } from '@/components/forms/ConfigurationAuthentification'
 import { verifierSecondFacteur, type EtatSecurite } from '@/lib/agences/action-securite'
-import { securite } from '@/lib/content/securite'
+import { securite as securiteFr } from '@/lib/content/securite'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function FormulaireSecurite({
   initial,
@@ -11,6 +14,9 @@ export function FormulaireSecurite({
   initial: EtatSecurite
   facteurs?: Array<{ id: string; nom: string }>
 }) {
+  const langue = useLangue()
+  const securite = choisir(langue, securiteFr, securiteEn)
+
   const [etat, action, pending] = useActionState(verifierSecondFacteur, initial)
   return (
     <form action={action} className="flex flex-col gap-5">

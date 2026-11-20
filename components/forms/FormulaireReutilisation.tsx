@@ -5,11 +5,19 @@ import {
   copierPiece,
   type EtatReutilisation,
 } from '@/lib/garant/action-reutilisation'
-import { reutilisation as texte } from '@/lib/content/reutilisation'
-import { natures } from '@/lib/content/garant'
+import { reutilisation as texteFr } from '@/lib/content/reutilisation'
+import { natures as naturesFr } from '@/lib/content/garant'
 import { tailleLisible } from '@/lib/garant/validation'
+import { reutilisation as texteEn } from '@/lib/content/en/reutilisation'
+import { natures as naturesEn } from '@/lib/content/en/garant'
+import { choisir, locale } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+  const natures = choisir(langue, naturesFr, naturesEn)
+
   const id = useId()
   const [etat, setEtat] = useState<EtatReutilisation | null>(null)
   const [attente, setAttente] = useState(false)
@@ -75,7 +83,8 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
                 {etat.pieces.map((p) => (
                   <option key={p.id} value={p.id}>
                     {natures.find((n) => n.valeur === p.nature)?.libelle} ·{' '}
-                    {new Date(p.date).toLocaleDateString('fr-FR')} · {tailleLisible(p.taille)}
+                    {new Date(p.date).toLocaleDateString(locale(langue))} ·{' '}
+                    {tailleLisible(p.taille, langue)}
                   </option>
                 ))}
               </select>

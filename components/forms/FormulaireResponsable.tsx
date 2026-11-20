@@ -1,7 +1,10 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { affecterDossier, type EtatResponsable } from '@/lib/agences/action-responsable'
-import { responsables as t, type ResponsableDossier } from '@/lib/content/responsables'
+import { responsables as tFr, type ResponsableDossier } from '@/lib/content/responsables'
+import { responsables as tEn } from '@/lib/content/en/responsables'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireResponsable({
   dossierId,
   courant,
@@ -15,6 +18,9 @@ export function FormulaireResponsable({
   utilisateurId: string
   choix: { id: string; email: string }[]
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, envoyer, attente] = useActionState(affecterDossier, {
     statut: 'inactif',
   } as EtatResponsable)

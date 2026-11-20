@@ -6,9 +6,10 @@ import { choisir, type Langue } from '@/lib/i18n'
 /**
  * Le gabarit commun des pages juridiques : un titre, une date, des sections.
  *
- * `incomplet` pose l'attribut que le controle de production refuse, et affiche
- * l'avertissement au lecteur. Les deux vont ensemble : une page qui dirait
- * « a completer » sans que la supervision le voie resterait ainsi des mois.
+ * `incomplet` pose l'attribut que le controle de production refuse tant que
+ * la configuration ne declare pas l'editeur immatricule. Le lecteur, lui, lit
+ * le projet de societe et la mention « en cours d'immatriculation » : rien
+ * d'invente, rien de vide.
  */
 export function PageJuridique({
   titre,
@@ -27,14 +28,6 @@ export function PageJuridique({
       <EnTetePage titre={titre} sousTitre={<p>{juridique.miseAJour}</p>} />
       <section className="bg-cream gouttiere pt-[6.8rem] pb-[11.25rem] max-[767px]:py-[3.75rem]">
         <div className="bg-paper mx-auto max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
-          {incomplet ? (
-            <p
-              role="note"
-              className="bg-sun texte-16 mb-[2.5rem] rounded-[1rem] px-5 py-4 font-semibold"
-            >
-              {juridique.avertissementIncomplet}
-            </p>
-          ) : null}
           {langue === 'en' ? (
             <p role="note" className="texte-16 text-muted mb-[2.5rem]">
               {juridiqueEn.traduction}
@@ -69,8 +62,8 @@ export function SectionJuridique({
   )
 }
 
-/** Une valeur de l'editeur, ou la mention visible qu'elle manque. */
+/** Une valeur de l'editeur ; sans elle, un numero attend l'immatriculation. */
 export function Valeur({ valeur, langue = 'fr' }: { valeur: string | null; langue?: Langue }) {
   const juridique = choisir(langue, juridiqueFr, juridiqueEn)
-  return valeur ? <>{valeur}</> : <em className="text-muted">{juridique.aCompleter}</em>
+  return valeur ? <>{valeur}</> : <em className="text-muted">{juridique.immatriculation}</em>
 }

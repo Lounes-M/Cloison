@@ -59,6 +59,7 @@ export function FormulaireConnexion({
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
+      <input type="hidden" name="langue" value={langue} />
       {lienExpire ? (
         <p className="bg-sun outlined rounded-xl px-4 py-3 text-[14px] font-semibold">{t.expire}</p>
       ) : null}
@@ -68,7 +69,7 @@ export function FormulaireConnexion({
           role="alert"
           className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
         >
-          {langue === 'en' ? en.messageEn(etat.message) : etat.message}
+          {etat.message}
         </p>
       ) : null}
 

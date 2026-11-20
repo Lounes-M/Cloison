@@ -1,8 +1,9 @@
 'use server'
+import { traducteur } from '@/lib/messages'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 
 import { verifierDocument } from '@/lib/coffre/validation-document'
 import { verifierContenu } from '@/lib/coffre/type-reel'
@@ -15,7 +16,17 @@ import { baseSupabase } from '@/lib/coffre/depot-supabase'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { TAILLE_MAX_DEPOT, natureDepuis, nombreDocumentsDepuis } from '@/lib/garant/validation'
 import { autoriserAnalyse } from '@/lib/garant/debit-depot'
-import { depot as contenuDepot, documentsDeclares } from '@/lib/content/garant'
+import {
+  depot as contenuDepotFr,
+  documentsDeclares as documentsDeclaresFr,
+} from '@/lib/content/garant'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import {
+  depot as contenuDepotEn,
+  documentsDeclares as documentsDeclaresEn,
+} from '@/lib/content/en/garant'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Le depot d'une piece par le garant, et son retrait.
@@ -44,14 +55,20 @@ export async function deposerUnePiece(
   _precedent: EtatDepot,
   donnees: FormData,
 ): Promise<EtatDepot> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+  const contenuDepot = choisir(langue, contenuDepotFr, contenuDepotEn)
+
   const nature = natureDepuis(donnees.get('nature'))
-  if (!nature) return { statut: 'erreur', message: 'Nature de pièce inconnue.' }
+  if (!nature) return { statut: 'erreur', message: dire('Nature de pièce inconnue.') }
   const nombre = nombreDocumentsDepuis(nature, donnees.get('nombre_documents'))
   if (nombre === null) return { statut: 'erreur', message: documentsDeclares.invalide, nature }
 
   const fichier = donnees.get('fichier')
   if (!(fichier instanceof File) || fichier.size === 0) {
-    return { statut: 'erreur', message: 'Choisissez un fichier.', nature }
+    return { statut: 'erreur', message: dire('Choisissez un fichier.'), nature }
   }
 
   // La borne pratique, avant meme de lire les octets : au-dela, Vercel aurait
@@ -60,7 +77,9 @@ export async function deposerUnePiece(
   if (fichier.size > TAILLE_MAX_DEPOT) {
     return {
       statut: 'erreur',
-      message: 'Ce fichier dépasse 4 Mo. Une photo moins lourde ou un PDF plus léger passera.',
+      message: dire(
+        'Ce fichier dépasse 4 Mo. Une photo moins lourde ou un PDF plus léger passera.',
+      ),
       nature,
     }
   }
@@ -69,7 +88,7 @@ export async function deposerUnePiece(
   if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
     return { statut: 'erreur', message: sessionPorteur.autreDossier }
   }
-  if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE, nature }
+  if (!porteur) return { statut: 'erreur', message: dire(LIEN_EXPIRE), nature }
 
   try {
     if (!(await autoriserAnalyse(porteur.capacite.dossierId))) {
@@ -80,14 +99,15 @@ export async function deposerUnePiece(
 
     const contenu = Buffer.from(await fichier.arrayBuffer())
     const format = verifierContenu(contenu)
-    if (!format.accepte) return { statut: 'erreur', message: format.raison, nature }
+    if (!format.accepte) return { statut: 'erreur', message: dire(format.raison), nature }
     try {
       await verifierDocument(contenu, format.type)
     } catch {
       return {
         statut: 'erreur',
-        message:
+        message: dire(
           'Ce document est invalide, protégé ou trop grand. Exportez une copie lisible de moins de 40 pages.',
+        ),
         nature,
       }
     }
@@ -99,7 +119,7 @@ export async function deposerUnePiece(
       nombre,
     )
 
-    if (!resultat.depose) return { statut: 'erreur', message: resultat.raison, nature }
+    if (!resultat.depose) return { statut: 'erreur', message: dire(resultat.raison), nature }
 
     // La derniere piece peut avoir fait passer le dossier a complet : c'est la
     // base qui l'a decide, et c'est ici qu'on le dit.
@@ -108,7 +128,7 @@ export async function deposerUnePiece(
     console.error('[garant] depot impossible')
     return {
       statut: 'erreur',
-      message: "Le dépôt n'a pas abouti. Réessayez dans un instant.",
+      message: dire("Le dépôt n'a pas abouti. Réessayez dans un instant."),
       nature,
     }
   }
@@ -123,24 +143,31 @@ export async function retirerUnePiece(
   _precedent: EtatRetrait,
   donnees: FormData,
 ): Promise<EtatRetrait> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+
   const pieceId = String(donnees.get('piece') ?? '')
-  if (!estUuidCanonique(pieceId)) return { statut: 'erreur', message: 'Pièce inconnue.' }
+  if (!estUuidCanonique(pieceId)) return { statut: 'erreur', message: dire('Pièce inconnue.') }
 
   const porteur = await porteurGarant()
   if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
     return { statut: 'erreur', message: sessionPorteur.autreDossier }
   }
-  if (!porteur) return { statut: 'erreur', message: LIEN_EXPIRE }
+  if (!porteur) return { statut: 'erreur', message: dire(LIEN_EXPIRE) }
 
   try {
     const supabase = clientPorteurDeLien(porteur.jeton)
     const avant = await statutActuel(supabase, porteur.capacite.dossierId)
     const resultat = await retirerPiece(baseSupabase(supabase), pieceId)
-    if (!resultat.retiree) return { statut: 'erreur', message: resultat.raison }
+    if (!resultat.retiree) return { statut: 'erreur', message: dire(resultat.raison) }
     await prevenirSiLeStatutAChange(supabase, porteur.capacite.dossierId, avant)
   } catch {
     console.error('[garant] retrait impossible')
-    return { statut: 'erreur', message: "Le retrait n'a pas abouti. Réessayez dans un instant." }
+    return {
+      statut: 'erreur',
+      message: dire("Le retrait n'a pas abouti. Réessayez dans un instant."),
+    }
   }
 
   revalidatePath('/garant')

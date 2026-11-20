@@ -1,7 +1,7 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
-import { interfaceEspace } from '@/lib/content/interface'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
-import { acte as texteActe } from '@/lib/content/acte'
+import { acte as texteActeFr } from '@/lib/content/acte'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -11,12 +11,11 @@ import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
 import { ResponsableDossier } from '@/components/dossiers/ResponsableDossier'
 import { HistoriqueResponsables } from '@/components/dossiers/HistoriqueResponsables'
 import { NotesDossier } from '@/components/dossiers/NotesDossier'
-import { notesDossier as texteNotes } from '@/lib/content/notes'
-import { examen as texteExamen, type ExamenDocumentaire } from '@/lib/content/examen'
+import { notesDossier as texteNotesFr } from '@/lib/content/notes'
+import { examen as texteExamenFr, type ExamenDocumentaire } from '@/lib/content/examen'
 import { configurationOcr } from '@/lib/ocr/openrouter'
 import { Complements } from '@/components/dossiers/Complements'
 import { type Complement } from '@/lib/content/complements'
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -25,19 +24,19 @@ import { FormulaireCloture } from '@/components/forms/FormulaireCloture'
 import { FormulaireLoyerAgence } from '@/components/forms/FormulaireLoyerAgence'
 import { FormulaireRelanceGarant } from '@/components/forms/FormulaireRelanceGarant'
 import { FormulaireRattachementLogement } from '@/components/forms/FormulaireRattachementLogement'
-import { logements as texteLogements } from '@/lib/content/logements'
+import { logements as texteLogementsFr } from '@/lib/content/logements'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
 import {
-  acteurs,
-  actions,
-  cloture as texteCloture,
-  dossier as texte,
-  groupe as texteGroupe,
-  loyerAgence as texteLoyer,
-  natures,
-  statuts,
-  tableau,
+  acteurs as acteursFr,
+  actions as actionsFr,
+  cloture as texteClotureFr,
+  dossier as texteFr,
+  groupe as texteGroupeFr,
+  loyerAgence as texteLoyerFr,
+  natures as naturesFr,
+  statuts as statutsFr,
+  tableau as tableauFr,
 } from '@/lib/content/espace'
 import { tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
@@ -49,13 +48,38 @@ import {
 } from '@/lib/agences/inactivite'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
-import { journal as texteJournal } from '@/lib/content/journal'
-import { documentsDeclares, profilsRessources } from '@/lib/content/garant'
+import { journal as texteJournalFr } from '@/lib/content/journal'
+import {
+  documentsDeclares as documentsDeclaresFr,
+  profilsRessources as profilsRessourcesFr,
+} from '@/lib/content/garant'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { acte as texteActeEn } from '@/lib/content/en/acte'
+import { notesDossier as texteNotesEn } from '@/lib/content/en/notes'
+import { examen as texteExamenEn } from '@/lib/content/en/examen'
+import { logements as texteLogementsEn } from '@/lib/content/en/logements'
+import {
+  acteurs as acteursEn,
+  actions as actionsEn,
+  cloture as texteClotureEn,
+  dossier as texteEn,
+  groupe as texteGroupeEn,
+  loyerAgence as texteLoyerEn,
+  natures as naturesEn,
+  statuts as statutsEn,
+  tableau as tableauEn,
+} from '@/lib/content/en/espace'
+import { journal as texteJournalEn } from '@/lib/content/en/journal'
+import {
+  documentsDeclares as documentsDeclaresEn,
+  profilsRessources as profilsRessourcesEn,
+} from '@/lib/content/en/garant'
+import { choisir, locale, type Langue } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata: Metadata = {
-  title: 'Dossier',
-  robots: { index: false, follow: false },
-}
+export const generateMetadata = () => titreEspace(titresFr.dossier, titresEn.dossier)
 
 const tons = {
   sky: 'bg-sky',
@@ -65,12 +89,13 @@ const tons = {
   paper: 'bg-paper',
 } as const
 
-function euros(cents: unknown): string {
-  return `${(Number(cents) / 100).toLocaleString('fr-FR')} €`
+function eurosDe(cents: unknown, langue: Langue): string {
+  const montant = (Number(cents) / 100).toLocaleString(locale(langue))
+  return langue === 'en' ? `€${montant}` : `${montant} €`
 }
 
-function date(valeur: unknown, heure = false): string {
-  return new Date(String(valeur)).toLocaleString('fr-FR', {
+function dateDe(valeur: unknown, heure: boolean, langue: Langue): string {
+  return new Date(String(valeur)).toLocaleString(locale(langue), {
     timeZone: 'Europe/Paris',
     day: 'numeric',
     month: 'long',
@@ -97,6 +122,27 @@ export default async function PageDossier({
   params: Promise<{ id: string }>
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const langue = await langueEspace()
+  const euros = (cents: unknown) => eurosDe(cents, langue)
+  const date = (valeur: unknown, heure = false) => dateDe(valeur, heure, langue)
+  const statuts = choisir(langue, statutsFr, statutsEn)
+  const texte = choisir(langue, texteFr, texteEn)
+  const tableau = choisir(langue, tableauFr, tableauEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+  const texteNotes = choisir(langue, texteNotesFr, texteNotesEn)
+  const texteLoyer = choisir(langue, texteLoyerFr, texteLoyerEn)
+  const texteLogements = choisir(langue, texteLogementsFr, texteLogementsEn)
+  const texteGroupe = choisir(langue, texteGroupeFr, texteGroupeEn)
+  const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
+  const texteExamen = choisir(langue, texteExamenFr, texteExamenEn)
+  const profilsRessources = choisir(langue, profilsRessourcesFr, profilsRessourcesEn)
+  const natures = choisir(langue, naturesFr, naturesEn)
+  const texteCloture = choisir(langue, texteClotureFr, texteClotureEn)
+  const acteurs = choisir(langue, acteursFr, acteursEn)
+  const texteJournal = choisir(langue, texteJournalFr, texteJournalEn)
+  const actions = choisir(langue, actionsFr, actionsEn)
+  const texteActe = choisir(langue, texteActeFr, texteActeEn)
+
   const { id } = await params
   if (!estUuidCanonique(id)) notFound()
 
@@ -193,7 +239,7 @@ export default async function PageDossier({
   const statut = statuts[String(d.statut)] ?? statuts.ouvert!
   const ratio = e?.ratio == null ? null : Number(e.ratio)
   const seuil = agence.seuilRatio
-  const fmt = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
+  const fmt = (n: number) => n.toLocaleString(locale(langue), { minimumFractionDigits: 2 })
 
   const lie = Array.isArray(groupes) ? groupes[0] : null
   const ratioGroupe = lie?.ratio_groupe == null ? null : Number(lie.ratio_groupe)
@@ -366,7 +412,7 @@ export default async function PageDossier({
               loyerActuel={
                 d.loyer_cents == null
                   ? ''
-                  : (Number(d.loyer_cents) / 100).toLocaleString('fr-FR', {
+                  : (Number(d.loyer_cents) / 100).toLocaleString(locale(langue), {
                       useGrouping: false,
                     })
               }
@@ -432,7 +478,7 @@ export default async function PageDossier({
         {e ? (
           <dl className="mt-4 grid gap-x-8 gap-y-2 text-[14px] md:grid-cols-2">
             <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
-              <dt className="text-muted font-medium">Couvre</dt>
+              <dt className="text-muted font-medium">{texte.couvreLibelle}</dt>
               <dd className="font-semibold">
                 {texte.couvre[e.couvre as 'loyer' | 'loyer_charges']}
               </dd>
@@ -448,7 +494,7 @@ export default async function PageDossier({
               <dd className="font-semibold">{e.jusqu_au ? date(e.jusqu_au) : texte.dureeDuBail}</dd>
             </div>
             <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
-              <dt className="text-muted font-medium">Nature</dt>
+              <dt className="text-muted font-medium">{texte.nature}</dt>
               <dd className="font-semibold">{e.solidaire ? texte.solidaire : texte.simple}</dd>
             </div>
             <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
@@ -489,7 +535,7 @@ export default async function PageDossier({
                   {natures[String(p.type)] ?? String(p.type)}
                   <span className="text-muted font-medium">
                     {documentsDeclares.bilan(Number(p.nombre_documents ?? 1))},{' '}
-                    {tailleLisible(Number(p.taille_octets))}, {date(p.depose_le)}
+                    {tailleLisible(Number(p.taille_octets), langue)}, {date(p.depose_le)}
                   </span>
                 </span>
                 <a
@@ -605,7 +651,8 @@ export default async function PageDossier({
       </section>
 
       <p className="text-muted mt-10 text-[13px] font-medium">
-        Ouvert le {date(d.cree_le)}, expire le {date(d.expire_le)}.
+        {texte.ouvertLe} {date(d.cree_le)}
+        {texte.expireLe} {date(d.expire_le)}.
       </p>
       <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />

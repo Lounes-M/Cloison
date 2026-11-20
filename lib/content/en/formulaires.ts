@@ -37,16 +37,6 @@ export const connexion = {
   recevoir: 'Send me my link',
 } as const
 
-export const continuite = {
-  retrouver: 'Find my file',
-  email: 'Your email address',
-  reference: 'File reference received by email',
-  envoyer: 'Send me a new link',
-  resultat:
-    'If these details match a file that is still active, a new link will be sent to its address.',
-  erreur: 'This did not go through. Check the details and try again.',
-} as const
-
 export const demande = {
   nom: 'Agency name',
   nomExemple: 'Bellevue Lettings',
@@ -73,44 +63,3 @@ export const demande = {
   suite:
     'We will get back to you within 48 business hours, with a demo on a real file: not a brochure.',
 } as const
-
-/**
- * Les messages que les actions serveur renvoient en francais, et leur version
- * anglaise. Un message inconnu retombe sur `defaut`.
- */
-const messageDefaut = 'This did not go through. Check the form and try again.'
-
-export const messagesServeur: Record<string, string> = {
-  'Ton adresse e-mail est requise.': 'Your email address is required.',
-  'Cette adresse est trop longue.': 'This address is too long.',
-  'Cette adresse ne ressemble pas a une adresse e-mail.':
-    'This does not look like an email address.',
-  'Cette adresse ne ressemble pas à une adresse e-mail.':
-    'This does not look like an email address.',
-  'Cette adresse est invalide.': 'This address is not valid.',
-  'Trop de dossiers ouverts depuis cette connexion. Réessaie dans une heure.':
-    'Too many files opened from this connection. Try again in an hour.',
-  "Le dossier n'a pas pu être ouvert. Réessaie dans un instant.":
-    'The file could not be opened. Try again in a moment.',
-  'Votre adresse professionnelle est requise.': 'Your work address is required.',
-  'Trop de tentatives. Réessayez dans quelques minutes.':
-    'Too many attempts. Try again in a few minutes.',
-  'Adresse e-mail incomplète.': 'Incomplete email address.',
-  'Adresse e-mail trop longue.': 'Email address too long.',
-  'Utilisez votre adresse professionnelle, pas une adresse personnelle.':
-    'Use your work address, not a personal one.',
-  "Le nom de l'agence est trop court.": 'The agency name is too short.',
-  "Le nom de l'agence est trop long.": 'The agency name is too long.',
-  'Ville trop courte.': 'City name too short.',
-  'Ville trop longue.': 'City name too long.',
-  'Choisissez un volume.': 'Choose a volume.',
-  'Message trop long (2000 caractères maximum).': 'Message too long (2,000 characters maximum).',
-  'Quelques champs sont à corriger.': 'A few fields need correcting.',
-  "Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant.":
-    'We could not save your request. Try again in a moment.',
-}
-
-/** Le message d'une action serveur dans la langue de la page. */
-export function messageEn(message: string | undefined): string | undefined {
-  return message === undefined ? undefined : (messagesServeur[message] ?? messageDefaut)
-}

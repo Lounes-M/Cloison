@@ -6,8 +6,11 @@ import Link from 'next/link'
 import { z } from 'zod'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { payerActe } from '@/lib/paiement/action-acte'
-import { facturation as t } from '@/lib/content/facturation'
-export const metadata = { title: t.titre, robots: { index: false, follow: false } }
+import { facturation as tFr } from '@/lib/content/facturation'
+import { facturation as tEn } from '@/lib/content/en/facturation'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 const lignes = z
   .array(
     z.object({
@@ -26,6 +29,9 @@ export default async function Page({
 }: {
   searchParams: Promise<{ avant?: string; paiement?: string }>
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const q = await searchParams
   const c = await contexteAgence()
   if (c.etat !== 'rattache') notFound()
@@ -65,7 +71,7 @@ export default async function Page({
                 <div>
                   <dt className="text-muted text-xs font-semibold">{t.montant}</dt>
                   <dd className="mt-1 text-2xl font-bold tabular-nums">
-                    {(f.montant_cents / 100).toLocaleString('fr-FR', {
+                    {(f.montant_cents / 100).toLocaleString(locale(langue), {
                       style: 'currency',
                       currency: 'EUR',
                     })}
@@ -75,7 +81,7 @@ export default async function Page({
                   <dt className="text-muted text-xs font-semibold">{t.date}</dt>
                   <dd className="mt-2 text-sm font-semibold">
                     <time dateTime={f.cree_le}>
-                      {new Date(f.cree_le).toLocaleDateString('fr-FR')}
+                      {new Date(f.cree_le).toLocaleDateString(locale(langue))}
                     </time>
                   </dd>
                 </div>

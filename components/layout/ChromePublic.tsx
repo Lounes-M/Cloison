@@ -1,4 +1,5 @@
 import { SiteFooter } from '@/components/layout/SiteFooter'
+import { FournisseurLangue } from '@/components/langue/LangueContexte'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { interfaceEspace as interfaceEn } from '@/lib/content/en/interface'
 import { interfaceEspace as interfaceFr } from '@/lib/content/interface'
@@ -25,7 +26,7 @@ export function ChromePublic({ langue, children }: { langue: Langue; children: R
       </a>
       <SiteHeader langue={langue} />
       <div id="contenu" tabIndex={-1} className="sous-entete-fixe">
-        {children}
+        <FournisseurLangue langue={langue}>{children}</FournisseurLangue>
       </div>
       <SiteFooter langue={langue} />
     </div>

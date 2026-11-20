@@ -2,7 +2,10 @@
 
 import { useActionState, useState } from 'react'
 import { attribuerPlusieurs, type EtatAttributions } from '@/lib/agences/action-attributions'
-import { pilotage as t } from '@/lib/content/pilotage'
+import { pilotage as tFr } from '@/lib/content/pilotage'
+import { pilotage as tEn } from '@/lib/content/en/pilotage'
+import { deuxPoints, choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export type ChoixDossier = { id: string; revision: string | null; reference: string }
 
@@ -17,6 +20,9 @@ export function FormulaireAttributions({
   utilisateurId: string
   disponible: boolean
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [selection, selectionner] = useState<ChoixDossier[]>([])
   const [recu, conserverRecu] = useState<ChoixDossier[]>([])
   const selectionVisible = selection.every((s) => dossiers.some((d) => d.id === s.id))
@@ -109,13 +115,15 @@ export function FormulaireAttributions({
           <ul className="mt-2 grid gap-2">
             {etat.resultats.map((r) => (
               <li key={r.id} className="break-all">
-                {recu.find((d) => d.id === r.id)?.reference ?? r.id} : {t.etats[r.etat]}
+                {recu.find((d) => d.id === r.id)?.reference ?? r.id}
+                {deuxPoints(langue)}
+                {t.etats[r.etat]}
               </li>
             ))}
           </ul>
           <p className="mt-3 text-sm">{t.precaution}</p>
           <a href="" className="lien-espace mt-3">
-            Actualiser la liste
+            {t.actualiser}
           </a>
         </div>
       ) : null}

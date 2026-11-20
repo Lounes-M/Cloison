@@ -3,8 +3,11 @@
 import { useActionState, useId } from 'react'
 
 import { rattacherAuLogement, type EtatLogement } from '@/lib/agences/action-logements'
-import { logements as texte } from '@/lib/content/logements'
+import { logements as texteFr } from '@/lib/content/logements'
 import { cn } from '@/lib/utils'
+import { logements as texteEn } from '@/lib/content/en/logements'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatLogement = { statut: 'inactif' }
 
@@ -18,6 +21,9 @@ export function FormulaireRattachementLogement({
   actuel: string | null
   options: { id: string; libelle: string }[]
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(rattacherAuLogement, ETAT_INITIAL)
   const idChamp = useId()
 

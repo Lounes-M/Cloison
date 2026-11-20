@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { deplier } from './doublures/deplier'
 import { isValidElement, type ReactNode } from 'react'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
@@ -672,21 +673,20 @@ test('le garant voit ce qu il lui reste a faire tant que le depot est ouvert', a
     if (typeof noeud === 'string') sortie.push(noeud)
     if (Array.isArray(noeud)) noeud.forEach((n) => textes(n, sortie))
     if (isValidElement<{ children?: ReactNode }>(noeud)) {
-      if (noeud.type === ResteAFaireGarant) {
-        textes(ResteAFaireGarant(noeud.props as Parameters<typeof ResteAFaireGarant>[0]), sortie)
-      }
       textes(noeud.props.children, sortie)
     }
     return sortie
   }
-  const ouvert = textes(await PageGarant()).join(' ')
+  const ouvert = textes(await deplier(await PageGarant(), [ResteAFaireGarant])).join(' ')
   expect(ouvert).toContain('Ce qu’il vous reste à faire')
   expect(ouvert).toContain('Bulletins de paie : 3 documents manquants sur 3.')
   reponses.dossiers = {
     data: { ...(reponses.dossiers!.data as object), statut: 'transmis' },
     error: null,
   }
-  expect(textes(await PageGarant()).join(' ')).not.toContain('Ce qu’il vous reste à faire')
+  expect(textes(await deplier(await PageGarant(), [ResteAFaireGarant])).join(' ')).not.toContain(
+    'Ce qu’il vous reste à faire',
+  )
 })
 
 test('le locataire voit ses propres gestes, jamais les pieces de son garant', async () => {
@@ -698,12 +698,6 @@ test('le locataire voit ses propres gestes, jamais les pieces de son garant', as
     if (typeof noeud === 'string') sortie.push(noeud)
     if (Array.isArray(noeud)) noeud.forEach((n) => textes(n, sortie))
     if (isValidElement<{ children?: ReactNode }>(noeud)) {
-      if (noeud.type === ResteAFaireLocataire) {
-        textes(
-          ResteAFaireLocataire(noeud.props as Parameters<typeof ResteAFaireLocataire>[0]),
-          sortie,
-        )
-      }
       textes(noeud.props.children, sortie)
     }
     return sortie
@@ -717,7 +711,7 @@ test('le locataire voit ses propres gestes, jamais les pieces de son garant', as
     },
     error: null,
   }
-  const avant = textes(await locataire()).join(' ')
+  const avant = textes(await deplier(await locataire(), [ResteAFaireLocataire])).join(' ')
   expect(avant).toContain('Ce qu’il te reste à faire')
   expect(avant).toContain('Indique le loyer mensuel, charges comprises.')
   expect(avant).toContain('Désigne ton garant')
@@ -731,7 +725,7 @@ test('le locataire voit ses propres gestes, jamais les pieces de son garant', as
     },
     error: null,
   }
-  const apres = textes(await locataire()).join(' ')
+  const apres = textes(await deplier(await locataire(), [ResteAFaireLocataire])).join(' ')
   expect(apres).toContain('Rien à faire de ton côté pour l’instant.')
   expect(apres).not.toContain('Bulletins')
 })

@@ -78,14 +78,16 @@ export const profilsRessources = [
   { valeur: 'independant', libelle: 'Indépendant' },
 ] as const
 export type ProfilRessources = (typeof profilsRessources)[number]['valeur']
-export function naturesDuProfil(profil: ProfilRessources) {
+type Nature = { valeur: NatureValeur; libelle: string; aide: string; attendu: number }
+/** `liste` : les memes natures dans une autre langue ; le francais par defaut. */
+export function naturesDuProfil(profil: ProfilRessources, liste: readonly Nature[] = natures) {
   const communes: NatureValeur[] = ['avis_imposition', 'piece_identite', 'justificatif_domicile']
   const propres: Record<ProfilRessources, NatureValeur[]> = {
     salarie: ['bulletin_paie', 'contrat_travail'],
     retraite: ['pension_retraite'],
     independant: ['bilan_comptable', 'attestation_ressources', 'activite_independante'],
   }
-  return natures.filter((nature) => [...communes, ...propres[profil]].includes(nature.valeur))
+  return liste.filter((nature) => [...communes, ...propres[profil]].includes(nature.valeur))
 }
 export const documentsDeclares = {
   profil: (libelle: string) => `Liste adaptée à votre situation : ${libelle.toLowerCase()}.`,
@@ -129,6 +131,15 @@ export const depot = {
 } as const
 
 export const engagement = {
+  resume: {
+    loyer: 'Le loyer seul',
+    loyerCharges: 'Le loyer et les charges',
+    plafond: ', jusqu’à',
+    auTotal: '€ au total',
+    jusquAu: ', jusqu’au',
+    solidaire: ', caution solidaire',
+    aucun: 'Aucun engagement déclaré.',
+  },
   titre: 'Ce que vous couvrez',
   aide: 'Ce que vous déclarez ici figurera dans l’acte de cautionnement. Vous pouvez le corriger tant que le dossier n’est pas parti.',
   revenu: 'Votre revenu net mensuel',
@@ -154,6 +165,12 @@ export const engagement = {
   bouton: 'Enregistrer',
   envoi: 'Enregistrement…',
   succes: 'Enregistré.',
+  erreurs: {
+    couvre: 'Indiquez ce que vous couvrez.',
+    montant: 'Le montant ne se lit pas. Exemple : 1 200 ou 1200,50.',
+    date: 'La date de fin doit être à venir, au format AAAA-MM-JJ.',
+    revenu: 'Le revenu ne se lit pas. Exemple : 3 200 ou 3200,50.',
+  },
 } as const
 
 /**

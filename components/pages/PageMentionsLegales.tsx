@@ -2,12 +2,12 @@ import { PageJuridique, SectionJuridique, Valeur } from '@/components/juridique/
 import * as en from '@/lib/content/en/juridique'
 import * as fr from '@/lib/content/juridique'
 import { choisir, type Langue } from '@/lib/i18n'
-import { editeur } from '@/lib/juridique/editeur'
+import { editeurAffiche } from '@/lib/juridique/editeur'
 
 /** Les mentions de l'article 6 de la loi pour la confiance dans l'economie numerique. */
 export function PageMentionsLegales({ langue = 'fr' }: { langue?: Langue }) {
   const textes = choisir(langue, fr.mentionsLegales, en.mentionsLegales)
-  const e = editeur()
+  const e = editeurAffiche(langue)
   const lignes = [
     ['denomination', e.denomination],
     ['forme', e.forme],
@@ -61,6 +61,8 @@ export function PageMentionsLegales({ langue = 'fr' }: { langue?: Langue }) {
           ))}
         </ul>
       </SectionJuridique>
+
+      <SectionJuridique titre={textes.donnees} paragraphes={[textes.donneesTexte]} />
 
       <SectionJuridique
         titre={textes.autres}

@@ -1,12 +1,16 @@
 import { cookies } from 'next/headers'
 import { estCookieSessionAgence } from '@/lib/acces/cookies-agence'
 import { seDeconnecter } from '@/lib/agences/action-securite'
-import { securite } from '@/lib/content/securite'
+import { securite as securiteFr } from '@/lib/content/securite'
 import { connection } from 'next/server'
 
 import { CadreEspace } from '@/components/layout/CadreEspace'
-import { support } from '@/lib/content/espace'
+import { support as supportFr } from '@/lib/content/espace'
 import { env } from '@/lib/env'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { support as supportEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * L'espace agence.
@@ -18,6 +22,10 @@ import { env } from '@/lib/env'
  * ecran agence, y compris apres le second facteur et une exclusion.
  */
 export default async function LayoutAgence({ children }: { children: React.ReactNode }) {
+  const langue = await langueEspace()
+  const securite = choisir(langue, securiteFr, securiteEn)
+  const support = choisir(langue, supportFr, supportEn)
+
   // Rendu a chaque requete, jamais prerendu : la Content-Security-Policy de
   // l'applicatif porte un nonce que le proxy tire par requete, et une
   // page prerendue au build ne pourrait pas le porter. Ses scripts seraient

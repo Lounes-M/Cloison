@@ -1,7 +1,10 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { enregistrerExamen, type EtatExamen } from '@/lib/agences/action-examen'
-import { examen as t, type ExamenDocumentaire } from '@/lib/content/examen'
+import { examen as tFr, type ExamenDocumentaire } from '@/lib/content/examen'
+import { examen as tEn } from '@/lib/content/en/examen'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireExamen({
   dossierId,
   pieceId,
@@ -11,6 +14,9 @@ export function FormulaireExamen({
   pieceId: string
   precedent?: ExamenDocumentaire
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, envoyer, attente] = useActionState(enregistrerExamen, {
     statut: 'inactif',
   } as EtatExamen)

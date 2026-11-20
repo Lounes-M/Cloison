@@ -1,14 +1,23 @@
 'use server'
+import { traducteur } from '@/lib/messages'
 import { createHash } from 'node:crypto'
 
 import { revalidatePath } from 'next/cache'
 
 import { clientServeur } from '@/lib/acces/serveur'
-import { cloture as texte } from '@/lib/content/espace'
-import { cloture as courriels, pied } from '@/lib/content/courriels'
-import { envoyer } from '@/lib/courriels/envoi'
+import { cloture as texteFr } from '@/lib/content/espace'
+import { cloture as courrielsFr } from '@/lib/content/courriels'
+import { cloture as courrielsEn } from '@/lib/content/en/courriels'
+import { gabaritCourriel as gabaritEn } from '@/lib/content/en/gabarit-courriel'
+import { gabaritCourriel as gabaritFr } from '@/lib/content/gabarit-courriel'
+import { adresseDuSite, envoyer } from '@/lib/courriels/envoi'
+import { composerCourriel } from '@/lib/courriels/gabarit'
+import { langueDossier } from '@/lib/langue-preferee'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
+import { cloture as texteEn } from '@/lib/content/en/espace'
+import { choisir, type Langue } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatCloture =
   | { statut: 'inactif' }
@@ -30,6 +39,10 @@ function identifiant(dossierId: string, partie: string): string {
  * file de notifications ne porterait plus pour un dossier echu.
  */
 export async function cloreLeDossier(_p: EtatCloture, donnees: FormData): Promise<EtatCloture> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const id = String(donnees.get('dossier') ?? '')
   const reference = String(donnees.get('reference') ?? '').trim()
   if (!estUuidCanonique(id) || reference.length === 0 || reference.length > 64) {
@@ -37,7 +50,14 @@ export async function cloreLeDossier(_p: EtatCloture, donnees: FormData): Promis
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
+
+  // La langue de chaque porteur se lit avant la cloture : apres elle, le
+  // dossier n'a plus rien a dire. Elle ne sert qu'aux deux courriels d'adieu.
+  const langues: Record<'locataire' | 'garant', Langue> = {
+    locataire: (await langueDossier(id, 'locataire')) ?? 'fr',
+    garant: (await langueDossier(id, 'garant')) ?? 'fr',
+  }
 
   const { data, error } = await contexte.supabase.rpc('clore_dossier', {
     le_dossier: id,
@@ -54,20 +74,37 @@ export async function cloreLeDossier(_p: EtatCloture, donnees: FormData): Promis
     email_garant?: unknown
     email_second_garant?: unknown
   }
-  const signature = `\n\nRéférence du dossier : ${String(clos.reference)}\n\n${pied}`
   try {
     const db = await clientServeur()
-    const envois: [string, unknown, { sujet: string; texte: string }][] = [
-      ['locataire', clos.email_locataire, courriels.locataire],
-      ['garant', clos.email_garant, courriels.garant],
-      ['second', clos.email_second_garant, courriels.garant],
+    // Le second garant a son propre dossier, que cette action ne connait
+    // pas : il lit la langue du premier.
+    const envois: [string, unknown, 'locataire' | 'garant'][] = [
+      ['locataire', clos.email_locataire, 'locataire'],
+      ['garant', clos.email_garant, 'garant'],
+      ['second', clos.email_second_garant, 'garant'],
     ]
-    for (const [partie, adresse, message] of envois) {
+    for (const [partie, adresse, espace] of envois) {
       if (typeof adresse !== 'string' || adresse.length === 0) continue
+      const langueCourriel = langues[espace]
+      const message = choisir(langueCourriel, courrielsFr, courrielsEn)[espace]
       const accepte = await envoyer(
         adresse,
         message.sujet,
-        message.texte + signature,
+        composerCourriel(
+          {
+            langue: langueCourriel,
+            espace,
+            sujet: message.sujet,
+            paragraphes: [message.texte],
+            details: [
+              {
+                libelle: choisir(langueCourriel, gabaritFr, gabaritEn).reference,
+                valeur: String(clos.reference),
+              },
+            ],
+          },
+          adresseDuSite(),
+        ),
         identifiant(id, partie),
         undefined,
         true,

@@ -1,23 +1,28 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
-import { interfaceEspace } from '@/lib/content/interface'
-import type { Metadata } from 'next'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { listerConnecteurs } from '@/lib/connecteurs/liste'
-import { connecteurs as t } from '@/lib/content/connecteurs'
+import { connecteurs as tFr } from '@/lib/content/connecteurs'
 import { FormulaireConnecteur } from '@/components/forms/FormulaireConnecteur'
-export const metadata: Metadata = {
-  title: t.titre,
-  robots: { index: false, follow: false },
-}
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { connecteurs as tEn } from '@/lib/content/en/connecteurs'
+import { choisir, locale, deuxPoints } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 export default async function PageConnecteurs() {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+
   const c = await contexteAgence()
   if (c.etat !== 'rattache') redirect('/connexion')
   if (c.role !== 'admin') notFound()
   const data = await listerConnecteurs(c)
-  const date = (v: string) => new Date(v).toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })
+  const date = (v: string) =>
+    new Date(v).toLocaleDateString(locale(langue), { timeZone: 'Europe/Paris' })
   return (
     <div className="page-espace w-full max-w-[960px]">
       <Link href="/espace" className="lien-espace mb-6">
@@ -42,7 +47,9 @@ export default async function PageConnecteurs() {
               <h2 className="font-bold">{k.nom}</h2>
               <p>{k.revoque_le ? t.revoque : active ? t.actif : t.expire}</p>
               <p className="text-sm">
-                {t.expiration} : {date(k.expire_le)}
+                {t.expiration}
+                {deuxPoints(langue)}
+                {date(k.expire_le)}
               </p>
               <p className="text-sm">
                 {t.utilisation} : {k.utilise_le ? date(k.utilise_le) : t.jamais}

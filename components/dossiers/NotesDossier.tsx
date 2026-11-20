@@ -1,7 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { BoutonSupprimerNote, FormulaireNote } from '@/components/forms/FormulaireNote'
-import { notesDossier as texte } from '@/lib/content/notes'
+import { notesDossier as texteFr } from '@/lib/content/notes'
+import { notesDossier as texteEn } from '@/lib/content/en/notes'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 type Note = {
   id: string
@@ -33,6 +36,9 @@ export async function NotesDossier({
   supabase: SupabaseClient
   modifiable: boolean
 }) {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+
   let notes: Note[] | null = null
   try {
     const { data, error } = await supabase.rpc('notes_du_dossier', { le_dossier: dossierId })
@@ -55,7 +61,7 @@ export async function NotesDossier({
       ) : (
         <ol className="mt-4 space-y-4">
           {notes.map((n) => {
-            const date = new Date(n.cree_le).toLocaleString('fr-FR', {
+            const date = new Date(n.cree_le).toLocaleString(locale(langue), {
               timeZone: 'Europe/Paris',
               dateStyle: 'medium',
               timeStyle: 'short',

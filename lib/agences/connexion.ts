@@ -1,5 +1,7 @@
 'use server'
 
+import { langueAction, poserLangue } from '@/lib/langue-espace'
+import { traducteur } from '@/lib/messages'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
@@ -57,6 +59,8 @@ export async function envoyerLienDeConnexion(
   _precedent: EtatConnexion,
   donnees: FormData,
 ): Promise<EtatConnexion> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
   const saisie = String(donnees.get('courriel') ?? '')
   const analyse = schema.safeParse({ courriel: saisie })
 
@@ -66,7 +70,7 @@ export async function envoyerLienDeConnexion(
     // compte.
     return {
       statut: 'erreur',
-      message: analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.',
+      message: dire(analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.'),
       valeur: saisie,
     }
   }
@@ -79,10 +83,13 @@ export async function envoyerLienDeConnexion(
     ) {
       return {
         statut: 'erreur',
-        message: 'Trop de tentatives. Réessayez dans quelques minutes.',
+        message: dire('Trop de tentatives. Réessayez dans quelques minutes.'),
         valeur: saisie,
       }
     }
+
+    // La langue de la page de connexion suit le collaborateur dans son espace.
+    await poserLangue(langue)
 
     const supabase = await clientAgence()
     const { error } = await supabase.auth.signInWithOtp({
@@ -93,6 +100,9 @@ export async function envoyerLienDeConnexion(
         // lien a un vrai garant. La barriere tombe la, et nulle part avant.
         shouldCreateUser: true,
         emailRedirectTo: `${adresseDuSite()}/connexion/verifie`,
+        // Pour un nouveau compte : la langue du courriel de connexion, que le
+        // gabarit Supabase lit dans `.Data.langue` (supabase/gabarits).
+        data: { langue },
       },
     })
 

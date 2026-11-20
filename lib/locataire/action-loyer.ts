@@ -1,13 +1,17 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 
 import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { montantEnCents } from '@/lib/garant/validation'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Le locataire saisit son loyer.
@@ -24,13 +28,17 @@ export type EtatLoyer =
   | { statut: 'erreur'; message: string; valeur?: string }
 
 export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): Promise<EtatLoyer> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+
   const saisie = String(donnees.get('loyer') ?? '')
   const cents = montantEnCents(saisie)
 
   if (cents === 'invalide' || cents === null) {
     return {
       statut: 'erreur',
-      message: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
+      message: dire('Le loyer ne se lit pas. Exemple : 850 ou 850,50.'),
       valeur: saisie,
     }
   }
@@ -40,7 +48,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
     return { statut: 'erreur', message: sessionPorteur.autreDossier }
   }
   if (!porteur || porteur.capacite.partie !== 'locataire') {
-    return { statut: 'erreur', message: 'Ton lien a expiré. Demande-en un nouveau.' }
+    return { statut: 'erreur', message: dire('Ton lien a expiré. Demande-en un nouveau.') }
   }
 
   try {
@@ -58,7 +66,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
       console.error('[locataire] loyer refuse')
       return {
         statut: 'erreur',
-        message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
+        message: dire("L'enregistrement n'a pas abouti. Réessaie dans un instant."),
         valeur: saisie,
       }
     }
@@ -70,7 +78,7 @@ export async function saisirMonLoyer(_precedent: EtatLoyer, donnees: FormData): 
     console.error('[locataire] loyer impossible')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Réessaie dans un instant.",
+      message: dire("L'enregistrement n'a pas abouti. Réessaie dans un instant."),
       valeur: saisie,
     }
   }

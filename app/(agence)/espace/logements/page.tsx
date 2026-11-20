@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -6,11 +5,15 @@ import { FormulaireLogement } from '@/components/forms/FormulaireLogement'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { archiverUnLogement } from '@/lib/agences/action-logements'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { logements as t } from '@/lib/content/logements'
-import { euros } from '@/lib/content/tarifs'
+import { logements as tFr } from '@/lib/content/logements'
+import { euros as eurosFr } from '@/lib/content/tarifs'
 import { cn } from '@/lib/utils'
+import { logements as tEn } from '@/lib/content/en/logements'
+import { euros as eurosEn } from '@/lib/content/en/tarifs'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
 
-export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 
 type Ligne = {
   id: string
@@ -29,6 +32,10 @@ export default async function PageLogements({
 }: {
   searchParams?: Promise<{ archives?: string }>
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const euros = choisir(langue, eurosFr, eurosEn)
+
   const c = await contexteAgence()
   if (c.etat !== 'rattache') redirect('/connexion')
   const avecArchives = (await searchParams)?.archives === '1'

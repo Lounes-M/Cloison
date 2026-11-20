@@ -465,6 +465,38 @@
     background: var(--color-sun);
   }
 
+  /* La bascule de langue des espaces : deux choix dans un meme contour. */
+  .bascule-langue {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.2rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+    border-radius: 0.625rem;
+    background: var(--color-paper);
+  }
+  .bascule-langue-choix {
+    min-width: 44px;
+    padding: 0 0.6rem;
+    border-radius: 0.45rem;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .bascule-langue-choix:hover {
+    color: var(--color-ink);
+  }
+  .bascule-langue-actif {
+    background: var(--color-cobalt);
+    color: var(--color-paper);
+  }
+  .bascule-langue-actif:hover {
+    color: var(--color-paper);
+  }
+
   .entete-espace {
     animation: none;
   }

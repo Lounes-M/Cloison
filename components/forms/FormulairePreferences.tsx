@@ -1,8 +1,14 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { reglerNotifications, type EtatPreferences } from '@/lib/agences/action-preferences'
-import { preferences as t, type PreferenceNotifications } from '@/lib/content/preferences'
+import { preferences as tFr, type PreferenceNotifications } from '@/lib/content/preferences'
+import { preferences as tEn } from '@/lib/content/en/preferences'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulairePreferences({ courante }: { courante: PreferenceNotifications }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, envoyer, attente] = useActionState(reglerNotifications, {
     statut: 'inactif',
   } as EtatPreferences)

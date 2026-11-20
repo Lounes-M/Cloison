@@ -2,8 +2,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { gererConnecteur, type EtatConnecteur } from '@/lib/connecteurs/action'
-import { connecteurs as t } from '@/lib/content/connecteurs'
+import { connecteurs as tFr } from '@/lib/content/connecteurs'
+import { connecteurs as tEn } from '@/lib/content/en/connecteurs'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireConnecteur({ agence, id }: { agence: string; id?: string }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, afficher] = useState<EtatConnecteur | null>(null),
     [attente, patienter] = useState(false)
   const generation = useRef(0),

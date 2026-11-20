@@ -1,10 +1,18 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { testerApplication } from '@/lib/agences/action-tester-application'
-import { applicationSecours as t } from '@/lib/content/application-secours'
-import { securite } from '@/lib/content/securite'
+import { applicationSecours as tFr } from '@/lib/content/application-secours'
+import { securite as securiteFr } from '@/lib/content/securite'
+import { applicationSecours as tEn } from '@/lib/content/en/application-secours'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function FormulaireTestApplication({ facteur }: { facteur: string }) {
+  const langue = useLangue()
+  const securite = choisir(langue, securiteFr, securiteEn)
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, action, pending] = useActionState(testerApplication, {})
   const id = useId()
   return (

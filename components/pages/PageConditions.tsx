@@ -2,13 +2,13 @@ import { PageJuridique, SectionJuridique } from '@/components/juridique/PageJuri
 import * as en from '@/lib/content/en/juridique'
 import * as fr from '@/lib/content/juridique'
 import { choisir, type Langue } from '@/lib/i18n'
-import { editeur } from '@/lib/juridique/editeur'
+import { editeurAffiche } from '@/lib/juridique/editeur'
 
 /** Les conditions des trois espaces, et le recours du consommateur. */
 export function PageConditions({ langue = 'fr' }: { langue?: Langue }) {
   const textes = choisir(langue, fr.conditions, en.conditions)
   const { mentionTva } = choisir(langue, fr, en)
-  const e = editeur()
+  const e = editeurAffiche(langue)
 
   return (
     <PageJuridique langue={langue} titre={textes.titre} incomplet={e.manquants.length > 0}>
@@ -31,7 +31,9 @@ export function PageConditions({ langue = 'fr' }: { langue?: Langue }) {
                     {new URL(e.mediateur.site).host}
                   </a>
                 </p>
-              ) : null}
+              ) : (
+                <p>{textes.mediation}</p>
+              )}
               <p>{textes.tribunaux}</p>
             </>
           ) : null}

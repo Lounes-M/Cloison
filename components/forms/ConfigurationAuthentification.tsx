@@ -1,7 +1,13 @@
-import { securite } from '@/lib/content/securite'
+'use client'
+
+import { useLangue } from '@/components/langue/LangueContexte'
+import { securite as securiteFr } from '@/lib/content/securite'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { choisir } from '@/lib/i18n'
 
 /** Le QR reste une image ; la cle n'est conservee que dans l'etat du formulaire. */
 export function ConfigurationAuthentification({ qr, secret }: { qr: string; secret?: string }) {
+  const securite = choisir(useLangue(), securiteFr, securiteEn)
   return (
     <div className="configuration-authentification">
       <p className="text-sm font-bold">{securite.scanner}</p>

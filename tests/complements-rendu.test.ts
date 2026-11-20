@@ -1,5 +1,4 @@
 import { expect, test, vi } from 'vitest'
-import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -30,9 +29,10 @@ const pieces = [
     depose_le: '2026-09-09T09:00:00Z',
   },
 ]
-function rendre(agence: boolean, etat: Complement['etat'] = 'demande', modifiable = true) {
+// `Complements` est un composant serveur : on l'attend, puis on rend son arbre.
+async function rendre(agence: boolean, etat: Complement['etat'] = 'demande', modifiable = true) {
   return renderToStaticMarkup(
-    createElement(Complements, {
+    await Complements({
       dossierId: '55555555-5555-4555-8555-555555555555',
       agence,
       modifiable,
@@ -41,31 +41,31 @@ function rendre(agence: boolean, etat: Complement['etat'] = 'demande', modifiabl
     }),
   )
 }
-test('le garant propose seulement un fichier posterieur a la demande', () => {
-  const html = rendre(false)
+test('le garant propose seulement un fichier posterieur a la demande', async () => {
+  const html = await rendre(false)
   expect(html).toContain(`value="${pieces[0]!.id}"`)
   expect(html).not.toContain(pieces[1]!.id)
   expect(html).not.toContain('value="valider"')
 })
-test('un remplacement fourni attend un examen distinct de l agence', () => {
-  const garant = rendre(false, 'fourni'),
-    agence = rendre(true, 'fourni')
+test('un remplacement fourni attend un examen distinct de l agence', async () => {
+  const garant = await rendre(false, 'fourni'),
+    agence = await rendre(true, 'fourni')
   expect(garant).not.toContain('<form')
   expect(agence).toContain('value="valider"')
   expect(agence).toContain('value="refuser"')
   expect(agence).toContain(`/espace/pieces/${pieces[0]!.id}`)
 })
-test('un dossier ferme conserve le suivi sans formulaire de modification', () => {
-  expect(rendre(true, 'fourni', false)).not.toContain('<form')
-  expect(rendre(false, 'demande', false)).not.toContain('<form')
+test('un dossier ferme conserve le suivi sans formulaire de modification', async () => {
+  expect(await rendre(true, 'fourni', false)).not.toContain('<form')
+  expect(await rendre(false, 'demande', false)).not.toContain('<form')
 })
-test('apercus optionnels des composants reels sur fixtures', () => {
+test('apercus optionnels des composants reels sur fixtures', async () => {
   const destination = process.env.CLOISON_APERCUS_COMPLEMENTS
   if (!destination) return
   mkdirSync(destination, { recursive: true })
   for (const agence of [false, true])
     writeFileSync(
       join(destination, agence ? 'agence.html' : 'garant.html'),
-      rendre(agence, agence ? 'fourni' : 'demande'),
+      await rendre(agence, agence ? 'fourni' : 'demande'),
     )
 })

@@ -2,16 +2,10 @@
 
 import { useState } from 'react'
 
-import { candidature } from '@/lib/content/candidature'
-
-const textes = {
-  lien: [candidature.agence.copier, candidature.agence.copie, candidature.agence.copieImpossible],
-  message: [
-    candidature.agence.copierMessage,
-    candidature.agence.messageCopie,
-    candidature.agence.messageCopieImpossible,
-  ],
-} as const
+import { candidature as candidatureFr } from '@/lib/content/candidature'
+import { candidature as candidatureEn } from '@/lib/content/en/candidature'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 /** Copier le lien de candidature, ou le message qui le porte, avec un retour lu par les lecteurs d'ecran. */
 export function BoutonCopierLien({
@@ -19,9 +13,13 @@ export function BoutonCopierLien({
   sorte = 'lien',
 }: {
   lien: string
-  sorte?: keyof typeof textes
+  sorte?: 'lien' | 'message'
 }) {
-  const [bouton, copie, echec] = textes[sorte]
+  const t = choisir(useLangue(), candidatureFr, candidatureEn).agence
+  const [bouton, copie, echec] =
+    sorte === 'lien'
+      ? [t.copier, t.copie, t.copieImpossible]
+      : [t.copierMessage, t.messageCopie, t.messageCopieImpossible]
   const [etat, noter] = useState<'ok' | 'erreur' | null>(null)
   return (
     <div className="flex flex-wrap items-center gap-3">

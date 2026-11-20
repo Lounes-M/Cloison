@@ -1,13 +1,10 @@
 import type { Metadata } from 'next'
 import { connection } from 'next/server'
-import { SiteFooter } from '@/components/layout/SiteFooter'
-import { SiteHeader } from '@/components/layout/SiteHeader'
-import { Button } from '@/components/ui/Button'
-import { NavigationReprise } from '@/components/ui/NavigationReprise'
-import { erreurs } from '@/lib/content/erreurs'
+import { EcranIntrouvable } from '@/components/ui/EcranIntrouvable'
+import { langueEspace } from '@/lib/langue-espace'
 
 export const metadata: Metadata = {
-  title: 'Page introuvable',
+  title: 'Page introuvable · Page not found',
 }
 
 export default async function NotFound() {
@@ -17,25 +14,5 @@ export default async function NotFound() {
   // build ne le porterait pas, et le navigateur refuserait ses scripts.
   await connection()
 
-  return (
-    <div className="site-public">
-      <SiteHeader />
-      <div className="sous-entete-fixe">
-        <main className="ecran-reprise">
-          <div className="carte-reprise">
-            <p className="font-display text-cobalt text-[clamp(4rem,12vw,7rem)] leading-none">
-              404
-            </p>
-            <h1>{erreurs.titreIntrouvable}</h1>
-            <p className="description-reprise">{erreurs.adresse}</p>
-            <div className="actions-reprise">
-              <Button href="/">{erreurs.accueil}</Button>
-            </div>
-            <NavigationReprise />
-          </div>
-        </main>
-      </div>
-      <SiteFooter />
-    </div>
-  )
+  return <EcranIntrouvable langueChoisie={await langueEspace()} />
 }

@@ -1,14 +1,13 @@
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
-import { frise } from '@/lib/content/frise'
+import { frise as friseFr } from '@/lib/content/frise'
 import { etapesGarant } from '@/lib/dossiers/frise'
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
-import { interfaceEspace } from '@/lib/content/interface'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
 import { FormulaireReutilisation } from '@/components/forms/FormulaireReutilisation'
 import { Complements } from '@/components/dossiers/Complements'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { type Complement } from '@/lib/content/complements'
-import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { BoutonRetrait } from '@/components/forms/BoutonRetrait'
@@ -19,32 +18,46 @@ import {
   type EngagementAffiche,
 } from '@/components/forms/FormulaireEngagement'
 import { Icone } from '@/components/ui/Icone'
-import { informationCollecte } from '@/lib/content/information-collecte'
+import { informationCollecte as informationCollecteFr } from '@/lib/content/information-collecte'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { FormulaireMention } from '@/components/forms/FormulaireMention'
 import {
-  depot,
-  engagement as texteEngagement,
-  mention as texteMention,
-  natures,
+  depot as depotFr,
+  engagement as texteEngagementFr,
+  mention as texteMentionFr,
+  natures as naturesFr,
   naturesDuProfil,
-  profilsRessources,
-  documentsDeclares,
+  profilsRessources as profilsRessourcesFr,
+  documentsDeclares as documentsDeclaresFr,
   type ProfilRessources,
 } from '@/lib/content/garant'
 import { tailleLisible } from '@/lib/garant/validation'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
-import { journal as texteJournal } from '@/lib/content/journal'
+import { journal as texteJournalFr } from '@/lib/content/journal'
 import { agenceDuDossier } from '@/lib/acces/agence-du-dossier'
-import { agenceDuDossier as texteAgence } from '@/lib/content/agence-du-dossier'
+import { agenceDuDossier as texteAgenceFr } from '@/lib/content/agence-du-dossier'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
 import { resteAFaire } from '@/lib/garant/reste-a-faire'
+import { frise as friseEn } from '@/lib/content/en/frise'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { informationCollecte as informationCollecteEn } from '@/lib/content/en/information-collecte'
+import {
+  depot as depotEn,
+  engagement as texteEngagementEn,
+  mention as texteMentionEn,
+  natures as naturesEn,
+  profilsRessources as profilsRessourcesEn,
+  documentsDeclares as documentsDeclaresEn,
+} from '@/lib/content/en/garant'
+import { journal as texteJournalEn } from '@/lib/content/en/journal'
+import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
+import { choisir, locale, deuxPoints } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata: Metadata = {
-  title: 'Votre dépôt',
-  robots: { index: false, follow: false },
-}
+export const generateMetadata = () => titreEspace(titresFr.garant, titresEn.garant)
 
 /** Tant que le dossier est la, le garant depose et corrige. Apres, il regarde. */
 const STATUTS_OUVERTS = new Set(['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'])
@@ -75,6 +88,19 @@ type Piece = {
 export default async function PageGarant({
   searchParams,
 }: { searchParams?: Promise<Record<string, string | string[] | undefined>> } = {}) {
+  const langue = await langueEspace()
+  const natures = choisir(langue, naturesFr, naturesEn)
+  const depot = choisir(langue, depotFr, depotEn)
+  const texteAgence = choisir(langue, texteAgenceFr, texteAgenceEn)
+  const frise = choisir(langue, friseFr, friseEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+  const informationCollecte = choisir(langue, informationCollecteFr, informationCollecteEn)
+  const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
+  const profilsRessources = choisir(langue, profilsRessourcesFr, profilsRessourcesEn)
+  const texteMention = choisir(langue, texteMentionFr, texteMentionEn)
+  const texteJournal = choisir(langue, texteJournalFr, texteJournalEn)
+  const texteEngagement = choisir(langue, texteEngagementFr, texteEngagementEn)
+
   const porteur = await capaciteDepuisCookies()
   if (!porteur) redirect('/lien-invalide')
   if (porteur.capacite.partie !== 'garant') redirect('/locataire')
@@ -138,7 +164,7 @@ export default async function PageGarant({
       : engagement?.profil_ressources === 'independant'
         ? 'independant'
         : 'salarie'
-  const attendues = naturesDuProfil(profil)
+  const attendues = naturesDuProfil(profil, natures)
   const visibles = natures.filter(
     (n) =>
       attendues.some((a) => a.valeur === n.valeur) || deposees.some((p) => p.type === n.valeur),
@@ -206,7 +232,11 @@ export default async function PageGarant({
 
       <FriseAvancement
         titre={frise.garant.titre}
-        etapes={etapesGarant(String(dossier.statut), Boolean(engagement) && deposees.length > 0)}
+        etapes={etapesGarant(
+          String(dossier.statut),
+          Boolean(engagement) && deposees.length > 0,
+          langue,
+        )}
       />
 
       {restant ? <ResteAFaireGarant etapes={restant} /> : null}
@@ -276,11 +306,11 @@ export default async function PageGarant({
                       >
                         <span className="flex flex-wrap items-center gap-2 text-[14px] font-medium">
                           <Icone nom="fichier" className="size-4" />
-                          {tailleLisible(piece.taille_octets)}
+                          {tailleLisible(piece.taille_octets, langue)}
                           <span>{documentsDeclares.bilan(piece.nombre_documents ?? 1)}</span>
                           <span className="text-muted">
                             {depot.deposeLe(
-                              new Date(piece.depose_le).toLocaleDateString('fr-FR', {
+                              new Date(piece.depose_le).toLocaleDateString(locale(langue), {
                                 day: 'numeric',
                                 month: 'long',
                               }),
@@ -363,9 +393,11 @@ export default async function PageGarant({
               }) => (
                 <li key={entree.id} className="border-ink border-t pt-3 text-sm break-words">
                   <time dateTime={entree.quand}>
-                    {new Date(entree.quand).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
+                    {new Date(entree.quand).toLocaleString(locale(langue), {
+                      timeZone: 'Europe/Paris',
+                    })}
                   </time>
-                  {' : '}
+                  {deuxPoints(langue)}
                   {texteJournal.actions[entree.action] ?? texteJournal.acces}
                   {texteJournal.par}
                   {entree.identite ?? texteJournal.acteurs[entree.acteur] ?? texteJournal.inconnu}.
@@ -398,15 +430,15 @@ export default async function PageGarant({
         ) : (
           <p className="text-[15px] font-medium">
             {engagementAffiche
-              ? `${engagementAffiche.couvre === 'loyer' ? 'Le loyer seul' : 'Le loyer et les charges'}${engagementAffiche.montant ? `, jusqu’à ${engagementAffiche.montant} € au total` : ''}${engagementAffiche.jusquAu ? `, jusqu’au ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? ', caution solidaire' : ''}.`
-              : 'Aucun engagement déclaré.'}
+              ? `${engagementAffiche.couvre === 'loyer' ? texteEngagement.resume.loyer : texteEngagement.resume.loyerCharges}${engagementAffiche.montant ? `${texteEngagement.resume.plafond} ${engagementAffiche.montant} ${texteEngagement.resume.auTotal}` : ''}${engagementAffiche.jusquAu ? `${texteEngagement.resume.jusquAu} ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? texteEngagement.resume.solidaire : ''}.`
+              : texteEngagement.resume.aucun}
           </p>
         )}
       </section>
       {dossier.expire_le ? (
         <p className="text-muted mt-10 text-[13px] font-medium">
           {depot.expire(
-            new Date(String(dossier.expire_le)).toLocaleDateString('fr-FR', {
+            new Date(String(dossier.expire_le)).toLocaleDateString(locale(langue), {
               day: 'numeric',
               month: 'long',
               year: 'numeric',

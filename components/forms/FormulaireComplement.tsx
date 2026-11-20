@@ -1,7 +1,10 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { modifierComplement, type EtatComplement } from '@/lib/agences/action-complement'
-import { complements as t } from '@/lib/content/complements'
+import { complements as tFr } from '@/lib/content/complements'
+import { complements as tEn } from '@/lib/content/en/complements'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireComplement({
   dossierId,
   cible,
@@ -13,6 +16,9 @@ export function FormulaireComplement({
   operation: 'demander' | 'fournir' | 'valider' | 'refuser'
   fichiers?: { id: string; libelle: string }[]
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, envoyer, enCours] = useActionState(modifierComplement, {
     statut: 'inactif',
   } as EtatComplement)

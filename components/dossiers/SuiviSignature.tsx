@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
-import { signature as t } from '@/lib/content/signature'
+import { signature as tFr } from '@/lib/content/signature'
+import { signature as tEn } from '@/lib/content/en/signature'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export async function SuiviSignature({
   db,
   dossier,
@@ -11,6 +14,9 @@ export async function SuiviSignature({
   dossier: string
   partie: 'agence' | 'garant'
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   if (process.env.SIGNATURE_PARCOURS_ENABLED !== 'true') return null
   const r = await db.rpc('actes_du_dossier', { le_dossier: dossier })
   const liste = z

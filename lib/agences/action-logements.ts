@@ -2,12 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { candidature as texteCandidature } from '@/lib/content/candidature'
-import { logements as texte } from '@/lib/content/logements'
+import { candidature as texteCandidatureFr } from '@/lib/content/candidature'
+import { logements as texteFr } from '@/lib/content/logements'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
 import { montantEnCents } from '@/lib/garant/validation'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
+import { candidature as texteCandidatureEn } from '@/lib/content/en/candidature'
+import { logements as texteEn } from '@/lib/content/en/logements'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Les logements de l'agence (migration 0069).
@@ -21,6 +25,9 @@ export type EtatLogement =
   { statut: 'inactif' } | { statut: 'enregistre' } | { statut: 'erreur'; message: string }
 
 export async function creerUnLogement(_p: EtatLogement, donnees: FormData): Promise<EtatLogement> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const libelle = String(donnees.get('libelle') ?? '').trim()
   const loyer = montantEnCents(String(donnees.get('loyer') ?? ''))
   if (libelle.length === 0 || libelle.length > 120) {
@@ -60,6 +67,9 @@ export async function rattacherAuLogement(
   _p: EtatLogement,
   donnees: FormData,
 ): Promise<EtatLogement> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const dossier = String(donnees.get('dossier') ?? '')
   const brut = String(donnees.get('logement') ?? '')
   const logement = brut === '' ? null : brut
@@ -105,6 +115,9 @@ export async function attribuerLeLogement(
   _p: EtatAttribution,
   donnees: FormData,
 ): Promise<EtatAttribution> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const logement = String(donnees.get('logement') ?? '')
   const retenu = String(donnees.get('dossier') ?? '')
   if (!estUuidCanonique(logement) || !estUuidCanonique(retenu)) {
@@ -200,6 +213,10 @@ export async function decrireLeLogement(
   _p: EtatLogement,
   donnees: FormData,
 ): Promise<EtatLogement> {
+  const langue = await langueEspace()
+  const texteCandidature = choisir(langue, texteCandidatureFr, texteCandidatureEn)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const t = texteCandidature.description.erreurs
   const id = String(donnees.get('logement') ?? '')
   if (!estUuidCanonique(id)) return { statut: 'erreur', message: texte.erreurs.general }

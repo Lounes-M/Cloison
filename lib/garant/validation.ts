@@ -1,10 +1,12 @@
 import {
-  natures,
-  profilsRessources,
-  engagement as texteEngagement,
+  natures as naturesFr,
+  profilsRessources as profilsRessourcesFr,
+  engagement as texteEngagementFr,
   type ProfilRessources,
   type NatureValeur,
 } from '@/lib/content/garant'
+import { engagement as texteEngagementEn } from '@/lib/content/en/garant'
+import { choisir, type Langue } from '@/lib/i18n'
 
 /**
  * Ce que le garant peut soumettre, et sous quelle forme.
@@ -28,7 +30,7 @@ export const TAILLE_MAX_DEPOT = 4 * 1024 * 1024
 /** Cent millions d'euros : au-dela, c'est une faute de frappe, pas un plafond. */
 const MONTANT_MAX_CENTS = 100_000_000 * 100
 
-const VALEURS_DE_NATURE = new Set<string>(natures.map((n) => n.valeur))
+const VALEURS_DE_NATURE = new Set<string>(naturesFr.map((n) => n.valeur))
 
 export function natureDepuis(valeur: unknown): NatureValeur | null {
   return typeof valeur === 'string' && VALEURS_DE_NATURE.has(valeur)
@@ -96,28 +98,30 @@ function dateAVenir(saisie: string, aujourdHui: Date): string | null | 'invalide
 export function analyserEngagement(
   champs: Record<string, string | undefined>,
   aujourdHui: Date = new Date(),
+  langue: Langue = 'fr',
 ): AnalyseEngagement {
+  const t = choisir(langue, texteEngagementFr, texteEngagementEn)
   const profil = champs.profil
-  if (profil !== undefined && !profilsRessources.some((p) => p.valeur === profil))
-    return { ok: false, message: texteEngagement.profilInvalide }
+  if (profil !== undefined && !profilsRessourcesFr.some((p) => p.valeur === profil))
+    return { ok: false, message: t.profilInvalide }
   const couvre = champs.couvre
   if (couvre !== 'loyer' && couvre !== 'loyer_charges') {
-    return { ok: false, message: 'Indiquez ce que vous couvrez.' }
+    return { ok: false, message: t.erreurs.couvre }
   }
 
   const montantMaxCents = montantEnCents(champs.montant ?? '')
   if (montantMaxCents === 'invalide') {
-    return { ok: false, message: 'Le montant ne se lit pas. Exemple : 1 200 ou 1200,50.' }
+    return { ok: false, message: t.erreurs.montant }
   }
 
   const jusquAu = dateAVenir(champs.jusquAu ?? '', aujourdHui)
   if (jusquAu === 'invalide') {
-    return { ok: false, message: 'La date de fin doit être à venir, au format AAAA-MM-JJ.' }
+    return { ok: false, message: t.erreurs.date }
   }
 
   const revenuNetMensuelCents = montantEnCents(champs.revenu ?? '')
   if (revenuNetMensuelCents === 'invalide') {
-    return { ok: false, message: 'Le revenu ne se lit pas. Exemple : 3 200 ou 3200,50.' }
+    return { ok: false, message: t.erreurs.revenu }
   }
 
   return {
@@ -136,7 +140,12 @@ export function analyserEngagement(
 }
 
 /** « 1,2 Mo », « 340 Ko » : ce que la personne lit a cote de sa piece. */
-export function tailleLisible(octets: number): string {
+export function tailleLisible(octets: number, langue: Langue = 'fr'): string {
+  if (langue === 'en') {
+    if (octets >= 1024 * 1024) return `${(octets / (1024 * 1024)).toFixed(1)} MB`
+    if (octets >= 1024) return `${Math.round(octets / 1024)} KB`
+    return `${octets} B`
+  }
   if (octets >= 1024 * 1024) return `${(octets / (1024 * 1024)).toFixed(1).replace('.', ',')} Mo`
   if (octets >= 1024) return `${Math.round(octets / 1024)} Ko`
   return `${octets} o`

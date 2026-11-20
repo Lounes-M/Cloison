@@ -139,3 +139,46 @@ test('le prix porte la mention fiscale de l editeur', () => {
   expect(html).toContain('toutes taxes comprises')
   expect(html).not.toContain('293 B')
 })
+
+test('sans immatriculation, les pages presentent le projet de societe, sans numero invente', () => {
+  poser({
+    EDITEUR_DENOMINATION: '',
+    EDITEUR_FORME: '',
+    EDITEUR_SIREN: '',
+    EDITEUR_ADRESSE: '',
+    EDITEUR_COURRIEL: '',
+    EMAIL_SUPPORT: '',
+    EDITEUR_DIRECTEUR_PUBLICATION: '',
+    MEDIATEUR_NOM: '',
+    SAUVEGARDE_RETENTION_JOURS: '',
+  })
+  const mentions = rendre(PageMentionsLegales)
+  for (const attendu of ['Cloison SAS', 'en cours de formation', 'contact@cloison.immo'])
+    expect(mentions).toContain(attendu)
+  expect(mentions).toContain('En cours d’immatriculation')
+  expect(mentions).not.toContain('À compléter')
+  // Aucun numero a neuf chiffres n'apparait tant qu'aucun n'est declare.
+  expect(mentions.replace(/<[^>]+>/g, ' ')).not.toMatch(/\b\d{3} ?\d{3} ?\d{3}\b/)
+  // La supervision, elle, continue de reclamer les vraies valeurs.
+  expect(mentions).toContain('data-editeur-incomplet')
+
+  const confidentialite = rendre(PageConfidentialite)
+  expect(confidentialite).toContain('Le responsable du traitement est Cloison SAS')
+  expect(confidentialite).toContain('conservées 7 jours au plus')
+  expect(confidentialite).toContain('Cookies et courriels')
+  expect(confidentialite).not.toContain('À compléter')
+
+  const conditions = rendre(PageConditions)
+  expect(conditions).toContain('article L. 612-1 du code de la consommation')
+  expect(conditions).toContain('article 293 B du CGI')
+})
+
+test('une valeur declaree remplace toujours celle du projet', () => {
+  poser(COMPLET)
+  const mentions = rendre(PageMentionsLegales)
+  expect(mentions).toContain('Cloison Fixture')
+  expect(mentions).not.toContain('Cloison SAS')
+  expect(mentions).not.toContain('1 000 €')
+  expect(mentions).not.toContain('En cours d’immatriculation')
+  expect(rendre(PageConditions)).not.toContain('article L. 612-1')
+})

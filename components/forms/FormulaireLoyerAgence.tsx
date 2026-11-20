@@ -3,8 +3,11 @@
 import { useActionState, useId } from 'react'
 
 import { fixerLeLoyer, type EtatLoyerAgence } from '@/lib/agences/action-loyer'
-import { loyerAgence as texte } from '@/lib/content/espace'
+import { loyerAgence as texteFr } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
+import { loyerAgence as texteEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatLoyerAgence = { statut: 'inactif' }
 
@@ -16,6 +19,9 @@ export function FormulaireLoyerAgence({
   dossierId: string
   loyerActuel: string
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(fixerLeLoyer, ETAT_INITIAL)
   const idChamp = useId()
 

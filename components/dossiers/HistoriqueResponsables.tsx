@@ -1,6 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { historiqueResponsables as t } from '@/lib/content/historique-responsables'
+import { historiqueResponsables as tFr } from '@/lib/content/historique-responsables'
 import { lirePositionResponsables, pageResponsables } from '@/lib/agences/historique-responsables'
+import { historiqueResponsables as tEn } from '@/lib/content/en/historique-responsables'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export async function HistoriqueResponsables({
   dossierId,
@@ -11,6 +14,9 @@ export async function HistoriqueResponsables({
   supabase: SupabaseClient
   position: unknown
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const curseur = lirePositionResponsables(position, dossierId)
   let page: ReturnType<typeof pageResponsables> | null = null
   try {
@@ -40,7 +46,7 @@ export async function HistoriqueResponsables({
               {page.lignes.map((l) => (
                 <li key={l.id} className="border-ink/20 border-t pt-3 text-sm">
                   <time dateTime={l.quand} className="font-bold">
-                    {new Date(l.quand).toLocaleString('fr-FR', {
+                    {new Date(l.quand).toLocaleString(locale(langue), {
                       timeZone: 'Europe/Paris',
                       dateStyle: 'medium',
                       timeStyle: 'short',

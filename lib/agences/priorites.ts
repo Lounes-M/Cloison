@@ -1,9 +1,15 @@
 import 'server-only'
 import type { ContexteAgence } from './contexte'
-import { pilotage } from '@/lib/content/pilotage'
+import { pilotage as pilotageFr } from '@/lib/content/pilotage'
 import { STATUTS_EN_ATTENTE, limiteSansNouvelles } from './inactivite'
+import { pilotage as pilotageEn } from '@/lib/content/en/pilotage'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'rattache' }>) {
+  const langue = await langueEspace()
+  const pilotage = choisir(langue, pilotageFr, pilotageEn)
+
   const maintenant = Date.now()
   return Promise.all(
     pilotage.indicateurs.map(async ({ cle }) => {

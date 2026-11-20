@@ -182,6 +182,9 @@ const api = createServer(async (req, res) => {
       valeur = preference.revision
     }
   } else if (path.endsWith('/rpc/jeton_est_actif')) valeur = true
+  else if (path.endsWith('/rpc/regler_ma_langue') || path.endsWith('/rpc/regler_langue_dossier'))
+    valeur = true
+  else if (path.endsWith('/rpc/ma_langue') || path.endsWith('/rpc/langue_dossier')) valeur = null
   else if (path.endsWith('/dossiers'))
     valeur = [
       {

@@ -1,10 +1,12 @@
 import { z } from 'zod'
 import {
-  aideDossier as t,
+  aideDossier as tFr,
   categoriesSupport,
   type EspaceSupport,
   type CategorieSupport,
 } from '@/lib/content/support-dossier'
+import { aideDossier as tEn } from '@/lib/content/en/support-dossier'
+import { choisir, type Langue } from '@/lib/i18n'
 // Ce schema est aussi execute dans le navigateur, sous une CSP sans eval.
 z.config({ jitless: true })
 const parametres = z.object({
@@ -18,10 +20,12 @@ export function preparerMessageSupport(entree: {
   reference: string
   espace: EspaceSupport
   categorie: CategorieSupport
+  langue?: Langue
 }) {
   const p = parametres.safeParse(entree)
   if (!p.success || !categoriesSupport[p.data.espace].includes(p.data.categorie)) return null
   const { adresse, reference, espace, categorie } = p.data
+  const t = choisir(entree.langue ?? 'fr', tFr, tEn)
   const sujet = `${t.objet} - ${reference} - ${t.categories[categorie]}`
   const texte = `${t.reference} : ${reference}\n${t.parcours} : ${t.espaces[espace]}\n${t.categorie} : ${t.categories[categorie]}\n\n${t.invitation}`
   return {

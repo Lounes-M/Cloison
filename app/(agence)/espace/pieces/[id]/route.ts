@@ -1,3 +1,5 @@
+import { langueEspace } from '@/lib/langue-espace'
+import { traducteur } from '@/lib/messages'
 import { NextResponse, type NextRequest } from 'next/server'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 
@@ -40,7 +42,8 @@ export async function GET(_requete: NextRequest, { params }: { params: Promise<{
 
   // Un refus d'acces et une piece inexistante se lisent pareil : distinguer
   // les deux dirait ce qui existe.
-  if (!ouverture.ouverte) return new NextResponse(ouverture.raison, { status: 404 })
+  if (!ouverture.ouverte)
+    return new NextResponse(traducteur(await langueEspace())(ouverture.raison), { status: 404 })
 
   // Vercel borne les reponses tamponnees a 4,5 Mo. Le flux ne commence
   // qu'apres autorisation, journalisation et rasterisation completes.

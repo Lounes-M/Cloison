@@ -1,5 +1,7 @@
 'use server'
 
+import { langueAction } from '@/lib/langue-espace'
+import { traducteur } from '@/lib/messages'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
@@ -40,6 +42,8 @@ export async function demanderLActivation(
   _precedent: EtatActivation,
   donnees: FormData,
 ): Promise<EtatActivation> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
   const valeurs = {
     siren: String(donnees.get('siren') ?? ''),
     cartePro: String(donnees.get('cartePro') ?? ''),
@@ -48,13 +52,13 @@ export async function demanderLActivation(
   if (!analyse.success) {
     return {
       statut: 'erreur',
-      message: analyse.error.issues[0]?.message ?? 'Saisie invalide.',
+      message: dire(analyse.error.issues[0]?.message ?? 'Saisie invalide.'),
       valeurs,
     }
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
   const { supabase, agence, email } = contexte
 
   const { data, error } = await supabase
@@ -71,7 +75,7 @@ export async function demanderLActivation(
     if (error) console.error('[activation] demande refusee')
     return {
       statut: 'erreur',
-      message: 'Seul un administrateur de l’agence peut demander l’activation.',
+      message: dire('Seul un administrateur de l’agence peut demander l’activation.'),
       valeurs,
     }
   }

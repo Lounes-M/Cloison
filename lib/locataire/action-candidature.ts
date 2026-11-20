@@ -4,10 +4,14 @@ import { revalidatePath } from 'next/cache'
 
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { candidature } from '@/lib/content/candidature'
+import { candidature as candidatureFr } from '@/lib/content/candidature'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 import { codeDeCandidature } from '@/lib/validation/candidature'
+import { candidature as candidatureEn } from '@/lib/content/en/candidature'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatCandidature =
   | { statut: 'inactif' }
@@ -24,6 +28,10 @@ export async function candidaterAuLogement(
   _p: EtatCandidature,
   donnees: FormData,
 ): Promise<EtatCandidature> {
+  const langue = await langueEspace()
+  const candidature = choisir(langue, candidatureFr, candidatureEn)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+
   const porteur = await capaciteDepuisCookies()
   if (!porteur || porteur.capacite.partie !== 'locataire') {
     return { statut: 'erreur', message: candidature.espace.erreur }

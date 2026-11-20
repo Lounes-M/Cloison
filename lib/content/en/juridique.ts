@@ -10,10 +10,28 @@ import { prixLocataire } from './tarifs'
 
 export const juridique = {
   aCompleter: 'To be completed',
-  avertissementIncomplet: 'Some information about the publisher is being published.',
-  miseAJour: 'Last updated: 21 October 2026.',
+  immatriculation: 'Registration in progress',
+  miseAJour: 'Last updated: 20 November 2026.',
+  navigation: 'Legal information',
+  liens: {
+    mentions: { label: 'Legal notice', href: '/mentions-legales' },
+    confidentialite: { label: 'Privacy', href: '/confidentialite' },
+    conditions: { label: 'Terms', href: '/conditions' },
+  },
   traduction:
     'This page is a translation provided for convenience. The French version is the one that applies.',
+} as const
+
+/** L'editeur en projet, tel que la page anglaise le presente. */
+export const editeurEnProjet = {
+  denomination: 'Cloison SAS',
+  forme:
+    'Société par actions simplifiée (SAS, French simplified joint-stock company), being incorporated',
+  capital: '€1,000',
+  adresse: 'Paris, France',
+  courriel: 'contact@cloison.immo',
+  directeurPublication: 'The chair (président) of Cloison SAS',
+  sauvegardeJours: 7,
 } as const
 
 export const mentionTva = {
@@ -52,6 +70,9 @@ export const mentionsLegales = {
       site: 'https://supabase.com',
     },
   ],
+  donnees: 'Personal data and cookies',
+  donneesTexte:
+    'Cloison processes personal data as a data controller. The Privacy page sets out the data concerned, how long it is kept, who receives it and how to exercise your rights. The site only sets the cookies strictly necessary for it to work: no advertising cookies, no audience measurement.',
   autres: 'Ownership and reporting',
   propriete:
     'The code, texts, brand and graphic elements of Cloison are protected. Browsing the site grants no licence.',
@@ -77,6 +98,7 @@ export const confidentialite = {
         'Tenant: email address, name, rent amount, file status and, if you pay for the file, the payment record sent by Stripe. Cloison never receives your card number.',
         'Guarantor: email address, last name, first name, postal address, declared net monthly income, scope of the commitment, the guarantee statement you write yourself, and the supporting documents you upload (payslips, tax notice, identity document, proof of address, employment contract).',
         'Agency: work email address of each team member, role in the agency and, to verify the agency, its SIREN number and its professional licence number.',
+        'For everyone: the language chosen, French or English, to display your space and to write to you in that language.',
         'For everyone: a log of viewings (who opened what, and when) and, against abuse, fingerprints of the IP address and email address calculated with a secret key, without the address itself.',
         'No health, opinion or biometric data is requested. The identity document is neither read automatically nor compared with a face.',
       ],
@@ -117,6 +139,15 @@ export const confidentialite = {
       paragraphes: [
         'Vercel runs the application in the Frankfurt region. Supabase hosts the database and the encrypted documents in the European Union. Resend delivers the emails. Stripe processes the tenant’s card payment.',
         'These providers act on Cloison’s instructions, under data processing agreements. Where a provider falls under a country outside the European Union, the transfer is governed by the European Commission’s standard contractual clauses or by the EU-US Data Privacy Framework.',
+      ],
+    },
+    {
+      id: 'cookies',
+      titre: 'Cookies and emails',
+      paragraphes: [
+        'Cloison sets no advertising cookies, no audience measurement cookies and no third-party trackers. The only cookies used are strictly necessary for the service: the one that carries your access link to the file, the one that keeps an agency team member signed in, and the one that remembers the language chosen. They are exempt from consent, which is why there is no banner.',
+        'The file access cookie lasts seven days at most, the language cookie one year. You can delete them from your browser: you will then need to open your link again or sign in again.',
+        'Emails sent by Cloison contain no remote image and no tracking pixel: nobody is told when they are opened. Cloison never asks for a document or a password by email.',
       ],
     },
   ] satisfies readonly Section[],
@@ -203,6 +234,8 @@ export const conditions = {
   ] satisfies readonly Section[],
   mediateur: (nom: string) =>
     `If you are a consumer and your complaint has not been resolved, you can use the consumer mediator free of charge: ${nom}.`,
+  mediation:
+    'If you are a consumer and your written complaint has not been resolved within two months, you can use a consumer mediator free of charge, in accordance with article L. 612-1 of the French Consumer Code. The mediator’s contact details are sent to you with the reply to your complaint, and at any time on request to the contact address.',
   tribunaux:
     'You can also bring the matter before the competent courts; a consumer can use the court of their place of residence.',
 } as const

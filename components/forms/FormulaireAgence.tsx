@@ -27,8 +27,6 @@ function Erreur({ id, message }: { id: string; message?: string }) {
 export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
   const t = choisir(langue, demandeFr, en.demande)
   const informationCollecte = choisir(langue, collecteFr, en.informationCollecte)
-  const traduit = (message: string | undefined) =>
-    langue === 'en' ? en.messageEn(message) : message
   const [etat, envoyer, enCours] = useActionState(envoyerDemandeAgence, ETAT_INITIAL)
   const idBase = useId()
   const resume = useRef<HTMLDivElement>(null)
@@ -73,6 +71,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
 
   return (
     <form key={cleRendu} action={envoyer} noValidate className="flex flex-col gap-5">
+      <input type="hidden" name="langue" value={langue} />
       {etat.statut === 'erreur' && etat.message ? (
         <div
           ref={resume}
@@ -82,7 +81,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
           // collant la masquerait sans cette marge.
           className="bg-flame outlined text-ink scroll-mt-28 rounded-xl px-4 py-3 text-[14px] font-bold"
         >
-          {traduit(etat.message)}
+          {etat.message}
         </div>
       ) : null}
 
@@ -103,7 +102,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
             aria-describedby={champs.nomAgence ? `${idBase}-nom-erreur` : undefined}
             className={cn(champBase, champs.nomAgence && 'border-flame')}
           />
-          <Erreur id={`${idBase}-nom-erreur`} message={traduit(champs.nomAgence)} />
+          <Erreur id={`${idBase}-nom-erreur`} message={champs.nomAgence} />
         </div>
 
         <div>
@@ -122,7 +121,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
             aria-describedby={champs.ville ? `${idBase}-ville-erreur` : undefined}
             className={cn(champBase, champs.ville && 'border-flame')}
           />
-          <Erreur id={`${idBase}-ville-erreur`} message={traduit(champs.ville)} />
+          <Erreur id={`${idBase}-ville-erreur`} message={champs.ville} />
         </div>
       </div>
 
@@ -143,7 +142,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
           aria-describedby={champs.email ? `${idBase}-email-erreur` : undefined}
           className={cn(champBase, champs.email && 'border-flame')}
         />
-        <Erreur id={`${idBase}-email-erreur`} message={traduit(champs.email)} />
+        <Erreur id={`${idBase}-email-erreur`} message={champs.email} />
       </div>
 
       <fieldset>
@@ -167,7 +166,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
             </label>
           ))}
         </div>
-        <Erreur id={`${idBase}-volume-erreur`} message={traduit(champs.dossiersParAn)} />
+        <Erreur id={`${idBase}-volume-erreur`} message={champs.dossiersParAn} />
       </fieldset>
 
       <div>
@@ -185,7 +184,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
           aria-describedby={champs.message ? `${idBase}-message-erreur` : undefined}
           className={cn(champBase, 'resize-y', champs.message && 'border-flame')}
         />
-        <Erreur id={`${idBase}-message-erreur`} message={traduit(champs.message)} />
+        <Erreur id={`${idBase}-message-erreur`} message={champs.message} />
       </div>
 
       {/* Piege a robots : invisible et hors du parcours clavier, seul un

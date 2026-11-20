@@ -1,14 +1,21 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { FormulaireRappels } from '@/components/forms/FormulaireRappels'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
-import { interfaceEspace } from '@/lib/content/interface'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { rappels as t, type ReglagesRappels } from '@/lib/content/rappels'
-export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
+import { rappels as tFr, type ReglagesRappels } from '@/lib/content/rappels'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { rappels as tEn } from '@/lib/content/en/rappels'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 export default async function PageRappels() {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+
   const c = await contexteAgence()
   if (c.etat !== 'rattache') redirect('/connexion')
   if (c.role !== 'admin') notFound()

@@ -8,9 +8,14 @@ import { consommerDebit } from '@/lib/acces/debit'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { clientServeur } from '@/lib/acces/serveur'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { secondGarant as texte } from '@/lib/content/locataire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { secondGarant as texteFr } from '@/lib/content/locataire'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
+import { secondGarant as texteEn } from '@/lib/content/en/locataire'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { choisir, versLangue } from '@/lib/i18n'
+import { reglerLangueDossier } from '@/lib/langue-preferee'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Le locataire designe un second garant, ou lui renvoie son lien.
@@ -39,6 +44,10 @@ export async function designerSecondGarant(
   _precedent: EtatSecondGarant,
   donnees: FormData,
 ): Promise<EtatSecondGarant> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+
   const saisie = String(donnees.get('courriel') ?? '')
   const analyse = schema.safeParse(saisie)
   if (!analyse.success) return { statut: 'erreur', message: texte.erreurs.adresse, valeur: saisie }
@@ -75,6 +84,12 @@ export async function designerSecondGarant(
     if (error || !emis?.dossier || !emis.jti) {
       return { statut: 'erreur', message: texte.erreurs.refus, valeur: saisie }
     }
+    await reglerLangueDossier(String(emis.dossier), 'locataire', langue)
+    await reglerLangueDossier(
+      String(emis.dossier),
+      'garant',
+      versLangue(donnees.get('langueGarant') ?? langue),
+    )
     await reprendreLivraisonLiens(String(emis.dossier))
   } catch {
     console.error('[locataire] second garant impossible')

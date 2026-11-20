@@ -2,24 +2,19 @@
 import { useActionState } from 'react'
 import { retrouverMonDossier, rattacherMonDossier } from '@/lib/locataire/action-continuite'
 import { continuite as continuiteFr } from '@/lib/content/continuite'
-import { continuite as continuiteEn } from '@/lib/content/en/formulaires'
-import type { Langue } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
+import { continuite as continuiteEn } from '@/lib/content/en/continuite'
+import { choisir, type Langue } from '@/lib/i18n'
 export function FormulaireContinuite({
   mode,
   dossierId,
-  langue = 'fr',
+  langue: langueChoisie,
 }: ({ mode: 'retrouver'; dossierId?: never } | { mode: 'agence'; dossierId: string }) & {
   langue?: Langue
 }) {
-  // Seul le mode « retrouver » existe en anglais : le rattachement a une
-  // agence se fait depuis l'espace du locataire, qui reste en francais.
-  const continuite = { ...continuiteFr, ...(langue === 'en' ? continuiteEn : {}) }
-  const traduit = (message: string) =>
-    langue !== 'en'
-      ? message
-      : message === continuiteFr.resultat
-        ? continuiteEn.resultat
-        : continuiteEn.erreur
+  const langueDuContexte = useLangue()
+  const langue = langueChoisie ?? langueDuContexte
+  const continuite = choisir(langue, continuiteFr, continuiteEn)
   const [etat, action, pending] = useActionState(
     mode === 'retrouver' ? retrouverMonDossier : rattacherMonDossier,
     {},
@@ -30,6 +25,7 @@ export function FormulaireContinuite({
         {mode === 'retrouver' ? continuite.retrouver : continuite.agence}
       </h2>
       <form action={action} className="mt-4 flex flex-col gap-3">
+        <input type="hidden" name="langue" value={langue} />
         <input type="hidden" name="dossier" value={dossierId ?? ''} />
         {mode === 'retrouver' ? (
           <>
@@ -71,7 +67,7 @@ export function FormulaireContinuite({
         <button disabled={pending} className="bg-ink text-paper rounded-lg p-3 font-bold">
           {mode === 'retrouver' ? continuite.envoyer : continuite.transmettre}
         </button>
-        {etat.message ? <p role="status">{traduit(etat.message)}</p> : null}
+        {etat.message ? <p role="status">{etat.message}</p> : null}
       </form>
     </section>
   )

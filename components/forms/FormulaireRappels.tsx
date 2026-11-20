@@ -1,8 +1,14 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { reglerRappels, type EtatRappels } from '@/lib/agences/action-rappels'
-import { rappels as t, type ReglagesRappels } from '@/lib/content/rappels'
+import { rappels as tFr, type ReglagesRappels } from '@/lib/content/rappels'
+import { rappels as tEn } from '@/lib/content/en/rappels'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireRappels({ courants }: { courants: ReglagesRappels }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, envoyer, attente] = useActionState(reglerRappels, {
     statut: 'inactif',
   } as EtatRappels)

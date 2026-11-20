@@ -3,10 +3,12 @@
 import { useActionState, useId } from 'react'
 
 import { decrireLeLogement, type EtatLogement } from '@/lib/agences/action-logements'
-import { candidature } from '@/lib/content/candidature'
+import { candidature as candidatureFr } from '@/lib/content/candidature'
+import { candidature as candidatureEn } from '@/lib/content/en/candidature'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatLogement = { statut: 'inactif' }
-const t = candidature.description
 const champ = 'border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[16px] font-medium'
 
 export type DescriptionLogement = {
@@ -25,6 +27,7 @@ export function FormulaireDescriptionLogement({
   logementId: string
   description: DescriptionLogement
 }) {
+  const t = choisir(useLangue(), candidatureFr, candidatureEn).description
   const [etat, envoyer, enCours] = useActionState(decrireLeLogement, ETAT_INITIAL)
   const id = useId()
 

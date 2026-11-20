@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="{{ if eq .Data.langue "en" }}en{{ else }}fr{{ end }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Cloison</title>
+</head>
+<body style="margin:0;padding:0;background:#faf4ec;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#faf4ec" style="background:#faf4ec;">
+<tr><td align="center" style="padding:32px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+<tr><td style="padding:0 8px 20px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;font-weight:600;letter-spacing:0;line-height:1;color:#1e1e1e;">CLOI<span style="display:inline-block;width:7px;height:22px;margin:0 2px;border-radius:3px;background:#fe5000;vertical-align:-3px;"></span>SON</td></tr>
+<tr><td bgcolor="#ffffff" style="background:#ffffff;border-radius:24px;padding:36px 32px 28px;">
+<p style="margin:0 0 18px;"><span style="display:inline-block;padding:6px 12px;border-radius:999px;background:#f6dfeb;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;color:#1e1e1e;">{{ if eq .Data.langue "en" }}Agency space{{ else }}Espace agence{{ end }}</span></p>
+<h1 style="margin:0 0 18px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:26px;line-height:1.2;font-weight:600;color:#1e1e1e;">{{ if eq .Data.langue "en" }}Your sign-in link{{ else }}Votre lien de connexion{{ end }}</h1>
+<p style="margin:0 0 16px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#1e1e1e;">{{ if eq .Data.langue "en" }}Use this button to open your Cloison agency space. The link works once and expires shortly.{{ else }}Ce bouton ouvre votre espace agence Cloison. Le lien ne sert qu’une fois et expire rapidement.{{ end }}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px;"><tr><td bgcolor="#035946" style="border-radius:999px;background:#035946;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:15px 30px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;line-height:1;color:#ffffff;text-decoration:none;border-radius:999px;">{{ if eq .Data.langue "en" }}Sign in{{ else }}Me connecter{{ end }}&nbsp;<span style="color:#fe5000;">&rarr;</span></a></td></tr></table>
+<p style="margin:0 0 6px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#5e5e5e;">{{ if eq .Data.langue "en" }}If the button does not respond, this link leads to the same place:{{ else }}Si le bouton ne répond pas, ce lien mène au même endroit :{{ end }}</p>
+<p style="margin:0 0 20px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#035946;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+<p style="margin:0;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#5e5e5e;">{{ if eq .Data.langue "en" }}If you did not ask for this link, you can ignore this email: nothing happens without a click.{{ else }}Si vous n’avez pas demandé ce lien, ignorez ce courriel : rien ne se passe sans clic.{{ end }}</p>
+</td></tr>
+<tr><td style="padding:24px 8px 0;">
+<p style="margin:0 0 10px;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.55;color:#5e5e5e;">{{ if eq .Data.langue "en" }}Cloison never asks for a password or a document by email.{{ else }}Cloison ne demande jamais de mot de passe ni de pièce par courriel.{{ end }}</p>
+<p style="margin:0;font-family:'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.55;color:#5e5e5e;"><strong style="color:#1e1e1e;">Cloison</strong> &nbsp;·&nbsp; {{ if eq .Data.langue "en" }}One shared file. Separate spaces.{{ else }}Un dossier commun. Des espaces séparés.{{ end }}</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

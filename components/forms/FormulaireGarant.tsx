@@ -2,9 +2,13 @@
 
 import { useActionState, useId } from 'react'
 
-import { espace } from '@/lib/content/locataire'
+import { espace as espaceFr } from '@/lib/content/locataire'
 import { designerMonGarant, type EtatGarant } from '@/lib/locataire/action-garant'
 import { cn } from '@/lib/utils'
+import { espace as espaceEn } from '@/lib/content/en/locataire'
+import { choisir } from '@/lib/i18n'
+import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatGarant = { statut: 'inactif' }
 
@@ -24,6 +28,9 @@ export function FormulaireGarant({
   garantActuel: string | null
   verrouille?: boolean
 }) {
+  const langue = useLangue()
+  const espace = choisir(langue, espaceFr, espaceEn)
+
   const [etat, envoyer, enCours] = useActionState(designerMonGarant, ETAT_INITIAL)
   const idChamp = useId()
 
@@ -73,6 +80,8 @@ export function FormulaireGarant({
           {espace.garantAide}
         </p>
       </div>
+
+      {verrouille ? null : <ChoixLangueDestinataire name="langueGarant" destinataire="garant" />}
 
       <button
         type="submit"

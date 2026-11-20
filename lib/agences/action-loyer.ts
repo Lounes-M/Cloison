@@ -1,12 +1,16 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { revalidatePath } from 'next/cache'
 
-import { loyerAgence as texte } from '@/lib/content/espace'
+import { loyerAgence as texteFr } from '@/lib/content/espace'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { montantEnCents } from '@/lib/garant/validation'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
+import { loyerAgence as texteEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * L'agence fixe ou corrige le loyer d'un de ses dossiers.
@@ -26,6 +30,10 @@ export async function fixerLeLoyer(
   _p: EtatLoyerAgence,
   donnees: FormData,
 ): Promise<EtatLoyerAgence> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const id = String(donnees.get('dossier') ?? '')
   const saisie = String(donnees.get('loyer') ?? '')
   const cents = montantEnCents(saisie)
@@ -34,7 +42,7 @@ export async function fixerLeLoyer(
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   try {
     const avant = await statutActuel(contexte.supabase, id)

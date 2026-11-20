@@ -1,5 +1,7 @@
 'use server'
 
+import { langueAction } from '@/lib/langue-espace'
+import { traducteur } from '@/lib/messages'
 import { headers } from 'next/headers'
 import { consommerDebit } from '@/lib/acces/debit'
 import { clientServeur } from '@/lib/acces/serveur'
@@ -29,6 +31,8 @@ export async function envoyerDemandeAgence(
   _precedent: EtatFormulaire,
   donnees: FormData,
 ): Promise<EtatFormulaire> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
   // Conserve tel quel : c'est ce qu'on reaffichera si quelque chose echoue.
   const saisie: Record<string, string> = {
     nomAgence: String(donnees.get('nomAgence') ?? ''),
@@ -52,11 +56,11 @@ export async function envoyerDemandeAgence(
     const champs: Record<string, string> = {}
     for (const probleme of analyse.error.issues) {
       const champ = probleme.path[0]
-      if (typeof champ === 'string' && !champs[champ]) champs[champ] = probleme.message
+      if (typeof champ === 'string' && !champs[champ]) champs[champ] = dire(probleme.message)
     }
     return {
       statut: 'erreur',
-      message: 'Quelques champs sont à corriger.',
+      message: dire('Quelques champs sont à corriger.'),
       champs,
       valeurs: saisie,
     }
@@ -89,7 +93,7 @@ export async function envoyerDemandeAgence(
     ) {
       return {
         statut: 'erreur',
-        message: 'Trop de tentatives. Réessayez dans quelques minutes.',
+        message: dire('Trop de tentatives. Réessayez dans quelques minutes.'),
         valeurs: saisie,
       }
     }
@@ -99,7 +103,7 @@ export async function envoyerDemandeAgence(
     if (resultat.statut === 'echec') {
       return {
         statut: 'erreur',
-        message: "Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant.",
+        message: dire("Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant."),
         valeurs: saisie,
       }
     }
@@ -115,7 +119,7 @@ export async function envoyerDemandeAgence(
     console.error('[demande-agence] échec inattendu')
     return {
       statut: 'erreur',
-      message: "Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant.",
+      message: dire("Nous n'avons pas pu enregistrer votre demande. Réessayez dans un instant."),
       valeurs: saisie,
     }
   }

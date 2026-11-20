@@ -1,16 +1,20 @@
 import 'server-only'
 
+import { editeurEnProjet as projetEn } from '@/lib/content/en/juridique'
+import { editeurEnProjet as projetFr } from '@/lib/content/juridique'
+import { choisir, type Langue } from '@/lib/i18n'
+
 /**
  * L'identite de l'editeur, telle que les pages juridiques l'affichent.
  *
- * Rien n'est ecrit en dur : la structure n'est pas encore immatriculee, et une
- * raison sociale inventee serait pire qu'une ligne vide. Les valeurs viennent
- * des variables `EDITEUR_*`, lues au rendu de chaque page : ce
- * sont des informations publiques par nature, aucune n'est un secret.
+ * Les valeurs declarees viennent des variables `EDITEUR_*`, lues au rendu de
+ * chaque page : ce sont des informations publiques par nature, aucune n'est un
+ * secret. Tant qu'elles manquent, les pages affichent le projet de societe
+ * (`editeurAffiche`), sans jamais inventer de numero d'immatriculation.
  *
  * Une valeur absente ou mal formee ne disparait pas en silence. Elle est
- * listee dans `manquants`, la page l'affiche comme « a completer » et porte
- * l'attribut `data-editeur-incomplet`, que le controle de production
+ * listee dans `manquants` et la page porte l'attribut
+ * `data-editeur-incomplet`, que le controle de production
  * (`scripts/verifier-production.mjs`) refuse. Le site reste servi : c'est une
  * alerte, pas une panne.
  */
@@ -87,6 +91,38 @@ export function editeur(): Editeur {
   // d'agence ne lui coute rien, mais le paiement en ligne existe bien.
   if (!valeurs.mediateur) manquants.push('mediateur')
   return { ...valeurs, manquants }
+}
+
+/**
+ * L'editeur tel que les pages l'affichent.
+ *
+ * Tant que la societe n'est pas immatriculee, les pages presentent le projet
+ * (`editeurEnProjet`) plutot que des lignes vides : denomination, forme,
+ * capital, siege, contact. Aucun numero n'est invente : sans `EDITEUR_SIREN`,
+ * la page dit « en cours d'immatriculation ».
+ *
+ * `manquants` ne change pas : il liste ce que la configuration ne declare pas
+ * encore, et la page garde son attribut `data-editeur-incomplet` tant qu'il
+ * n'est pas vide. La supervision continue donc de reclamer les vraies valeurs.
+ */
+export function editeurAffiche(langue: Langue = 'fr'): Editeur {
+  const declare = editeur()
+  const projet = choisir(langue, projetFr, projetEn)
+  return {
+    ...declare,
+    denomination: declare.denomination ?? projet.denomination,
+    forme: declare.forme ?? projet.forme,
+    // Le capital du projet n'accompagne que la forme du projet.
+    capital: declare.capital ?? (declare.forme ? null : projet.capital),
+    adresse: declare.adresse ?? projet.adresse,
+    courriel: declare.courriel ?? projet.courriel,
+    directeurPublication: declare.directeurPublication ?? projet.directeurPublication,
+  }
+}
+
+/** La duree affichee des sauvegardes : celle qui est declaree, sinon celle du projet. */
+export function retentionAffichee(): number {
+  return retentionSauvegardes() ?? projetFr.sauvegardeJours
 }
 
 /**

@@ -71,12 +71,12 @@ test('le reglement ferme ne propose aucun paiement et le signale', async () => {
   vi.stubEnv('FACTURATION_ACTES_ENABLED', 'false')
   const { formulaires, textes } = await rendre()
   expect(formulaires).toEqual([])
-  expect(textes).toContain('Le règlement en ligne n’est pas encore ouvert.')
+  expect(textes).toContain('Le règlement en ligne est momentanément indisponible.')
 })
 
 test('le reglement ouvert ne propose que la facture a regler, sans anomalie ni doublon', async () => {
   vi.stubEnv('FACTURATION_ACTES_ENABLED', 'true')
   const { formulaires, textes } = await rendre()
   expect(formulaires).toEqual([`facture=${A_REGLER},montant=2900,tarif=recette`])
-  expect(textes).not.toContain('Le règlement en ligne n’est pas encore ouvert.')
+  expect(textes).not.toContain('Le règlement en ligne est momentanément indisponible.')
 })

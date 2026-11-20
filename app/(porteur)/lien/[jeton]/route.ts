@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { DUREE_JETON_SECONDES } from '@/lib/acces/jeton'
 import { NOM_COOKIE_CAPACITE, resoudreCapacite } from '@/lib/acces/session'
+import { optionsCookieLangue } from '@/lib/langue-espace'
+import { langueDossier } from '@/lib/langue-preferee'
 
 /**
  * Le lien recu par courriel atterrit ici.
@@ -44,6 +46,12 @@ export async function GET(
     path: '/',
     maxAge: DUREE_JETON_SECONDES,
   })
+
+  // La langue que la personne a choisie, ou qu'on a choisie pour elle a
+  // l'ouverture du dossier, la suit sur ce navigateur. Sans preference, le
+  // cookie deja present reste.
+  const langue = await langueDossier(capacite.dossierId, capacite.partie)
+  if (langue) reponse.cookies.set(optionsCookieLangue(langue))
 
   return reponse
 }

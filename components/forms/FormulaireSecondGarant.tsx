@@ -1,10 +1,14 @@
 'use client'
 
+import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
 import { useActionState, useId } from 'react'
 
-import { secondGarant as texte } from '@/lib/content/locataire'
+import { secondGarant as texteFr } from '@/lib/content/locataire'
 import { designerSecondGarant, type EtatSecondGarant } from '@/lib/locataire/action-second-garant'
 import { cn } from '@/lib/utils'
+import { secondGarant as texteEn } from '@/lib/content/en/locataire'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatSecondGarant = { statut: 'inactif' }
 
@@ -21,6 +25,9 @@ export function FormulaireSecondGarant({
   dossierId: string
   secondActuel: string | null
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(designerSecondGarant, ETAT_INITIAL)
   const idChamp = useId()
   const valeurInitiale = etat.statut === 'erreur' ? (etat.valeur ?? '') : (secondActuel ?? '')
@@ -63,6 +70,7 @@ export function FormulaireSecondGarant({
           )}
         />
       </div>
+      {secondActuel ? null : <ChoixLangueDestinataire name="langueGarant" destinataire="garant" />}
       <button
         type="submit"
         disabled={enCours}

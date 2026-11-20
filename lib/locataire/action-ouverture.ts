@@ -1,14 +1,19 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
 import { consommerDebit } from '@/lib/acces/debit'
 import { clientServeur } from '@/lib/acces/serveur'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
-import { candidature as texteCandidature } from '@/lib/content/candidature'
+import { candidature as texteCandidatureFr } from '@/lib/content/candidature'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
+import { candidature as texteCandidatureEn } from '@/lib/content/en/candidature'
+import { choisir } from '@/lib/i18n'
+import { langueAction } from '@/lib/langue-espace'
+import { reglerLangueDossier } from '@/lib/langue-preferee'
 
 /**
  * La porte principale du produit : une adresse, un dossier, un lien.
@@ -48,13 +53,17 @@ export async function ouvrirMonDossier(
   _precedent: EtatOuverture,
   donnees: FormData,
 ): Promise<EtatOuverture> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
+  const texteCandidature = choisir(langue, texteCandidatureFr, texteCandidatureEn)
+
   const saisie = String(donnees.get('courriel') ?? '')
   const analyse = schema.safeParse({ courriel: saisie })
 
   if (!analyse.success) {
     return {
       statut: 'erreur',
-      message: analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.',
+      message: dire(analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.'),
       valeur: saisie,
     }
   }
@@ -79,7 +88,7 @@ export async function ouvrirMonDossier(
     ) {
       return {
         statut: 'erreur',
-        message: 'Trop de dossiers ouverts depuis cette connexion. Réessaie dans une heure.',
+        message: dire('Trop de dossiers ouverts depuis cette connexion. Réessaie dans une heure.'),
         valeur: saisie,
       }
     }
@@ -88,7 +97,7 @@ export async function ouvrirMonDossier(
     if (!ouvert) {
       return {
         statut: 'erreur',
-        message: "Le dossier n'a pas pu être ouvert. Réessaie dans un instant.",
+        message: dire("Le dossier n'a pas pu être ouvert. Réessaie dans un instant."),
         valeur: saisie,
       }
     }
@@ -104,6 +113,9 @@ export async function ouvrirMonDossier(
       if (error) console.error('[porte] candidature non rattachee')
     }
 
+    // La langue de la page devient celle du dossier, donc celle du lien
+    // qui part juste apres et de l'espace ou il mene.
+    await reglerLangueDossier(ouvert.dossierId, 'locataire', langue)
     await reprendreLivraisonLiens(ouvert.dossierId)
     if (rattachement === 'rattachee') {
       await prevenirSiLeStatutAChange(await clientServeur(), ouvert.dossierId, null)
@@ -112,7 +124,7 @@ export async function ouvrirMonDossier(
     console.error('[porte] ouverture impossible')
     return {
       statut: 'erreur',
-      message: "Le dossier n'a pas pu être ouvert. Réessaie dans un instant.",
+      message: dire("Le dossier n'a pas pu être ouvert. Réessaie dans un instant."),
       valeur: saisie,
     }
   }

@@ -1,6 +1,12 @@
-import { interfaceEspace as t } from '@/lib/content/interface'
+import { interfaceEspace as tFr } from '@/lib/content/interface'
+import { interfaceEspace as tEn } from '@/lib/content/en/interface'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
-export function SommaireDossier({ liens }: { liens: { id: string; titre: string }[] }) {
+export async function SommaireDossier({ liens }: { liens: { id: string; titre: string }[] }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   return (
     <nav className="navigation-sections sommaire-dossier" aria-label={t.navigationDossier}>
       {liens.map(({ id, titre }, index) => (

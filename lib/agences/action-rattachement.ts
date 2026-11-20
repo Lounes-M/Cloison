@@ -1,10 +1,15 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { revalidatePath } from 'next/cache'
 
-import { rattachement as textes } from '@/lib/content/rattachement'
+import { rattachement as textesFr } from '@/lib/content/rattachement'
 
+import { clientAgence } from '@/lib/acces/agence'
 import { rattacher } from './rattachement'
+import { rattachement as textesEn } from '@/lib/content/en/rattachement'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Nommer son agence, une seule fois, par la premiere personne qui arrive.
@@ -20,6 +25,10 @@ export async function nommerAgence(
   _precedent: EtatNomAgence,
   donnees: FormData,
 ): Promise<EtatNomAgence> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const textes = choisir(langue, textesFr, textesEn)
+
   const saisie = String(donnees.get('nom') ?? '').trim()
 
   // La base exige deux caracteres au minimum. On le verifie aussi ici, pour
@@ -39,6 +48,15 @@ export async function nommerAgence(
   if (resultat.etat === 'rattache' || resultat.etat === 'en-attente') {
     // La page relit le rattachement au rendu suivant : elle trouvera l'agence
     // et affichera l'espace au lieu de reposer la question.
+    // L'agence vient de naitre : la langue du navigateur devient la
+    // preference de son premier collaborateur, donc celle de ses courriels.
+    if (resultat.etat === 'rattache') {
+      try {
+        await (await clientAgence()).rpc('regler_ma_langue', { la_langue: langue })
+      } catch {
+        // La bascule ou la prochaine connexion l'enregistreront.
+      }
+    }
     revalidatePath('/espace')
     return { statut: 'inactif' }
   }
@@ -49,7 +67,7 @@ export async function nommerAgence(
 
   return {
     statut: 'erreur',
-    message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
+    message: dire("L'enregistrement n'a pas abouti. Réessayez dans un instant."),
     valeur: saisie,
   }
 }

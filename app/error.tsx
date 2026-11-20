@@ -1,11 +1,20 @@
 'use client'
 
-import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { useEffect, useSyncExternalStore } from 'react'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import { Button } from '@/components/ui/Button'
 import { NavigationReprise } from '@/components/ui/NavigationReprise'
-import { erreurs } from '@/lib/content/erreurs'
+import { erreurs as erreursEn } from '@/lib/content/en/erreurs'
+import { erreurs as erreursFr } from '@/lib/content/erreurs'
+import { COOKIE_LANGUE, choisir, lien, type Langue } from '@/lib/i18n'
+
+/** La langue choisie dans un espace : un cookie lisible, sans rien de secret. */
+function langueDuCookie(): Langue {
+  return document.cookie.split('; ').includes(`${COOKIE_LANGUE}=en`) ? 'en' : 'fr'
+}
+const sansAbonnement = () => () => {}
 
 /**
  * Frontiere d'erreur des pages : elle remplace le contenu de la route, le
@@ -23,14 +32,19 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const chemin = usePathname()
+  const choisie = useSyncExternalStore<Langue>(sansAbonnement, langueDuCookie, () => 'fr')
+  const langue: Langue = chemin === '/en' || chemin.startsWith('/en/') ? 'en' : choisie
+  const erreurs = choisir(langue, erreursFr, erreursEn)
+
   useEffect(() => {
     // Le navigateur ne recoit aucun detail supplementaire dans la console.
     console.error('[interface] chargement impossible')
   }, [error])
 
   return (
-    <div className="site-public">
-      <SiteHeader />
+    <div className="site-public" lang={langue}>
+      <SiteHeader langue={langue} />
       <div className="sous-entete-fixe">
         <main className="ecran-reprise">
           <div className="carte-reprise">
@@ -41,11 +55,11 @@ export default function Error({
             <p className="description-reprise">{erreurs.chargement}</p>
             <div className="actions-reprise">
               <Button onClick={() => window.location.reload()}>{erreurs.reessayer}</Button>
-              <Button href="/" tone="paper">
+              <Button href={lien(langue, '/')} tone="paper">
                 {erreurs.accueil}
               </Button>
             </div>
-            <NavigationReprise />
+            <NavigationReprise langue={langue} />
             {error.digest ? (
               <p className="reference-reprise">
                 {erreurs.reference} : <code>{error.digest}</code>
@@ -54,7 +68,7 @@ export default function Error({
           </div>
         </main>
       </div>
-      <SiteFooter />
+      <SiteFooter langue={langue} />
     </div>
   )
 }

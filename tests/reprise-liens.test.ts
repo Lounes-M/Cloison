@@ -40,7 +40,8 @@ test('la reprise signe le jti durable et conserve son identifiant en file', asyn
 test('un refus de mise en file reste visible et ne demande pas un nouvel identifiant', async () => {
   h.garant.mockResolvedValue(false)
   expect(await livrerLiens({ rpc: h.rpc } as never)).toEqual({ echecs: 1 })
-  expect(h.rpc).toHaveBeenCalledTimes(1)
+  // La liste des liens, puis la langue du destinataire : rien d'autre.
+  expect(h.rpc.mock.calls.map((appel) => appel[0])).toEqual(['liens_a_livrer', 'langues_courriels'])
 })
 test('une panne de reprise immediate ne transforme pas le dossier ouvert en echec', async () => {
   h.rpc.mockRejectedValue(new Error('indisponible'))

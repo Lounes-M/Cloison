@@ -320,6 +320,52 @@ export async function parcourirInterface(
     assert.equal(new URL(page.url()).pathname, '/' + partie, 'Le parcours porteur doit etre rendu')
   }
   await parcourirActes(page, site, id, moteur, largeur, actes, visiter)
+  // La bascule de langue des espaces : un formulaire, donc sans JavaScript
+  // requis. Elle change l'affichage tout de suite, et les memes controles de
+  // surface, de debordement et d'accessibilite valent pour l'anglais.
+  await page.goto(site + '/espace/notifications')
+  const bascule = (code) => page.locator(`.bascule-langue button[value="${code}"]`).first()
+  assert.equal(await bascule('fr').getAttribute('aria-pressed'), 'true', 'Francais par defaut')
+  await bascule('en').click()
+  await page.locator('.bascule-langue button[value="en"][aria-pressed="true"]').first().waitFor()
+  assert.equal(
+    (await page.locator('h1').first().innerText()).trim(),
+    'My notifications',
+    'La page doit passer en anglais',
+  )
+  assert(
+    (await contexte.cookies(site)).some((c) => c.name === 'cloison_langue' && c.value === 'en'),
+    'La langue choisie doit etre retenue',
+  )
+  for (const [chemin, nom] of [
+    ['/espace', 'en-tableau'],
+    [`/espace/dossiers/${id}`, 'en-dossier'],
+    ['/espace/logements', 'en-logements'],
+    ['/espace/collaborateurs', 'en-collaborateurs'],
+    ['/espace/notifications', 'en-notifications'],
+    ['/espace/activite', 'en-activite'],
+    ['/garant', 'en-garant'],
+    ['/lien-invalide', 'en-lien-invalide'],
+  ]) {
+    await visiter(chemin, nom)
+    assert.equal(
+      await page.locator('.espace-shell').first().getAttribute('lang'),
+      'en',
+      `Langue annoncee ${nom}`,
+    )
+  }
+  const francaisRestant = await page
+    .locator('body')
+    .evaluate((corps) =>
+      [...corps.innerText.matchAll(/[^.\n]*\b(Retrouver|Connexion|Votre|dossier)\b[^.\n]*/g)].map(
+        (m) => m[0].trim(),
+      ),
+    )
+  assert.deepEqual(francaisRestant, [], 'Du francais reste dans une page anglaise')
+  await page.goto(site + '/espace/notifications')
+  await bascule('fr').click()
+  await page.locator('.bascule-langue button[value="fr"][aria-pressed="true"]').first().waitFor()
+  console.log('OK : bascule de langue des espaces, pages anglaises controlees')
   const encoder = (v) => Buffer.from(JSON.stringify(v)).toString('base64url')
   const segments = session.access_token.split('.')
   const contenu = JSON.parse(Buffer.from(segments[1], 'base64url').toString())

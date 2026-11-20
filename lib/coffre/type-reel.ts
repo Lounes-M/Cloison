@@ -156,7 +156,7 @@ export function verifierContenu(contenu: Buffer): Verdict {
     const megaoctets = Math.round(TAILLE_MAXIMALE / (1024 * 1024))
     return {
       accepte: false,
-      raison: `Ce fichier depasse ${megaoctets} Mo. Reduis sa taille ou depose-le en plusieurs fois.`,
+      raison: `Ce fichier dépasse ${megaoctets} Mo. Réduisez sa taille ou déposez-le en plusieurs fois.`,
     }
   }
 

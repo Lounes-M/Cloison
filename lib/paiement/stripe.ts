@@ -177,7 +177,7 @@ export async function creerSessionLocataire(options: {
         ],
         success_url: options.retourOk,
         cancel_url: options.retourAnnule,
-        locale: 'fr',
+        locale: 'auto',
       },
       { idempotencyKey: `cloison:${options.dossierId}:${tentative}` },
     )
@@ -347,13 +347,13 @@ export async function creerSessionActe(
             price_data: {
               currency: 'eur',
               unit_amount: r.montant,
-              product_data: { name: 'Acte Cloison signe' },
+              product_data: { name: 'Acte Cloison signé' },
             },
           },
         ],
         success_url: `${origine}/espace/facturation`,
         cancel_url: `${origine}/espace/facturation`,
-        locale: 'fr',
+        locale: 'auto',
       },
       { idempotencyKey: `cloison-acte:${r.id}` },
     )

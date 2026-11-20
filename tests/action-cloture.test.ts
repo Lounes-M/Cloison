@@ -8,7 +8,10 @@ const d = vi.hoisted(() => ({
 }))
 vi.mock('@/lib/agences/contexte', () => ({ contexteAgence: d.contexte }))
 vi.mock('next/cache', () => ({ revalidatePath: d.revalider }))
-vi.mock('@/lib/courriels/envoi', () => ({ envoyer: d.envoyer }))
+vi.mock('@/lib/courriels/envoi', () => ({
+  envoyer: d.envoyer,
+  adresseDuSite: () => 'https://example.invalid',
+}))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: d.serveur }))
 import { cloreLeDossier } from '@/lib/agences/action-cloture'
 import { cloture as courriels } from '@/lib/content/courriels'
@@ -79,8 +82,11 @@ test('une cloture previent le locataire et le garant avec des identites stables'
   expect(garant![0]).toBe('garant@example.invalid')
   expect(garant![1]).toBe(courriels.garant.sujet)
   for (const appel of [locataire!, garant!]) {
-    expect(appel[2]).toContain('CL-ABC123')
-    expect(appel[2]).not.toMatch(/https?:\/\//)
+    expect(appel[2].text).toContain('CL-ABC123')
+    expect(appel[2].html).toContain('CL-ABC123')
+    // Aucun lien dans le propos, et jamais de lien de capacite ni de dossier.
+    expect(appel[2].text).not.toMatch(/https?:\/\//)
+    expect(appel[2].html).not.toMatch(/\/lien\/|\/espace\//)
     expect(appel[3]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
     expect(appel[5]).toBe(true)
   }

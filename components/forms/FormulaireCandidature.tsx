@@ -2,13 +2,19 @@
 
 import { useActionState, useId } from 'react'
 
-import { candidature as texte } from '@/lib/content/candidature'
+import { candidature as texteFr } from '@/lib/content/candidature'
 import { candidaterAuLogement, type EtatCandidature } from '@/lib/locataire/action-candidature'
+import { candidature as texteEn } from '@/lib/content/en/candidature'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatCandidature = { statut: 'inactif' }
 
 /** Coller le lien de l'annonce pour rejoindre ce logement et son agence (0070). */
 export function FormulaireCandidature({ dossierId }: { dossierId: string }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(candidaterAuLogement, ETAT_INITIAL)
   const idChamp = useId()
   const idAccord = useId()

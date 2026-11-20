@@ -2,13 +2,12 @@ import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import { resteAFaireLocataire } from '@/lib/locataire/reste-a-faire'
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
-import { frise } from '@/lib/content/frise'
+import { frise as friseFr } from '@/lib/content/frise'
 import { etapesLocataire } from '@/lib/dossiers/frise'
-import { interfaceEspace } from '@/lib/content/interface'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { FormulaireCandidature } from '@/components/forms/FormulaireCandidature'
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
-import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
@@ -16,18 +15,37 @@ import { FormulaireLoyer } from '@/components/forms/FormulaireLoyer'
 import { FormulaireSecondGarant } from '@/components/forms/FormulaireSecondGarant'
 import { agenceDuDossier } from '@/lib/acces/agence-du-dossier'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { agenceDuDossier as texteAgence } from '@/lib/content/agence-du-dossier'
-import { espace, secondGarant as texteSecond, statuts } from '@/lib/content/locataire'
-import { mentionTva, versionConditions } from '@/lib/content/juridique'
+import { agenceDuDossier as texteAgenceFr } from '@/lib/content/agence-du-dossier'
+import {
+  espace as espaceFr,
+  secondGarant as texteSecondFr,
+  statuts as statutsFr,
+} from '@/lib/content/locataire'
+import { mentionTva as mentionTvaFr, versionConditions } from '@/lib/content/juridique'
 import { editeur } from '@/lib/juridique/editeur'
-import { paiementLocataire, tarifs, euros } from '@/lib/content/tarifs'
+import {
+  paiementLocataire as paiementLocataireFr,
+  tarifs,
+  euros as eurosFr,
+} from '@/lib/content/tarifs'
 import { payerMonDossier } from '@/lib/locataire/action-paiement'
 import { cn } from '@/lib/utils'
+import { frise as friseEn } from '@/lib/content/en/frise'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
+import {
+  espace as espaceEn,
+  secondGarant as texteSecondEn,
+  statuts as statutsEn,
+} from '@/lib/content/en/locataire'
+import { mentionTva as mentionTvaEn } from '@/lib/content/en/juridique'
+import { paiementLocataire as paiementLocataireEn, euros as eurosEn } from '@/lib/content/en/tarifs'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata: Metadata = {
-  title: 'Ton dossier',
-  robots: { index: false, follow: false },
-}
+export const generateMetadata = () => titreEspace(titresFr.locataire, titresEn.locataire)
 
 const tons = {
   sky: 'bg-sky',
@@ -51,6 +69,17 @@ export default async function PageLocataire({
 }: {
   searchParams: Promise<{ paiement?: string }>
 }) {
+  const langue = await langueEspace()
+  const statuts = choisir(langue, statutsFr, statutsEn)
+  const espace = choisir(langue, espaceFr, espaceEn)
+  const texteAgence = choisir(langue, texteAgenceFr, texteAgenceEn)
+  const frise = choisir(langue, friseFr, friseEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+  const texteSecond = choisir(langue, texteSecondFr, texteSecondEn)
+  const paiementLocataire = choisir(langue, paiementLocataireFr, paiementLocataireEn)
+  const euros = choisir(langue, eurosFr, eurosEn)
+  const mentionTva = choisir(langue, mentionTvaFr, mentionTvaEn)
+
   const { paiement } = await searchParams
   const porteur = await capaciteDepuisCookies()
   if (!porteur) redirect('/lien-invalide')
@@ -112,7 +141,7 @@ export default async function PageLocataire({
   const suivi = dossier.agence_id ? await agenceDuDossier(supabase) : null
   const loyer =
     dossier.loyer_cents == null ? '' : (Number(dossier.loyer_cents) / 100).toLocaleString('fr-FR')
-  const expire = new Date(String(dossier.expire_le)).toLocaleDateString('fr-FR', {
+  const expire = new Date(String(dossier.expire_le)).toLocaleDateString(locale(langue), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -146,7 +175,7 @@ export default async function PageLocataire({
 
       <FriseAvancement
         titre={frise.locataire.titre}
-        etapes={etapesLocataire(String(dossier.statut), garant !== null)}
+        etapes={etapesLocataire(String(dossier.statut), garant !== null, langue)}
       />
 
       {restant ? <ResteAFaireLocataire etapes={restant} /> : null}
@@ -172,8 +201,7 @@ export default async function PageLocataire({
           <FormulaireLoyer dossierId={porteur.capacite.dossierId} loyerActuel={loyer} />
         ) : (
           <p className="text-sm">
-            Loyer : {loyer} €. Ce montant est figé pour préserver la confidentialité de la
-            déclaration du garant.
+            {espace.loyerFige} {loyer} {espace.loyerFigeSuite}
           </p>
         )}
         {ouvert && !dossier.agence_id && !dossier.demonstration ? (
@@ -219,7 +247,7 @@ export default async function PageLocataire({
           {dossier.paye_le ? (
             <p className="text-muted mt-3 text-[14px] font-medium">
               {paiementLocataire.regle_le(
-                new Date(String(dossier.paye_le)).toLocaleDateString('fr-FR', {
+                new Date(String(dossier.paye_le)).toLocaleDateString(locale(langue), {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -299,14 +327,11 @@ export default async function PageLocataire({
             />
             {!ouvert ? <p className="mt-3 text-sm">{espace.garantRenouvellement}</p> : null}
             {dossier.garant_verrouille ? (
-              <p className="mt-3 text-sm">
-                Le garant invité reste associé à ce dossier. Pour désigner une autre personne, ouvre
-                un nouveau dossier.
-              </p>
+              <p className="mt-3 text-sm">{espace.garantAssocie}</p>
             ) : null}
           </>
         ) : (
-          <p>Ce dossier ne peut plus être modifié.</p>
+          <p>{espace.plusModifiable}</p>
         )}
       </section>
 

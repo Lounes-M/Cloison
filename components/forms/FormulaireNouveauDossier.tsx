@@ -1,10 +1,14 @@
 'use client'
 
+import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
 import { useActionState, useId } from 'react'
 
-import { tableau } from '@/lib/content/espace'
+import { tableau as tableauFr } from '@/lib/content/espace'
 import { ouvrirUnDossier, type EtatNouveauDossier } from '@/lib/agences/action-dossier'
 import { cn } from '@/lib/utils'
+import { tableau as tableauEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatNouveauDossier = { statut: 'inactif' }
 
@@ -18,6 +22,9 @@ export function FormulaireNouveauDossier({
   logementId?: string
   loyerParDefaut?: string
 }) {
+  const langue = useLangue()
+  const tableau = choisir(langue, tableauFr, tableauEn)
+
   const [etat, envoyer, enCours] = useActionState(ouvrirUnDossier, ETAT_INITIAL)
   const idChamp = useId()
   const idLoyer = useId()
@@ -62,6 +69,12 @@ export function FormulaireNouveauDossier({
         />
         <p className="text-muted mt-2 text-[13px] font-medium">{tableau.nouveauAide}</p>
       </div>
+
+      <ChoixLangueDestinataire
+        name="langueLocataire"
+        destinataire="locataire"
+        disabled={!verifiee}
+      />
 
       <div>
         <label htmlFor={idLoyer} className="mb-2 block text-[14px] font-bold">
