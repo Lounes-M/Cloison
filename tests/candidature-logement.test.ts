@@ -133,7 +133,8 @@ test('un dossier ouvert depuis le lien rejoint le logement avant l envoi du lien
     le_dossier: DOSSIER,
     le_code: CODE,
   })
-  expect(ordre).toEqual(['candidater_dossier_neuf', 'livraison'])
+  // La langue du dossier est rangee avant que le lien parte : il part dans cette langue.
+  expect(ordre).toEqual(['candidater_dossier_neuf', 'regler_langue_dossier', 'livraison'])
   expect(h.prevenir).toHaveBeenCalledExactlyOnceWith({ rpc: h.rpc }, DOSSIER, null)
 })
 

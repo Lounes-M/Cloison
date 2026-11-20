@@ -138,14 +138,14 @@ test('les textes du garant le vouvoient', async () => {
  *
  * Ils s'affichent comme le reste mais echappaient a la garde de
  * `lib/content` : on lit donc chaque litteral pose sous `message:` ou
- * `raison:`, ou dans une constante, dans les dossiers qui parlent aux personnes.
+ * `raison:`, passe au traducteur `dire(...)`, ou range dans une constante, dans les dossiers qui parlent aux personnes.
  */
 const MESSAGES = ['lib/agences', 'lib/garant', 'lib/locataire', 'lib/coffre']
 // Un litteral peut etre renvoye a la ligne apres sa cle, ou coupe en plusieurs
 // morceaux joints par `+` : on lit toute la chaine.
 const MORCEAU = `(?:'[^'\\n]*'|"[^"\\n]*")`
 const LITTERAL = new RegExp(
-  `(?:\\b(?:message|raison):\\s*|\\bconst [A-Z_]+ = )(${MORCEAU}(?:\\s*\\+\\s*${MORCEAU})*)`,
+  `(?:\\b(?:message|raison):\\s*(?:dire\\(\\s*)?|\\bdire\\(\\s*|\\bconst [A-Z_]+ = )(${MORCEAU}(?:\\s*\\+\\s*${MORCEAU})*)`,
   'g',
 )
 const recoller = (chaine: string) =>
