@@ -25,7 +25,11 @@ export async function changerLangue(donnees: FormData): Promise<void> {
     // L'affichage a deja change.
   }
   try {
-    await (await clientAgence()).rpc('regler_ma_langue', { la_langue: langue })
+    const supabase = await clientAgence()
+    const { data } = await supabase.rpc('regler_ma_langue', { la_langue: langue })
+    // Le courriel de connexion est ecrit par Supabase : son gabarit lit la
+    // langue dans les metadonnees du compte.
+    if (data === true) await supabase.auth.updateUser({ data: { langue } })
   } catch {
     // Pas de session agence, ou base indisponible.
   }

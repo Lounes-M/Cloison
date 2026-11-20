@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 import { rattachement as textesFr } from '@/lib/content/rattachement'
 
+import { clientAgence } from '@/lib/acces/agence'
 import { rattacher } from './rattachement'
 import { rattachement as textesEn } from '@/lib/content/en/rattachement'
 import { choisir } from '@/lib/i18n'
@@ -47,6 +48,15 @@ export async function nommerAgence(
   if (resultat.etat === 'rattache' || resultat.etat === 'en-attente') {
     // La page relit le rattachement au rendu suivant : elle trouvera l'agence
     // et affichera l'espace au lieu de reposer la question.
+    // L'agence vient de naitre : la langue du navigateur devient la
+    // preference de son premier collaborateur, donc celle de ses courriels.
+    if (resultat.etat === 'rattache') {
+      try {
+        await (await clientAgence()).rpc('regler_ma_langue', { la_langue: langue })
+      } catch {
+        // La bascule ou la prochaine connexion l'enregistreront.
+      }
+    }
     revalidatePath('/espace')
     return { statut: 'inactif' }
   }

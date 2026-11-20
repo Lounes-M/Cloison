@@ -100,6 +100,9 @@ export async function envoyerLienDeConnexion(
         // lien a un vrai garant. La barriere tombe la, et nulle part avant.
         shouldCreateUser: true,
         emailRedirectTo: `${adresseDuSite()}/connexion/verifie`,
+        // Pour un nouveau compte : la langue du courriel de connexion, que le
+        // gabarit Supabase lit dans `.Data.langue` (supabase/gabarits).
+        data: { langue },
       },
     })
 
