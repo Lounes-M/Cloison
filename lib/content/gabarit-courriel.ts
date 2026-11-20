@@ -5,7 +5,6 @@
  */
 export const gabaritCourriel = {
   signature: 'Un dossier commun. Des espaces séparés.',
-  espaces: { locataire: 'Espace locataire', garant: 'Espace garant', agence: 'Espace agence' },
   reference: 'Référence du dossier',
   echeance: 'Fin du coffre',
   heure: 'heure de Paris',

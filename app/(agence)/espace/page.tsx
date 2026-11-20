@@ -28,7 +28,7 @@ import {
 } from '@/lib/content/espace'
 import { activite as texteActiviteFr } from '@/lib/content/activite'
 import { logements as texteLogementsFr } from '@/lib/content/logements'
-import { cn } from '@/lib/utils'
+import { Repere } from '@/components/ui/Repere'
 import {
   responsables as texteResponsablesFr,
   type ResponsableDossier,
@@ -50,14 +50,6 @@ import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
 
 export const generateMetadata = () => titreEspace(titresFr.espace, titresEn.espace)
-
-const tons = {
-  sky: 'bg-sky',
-  sun: 'bg-sun',
-  mint: 'bg-mint',
-  flame: 'bg-flame text-ink',
-  paper: 'bg-paper',
-} as const
 
 type Ligne = {
   id: string
@@ -582,14 +574,9 @@ export default async function PageEspace({
                           {tableau.colonnes.statut}
                         </dt>
                         <dd>
-                          <span
-                            className={cn(
-                              'inline-block rounded-full px-3 py-1 text-xs font-bold',
-                              tons[statut.ton],
-                            )}
-                          >
+                          <Repere ton={statut.ton} className="text-[13px]">
                             {statut.libelle}
-                          </span>
+                          </Repere>
                           <PastillesSuivi
                             pastilles={pastillesDuDossier(
                               { ...ligne, relances_epuisees: epuisesVus.has(ligne.id) },
@@ -687,14 +674,9 @@ export default async function PageEspace({
                           ) : null}
                         </td>
                         <td className="px-4 py-3">
-                          <span
-                            className={cn(
-                              'inline-block rounded-full px-3 py-1 text-xs font-bold',
-                              tons[statut.ton],
-                            )}
-                          >
+                          <Repere ton={statut.ton} className="text-[13px]">
                             {statut.libelle}
-                          </span>
+                          </Repere>
                           <PastillesSuivi
                             pastilles={pastillesDuDossier(
                               { ...ligne, relances_epuisees: epuisesVus.has(ligne.id) },

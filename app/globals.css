@@ -562,9 +562,6 @@
   .sommaire-dossier a:hover {
     background: var(--color-paper);
   }
-  .badge-espace {
-    background: var(--color-sun);
-  }
   .carte-priorite {
     display: flex;
     flex-direction: column;
@@ -581,9 +578,6 @@
   .carte-priorite:hover {
     border-color: var(--color-cobalt);
     background: color-mix(in srgb, var(--color-sky) 15%, var(--color-paper));
-  }
-  [data-espace='agence'] .badge-espace {
-    background: var(--color-sky);
   }
   .espace-shell section[id] {
     scroll-margin-top: 1.5rem;

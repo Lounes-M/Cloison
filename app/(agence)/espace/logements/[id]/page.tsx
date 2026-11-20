@@ -14,6 +14,7 @@ import { logements as tFr } from '@/lib/content/logements'
 import { euros as eurosFr } from '@/lib/content/tarifs'
 import { site } from '@/lib/site'
 import { estUuidCanonique } from '@/lib/validation/uuid'
+import { Repere } from '@/components/ui/Repere'
 import { cn } from '@/lib/utils'
 import { candidature as tcEn } from '@/lib/content/en/candidature'
 import { statuts as statutsEn } from '@/lib/content/en/espace'
@@ -23,14 +24,6 @@ import { choisir, locale } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 
 export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
-
-const tons = {
-  sky: 'bg-sky',
-  sun: 'bg-sun',
-  mint: 'bg-mint',
-  flame: 'bg-flame text-ink',
-  paper: 'bg-paper',
-} as const
 
 type Candidat = {
   id: string
@@ -146,14 +139,9 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                       </Link>
                     </th>
                     <td className="py-2 pr-4">
-                      <span
-                        className={cn(
-                          'border-ink inline-block rounded-full border-2 px-3 py-0.5 text-[12px] font-bold',
-                          tons[statut.ton],
-                        )}
-                      >
+                      <Repere ton={statut.ton} className="text-[13px]">
                         {statut.libelle}
-                      </span>
+                      </Repere>
                     </td>
                     <td
                       className={cn(

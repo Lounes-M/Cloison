@@ -7,6 +7,7 @@ import { archiverUnLogement } from '@/lib/agences/action-logements'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { logements as tFr } from '@/lib/content/logements'
 import { euros as eurosFr } from '@/lib/content/tarifs'
+import { Repere } from '@/components/ui/Repere'
 import { cn } from '@/lib/utils'
 import { logements as tEn } from '@/lib/content/en/logements'
 import { euros as eurosEn } from '@/lib/content/en/tarifs'
@@ -107,9 +108,9 @@ export default async function PageLogements({
                       {l.libelle}
                     </Link>
                     {l.candidature_ouverte ? (
-                      <span className="border-ink bg-mint ml-2 inline-block rounded-full border-2 px-2 py-0.5 text-[11px] font-bold">
+                      <Repere ton="mint" className="ml-3 inline-flex text-[12px]">
                         {t.lienOuvert}
-                      </span>
+                      </Repere>
                     ) : null}
                     {l.archive ? (
                       <span className="text-muted ml-2 text-[12px]">{t.archive}</span>

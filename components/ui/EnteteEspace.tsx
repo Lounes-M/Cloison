@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { Repere } from '@/components/ui/Repere'
 export function EnteteEspace({
   titre,
   etiquette,
@@ -12,14 +12,9 @@ export function EnteteEspace({
 }) {
   return (
     <header className="entete-espace border-ink/15 mb-6 border-b pb-6">
-      <p
-        className={cn(
-          'mb-3 inline-block rounded-full px-3 py-1 text-xs font-bold tracking-wide',
-          { sky: 'bg-sky', mint: 'bg-mint', sun: 'bg-sun' }[ton],
-        )}
-      >
+      <Repere as="p" ton={ton} className="mb-3 text-[13px] tracking-wide uppercase">
         {etiquette}
-      </p>
+      </Repere>
       <h1 className="font-display text-[clamp(1.25rem,6.25vw,2rem)] leading-tight break-words">
         {titre}
       </h1>
