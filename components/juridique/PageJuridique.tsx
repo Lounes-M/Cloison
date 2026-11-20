@@ -1,5 +1,7 @@
 import { EnTetePage } from '@/components/ui/EnTetePage'
-import { juridique } from '@/lib/content/juridique'
+import { juridique as juridiqueEn } from '@/lib/content/en/juridique'
+import { juridique as juridiqueFr } from '@/lib/content/juridique'
+import { choisir, type Langue } from '@/lib/i18n'
 
 /**
  * Le gabarit commun des pages juridiques : un titre, une date, des sections.
@@ -12,11 +14,14 @@ export function PageJuridique({
   titre,
   incomplet,
   children,
+  langue = 'fr',
 }: {
   titre: string
   incomplet: boolean
   children: React.ReactNode
+  langue?: Langue
 }) {
+  const juridique = choisir(langue, juridiqueFr, juridiqueEn)
   return (
     <main {...(incomplet ? { 'data-editeur-incomplet': '' } : {})}>
       <EnTetePage titre={titre} sousTitre={<p>{juridique.miseAJour}</p>} />
@@ -28,6 +33,11 @@ export function PageJuridique({
               className="bg-sun texte-16 mb-[2.5rem] rounded-[1rem] px-5 py-4 font-semibold"
             >
               {juridique.avertissementIncomplet}
+            </p>
+          ) : null}
+          {langue === 'en' ? (
+            <p role="note" className="texte-16 text-muted mb-[2.5rem]">
+              {juridiqueEn.traduction}
             </p>
           ) : null}
           <div className="space-y-[2.5rem]">{children}</div>
@@ -60,6 +70,7 @@ export function SectionJuridique({
 }
 
 /** Une valeur de l'editeur, ou la mention visible qu'elle manque. */
-export function Valeur({ valeur }: { valeur: string | null }) {
+export function Valeur({ valeur, langue = 'fr' }: { valeur: string | null; langue?: Langue }) {
+  const juridique = choisir(langue, juridiqueFr, juridiqueEn)
   return valeur ? <>{valeur}</> : <em className="text-muted">{juridique.aCompleter}</em>
 }

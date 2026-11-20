@@ -12,6 +12,7 @@ export const porte = {
   sousTitre:
     'Une adresse e-mail, et tu reçois un lien. Pas de compte, pas de mot de passe : le lien est ta clé.',
   champ: 'Ton adresse e-mail',
+  exemple: 'toi@exemple.fr',
   aide: 'Tu recevras ton lien par e-mail. Vérifie aussi tes indésirables.',
   bouton: 'Ouvrir mon dossier',
   envoi: 'Ouverture…',

@@ -4,8 +4,10 @@ import { useActionState, useEffect, useId, useRef } from 'react'
 import { envoyerDemandeAgence, type EtatFormulaire } from '@/lib/agences/action'
 import { VOLUMES } from '@/lib/agences/schema'
 import { cn } from '@/lib/utils'
-import { informationCollecte } from '@/lib/content/information-collecte'
-import { formulaire } from '@/lib/content/agences'
+import { demande as demandeFr } from '@/lib/content/agences'
+import * as en from '@/lib/content/en/formulaires'
+import { informationCollecte as collecteFr } from '@/lib/content/information-collecte'
+import { choisir, lien, type Langue } from '@/lib/i18n'
 
 const ETAT_INITIAL: EtatFormulaire = { statut: 'inactif' }
 
@@ -22,7 +24,11 @@ function Erreur({ id, message }: { id: string; message?: string }) {
   )
 }
 
-export function FormulaireAgence() {
+export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
+  const t = choisir(langue, demandeFr, en.demande)
+  const informationCollecte = choisir(langue, collecteFr, en.informationCollecte)
+  const traduit = (message: string | undefined) =>
+    langue === 'en' ? en.messageEn(message) : message
   const [etat, envoyer, enCours] = useActionState(envoyerDemandeAgence, ETAT_INITIAL)
   const idBase = useId()
   const resume = useRef<HTMLDivElement>(null)
@@ -49,9 +55,9 @@ export function FormulaireAgence() {
         tabIndex={-1}
         className="bg-mint outlined shadow-brut scroll-mt-28 rounded-[18px] p-8 text-center"
       >
-        <p className="font-display text-2xl">{formulaire.merci}</p>
+        <p className="font-display text-2xl">{t.merci}</p>
         <p className="mx-auto mt-3 max-w-[420px] text-[15px] leading-relaxed font-medium">
-          {formulaire.suite}
+          {t.suite}
         </p>
       </div>
     )
@@ -76,14 +82,14 @@ export function FormulaireAgence() {
           // collant la masquerait sans cette marge.
           className="bg-flame outlined text-ink scroll-mt-28 rounded-xl px-4 py-3 text-[14px] font-bold"
         >
-          {etat.message}
+          {traduit(etat.message)}
         </div>
       ) : null}
 
       <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label htmlFor={`${idBase}-nom`} className="mb-2 block text-[14px] font-bold">
-            Nom de l&apos;agence
+            {t.nom}
           </label>
           <input
             id={`${idBase}-nom`}
@@ -91,18 +97,18 @@ export function FormulaireAgence() {
             required
             maxLength={120}
             autoComplete="organization"
-            placeholder="Agence Bellevue"
+            placeholder={t.nomExemple}
             defaultValue={valeurs.nomAgence ?? ''}
             aria-invalid={Boolean(champs.nomAgence)}
             aria-describedby={champs.nomAgence ? `${idBase}-nom-erreur` : undefined}
             className={cn(champBase, champs.nomAgence && 'border-flame')}
           />
-          <Erreur id={`${idBase}-nom-erreur`} message={champs.nomAgence} />
+          <Erreur id={`${idBase}-nom-erreur`} message={traduit(champs.nomAgence)} />
         </div>
 
         <div>
           <label htmlFor={`${idBase}-ville`} className="mb-2 block text-[14px] font-bold">
-            Ville
+            {t.ville}
           </label>
           <input
             id={`${idBase}-ville`}
@@ -110,19 +116,19 @@ export function FormulaireAgence() {
             required
             maxLength={80}
             autoComplete="address-level2"
-            placeholder="Lyon"
+            placeholder={t.villeExemple}
             defaultValue={valeurs.ville ?? ''}
             aria-invalid={Boolean(champs.ville)}
             aria-describedby={champs.ville ? `${idBase}-ville-erreur` : undefined}
             className={cn(champBase, champs.ville && 'border-flame')}
           />
-          <Erreur id={`${idBase}-ville-erreur`} message={champs.ville} />
+          <Erreur id={`${idBase}-ville-erreur`} message={traduit(champs.ville)} />
         </div>
       </div>
 
       <div>
         <label htmlFor={`${idBase}-email`} className="mb-2 block text-[14px] font-bold">
-          E-mail professionnel
+          {t.email}
         </label>
         <input
           id={`${idBase}-email`}
@@ -131,17 +137,17 @@ export function FormulaireAgence() {
           required
           maxLength={180}
           autoComplete="email"
-          placeholder="contact@agence-bellevue.fr"
+          placeholder={t.emailExemple}
           defaultValue={valeurs.email ?? ''}
           aria-invalid={Boolean(champs.email)}
           aria-describedby={champs.email ? `${idBase}-email-erreur` : undefined}
           className={cn(champBase, champs.email && 'border-flame')}
         />
-        <Erreur id={`${idBase}-email-erreur`} message={champs.email} />
+        <Erreur id={`${idBase}-email-erreur`} message={traduit(champs.email)} />
       </div>
 
       <fieldset>
-        <legend className="mb-2 block text-[14px] font-bold">Dossiers de location par an</legend>
+        <legend className="mb-2 block text-[14px] font-bold">{t.volume}</legend>
         <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
           {VOLUMES.map((volume, index) => (
             <label
@@ -157,37 +163,36 @@ export function FormulaireAgence() {
                 }
                 className="sr-only"
               />
-              {volume.libelle}
+              {t.volumes[volume.valeur] ?? volume.libelle}
             </label>
           ))}
         </div>
-        <Erreur id={`${idBase}-volume-erreur`} message={champs.dossiersParAn} />
+        <Erreur id={`${idBase}-volume-erreur`} message={traduit(champs.dossiersParAn)} />
       </fieldset>
 
       <div>
         <label htmlFor={`${idBase}-message`} className="mb-2 block text-[14px] font-bold">
-          Un mot sur votre fonctionnement{' '}
-          <span className="text-muted font-medium">(facultatif)</span>
+          {t.message} <span className="text-muted font-medium">{t.facultatif}</span>
         </label>
         <textarea
           id={`${idBase}-message`}
           name="message"
           rows={3}
           maxLength={2000}
-          placeholder="Quel outil de signature utilisez-vous ? Où bloque la caution aujourd'hui ?"
+          placeholder={t.messageExemple}
           defaultValue={valeurs.message ?? ''}
           aria-invalid={Boolean(champs.message)}
           aria-describedby={champs.message ? `${idBase}-message-erreur` : undefined}
           className={cn(champBase, 'resize-y', champs.message && 'border-flame')}
         />
-        <Erreur id={`${idBase}-message-erreur`} message={champs.message} />
+        <Erreur id={`${idBase}-message-erreur`} message={traduit(champs.message)} />
       </div>
 
       {/* Piege a robots : invisible et hors du parcours clavier, seul un
           remplissage automatique y touche. `aria-hidden` evite qu'un lecteur
           d'ecran l'annonce. */}
       <div aria-hidden className="absolute h-0 w-0 overflow-hidden opacity-0">
-        <label htmlFor={`${idBase}-site`}>Site web</label>
+        <label htmlFor={`${idBase}-site`}>{t.siteWeb}</label>
         <input id={`${idBase}-site`} name="siteWeb" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
@@ -198,7 +203,7 @@ export function FormulaireAgence() {
         disabled={enCours}
         className="press bg-cobalt outlined rounded-brut shadow-brut inline-flex cursor-pointer items-center justify-center px-8 py-4 text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70"
       >
-        {enCours ? 'Envoi…' : 'Demander une démonstration →'}
+        {enCours ? t.envoi : t.bouton}
       </button>
 
       {/*
@@ -207,11 +212,8 @@ export function FormulaireAgence() {
         laisse son adresse.
       */}
       <p className="text-muted text-[12.5px] leading-relaxed">
-        Ces informations servent uniquement à vous recontacter au sujet du pilote Cloison. Elles ne
-        sont ni revendues, ni utilisées pour de la prospection tierce, et sont conservées
-        jusqu&apos;à la fin du pilote. Pour y accéder, les corriger ou les faire supprimer, il
-        suffit de répondre à l&apos;e-mail que vous recevrez.{' '}
-        <a href="/confidentialite" className="underline underline-offset-4">
+        {t.collecte}{' '}
+        <a href={lien(langue, '/confidentialite')} className="underline underline-offset-4">
           {informationCollecte.lien}
         </a>
       </p>

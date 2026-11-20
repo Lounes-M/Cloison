@@ -4,7 +4,9 @@ import { useActionState, useEffect, useId, useRef } from 'react'
 
 import { envoyerLienDeConnexion, type EtatConnexion } from '@/lib/agences/connexion'
 import { cn } from '@/lib/utils'
-import { connexion as t } from '@/lib/content/connexion'
+import { connexion as connexionFr } from '@/lib/content/connexion'
+import * as en from '@/lib/content/en/formulaires'
+import { choisir, type Langue } from '@/lib/i18n'
 
 const ETAT_INITIAL: EtatConnexion = { statut: 'inactif' }
 
@@ -23,7 +25,14 @@ const champBase =
  * plus quand le domaine est refuse : la meme phrase dans tous les cas, sans
  * quoi cette page renseignerait sur qui travaille ou.
  */
-export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boolean }) {
+export function FormulaireConnexion({
+  lienExpire = false,
+  langue = 'fr',
+}: {
+  lienExpire?: boolean
+  langue?: Langue
+}) {
+  const t = choisir(langue, connexionFr, en.connexion)
   const [etat, envoyer, enCours] = useActionState(envoyerLienDeConnexion, ETAT_INITIAL)
   const idChamp = useId()
   const resume = useRef<HTMLDivElement>(null)
@@ -59,7 +68,7 @@ export function FormulaireConnexion({ lienExpire = false }: { lienExpire?: boole
           role="alert"
           className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
         >
-          {etat.message}
+          {langue === 'en' ? en.messageEn(etat.message) : etat.message}
         </p>
       ) : null}
 

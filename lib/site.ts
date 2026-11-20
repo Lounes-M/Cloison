@@ -30,3 +30,15 @@ export const footerLinks = [
   { label: 'Confidentialité', href: '/confidentialite' },
   { label: 'Conditions', href: '/conditions' },
 ] as const
+
+/** Les libelles d'interface qui ne vivent dans aucun fichier de contenu. */
+export const chrome = {
+  navigationPrincipale: 'Navigation principale',
+  navigationPied: 'Navigation de pied de page',
+  logo: 'Cloison, accueil',
+  langue: 'Langue',
+  principe: 'Le principe',
+  principeTexte:
+    'Un dossier commun, trois espaces séparés. Le locataire suit, le garant dépose, l’agence examine.',
+  principeNote: 'Le garant ne paie jamais rien.',
+} as const

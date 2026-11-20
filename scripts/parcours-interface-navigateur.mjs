@@ -106,7 +106,7 @@ export async function parcourirInterface(
     routesVues.add(
       chemin
         .replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/g, '[id]')
-        .replace(/^\/candidater\/[a-f0-9]{32}$/, '/candidater/[code]'),
+        .replace(/^(\/en)?\/candidater\/[a-f0-9]{32}$/, '$1/candidater/[code]'),
     )
     await page.goto(site + chemin)
     await page.locator('h1').first().waitFor()
@@ -382,6 +382,23 @@ export async function parcourirInterface(
   await visiter('/questions', 'questions', false)
   for (const juridique of ['mentions-legales', 'confidentialite', 'conditions'])
     await visiter('/' + juridique, juridique, false)
+  // La version anglaise passe la meme revue que la francaise, page par page.
+  for (const chemin of [
+    '',
+    '/agences',
+    '/questions',
+    '/demarrer',
+    '/connexion',
+    '/mentions-legales',
+    '/confidentialite',
+    '/conditions',
+  ])
+    await visiter(
+      '/en' + chemin,
+      'en' + chemin.replaceAll('/', '-'),
+      chemin === '/demarrer' || chemin === '/connexion',
+    )
+  await visiter('/en/candidater/' + 'c'.repeat(32), 'en-candidater')
   await visiter('/page-inexistante-mobile', 'introuvable', false)
   const reprise = page.getByRole('navigation', { name: 'Reprendre la navigation', exact: true })
   const retourDossier = reprise.getByRole('link', { name: 'Retrouver mon dossier', exact: true })

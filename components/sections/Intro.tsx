@@ -1,6 +1,8 @@
 import { Photo } from '@/components/ui/Photo'
 import { Reveal } from '@/components/ui/Reveal'
-import { problem } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, type Langue } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
@@ -22,7 +24,8 @@ const photos = [
  * photos defilent autour, puis le second bloc prend le relais. Le bas de la
  * section s'arrondit sur la suivante.
  */
-export function Intro() {
+export function Intro({ langue = 'fr' }: { langue?: Langue }) {
+  const { problem } = choisir(langue, fr, en)
   return (
     <section className="bg-sun rounded-b-carte relative z-10 overflow-clip">
       <div className="relative mx-auto max-w-[95rem] lg:min-h-[150rem]">

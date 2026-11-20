@@ -83,7 +83,7 @@ export const questions = {
       questions: [
         {
           question: 'Combien ça coûte ?',
-          reponse: `Consulter les dossiers est gratuit. ${prixActe} par acte signé et archivé, lorsque la signature sera disponible.`,
+          reponse: `Consulter les dossiers est gratuit. ${prixActe} par acte signé et archivé.`,
         },
         {
           question: 'Comment mes collaborateurs rejoignent-ils l’espace ?',

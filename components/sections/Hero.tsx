@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { Icone } from '@/components/ui/Icone'
 import { VideoFond } from '@/components/ui/VideoFond'
-import { hero, marqueeItems } from '@/lib/content/home'
+import * as en from '@/lib/content/en/home'
+import * as fr from '@/lib/content/home'
+import { choisir, lien, type Langue } from '@/lib/i18n'
 import { site } from '@/lib/site'
 
 /**
@@ -12,7 +14,8 @@ import { site } from '@/lib/site'
  * nom de la marque en filigrane geant. Le bandeau defilant vert ferme la
  * section. Elle passe sous l'en-tete fixe, d'ou `passe-sous-entete`.
  */
-export function Hero() {
+export function Hero({ langue = 'fr' }: { langue?: Langue }) {
+  const { hero, marqueeItems } = choisir(langue, fr, en)
   const items = [...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems]
   return (
     <section
@@ -30,14 +33,13 @@ export function Hero() {
           <div className="conteneur grid gap-10 lg:grid-cols-[1fr_22.2rem] lg:gap-16">
             <div className="animate-fade-up min-w-0">
               <h1 className="titre-84 max-w-[50rem]">
-                Ton garant t&apos;aide. Il ne te doit{' '}
-                <span className="text-sun">ni sa fiche de paie</span>, ni une signature à
-                l&apos;aveugle.
+                {hero.titre[0]} <span className="text-sun">{hero.titre[1]}</span>
+                {hero.titre[2]}
               </h1>
 
               <div className="mt-[3rem] flex flex-wrap items-center gap-x-6 gap-y-4 max-[479px]:mt-8">
                 <Link
-                  href="/demarrer"
+                  href={lien(langue, '/demarrer')}
                   className="bouton group inline-flex items-stretch gap-[0.22rem] [--bouton-h:max(44px,4.5rem)] max-[479px]:[--bouton-h:max(44px,3.75rem)]"
                 >
                   <span aria-hidden className="bouton-fleche bouton-fleche-avant bg-sun text-white">
@@ -55,7 +57,7 @@ export function Hero() {
                   </span>
                 </Link>
                 <Link
-                  href="/agences"
+                  href={lien(langue, '/agences')}
                   className="texte-16 lien-trace inline-flex min-h-[44px] items-center"
                 >
                   {hero.secondaryCta}

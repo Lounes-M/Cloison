@@ -1,7 +1,8 @@
 import { isValidElement, type ReactNode } from 'react'
 import { expect, test } from 'vitest'
-import PageQuestions from '@/app/(marketing)/questions/page'
+import { PageQuestions } from '@/components/pages/PageQuestions'
 import { DonneesStructurees } from '@/components/seo/DonneesStructurees'
+import { questions as questionsEn } from '@/lib/content/en/questions'
 import { questions } from '@/lib/content/questions'
 import { faqStructuree, jsonPourScript } from '@/lib/seo/faq'
 
@@ -33,5 +34,7 @@ test('la page des questions pose le bloc de donnees', () => {
     if (noeud.type === DonneesStructurees) return noeud.props.donnees
     return trouver(noeud.props.children)
   }
-  expect(trouver(PageQuestions())).toEqual(faqStructuree(questions.groupes))
+  expect(trouver(PageQuestions({}))).toEqual(faqStructuree(questions.groupes))
+  // La page anglaise decrit ses propres questions, pas les francaises.
+  expect(trouver(PageQuestions({ langue: 'en' }))).toEqual(faqStructuree(questionsEn.groupes))
 })

@@ -2,13 +2,23 @@
 
 import { useActionState, useEffect, useId, useRef } from 'react'
 
-import { candidature as texteCandidature } from '@/lib/content/candidature'
-import { porte } from '@/lib/content/locataire'
+import { candidature as candidatureFr } from '@/lib/content/candidature'
+import { candidature as candidatureEn } from '@/lib/content/en/candidature'
+import * as en from '@/lib/content/en/formulaires'
+import { porte as porteFr } from '@/lib/content/locataire'
+import { choisir, lien, type Langue } from '@/lib/i18n'
 import { ouvrirMonDossier, type EtatOuverture } from '@/lib/locataire/action-ouverture'
 import { cn } from '@/lib/utils'
-import { informationCollecte } from '@/lib/content/information-collecte'
+import { informationCollecte as collecteFr } from '@/lib/content/information-collecte'
 
 const ETAT_INITIAL: EtatOuverture = { statut: 'inactif' }
+
+/** Les refus de candidature viennent du contenu : ils ont leur propre traduction. */
+function messageServeur(message: string) {
+  if (message === candidatureFr.page.invalideTexte) return candidatureEn.page.invalideTexte
+  if (message === candidatureFr.erreurs.accord) return candidatureEn.erreurs.accord
+  return en.messageEn(message)
+}
 
 /**
  * La porte principale : un champ, un bouton.
@@ -20,7 +30,11 @@ const ETAT_INITIAL: EtatOuverture = { statut: 'inactif' }
  */
 export function FormulaireOuverture({
   candidature,
-}: { candidature?: { code: string; agence: string } } = {}) {
+  langue = 'fr',
+}: { candidature?: { code: string; agence: string }; langue?: Langue } = {}) {
+  const porte = choisir(langue, porteFr, en.porte)
+  const texteCandidature = choisir(langue, candidatureFr, candidatureEn)
+  const informationCollecte = choisir(langue, collecteFr, en.informationCollecte)
   const [etat, envoyer, enCours] = useActionState(ouvrirMonDossier, ETAT_INITIAL)
   const idChamp = useId()
   const idAccord = useId()
@@ -59,7 +73,7 @@ export function FormulaireOuverture({
           role="alert"
           className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
         >
-          {etat.message}
+          {langue === 'en' ? messageServeur(etat.message) : etat.message}
         </p>
       ) : null}
 
@@ -74,7 +88,7 @@ export function FormulaireOuverture({
           autoComplete="email"
           required
           defaultValue={etat.statut === 'erreur' ? etat.valeur : ''}
-          placeholder="toi@exemple.fr"
+          placeholder={porte.exemple}
           aria-describedby={`${idChamp}-aide`}
           className={cn(
             'border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[15px] font-medium',
@@ -86,7 +100,7 @@ export function FormulaireOuverture({
         </p>
         <p className="text-muted mt-2 text-[13px] font-medium">
           {informationCollecte.locataire}{' '}
-          <a href="/confidentialite" className="underline underline-offset-4">
+          <a href={lien(langue, '/confidentialite')} className="underline underline-offset-4">
             {informationCollecte.lien}
           </a>
         </p>
