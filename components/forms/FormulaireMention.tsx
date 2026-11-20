@@ -2,9 +2,12 @@
 
 import { useActionState, useId } from 'react'
 
-import { mention as texte } from '@/lib/content/garant'
+import { mention as texteFr } from '@/lib/content/garant'
 import { apposerMaMention, type EtatMention } from '@/lib/garant/action-mention'
 import { cn } from '@/lib/utils'
+import { mention as texteEn } from '@/lib/content/en/garant'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatMention = { statut: 'inactif' }
 
@@ -39,6 +42,9 @@ export function FormulaireMention({
   solidaire: boolean
   version: number
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(apposerMaMention, ETAT_INITIAL)
   const id = useId()
 

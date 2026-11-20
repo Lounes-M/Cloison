@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { celluleCSV } from '@/lib/agences/exports-registres'
-import { activite as t } from '@/lib/content/activite'
+import { activite as tFr } from '@/lib/content/activite'
+import { activite as tEn } from '@/lib/content/en/activite'
+import { choisir, locale, type Langue } from '@/lib/i18n'
 
 /** Une ligne de `activite_de_mon_agence` (0068). */
 export type MoisActivite = {
@@ -36,10 +38,14 @@ export function totauxActivite(lignes: MoisActivite[]) {
 }
 
 /** « octobre 2026 », dans le fuseau de l'agence. */
-export function libelleMois(mois: string): string {
+export function libelleMois(mois: string, langue: Langue = 'fr'): string {
   const date = new Date(`${mois.slice(0, 10)}T12:00:00Z`)
   return Number.isFinite(date.getTime())
-    ? date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'Europe/Paris' })
+    ? date.toLocaleDateString(locale(langue), {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'Europe/Paris',
+      })
     : mois
 }
 
@@ -63,7 +69,8 @@ const moisCSV = z
  * Les compteurs de la page en CSV (point-virgule, BOM, CRLF), comme les
  * registres. Ils ne designent personne : une ligne par mois, aucun dossier.
  */
-export function activiteCSV(donnees: unknown): string {
+export function activiteCSV(donnees: unknown, langue: Langue = 'fr'): string {
+  const t = choisir(langue, tFr, tEn)
   const lignes = moisCSV
     .parse(donnees)
     .map((l) => [
@@ -79,7 +86,9 @@ export function activiteCSV(donnees: unknown): string {
     ])
   return (
     '\ufeff' +
-    [[...t.colonnesCSV], ...lignes].map((l) => l.map(celluleCSV).join(';')).join('\r\n') +
+    [[...t.colonnesCSV], ...lignes]
+      .map((l) => l.map((c) => celluleCSV(c, langue)).join(';'))
+      .join('\r\n') +
     '\r\n'
   )
 }

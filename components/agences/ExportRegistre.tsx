@@ -1,8 +1,14 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { exportsRegistres } from '@/lib/content/exports-registres'
+import { exportsRegistres as exportsRegistresFr } from '@/lib/content/exports-registres'
+import { exportsRegistres as exportsRegistresEn } from '@/lib/content/en/exports-registres'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function ExportRegistre({ registre }: { registre: 'archives' | 'reglements' | 'dossiers' }) {
+  const langue = useLangue()
+  const exportsRegistres = choisir(langue, exportsRegistresFr, exportsRegistresEn)
+
   const t =
     registre === 'dossiers'
       ? { ...exportsRegistres, ...exportsRegistres.dossiers }

@@ -2,11 +2,14 @@
 
 import { useActionState, useId, useRef, useState, useSyncExternalStore } from 'react'
 
-import { depot, documentsDeclares } from '@/lib/content/garant'
+import { depot as depotFr, documentsDeclares as documentsDeclaresFr } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
 import { reduireSiPhoto } from './reduire-photo'
 import { TAILLE_MAX_DEPOT } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
+import { depot as depotEn, documentsDeclares as documentsDeclaresEn } from '@/lib/content/en/garant'
+import { choisir, locale } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatDepot = { statut: 'inactif' }
 const rien = () => () => {}
@@ -20,6 +23,10 @@ export function FormulaireDepot({
   libelle: string
   dossierId: string
 }) {
+  const langue = useLangue()
+  const depot = choisir(langue, depotFr, depotEn)
+  const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
+
   const [etat, envoyer, enCours] = useActionState(deposerUnePiece, ETAT_INITIAL)
   const idChamp = useId()
   const [preparation, preparer] = useState(false)
@@ -77,7 +84,7 @@ export function FormulaireDepot({
       const choisi = entree.files?.[0]
       selectionner(
         choisi
-          ? `${choisi.name} (${(choisi.size / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Mo)`
+          ? `${choisi.name} (${(choisi.size / 1024 / 1024).toLocaleString(locale(langue), { maximumFractionDigits: 2 })} Mo)`
           : null,
       )
       verifier(entree)

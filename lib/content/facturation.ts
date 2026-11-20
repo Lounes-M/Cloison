@@ -14,7 +14,7 @@ export const facturation = {
   retour: 'Retour à l’espace agence',
   indisponible:
     'Le paiement n’a pas pu être confirmé. Le suivi reste disponible ; aucun nouvel essai incertain ne sera créé.',
-  suspendu: 'Le règlement en ligne n’est pas encore ouvert.',
+  suspendu: 'Le règlement en ligne est momentanément indisponible.',
   anomalie: 'Rapprochement à examiner',
   etats: {
     a_regler: 'À régler',

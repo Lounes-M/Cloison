@@ -1,12 +1,15 @@
 'use client'
 import { useId, useState } from 'react'
 import {
-  aideDossier as t,
+  aideDossier as tFr,
   categoriesSupport,
   type EspaceSupport,
   type CategorieSupport,
 } from '@/lib/content/support-dossier'
 import { preparerMessageSupport } from '@/lib/support/message'
+import { aideDossier as tEn } from '@/lib/content/en/support-dossier'
+import { choisir as choisirTexte } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireSupportDossier({
   adresse,
   reference,
@@ -16,10 +19,13 @@ export function FormulaireSupportDossier({
   reference: string
   espace: EspaceSupport
 }) {
+  const langue = useLangue()
+  const t = choisirTexte(langue, tFr, tEn)
+
   const id = useId()
   const [categorie, choisir] = useState<CategorieSupport>('acces')
   const [copie, noter] = useState<'repos' | 'ok' | 'erreur'>('repos')
-  const message = preparerMessageSupport({ adresse, reference, espace, categorie })
+  const message = preparerMessageSupport({ adresse, reference, espace, categorie, langue })
   if (!message) return null
   // Seul le locataire est tutoye ; l'agence et le garant sont vouvoyes.
   const tutoie = espace === 'locataire'

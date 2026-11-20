@@ -1,4 +1,5 @@
 import { activiteCSV } from '@/lib/agences/activite'
+import { langueEspace } from '@/lib/langue-espace'
 import { contexteAgence } from '@/lib/agences/contexte'
 
 export const runtime = 'nodejs'
@@ -18,7 +19,7 @@ export async function GET() {
       return new Response('Export indisponible.', { status: 403, headers: prive })
     const { data, error } = await c.supabase.rpc('activite_de_mon_agence')
     if (error) throw new Error('Lecture indisponible')
-    return new Response(activiteCSV(data), {
+    return new Response(activiteCSV(data, await langueEspace()), {
       headers: {
         ...prive,
         'Content-Type': 'text/csv; charset=utf-8',

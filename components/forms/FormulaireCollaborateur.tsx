@@ -1,7 +1,10 @@
 'use client'
 import { useActionState, useId } from 'react'
 import { modifierCollaborateur } from '@/lib/agences/action-collaborateur'
-import { collaborateurs as textes } from '@/lib/content/collaborateurs'
+import { collaborateurs as textesFr } from '@/lib/content/collaborateurs'
+import { collaborateurs as textesEn } from '@/lib/content/en/collaborateurs'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireCollaborateur({
   agence,
   cible,
@@ -15,6 +18,9 @@ export function FormulaireCollaborateur({
   soi: boolean
   admissible: boolean
 }) {
+  const langue = useLangue()
+  const textes = choisir(langue, textesFr, textesEn)
+
   const [etat, envoyer, enCours] = useActionState(modifierCollaborateur, {})
   const id = useId()
   return (

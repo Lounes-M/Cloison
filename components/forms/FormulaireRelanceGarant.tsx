@@ -3,13 +3,19 @@
 import { useActionState } from 'react'
 
 import { relancerLeGarant, type EtatRelance } from '@/lib/agences/action-relance'
-import { relanceGarant as texte } from '@/lib/content/espace'
+import { relanceGarant as texteFr } from '@/lib/content/espace'
 import { cn } from '@/lib/utils'
+import { relanceGarant as texteEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatRelance = { statut: 'inactif' }
 
 /** Ouvrir un nouveau cycle de relances quand les trois premieres sont restees sans reponse. */
 export function FormulaireRelanceGarant({ dossierId }: { dossierId: string }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(relancerLeGarant, ETAT_INITIAL)
 
   if (etat.statut === 'relance') {

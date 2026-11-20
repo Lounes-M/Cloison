@@ -1,0 +1,52 @@
+import type { Textes } from '@/lib/i18n'
+import type { exportsRegistres as Fr } from '../exports-registres'
+
+export const exportsRegistres: Textes<typeof Fr> = {
+  titre: 'Export the register',
+  aide: 'Download every page of the register, up to 1,000 rows. The CSV contains references, dates and statuses, with no document and no identity. Dates are in UTC. It is a point-in-time copy, not an invoice.',
+  telecharger: 'Download the register as CSV',
+  attente: 'Preparing the register…',
+  succes: 'File ready. Keep this export in a secure location.',
+  erreur: 'The register is unavailable. No partial file was downloaded. Try again.',
+  limite: 'The register exceeds 1,000 rows. No partial file was downloaded.',
+  oui: 'Yes',
+  non: 'No',
+  texte: 'Text: ',
+  colonnesArchives: [
+    'Deed reference',
+    'Template',
+    'Archived on (UTC)',
+    'Keep until (UTC)',
+    'Environment',
+    'Exported on (UTC)',
+  ],
+  dossiers: {
+    titre: 'Export your files',
+    aide: 'Download the list of your current files, up to 1,000 rows: reference, status, ratio, opening date, last activity and end of the vault. The CSV contains no document, no declared amount and no email address. Demo files are excluded. Dates are in UTC.',
+    telecharger: 'Download the files as CSV',
+    attente: 'Preparing the list…',
+    erreur: 'The list is unavailable. No partial file was downloaded. Try again.',
+    limite: 'Your files exceed 1,000 rows. No partial file was downloaded.',
+  },
+  colonnesDossiers: [
+    'Reference',
+    'Status',
+    'Guarantor named',
+    'Ratio',
+    'Opened on (UTC)',
+    'Last activity (UTC)',
+    'End of vault (UTC)',
+    'Exported on (UTC)',
+  ],
+  colonnesReglements: [
+    'Payment reference',
+    'Amount EUR',
+    'Refunded EUR',
+    'Created on (UTC)',
+    'Paid on (UTC)',
+    'Price version',
+    'Status',
+    'Reconciliation to review',
+    'Exported on (UTC)',
+  ],
+}

@@ -1,5 +1,8 @@
-import { tableau } from '@/lib/content/espace'
+import { tableau as tableauFr } from '@/lib/content/espace'
 import type { PastilleSuivi } from '@/lib/agences/inactivite'
+import { tableau as tableauEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 const tons: Record<PastilleSuivi, string> = {
   remplacement: 'bg-sun',
@@ -8,7 +11,10 @@ const tons: Record<PastilleSuivi, string> = {
 }
 
 /** Les signaux de suivi d'un dossier, sous son statut. */
-export function PastillesSuivi({ pastilles }: { pastilles: PastilleSuivi[] }) {
+export async function PastillesSuivi({ pastilles }: { pastilles: PastilleSuivi[] }) {
+  const langue = await langueEspace()
+  const tableau = choisir(langue, tableauFr, tableauEn)
+
   if (!pastilles.length) return null
   return (
     <ul className="mt-2 flex flex-wrap gap-1.5">

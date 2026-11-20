@@ -2,13 +2,19 @@
 
 import { useActionState } from 'react'
 
-import { depot } from '@/lib/content/garant'
+import { depot as depotFr } from '@/lib/content/garant'
 import { retirerUnePiece, type EtatRetrait } from '@/lib/garant/action-depot'
+import { depot as depotEn } from '@/lib/content/en/garant'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatRetrait = { statut: 'inactif' }
 
 /** Retirer une piece deposee. Un bouton, pas de confirmation : la piece se redepose en un geste. */
 export function BoutonRetrait({ pieceId, dossierId }: { pieceId: string; dossierId: string }) {
+  const langue = useLangue()
+  const depot = choisir(langue, depotFr, depotEn)
+
   const [etat, envoyer, enCours] = useActionState(retirerUnePiece, ETAT_INITIAL)
 
   return (

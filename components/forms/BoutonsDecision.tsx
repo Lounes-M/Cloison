@@ -2,9 +2,12 @@
 
 import { useActionState } from 'react'
 
-import { dossier as texte } from '@/lib/content/espace'
+import { dossier as texteFr } from '@/lib/content/espace'
 import { prendreLeDossier, refuserLeDossier, type EtatDecision } from '@/lib/agences/action-dossier'
 import { cn } from '@/lib/utils'
+import { dossier as texteEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatDecision = { statut: 'inactif' }
 
@@ -24,6 +27,9 @@ export function BoutonsDecision({
   peutPrendre: boolean
   peutRefuser: boolean
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [prise, prendre, priseEnCours] = useActionState(prendreLeDossier, ETAT_INITIAL)
   const [refus, refuser, refusEnCours] = useActionState(refuserLeDossier, ETAT_INITIAL)
 

@@ -1,7 +1,10 @@
 'use client'
 import { useState, type RefObject } from 'react'
 import { gererBrouillon, type EtatBrouillon } from '@/lib/brouillons/action'
-import { brouillons as t } from '@/lib/content/brouillons'
+import { brouillons as tFr } from '@/lib/content/brouillons'
+import { brouillons as tEn } from '@/lib/content/en/brouillons'
+import { choisir, locale } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function BrouillonEngagement({
   formulaire,
@@ -12,6 +15,9 @@ export function BrouillonEngagement({
   indisponible: boolean
   attente: (valeur: boolean) => void
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, setEtat] = useState<EtatBrouillon>({ revision: null })
   const [pending, setPending] = useState(false)
   async function agir(operation: 'lire' | 'sauver' | 'supprimer') {
@@ -71,7 +77,10 @@ export function BrouillonEngagement({
           {etat.expiration ? (
             <p>
               {t.expiration}{' '}
-              {new Date(etat.expiration).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}.
+              {new Date(etat.expiration).toLocaleString(locale(langue), {
+                timeZone: 'Europe/Paris',
+              })}
+              .
             </p>
           ) : null}
           <button type="button" onClick={reprendre} className="lien-espace mt-3">

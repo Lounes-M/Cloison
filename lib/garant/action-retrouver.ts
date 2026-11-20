@@ -4,7 +4,10 @@ import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
 import { consommerDebit } from '@/lib/acces/debit'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
-import { continuite } from '@/lib/content/continuite'
+import { continuite as continuiteFr } from '@/lib/content/continuite'
+import { continuite as continuiteEn } from '@/lib/content/en/continuite'
+import { choisir } from '@/lib/i18n'
+import { langueAction } from '@/lib/langue-espace'
 
 export type EtatRetrouverGarant = { message?: string }
 
@@ -17,6 +20,9 @@ export async function retrouverMonLienGarant(
   _etat: EtatRetrouverGarant,
   form: FormData,
 ): Promise<EtatRetrouverGarant> {
+  const langue = await langueAction(form)
+  const continuite = choisir(langue, continuiteFr, continuiteEn)
+
   const email = z.email().safeParse(
     String(form.get('email') ?? '')
       .trim()

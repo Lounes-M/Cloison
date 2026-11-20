@@ -2,14 +2,20 @@
 import { revalidatePath } from 'next/cache'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
-import { documentsDeclares } from '@/lib/content/garant'
+import { documentsDeclares as documentsDeclaresFr } from '@/lib/content/garant'
 import { nombreDocumentsDepuis } from './validation'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
+import { documentsDeclares as documentsDeclaresEn } from '@/lib/content/en/garant'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export type EtatDocuments = { erreur?: string; enregistre?: boolean }
 export async function declarerNombreDocuments(
   _etat: EtatDocuments,
   donnees: FormData,
 ): Promise<EtatDocuments> {
+  const langue = await langueEspace()
+  const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
+
   const porteur = await capaciteDepuisCookies()
   const piece = donnees.get('piece')
   const nombre = nombreDocumentsDepuis('bulletin_paie', donnees.get('nombre_documents'))

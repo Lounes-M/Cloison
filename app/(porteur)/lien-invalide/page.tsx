@@ -1,14 +1,15 @@
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { FormulaireRetrouverGarant } from '@/components/forms/FormulaireRetrouverGarant'
-import type { Metadata } from 'next'
 
 import { Button } from '@/components/ui/Button'
-import { lienInvalide } from '@/lib/content/locataire'
+import { lienInvalide as lienInvalideFr } from '@/lib/content/locataire'
+import { lienInvalide as lienInvalideEn } from '@/lib/content/en/locataire'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata: Metadata = {
-  title: 'Lien expiré',
-  robots: { index: false, follow: false },
-}
+export const generateMetadata = () => titreEspace(titresFr.lienExpire, titresEn.lienExpire)
 
 /**
  * Un lien refuse arrive ici, quelle que soit la raison.
@@ -18,7 +19,10 @@ export const metadata: Metadata = {
  * cede, et n'aiderait pas une personne de bonne foi, dont la reponse est la
  * meme dans les trois cas.
  */
-export default function PageLienInvalide() {
+export default async function PageLienInvalide() {
+  const langue = await langueEspace()
+  const lienInvalide = choisir(langue, lienInvalideFr, lienInvalideEn)
+
   return (
     <div className="panneau-espace w-full max-w-[540px] self-start">
       <h1 className="font-display text-2xl md:text-3xl">{lienInvalide.titre}</h1>

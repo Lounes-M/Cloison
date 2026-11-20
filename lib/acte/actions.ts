@@ -3,8 +3,11 @@ import { z } from 'zod'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { clientServeur } from '@/lib/acces/serveur'
 import { consommerDebit } from '@/lib/acces/debit'
-import { acte as t } from '@/lib/content/acte'
+import { acte as tFr } from '@/lib/content/acte'
 import { projetDepuisDossier } from './projet'
+import { acte as tEn } from '@/lib/content/en/acte'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatModeleActe = { message: string; pdf?: string; nom?: string }
 
@@ -14,6 +17,9 @@ export type EtatModeleActe = { message: string; pdf?: string; nom?: string }
  * hors de Cloison en attendant le prestataire.
  */
 export async function telechargerModeleActe(form: FormData): Promise<EtatModeleActe> {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   try {
     const dossier = z.uuid().parse(form.get('dossier'))
     const c = await contexteAgence()

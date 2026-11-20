@@ -1,10 +1,18 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
-import { interfaceEspace } from '@/lib/content/interface'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { redirect } from 'next/navigation'
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
 import { FormulaireSecurite } from '@/components/forms/FormulaireSecurite'
-import { securite } from '@/lib/content/securite'
+import { securite as securiteFr } from '@/lib/content/securite'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export default async function PageSecurite() {
+  const langue = await langueEspace()
+  const securite = choisir(langue, securiteFr, securiteEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+
   if (!(await utilisateurCourant())) redirect('/connexion')
   const db = await clientAgence()
   const assurance = await db.auth.mfa.getAuthenticatorAssuranceLevel().catch(() => null)

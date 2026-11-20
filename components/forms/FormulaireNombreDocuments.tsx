@@ -1,7 +1,16 @@
 'use client'
 import { useActionState, useId } from 'react'
-import { documentsDeclares, engagement } from '@/lib/content/garant'
+import {
+  documentsDeclares as documentsDeclaresFr,
+  engagement as engagementFr,
+} from '@/lib/content/garant'
 import { declarerNombreDocuments, type EtatDocuments } from '@/lib/garant/action-documents'
+import {
+  documentsDeclares as documentsDeclaresEn,
+  engagement as engagementEn,
+} from '@/lib/content/en/garant'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireNombreDocuments({
   dossierId,
   pieceId,
@@ -13,6 +22,10 @@ export function FormulaireNombreDocuments({
   actuel: number
   maximum: number
 }) {
+  const langue = useLangue()
+  const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
+  const engagement = choisir(langue, engagementFr, engagementEn)
+
   const [etat, envoyer, enCours] = useActionState(declarerNombreDocuments, {} as EtatDocuments)
   const id = useId()
   return (

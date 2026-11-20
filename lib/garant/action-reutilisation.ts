@@ -9,18 +9,21 @@ import { deposer } from '@/lib/coffre/depot'
 import { baseSupabase } from '@/lib/coffre/depot-supabase'
 import { verifierDocument } from '@/lib/coffre/validation-document'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
-import { reutilisation as texte } from '@/lib/content/reutilisation'
+import { reutilisation as texteFr } from '@/lib/content/reutilisation'
 import { natureDepuis, TAILLE_MAX_DEPOT } from './validation'
 import { autoriserAnalyse } from './debit-depot'
 import { jetonDuLienSource } from './lien-source'
 import { lireOriginalGarant } from './original'
+import { reutilisation as texteEn } from '@/lib/content/en/reutilisation'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type PieceReutilisable = { id: string; nature: string; date: string; taille: number }
 export type EtatReutilisation =
   | { statut: 'erreur'; message: string }
   | { statut: 'liste'; pieces: PieceReutilisable[] }
   | { statut: 'copie' }
-const erreur = (message: string = texte.erreur): EtatReutilisation => ({
+const erreur = (message: string): EtatReutilisation => ({
   statut: 'erreur',
   message,
 })
@@ -51,6 +54,9 @@ async function contexte(donnees: FormData) {
   }
 }
 export async function listerPiecesReutilisables(donnees: FormData): Promise<EtatReutilisation> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+
   try {
     const c = await contexte(donnees)
     if (!c) return erreur(texte.lienInvalide)
@@ -79,17 +85,20 @@ export async function listerPiecesReutilisables(donnees: FormData): Promise<Etat
   }
 }
 export async function copierPiece(donnees: FormData): Promise<EtatReutilisation> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const piece = donnees.get('piece')
   if (!estUuidCanonique(piece) || donnees.get('consentement') !== 'copie-v1')
     return erreur(texte.choix)
   try {
     const c = await contexte(donnees)
-    if (!c || !(await autoriserAnalyse(c.cible.capacite.dossierId))) return erreur()
+    if (!c || !(await autoriserAnalyse(c.cible.capacite.dossierId))) return erreur(texte.erreur)
     const avant = await statutActuel(c.dbCible, c.cible.capacite.dossierId)
     if (!['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(avant ?? ''))
-      return erreur()
+      return erreur(texte.erreur)
     const original = await lireOriginalGarant(c.dbSource, c.source, piece, TAILLE_MAX_DEPOT)
-    if (!original) return erreur()
+    if (!original) return erreur(texte.erreur)
     await verifierDocument(
       original.contenu,
       original.typeReel as 'application/pdf' | 'image/png' | 'image/jpeg',
@@ -116,13 +125,13 @@ export async function copierPiece(donnees: FormData): Promise<EtatReutilisation>
         original.nombre,
       )
       // Une reponse perdue ne doit pas provoquer une seconde copie silencieuse.
-      if (!resultat.depose && !(await confirmer())) return erreur()
-      if (!(await confirmer())) return erreur()
+      if (!resultat.depose && !(await confirmer())) return erreur(texte.erreur)
+      if (!(await confirmer())) return erreur(texte.erreur)
     }
     await prevenirSiLeStatutAChange(c.dbCible, c.cible.capacite.dossierId, avant)
     revalidatePath('/garant')
     return { statut: 'copie' }
   } catch {
-    return erreur()
+    return erreur(texte.erreur)
   }
 }

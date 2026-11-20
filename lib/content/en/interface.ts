@@ -1,16 +1,40 @@
-/** La part de `interface.ts` que le site public affiche, en anglais. */
-export const interfaceEspace = {
+import type { Textes } from '@/lib/i18n'
+import type { interfaceEspace as Fr } from '../interface'
+
+/** Les libelles communs des espaces et des pages d'entree, en anglais. */
+export const interfaceEspace: Textes<typeof Fr> = {
+  agence: 'Agency space',
+  porteur: 'Private space',
+  accueil: 'Back to home',
+  navigation: 'Navigation of your space',
+  tableau: 'My files',
   principal: 'Skip to content',
+  langue: 'Language',
   signature: 'One shared file. Separate spaces.',
   ouverture: 'Start here',
   retrouver: 'Already have a file?',
+  reglageDetails: 'Understand these settings',
+  nouveauDossier: 'New file',
+  reglages: 'Settings',
+  navigationDossier: 'In this file',
+  organisation: 'Organisation of the file',
+  pieces: 'Documents',
+  engagement: 'Commitment',
+  decision: 'Decision',
+  historique: 'History',
+  loyer: 'Property',
+  garant: 'Guarantor',
+  paiement: 'Payment',
   connexion: 'Welcome back',
   connexionTitre: 'Your agency space',
   connexionTexte: 'No password. Get a sign-in link at your work address to find your files again.',
+  securite: 'One more layer of protection',
+  equipe: 'Your team, in one place',
+  connecteurs: 'Your tools, connected to the follow-up',
   parcours: 'Three roles. One rule: everyone in their place.',
   roles: [
     { nom: 'Tenant', texte: 'You open the file and follow its progress.', ton: 'mint' },
     { nom: 'Guarantor', texte: 'You upload your documents in your private space.', ton: 'sun' },
     { nom: 'Agency', texte: 'You review the file in your own space.', ton: 'sky' },
   ],
-} as const
+}

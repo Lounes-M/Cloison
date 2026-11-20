@@ -4,13 +4,19 @@ import { cookies } from 'next/headers'
 import { estCookieAgence } from '@/lib/acces/cookies-agence'
 import { redirect } from 'next/navigation'
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
-import { securite } from '@/lib/content/securite'
+import { securite as securiteFr } from '@/lib/content/securite'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatSecurite = { facteur?: string; qr?: string; secret?: string; erreur?: string }
 export async function verifierSecondFacteur(
   etat: EtatSecurite,
   donnees: FormData,
 ): Promise<EtatSecurite> {
+  const langue = await langueEspace()
+  const securite = choisir(langue, securiteFr, securiteEn)
+
   if (!(await utilisateurCourant())) redirect('/connexion')
   const db = await clientAgence()
   if (donnees.get('operation') === 'configurer') {

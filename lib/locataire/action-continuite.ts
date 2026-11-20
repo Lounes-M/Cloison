@@ -1,6 +1,6 @@
 'use server'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -8,13 +8,20 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { consommerDebit } from '@/lib/acces/debit'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
-import { continuite } from '@/lib/content/continuite'
+import { continuite as continuiteFr } from '@/lib/content/continuite'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { continuite as continuiteEn } from '@/lib/content/en/continuite'
+import { choisir } from '@/lib/i18n'
+import { langueAction } from '@/lib/langue-espace'
 export type EtatContinuite = { message?: string }
 export async function retrouverMonDossier(
   _etat: EtatContinuite,
   form: FormData,
 ): Promise<EtatContinuite> {
+  const langue = await langueAction(form)
+  const continuite = choisir(langue, continuiteFr, continuiteEn)
+
   const email = z.email().safeParse(
     String(form.get('email') ?? '')
       .trim()
@@ -49,6 +56,10 @@ export async function rattacherMonDossier(
   _etat: EtatContinuite,
   form: FormData,
 ): Promise<EtatContinuite> {
+  const langue = await langueAction(form)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+  const continuite = choisir(langue, continuiteFr, continuiteEn)
+
   const porteur = await capaciteDepuisCookies()
   if (porteur && !formulaireDuDossier(form, porteur.capacite.dossierId)) {
     return { message: sessionPorteur.autreDossier }

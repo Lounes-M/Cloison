@@ -1,16 +1,18 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
-import { interfaceEspace } from '@/lib/content/interface'
-import type { Metadata } from 'next'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { collaborateurs as textes } from '@/lib/content/collaborateurs'
+import { collaborateurs as textesFr } from '@/lib/content/collaborateurs'
 import { FormulaireCollaborateur } from '@/components/forms/FormulaireCollaborateur'
-export const metadata: Metadata = {
-  title: 'Collaborateurs',
-  robots: { index: false, follow: false },
-}
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { collaborateurs as textesEn } from '@/lib/content/en/collaborateurs'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
+export const generateMetadata = () => titreEspace(titresFr.collaborateurs, titresEn.collaborateurs)
 type Membre = {
   utilisateur_id: string
   email: string | null
@@ -29,6 +31,10 @@ export default async function PageCollaborateurs({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const langue = await langueEspace()
+  const textes = choisir(langue, textesFr, textesEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') redirect('/connexion')
   if (contexte.role !== 'admin') notFound()
@@ -91,7 +97,9 @@ export default async function PageCollaborateurs({
         <ul className="mt-4 space-y-3 text-sm">
           {traces.map((e) => (
             <li key={e.id} className="border-ink/20 border-b pb-3 break-words">
-              <time>{new Date(e.quand).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}</time>
+              <time>
+                {new Date(e.quand).toLocaleString(locale(langue), { timeZone: 'Europe/Paris' })}
+              </time>
               {' : '}
               {textes.actions[e.action as keyof typeof textes.actions] ?? e.action}
               {' / '}

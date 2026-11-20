@@ -12,7 +12,10 @@ import {
   schemaBrouillon,
   type SaisieBrouillon,
 } from './format'
-import { brouillons as t } from '@/lib/content/brouillons'
+import { brouillons as tFr } from '@/lib/content/brouillons'
+import { brouillons as tEn } from '@/lib/content/en/brouillons'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export type EtatBrouillon = {
   revision?: string | null
   saisie?: SaisieBrouillon
@@ -21,6 +24,9 @@ export type EtatBrouillon = {
   erreur?: string
 }
 export async function gererBrouillon(_etat: EtatBrouillon, form: FormData): Promise<EtatBrouillon> {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   try {
     const porteur = await capaciteDepuisCookies()
     if (

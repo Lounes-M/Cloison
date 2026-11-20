@@ -1,14 +1,21 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { FormulairePreferences } from '@/components/forms/FormulairePreferences'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
-import { interfaceEspace } from '@/lib/content/interface'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { preferences as t, type PreferenceNotifications } from '@/lib/content/preferences'
-export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
+import { preferences as tFr, type PreferenceNotifications } from '@/lib/content/preferences'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { preferences as tEn } from '@/lib/content/en/preferences'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 export default async function PageNotifications() {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+
   const c = await contexteAgence()
   if (c.etat !== 'rattache') redirect('/connexion')
   const { data, error } = await c.supabase.rpc('mes_preferences_notifications')

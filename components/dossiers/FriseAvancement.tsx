@@ -1,6 +1,9 @@
-import { frise } from '@/lib/content/frise'
+import { frise as friseFr } from '@/lib/content/frise'
 import type { Etape } from '@/lib/dossiers/frise'
 import { cn } from '@/lib/utils'
+import { frise as friseEn } from '@/lib/content/en/frise'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 const pastilles = {
   fait: 'bg-mint',
@@ -10,7 +13,10 @@ const pastilles = {
 } as const
 
 /** Une liste ordonnee : l'ordre et l'etat se lisent sans la couleur. */
-export function FriseAvancement({ titre, etapes }: { titre: string; etapes: Etape[] }) {
+export async function FriseAvancement({ titre, etapes }: { titre: string; etapes: Etape[] }) {
+  const langue = await langueEspace()
+  const frise = choisir(langue, friseFr, friseEn)
+
   return (
     <section aria-labelledby="frise-titre" className="panneau-espace mt-6">
       <h2 id="frise-titre" className="text-xl font-bold">

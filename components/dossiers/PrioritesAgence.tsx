@@ -1,13 +1,19 @@
 import Link from 'next/link'
 import type { ContexteAgence } from '@/lib/agences/contexte'
 import { lirePriorites } from '@/lib/agences/priorites'
-import { pilotage as t } from '@/lib/content/pilotage'
+import { pilotage as tFr } from '@/lib/content/pilotage'
+import { pilotage as tEn } from '@/lib/content/en/pilotage'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export async function PrioritesAgence({
   contexte,
 }: {
   contexte: Extract<ContexteAgence, { etat: 'rattache' }>
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const nombres = await lirePriorites(contexte)
   return (
     <section className="panneau-espace mt-8" aria-label={t.titre}>
@@ -22,7 +28,7 @@ export async function PrioritesAgence({
                 <strong
                   className={nombre == null ? 'text-sm' : 'text-cobalt text-3xl tabular-nums'}
                 >
-                  {nombre == null ? t.indisponible : nombre.toLocaleString('fr-FR')}
+                  {nombre == null ? t.indisponible : nombre.toLocaleString(locale(langue))}
                 </strong>
               </Link>
             </li>

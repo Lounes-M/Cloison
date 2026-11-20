@@ -6,13 +6,19 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { signature as t } from '@/lib/content/signature'
-export const metadata = { title: t.archives, robots: { index: false, follow: false } }
+import { signature as tFr } from '@/lib/content/signature'
+import { signature as tEn } from '@/lib/content/en/signature'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+export const generateMetadata = () => titreEspace(tFr.archives, tEn.archives)
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ avant?: string }>
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const q = await searchParams,
     c = await contexteAgence()
   if (c.etat !== 'rattache') notFound()
@@ -54,10 +60,10 @@ export default async function Page({
                     className="text-cobalt inline-flex min-h-[44px] items-center font-bold break-words underline-offset-4 hover:underline"
                     href={`/espace/actes/${a.id}`}
                   >
-                    {a.modele} · {new Date(a.archive_le).toLocaleDateString('fr-FR')}
+                    {a.modele} · {new Date(a.archive_le).toLocaleDateString(locale(langue))}
                   </Link>
                   <p className="text-muted mt-2 text-sm leading-relaxed">
-                    {t.echeance} {new Date(a.conserver_jusqu_au).toLocaleDateString('fr-FR')}
+                    {t.echeance} {new Date(a.conserver_jusqu_au).toLocaleDateString(locale(langue))}
                   </p>
                 </div>
               </div>

@@ -3,8 +3,11 @@
 import { useActionState, useId } from 'react'
 
 import { nommerAgence, type EtatNomAgence } from '@/lib/agences/action-rattachement'
-import { rattachement } from '@/lib/content/rattachement'
+import { rattachement as rattachementFr } from '@/lib/content/rattachement'
 import { cn } from '@/lib/utils'
+import { rattachement as rattachementEn } from '@/lib/content/en/rattachement'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatNomAgence = { statut: 'inactif' }
 
@@ -16,6 +19,9 @@ const ETAT_INITIAL: EtatNomAgence = { statut: 'inactif' }
  * son nom ne leur appartient pas.
  */
 export function FormulaireNomAgence({ domaine }: { domaine: string }) {
+  const langue = useLangue()
+  const rattachement = choisir(langue, rattachementFr, rattachementEn)
+
   const [etat, envoyer, enCours] = useActionState(nommerAgence, ETAT_INITIAL)
   const idChamp = useId()
 

@@ -1,8 +1,14 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { calendrier } from '@/lib/content/calendrier'
+import { calendrier as calendrierFr } from '@/lib/content/calendrier'
+import { calendrier as calendrierEn } from '@/lib/content/en/calendrier'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function CalendrierEcheance({ dossierId }: { dossierId: string }) {
+  const langue = useLangue()
+  const calendrier = choisir(langue, calendrierFr, calendrierEn)
+
   const [etat, afficher] = useState<'repos' | 'attente' | 'succes' | 'erreur'>('repos')
   const controleur = useRef<AbortController | null>(null)
   const objet = useRef<string | null>(null)

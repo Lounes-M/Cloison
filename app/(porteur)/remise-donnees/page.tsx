@@ -1,9 +1,8 @@
-import type { Metadata } from 'next'
 import { Remise } from './remise'
-export const metadata: Metadata = {
-  title: 'Vos données personnelles',
-  robots: { index: false, follow: false },
-}
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
+import { titreEspace } from '@/lib/langue-espace'
+export const generateMetadata = () => titreEspace(titresFr.remise, titresEn.remise)
 export default function Page() {
   return <Remise />
 }

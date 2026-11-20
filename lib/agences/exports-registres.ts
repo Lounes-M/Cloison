@@ -1,7 +1,12 @@
 import { z } from 'zod'
-import { exportsRegistres as t } from '@/lib/content/exports-registres'
-import { facturation } from '@/lib/content/facturation'
-import { statuts } from '@/lib/content/espace'
+import { exportsRegistres as tFr } from '@/lib/content/exports-registres'
+import { facturation as facturationFr } from '@/lib/content/facturation'
+import { statuts as statutsFr } from '@/lib/content/espace'
+import { exportsRegistres as tEn } from '@/lib/content/en/exports-registres'
+import { facturation as facturationEn } from '@/lib/content/en/facturation'
+import { statuts as statutsEn } from '@/lib/content/en/espace'
+import { choisir, type Langue } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type Registre = 'archives' | 'reglements' | 'dossiers'
 export const LIMITE_REGISTRE = 1000
@@ -34,7 +39,7 @@ const ratio = z.union([z.number(), z.string().regex(/^\d{1,6}(\.\d{1,6})?$/)]).n
 const dossier = z.object({
   id: z.uuid(),
   reference: z.string().min(1).max(64),
-  statut: z.enum(Object.keys(statuts) as [string, ...string[]]),
+  statut: z.enum(Object.keys(statutsFr) as [string, ...string[]]),
   garant: z.boolean(),
   ratio,
   cree_le: date,
@@ -45,9 +50,9 @@ const dossier = z.object({
 export class RegistreTropGrand extends Error {}
 
 // Les contrôles sont normalisés ; les préfixes de formule deviennent du texte explicite.
-export function celluleCSV(valeur: string): string {
+export function celluleCSV(valeur: string, langue: Langue = 'fr'): string {
   let contenu = valeur.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').trim()
-  if (/^[=+\-@＝＋－＠]/u.test(contenu)) contenu = t.texte + contenu
+  if (/^[=+\-@＝＋－＠]/u.test(contenu)) contenu = choisir(langue, tFr, tEn).texte + contenu
   return '"' + contenu.replaceAll('"', '""') + '"'
 }
 function euros(valeur: number): string {
@@ -60,6 +65,11 @@ export async function exporterRegistre(
   signal: AbortSignal,
   maintenant = new Date(),
 ): Promise<string> {
+  const langue = await langueEspace()
+  const statuts = choisir(langue, statutsFr, statutsEn)
+  const t = choisir(langue, tFr, tEn)
+  const facturation = choisir(langue, facturationFr, facturationEn)
+
   const generation = maintenant.toISOString()
   const lignes: string[][] = []
   const ids = new Set<string>()
@@ -123,7 +133,9 @@ export async function exporterRegistre(
         : t.colonnesReglements
   const csv =
     '\ufeff' +
-    [entete, ...lignes].map((ligne) => ligne.map(celluleCSV).join(';')).join('\r\n') +
+    [entete, ...lignes]
+      .map((ligne) => ligne.map((c) => celluleCSV(c, langue)).join(';'))
+      .join('\r\n') +
     '\r\n'
   if (new TextEncoder().encode(csv).byteLength > TAILLE_EXPORT_MAX) throw new RegistreTropGrand()
   return csv

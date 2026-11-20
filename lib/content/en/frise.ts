@@ -1,0 +1,30 @@
+import type { Textes } from '@/lib/i18n'
+import type { frise as Fr } from '../frise'
+
+export const frise: Textes<typeof Fr> = {
+  etats: {
+    fait: 'done',
+    encours: 'in progress',
+    avenir: 'to come',
+    arrete: 'stopped',
+  },
+  locataire: {
+    titre: 'Where your file stands',
+    etapes: {
+      ouverture: 'File opened',
+      garant: 'Guarantor named',
+      depot: 'Your guarantor’s upload',
+      decision: 'Agency’s decision',
+      signature: 'Deed signed',
+    },
+  },
+  garant: {
+    titre: 'Where the file stands',
+    etapes: {
+      invitation: 'Invitation received',
+      depot: 'Your documents and your declaration',
+      decision: 'Agency’s decision',
+      signature: 'Deed signed',
+    },
+  },
+}

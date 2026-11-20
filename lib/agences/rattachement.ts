@@ -1,7 +1,10 @@
 import 'server-only'
 
 import { clientAgence } from '@/lib/acces/agence'
-import { rattachement as textes } from '@/lib/content/rattachement'
+import { rattachement as textesFr } from '@/lib/content/rattachement'
+import { rattachement as textesEn } from '@/lib/content/en/rattachement'
+import { choisir, type Langue } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Le rattachement d'un collaborateur a son agence.
@@ -47,7 +50,9 @@ export type Rattachement =
 export function interpreterRattachement(
   data: unknown,
   error: { code?: string; message?: string } | null,
+  langue: Langue = 'fr',
 ): Rattachement {
+  const textes = choisir(langue, textesFr, textesEn)
   if (!error && typeof data === 'string' && data.length > 0) {
     return { etat: 'rattache', agenceId: data }
   }
@@ -76,7 +81,7 @@ export async function rattacher(nom?: string): Promise<Rattachement> {
     nom_souhaite: nom?.trim() || null,
   })
 
-  const resultat = interpreterRattachement(data, error)
+  const resultat = interpreterRattachement(data, error, await langueEspace())
   if (resultat.etat === 'panne') console.error('[agence] rattachement impossible')
 
   return resultat

@@ -1,8 +1,11 @@
 'use server'
 import { revalidatePath } from 'next/cache'
 import { contexteApplicationSecours, NOM_SECOURS } from './application-secours'
-import { applicationSecours as t } from '@/lib/content/application-secours'
+import { applicationSecours as tFr } from '@/lib/content/application-secours'
 import { estUuidCanonique } from '@/lib/validation/uuid'
+import { applicationSecours as tEn } from '@/lib/content/en/application-secours'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatApplicationSecours = {
   facteur?: string
@@ -16,6 +19,9 @@ export async function gererApplicationSecours(
   _etat: EtatApplicationSecours,
   donnees: FormData,
 ): Promise<EtatApplicationSecours> {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   try {
     const c = await contexteApplicationSecours()
     if (!c) return { erreur: t.erreur }

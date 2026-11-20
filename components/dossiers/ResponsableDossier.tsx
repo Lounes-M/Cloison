@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import type { ContexteAgence } from '@/lib/agences/contexte'
 import {
-  responsables as t,
+  responsables as tFr,
   type ResponsableDossier as Affectation,
 } from '@/lib/content/responsables'
 import { FormulaireResponsable } from '@/components/forms/FormulaireResponsable'
+import { responsables as tEn } from '@/lib/content/en/responsables'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export async function ResponsableDossier({
   dossierId,
@@ -17,6 +20,9 @@ export async function ResponsableDossier({
   pageEquipe: unknown
   modifiable: boolean
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const page =
     typeof pageEquipe === 'string' && /^[1-9]\d{0,3}$/.test(pageEquipe)
       ? Math.min(Number(pageEquipe), 9999)

@@ -41,6 +41,12 @@ export const secondGarant = {
 } as const
 
 export const espace = {
+  loyerFige: 'Loyer :',
+  loyerFigeSuite:
+    '€. Ce montant est figé pour préserver la confidentialité de la déclaration du garant.',
+  garantAssocie:
+    'Le garant invité reste associé à ce dossier. Pour désigner une autre personne, ouvre un nouveau dossier.',
+  plusModifiable: 'Ce dossier ne peut plus être modifié.',
   garantRenouvellement:
     'Tu peux renvoyer son accès au même garant. Le dossier reste figé et le nouveau lien remplace le précédent.',
   titre: 'Ton dossier',

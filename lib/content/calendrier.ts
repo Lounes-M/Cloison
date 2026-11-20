@@ -7,4 +7,8 @@ export const calendrier = {
     'Fichier préparé. Vous pouvez l’importer dans votre agenda. Il ne crée aucune invitation et ne contient aucune pièce.',
   erreur:
     'Le calendrier est indisponible. Rechargez le dossier pour vérifier votre accès et son échéance, puis réessayez.',
+  evenement: 'Cloison : fin du coffre',
+  description:
+    'Échéance du coffre documentaire. Cette date ne décrit pas la durée de l’acte signé. Copie ponctuelle : vérifier la date courante dans Cloison. Aucun suivi automatique après import.',
+  indisponible: 'Échéance indisponible.',
 } as const

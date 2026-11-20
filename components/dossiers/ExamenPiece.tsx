@@ -1,7 +1,10 @@
 import { FormulaireExamen } from '@/components/forms/FormulaireExamen'
-import { examen as t, type ExamenDocumentaire } from '@/lib/content/examen'
+import { examen as tFr, type ExamenDocumentaire } from '@/lib/content/examen'
+import { examen as tEn } from '@/lib/content/en/examen'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
-export function ExamenPiece({
+export async function ExamenPiece({
   dossierId,
   pieceId,
   precedent,
@@ -14,6 +17,9 @@ export function ExamenPiece({
   obsolete: boolean
   modifiable: boolean
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   if (obsolete) return <p className="w-full text-sm">{t.obsolete}</p>
   return (
     <details className="outlined bg-sky/20 w-full min-w-0 rounded-xl p-4">
@@ -22,7 +28,7 @@ export function ExamenPiece({
       </summary>
       {precedent ? (
         <p className="mt-2 text-sm break-all">
-          {new Date(precedent.cree_le).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}
+          {new Date(precedent.cree_le).toLocaleString(locale(langue), { timeZone: 'Europe/Paris' })}
           {t.par}
           {precedent.acteur ?? t.ancien}
         </p>

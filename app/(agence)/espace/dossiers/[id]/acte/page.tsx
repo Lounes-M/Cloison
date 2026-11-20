@@ -4,12 +4,20 @@ import { z } from 'zod'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { configurationParcours } from '@/lib/signature/configuration-parcours'
 import { ModeleActe } from '@/components/forms/ModeleActe'
-import { acte as t } from '@/lib/content/acte'
+import { acte as tFr } from '@/lib/content/acte'
 import { dateLongue, euros } from '@/lib/acte/modele-cautionnement'
+import { acte as tEn } from '@/lib/content/en/acte'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata = { title: 'Acte de cautionnement', robots: { index: false, follow: false } }
+export const generateMetadata = () => titreEspace(titresFr.acte, titresEn.acte)
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const { id } = await params
   if (!z.uuid().safeParse(id).success) notFound()
 

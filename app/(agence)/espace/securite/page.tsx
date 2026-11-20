@@ -1,15 +1,22 @@
 import { FormulaireTestApplication } from '@/components/forms/FormulaireTestApplication'
-import { securite } from '@/lib/content/securite'
-import type { Metadata } from 'next'
+import { securite as securiteFr } from '@/lib/content/securite'
 import Link from 'next/link'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { FormulaireApplicationSecours } from '@/components/forms/FormulaireApplicationSecours'
 import { contexteApplicationSecours } from '@/lib/agences/application-secours'
-import { applicationSecours as t } from '@/lib/content/application-secours'
+import { applicationSecours as tFr } from '@/lib/content/application-secours'
+import { securite as securiteEn } from '@/lib/content/en/securite'
+import { applicationSecours as tEn } from '@/lib/content/en/application-secours'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
 
-export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 export default async function PageApplicationSecours() {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const securite = choisir(langue, securiteFr, securiteEn)
+
   const c = await contexteApplicationSecours().catch(() => null)
   return (
     <div className="page-espace w-full max-w-[600px]">

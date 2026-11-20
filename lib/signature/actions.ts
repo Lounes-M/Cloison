@@ -3,7 +3,7 @@ import { verifierProjetActe } from './validation-projet'
 import { PAGES_ACTE_MAX, type PositionSignature } from './position'
 import { projetDepuisDossier } from '@/lib/acte/projet'
 import { MODELE_CAUTIONNEMENT } from '@/lib/acte/modele-cautionnement'
-import { acte } from '@/lib/content/acte'
+import { acte as acteFr } from '@/lib/content/acte'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -13,12 +13,16 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import { sceller } from '@/lib/coffre/enveloppe'
 import { scellerMaitresse } from '@/lib/coffre/rotation-maitresse'
-import { signature } from '@/lib/content/signature'
+import { signature as signatureFr } from '@/lib/content/signature'
 import { echeanceActe } from './echeance'
 import { configurationParcours } from './configuration-parcours'
 import { empreintePdf } from './archive-format'
 import { archiverFichier, ouvrirContexteActe } from './parcours'
 import { contexteActe, dossierActe } from './parcours-types'
+import { acte as acteEn } from '@/lib/content/en/acte'
+import { signature as signatureEn } from '@/lib/content/en/signature'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export type EtatActe = { message: string; id?: string }
 const bytea = (b: Buffer) => `\\x${b.toString('hex')}`
 const base = z.object({
@@ -32,6 +36,10 @@ const saisie = base.extend({
   y: z.coerce.number().int().min(0).max(10000),
 })
 export async function preparerActe(_etat: EtatActe, form: FormData): Promise<EtatActe> {
+  const langue = await langueEspace()
+  const signature = choisir(langue, signatureFr, signatureEn)
+  const acte = choisir(langue, acteFr, acteEn)
+
   let cle: Buffer | undefined
   let reserve: string | undefined
   try {
@@ -129,6 +137,9 @@ export async function preparerActe(_etat: EtatActe, form: FormData): Promise<Eta
   }
 }
 export async function validerActe(_etat: EtatActe, form: FormData): Promise<EtatActe> {
+  const langue = await langueEspace()
+  const signature = choisir(langue, signatureFr, signatureEn)
+
   try {
     if (!configurationParcours()) return { message: signature.indisponible }
     const id = z.uuid().parse(form.get('acte'))
@@ -161,6 +172,9 @@ export async function validerActe(_etat: EtatActe, form: FormData): Promise<Etat
 }
 
 export async function reprendreDepotActe(_etat: EtatActe, form: FormData): Promise<EtatActe> {
+  const langue = await langueEspace()
+  const signature = choisir(langue, signatureFr, signatureEn)
+
   let cle: Buffer | undefined
   try {
     if (!configurationParcours()) throw new Error()

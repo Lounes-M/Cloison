@@ -1,3 +1,7 @@
+import { calendrier as calendrierEn } from '@/lib/content/en/calendrier'
+import { calendrier as calendrierFr } from '@/lib/content/calendrier'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { calendrierEcheance } from '@/lib/agences/calendrier'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -10,11 +14,15 @@ const entetes = {
   'X-Content-Type-Options': 'nosniff',
   'X-Robots-Tag': 'noindex, nofollow',
 }
-const refus = (status: number) =>
-  new Response('Échéance indisponible.', { status, headers: entetes })
 
 export async function GET(_requete: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const langue = await langueEspace()
+  const refus = (status: number) =>
+    new Response(choisir(langue, calendrierFr, calendrierEn).indisponible, {
+      status,
+      headers: entetes,
+    })
   if (!estUuidCanonique(id)) return refus(404)
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return refus(401)
@@ -29,7 +37,7 @@ export async function GET(_requete: Request, { params }: { params: Promise<{ id:
     if (error) return refus(503)
     if (!data) return refus(404)
     if (data.id !== id) return refus(503)
-    return new Response(calendrierEcheance(data, maintenant), {
+    return new Response(calendrierEcheance(data, maintenant, langue), {
       headers: {
         ...entetes,
         'Content-Type': 'text/calendar; charset=utf-8',

@@ -58,6 +58,7 @@ export const pilotage = {
     incertain: 'Résultat incertain : vérifiez le responsable avant de réessayer',
     non_traite: 'Non traité',
   },
+  actualiser: 'Actualiser la liste',
   precaution:
     'En cas de résultat incertain, le serveur peut avoir enregistré la modification. Rechargez la liste avant toute nouvelle tentative.',
 } as const

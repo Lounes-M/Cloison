@@ -1,6 +1,5 @@
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
-import { interfaceEspace } from '@/lib/content/interface'
-import type { Metadata } from 'next'
+import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -20,21 +19,37 @@ import {
 } from '@/lib/agences/inactivite'
 import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { collaborateurs } from '@/lib/content/collaborateurs'
-import { rattachement as textesRattachement } from '@/lib/content/rattachement'
-import { activation, statuts, tableau } from '@/lib/content/espace'
-import { activite as texteActivite } from '@/lib/content/activite'
-import { logements as texteLogements } from '@/lib/content/logements'
+import { collaborateurs as collaborateursFr } from '@/lib/content/collaborateurs'
+import { rattachement as textesRattachementFr } from '@/lib/content/rattachement'
+import {
+  activation as activationFr,
+  statuts as statutsFr,
+  tableau as tableauFr,
+} from '@/lib/content/espace'
+import { activite as texteActiviteFr } from '@/lib/content/activite'
+import { logements as texteLogementsFr } from '@/lib/content/logements'
 import { cn } from '@/lib/utils'
 import {
-  responsables as texteResponsables,
+  responsables as texteResponsablesFr,
   type ResponsableDossier,
 } from '@/lib/content/responsables'
+import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
+import { collaborateurs as collaborateursEn } from '@/lib/content/en/collaborateurs'
+import { rattachement as textesRattachementEn } from '@/lib/content/en/rattachement'
+import {
+  activation as activationEn,
+  statuts as statutsEn,
+  tableau as tableauEn,
+} from '@/lib/content/en/espace'
+import { activite as texteActiviteEn } from '@/lib/content/en/activite'
+import { logements as texteLogementsEn } from '@/lib/content/en/logements'
+import { responsables as texteResponsablesEn } from '@/lib/content/en/responsables'
+import { choisir, locale, type Langue } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata: Metadata = {
-  title: 'Espace agence',
-  robots: { index: false, follow: false },
-}
+export const generateMetadata = () => titreEspace(titresFr.espace, titresEn.espace)
 
 const tons = {
   sky: 'bg-sky',
@@ -69,23 +84,23 @@ const colonnesTri = {
   activite: 'activite_rappel_le',
 } as const
 
-function dateEcheance(valeur: string): string {
+function dateEcheanceDe(valeur: string, langue: Langue): string {
   const date = new Date(valeur)
   return Number.isFinite(date.getTime())
-    ? date.toLocaleDateString('fr-FR', {
+    ? date.toLocaleDateString(locale(langue), {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
         timeZone: 'Europe/Paris',
       })
-    : tableau.dateIndisponible
+    : choisir(langue, tableauFr, tableauEn).dateIndisponible
 }
 
-function ratioDe(ligne: Ligne): string | null {
+function ratioDansLangue(ligne: Ligne, langue: Langue): string | null {
   const e = Array.isArray(ligne.engagements) ? ligne.engagements[0] : ligne.engagements
   return e?.ratio == null
     ? null
-    : Number(e.ratio).toLocaleString('fr-FR', { minimumFractionDigits: 2 })
+    : Number(e.ratio).toLocaleString(locale(langue), { minimumFractionDigits: 2 })
 }
 
 /**
@@ -100,6 +115,19 @@ export default async function PageEspace({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 } = {}) {
+  const langue = await langueEspace()
+  const dateEcheance = (valeur: string) => dateEcheanceDe(valeur, langue)
+  const ratioDe = (ligne: Ligne) => ratioDansLangue(ligne, langue)
+  const textesRattachement = choisir(langue, textesRattachementFr, textesRattachementEn)
+  const collaborateurs = choisir(langue, collaborateursFr, collaborateursEn)
+  const statuts = choisir(langue, statutsFr, statutsEn)
+  const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
+  const texteActivite = choisir(langue, texteActiviteFr, texteActiviteEn)
+  const texteLogements = choisir(langue, texteLogementsFr, texteLogementsEn)
+  const tableau = choisir(langue, tableauFr, tableauEn)
+  const activation = choisir(langue, activationFr, activationEn)
+  const texteResponsables = choisir(langue, texteResponsablesFr, texteResponsablesEn)
+
   const contexte = await contexteAgence()
   if (contexte.etat === 'anonyme') redirect('/connexion')
 
@@ -248,14 +276,14 @@ export default async function PageEspace({
   const demandesEnAttente =
     !demandes.error && Number.isSafeInteger(demandes.data) ? Number(demandes.data) : 0
 
-  const seuil = agence.seuilRatio.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
+  const seuil = agence.seuilRatio.toLocaleString(locale(langue), { minimumFractionDigits: 2 })
 
   return (
     <div className="page-espace w-full max-w-[1040px] self-start">
       <h1 className="font-display text-3xl md:text-4xl">{agence.nom}</h1>
       <p className="text-muted mt-2 text-[14px] font-medium">
-        Connecté en tant que <strong className="text-ink">{email}</strong>
-        {role === 'admin' ? ', administrateur' : ''}.
+        {tableau.connecte} <strong className="text-ink">{email}</strong>
+        {role === 'admin' ? tableau.administrateur : ''}.
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -299,7 +327,7 @@ export default async function PageEspace({
             {agence.activationDemandeeLe ? (
               <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
                 {activation.enAttente(
-                  new Date(agence.activationDemandeeLe).toLocaleDateString('fr-FR', {
+                  new Date(agence.activationDemandeeLe).toLocaleDateString(locale(langue), {
                     day: 'numeric',
                     month: 'long',
                   }),
@@ -586,7 +614,7 @@ export default async function PageEspace({
                       <div>
                         <dt className="text-muted text-xs font-bold">{tableau.colonnes.ouvert}</dt>
                         <dd>
-                          {new Date(ligne.cree_le).toLocaleDateString('fr-FR', {
+                          {new Date(ligne.cree_le).toLocaleDateString(locale(langue), {
                             day: 'numeric',
                             month: 'short',
                           })}
@@ -682,7 +710,7 @@ export default async function PageEspace({
                         </td>
                         <td className="px-4 py-3 font-medium">{ratio ? `${ratio}×` : '·'}</td>
                         <td className="text-muted px-4 py-3 font-medium">
-                          {new Date(ligne.cree_le).toLocaleDateString('fr-FR', {
+                          {new Date(ligne.cree_le).toLocaleDateString(locale(langue), {
                             day: 'numeric',
                             month: 'short',
                           })}

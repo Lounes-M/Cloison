@@ -5,8 +5,14 @@ import { notFound } from 'next/navigation'
 import { accesActe } from '@/lib/signature/lecture'
 import { ouvrirContexteActe } from '@/lib/signature/parcours'
 import { ValidationActe, RepriseActe } from '@/components/forms/FormulaireActe'
-import { signature as t } from '@/lib/content/signature'
+import { signature as tFr } from '@/lib/content/signature'
+import { signature as tEn } from '@/lib/content/en/signature'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export async function DetailActe({ id, partie }: { id: string; partie: 'agence' | 'garant' }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const acces = await accesActe(id, partie).catch(() => null)
   if (!acces) notFound()
   const { d, dossier } = acces
@@ -72,7 +78,7 @@ export async function DetailActe({ id, partie }: { id: string; partie: 'agence' 
       {partie === 'agence' && d.acte.etape === 'preparation' ? <RepriseActe id={id} /> : null}
       <div className="border-ink/15 text-muted mt-8 border-t pt-5 text-sm leading-relaxed">
         <p>
-          {t.echeance} {new Date(d.acte.conserver_jusqu_au).toLocaleDateString('fr-FR')}
+          {t.echeance} {new Date(d.acte.conserver_jusqu_au).toLocaleDateString(locale(langue))}
         </p>
         <p className="mt-2">{t.conserve}</p>
       </div>

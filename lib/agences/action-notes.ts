@@ -1,10 +1,14 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { revalidatePath } from 'next/cache'
 
-import { notesDossier as texte } from '@/lib/content/notes'
+import { notesDossier as texteFr } from '@/lib/content/notes'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
+import { notesDossier as texteEn } from '@/lib/content/en/notes'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatNote =
   | { statut: 'inactif' }
@@ -19,6 +23,10 @@ export type EtatNote =
  * fait que relayer et rafraichir la fiche. Le texte n'est jamais journalise.
  */
 export async function ajouterNote(_p: EtatNote, donnees: FormData): Promise<EtatNote> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const id = String(donnees.get('dossier') ?? '')
   const saisie = String(donnees.get('texte') ?? '')
   const propre = saisie.trim()
@@ -26,7 +34,7 @@ export async function ajouterNote(_p: EtatNote, donnees: FormData): Promise<Etat
     return { statut: 'erreur', message: texte.erreurAjout, valeur: saisie }
   }
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase.rpc('ajouter_note_dossier', {
     le_dossier: id,
@@ -42,13 +50,17 @@ export async function ajouterNote(_p: EtatNote, donnees: FormData): Promise<Etat
 
 /** Supprimer une note : son auteur ou un administrateur, la base tranche. */
 export async function supprimerNote(_p: EtatNote, donnees: FormData): Promise<EtatNote> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const id = String(donnees.get('dossier') ?? '')
   const note = String(donnees.get('note') ?? '')
   if (!estUuidCanonique(id) || !estUuidCanonique(note)) {
     return { statut: 'erreur', message: texte.erreurSuppression }
   }
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase.rpc('supprimer_note_dossier', { la_note: note })
   if (error || data !== true) {

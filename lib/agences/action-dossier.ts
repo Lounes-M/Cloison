@@ -1,4 +1,5 @@
 'use server'
+import { traducteur } from '@/lib/messages'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 
 import { revalidatePath } from 'next/cache'
@@ -7,9 +8,12 @@ import { z } from 'zod'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
-import { tableau } from '@/lib/content/espace'
+import { tableau as tableauFr } from '@/lib/content/espace'
 import { montantEnCents } from '@/lib/garant/validation'
 import { contexteAgence } from './contexte'
+import { tableau as tableauEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { langueAction, langueEspace } from '@/lib/langue-espace'
 
 /**
  * Ce que l'agence fait a un dossier.
@@ -42,18 +46,22 @@ const schemaLocataire = z.object({
 const OUVERTURE_IMPOSSIBLE = "Le dossier n'a pas pu être ouvert. Réessayez dans un instant."
 
 const NON_VERIFIEE =
-  "Votre agence n'est pas encore vérifiée : l'ouverture d'un dossier pour un vrai locataire attend la verification."
+  "Votre agence n'est pas encore vérifiée : l'ouverture d'un dossier pour un vrai locataire attend la vérification."
 
 export async function ouvrirUnDossier(
   _precedent: EtatNouveauDossier,
   donnees: FormData,
 ): Promise<EtatNouveauDossier> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const tableau = choisir(langue, tableauFr, tableauEn)
+
   const saisie = String(donnees.get('courriel') ?? '')
   const analyse = schemaLocataire.safeParse({ courriel: saisie })
   if (!analyse.success) {
     return {
       statut: 'erreur',
-      message: analyse.error.issues[0]?.message ?? 'Adresse invalide.',
+      message: dire(analyse.error.issues[0]?.message ?? 'Adresse invalide.'),
       valeur: saisie,
     }
   }
@@ -72,13 +80,13 @@ export async function ouvrirUnDossier(
 
   const brutLogement = String(donnees.get('logement') ?? '')
   if (brutLogement !== '' && !estUuidCanonique(brutLogement)) {
-    return { statut: 'erreur', message: OUVERTURE_IMPOSSIBLE, valeur: saisie }
+    return { statut: 'erreur', message: dire(OUVERTURE_IMPOSSIBLE), valeur: saisie }
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
   if (contexte.agence.statut !== 'verifiee') {
-    return { statut: 'erreur', message: NON_VERIFIEE, valeur: saisie }
+    return { statut: 'erreur', message: dire(NON_VERIFIEE), valeur: saisie }
   }
 
   // Le logement se lit avec les droits de l'agence (0069) : celui d'une autre
@@ -90,7 +98,7 @@ export async function ouvrirUnDossier(
       .select('id, loyer_cents')
       .eq('id', brutLogement)
       .maybeSingle()
-    if (!data) return { statut: 'erreur', message: OUVERTURE_IMPOSSIBLE, valeur: saisie }
+    if (!data) return { statut: 'erreur', message: dire(OUVERTURE_IMPOSSIBLE), valeur: saisie }
     logement = {
       id: String(data.id),
       loyer_cents: data.loyer_cents == null ? null : Number(data.loyer_cents),
@@ -106,7 +114,7 @@ export async function ouvrirUnDossier(
     if (!ouvert) {
       return {
         statut: 'erreur',
-        message: "Le dossier n'a pas pu être ouvert. Réessayez dans un instant.",
+        message: dire("Le dossier n'a pas pu être ouvert. Réessayez dans un instant."),
         valeur: saisie,
       }
     }
@@ -131,7 +139,7 @@ export async function ouvrirUnDossier(
     console.error('[agence] ouverture impossible')
     return {
       statut: 'erreur',
-      message: "Le dossier n'a pas pu être ouvert. Réessayez dans un instant.",
+      message: dire("Le dossier n'a pas pu être ouvert. Réessayez dans un instant."),
       valeur: saisie,
     }
   }
@@ -150,11 +158,13 @@ export type EtatDecision = { statut: 'inactif' } | { statut: 'erreur'; message: 
  * prend rien : zero ligne, pas de transmission.
  */
 export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Promise<EtatDecision> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
   const id = String(donnees.get('dossier') ?? '')
-  if (!estUuidCanonique(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
+  if (!estUuidCanonique(id)) return { statut: 'erreur', message: dire('Dossier inconnu.') }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase
     .from('dossiers')
@@ -165,7 +175,10 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
   if (error || !Array.isArray(data) || data.length === 0) {
     if (error) console.error('[agence] prise refusee')
-    return { statut: 'erreur', message: "Ce dossier n'est pas complet, ou n'est plus le vôtre." }
+    return {
+      statut: 'erreur',
+      message: dire("Ce dossier n'est pas complet, ou n'est plus le vôtre."),
+    }
   }
 
   // La prise est un acces qui compte : elle fige ce que le garant a depose.
@@ -186,11 +199,13 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
 }
 
 export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Promise<EtatDecision> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
   const id = String(donnees.get('dossier') ?? '')
-  if (!estUuidCanonique(id)) return { statut: 'erreur', message: 'Dossier inconnu.' }
+  if (!estUuidCanonique(id)) return { statut: 'erreur', message: dire('Dossier inconnu.') }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase
     .from('dossiers')
@@ -201,7 +216,10 @@ export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
   if (error || !Array.isArray(data) || data.length === 0) {
     if (error) console.error('[agence] refus refuse')
-    return { statut: 'erreur', message: 'Ce dossier ne peut pas être refusé dans son état actuel.' }
+    return {
+      statut: 'erreur',
+      message: dire('Ce dossier ne peut pas être refusé dans son état actuel.'),
+    }
   }
 
   // Le refus se dit, sans son motif : c'est ce que l'ecran promet.
@@ -225,6 +243,8 @@ export type EtatSeuil =
  * et un membre qui essaierait obtiendrait zero ligne.
  */
 export async function reglerLeSeuil(_p: EtatSeuil, donnees: FormData): Promise<EtatSeuil> {
+  const langue = await langueAction(donnees)
+  const dire = traducteur(langue)
   const saisie = String(donnees.get('seuil') ?? '')
     .trim()
     .replace(',', '.')
@@ -233,13 +253,13 @@ export async function reglerLeSeuil(_p: EtatSeuil, donnees: FormData): Promise<E
   if (!/^\d+(\.\d{1,2})?$/.test(saisie) || !(seuil >= 1 && seuil <= 10)) {
     return {
       statut: 'erreur',
-      message: 'Le seuil se lit entre 1 et 10, avec au plus deux décimales.',
+      message: dire('Le seuil se lit entre 1 et 10, avec au plus deux décimales.'),
       valeur: saisie,
     }
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase
     .from('agences')
@@ -251,7 +271,7 @@ export async function reglerLeSeuil(_p: EtatSeuil, donnees: FormData): Promise<E
     if (error) console.error('[agence] seuil refuse')
     return {
       statut: 'erreur',
-      message: 'Seul un administrateur de l’agence peut modifier le seuil.',
+      message: dire('Seul un administrateur de l’agence peut modifier le seuil.'),
       valeur: saisie,
     }
   }

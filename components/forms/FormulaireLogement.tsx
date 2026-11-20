@@ -3,13 +3,19 @@
 import { useActionState, useId } from 'react'
 
 import { creerUnLogement, type EtatLogement } from '@/lib/agences/action-logements'
-import { logements as texte } from '@/lib/content/logements'
+import { logements as texteFr } from '@/lib/content/logements'
 import { cn } from '@/lib/utils'
+import { logements as texteEn } from '@/lib/content/en/logements'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatLogement = { statut: 'inactif' }
 
 /** Creer un logement : un libelle, un loyer de reference facultatif. */
 export function FormulaireLogement() {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(creerUnLogement, ETAT_INITIAL)
   const idLibelle = useId()
   const idLoyer = useId()

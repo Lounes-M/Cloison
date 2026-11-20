@@ -3,9 +3,12 @@
 import Link from 'next/link'
 import { useActionState, useId } from 'react'
 
-import { cloture as texte, dossier as texteDossier } from '@/lib/content/espace'
+import { cloture as texteFr, dossier as texteDossierFr } from '@/lib/content/espace'
 import { cloreLeDossier, type EtatCloture } from '@/lib/agences/action-cloture'
 import { cn } from '@/lib/utils'
+import { cloture as texteEn, dossier as texteDossierEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatCloture = { statut: 'inactif' }
 
@@ -23,6 +26,10 @@ export function FormulaireCloture({
   dossierId: string
   reference: string
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+  const texteDossier = choisir(langue, texteDossierFr, texteDossierEn)
+
   const [etat, envoyer, enCours] = useActionState(cloreLeDossier, ETAT_INITIAL)
   const idChamp = useId()
   const idAide = useId()

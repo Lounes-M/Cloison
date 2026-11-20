@@ -1,7 +1,8 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 
 import { revalidatePath } from 'next/cache'
 
@@ -9,7 +10,11 @@ import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { analyserEngagement } from '@/lib/garant/validation'
 import { versionConditions } from '@/lib/garant/version-conditions'
-import { conditionsEngagement } from '@/lib/content/conditions-engagement'
+import { conditionsEngagement as conditionsEngagementFr } from '@/lib/content/conditions-engagement'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { conditionsEngagement as conditionsEngagementEn } from '@/lib/content/en/conditions-engagement'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Ce que le garant couvre.
@@ -33,13 +38,18 @@ export async function declarerMonEngagement(
   _precedent: EtatEngagement,
   donnees: FormData,
 ): Promise<EtatEngagement> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+  const conditionsEngagement = choisir(langue, conditionsEngagementFr, conditionsEngagementEn)
+
   const champs: Record<string, string | undefined> = {}
   for (const nom of ['couvre', 'montant', 'jusquAu', 'solidaire', 'revenu', 'profil']) {
     const valeur = donnees.get(nom)
     champs[nom] = typeof valeur === 'string' ? valeur : undefined
   }
 
-  const analyse = analyserEngagement(champs)
+  const analyse = analyserEngagement(champs, new Date(), langue)
   if (!analyse.ok) return { statut: 'erreur', message: analyse.message }
 
   const porteur = await capaciteDepuisCookies()
@@ -49,7 +59,7 @@ export async function declarerMonEngagement(
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
-      message: 'Votre lien a expiré. Demandez au locataire de vous le renvoyer.',
+      message: dire('Votre lien a expiré. Demandez au locataire de vous le renvoyer.'),
     }
   }
 
@@ -98,7 +108,7 @@ export async function declarerMonEngagement(
       console.error('[garant] engagement refuse')
       return {
         statut: 'erreur',
-        message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
+        message: dire("L'enregistrement n'a pas abouti. Réessayez dans un instant."),
       }
     }
 
@@ -109,7 +119,7 @@ export async function declarerMonEngagement(
     console.error('[garant] engagement impossible')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
+      message: dire("L'enregistrement n'a pas abouti. Réessayez dans un instant."),
     }
   }
 

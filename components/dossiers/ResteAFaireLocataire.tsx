@@ -1,6 +1,9 @@
 import { Icone } from '@/components/ui/Icone'
-import { resteAFaire as t } from '@/lib/content/locataire'
+import { resteAFaire as tFr } from '@/lib/content/locataire'
 import type { EtapeLocataire } from '@/lib/locataire/reste-a-faire'
+import { resteAFaire as tEn } from '@/lib/content/en/locataire'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 const ancres: Record<EtapeLocataire, string> = {
   loyer: 'logement',
@@ -9,7 +12,10 @@ const ancres: Record<EtapeLocataire, string> = {
 }
 
 /** Le haut de l'espace du locataire : ses gestes, et ou les faire. */
-export function ResteAFaireLocataire({ etapes }: { etapes: EtapeLocataire[] }) {
+export async function ResteAFaireLocataire({ etapes }: { etapes: EtapeLocataire[] }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   return (
     <section aria-labelledby="reste-a-faire" className="panneau-espace mt-8">
       <h2 id="reste-a-faire" className="text-xl font-bold">

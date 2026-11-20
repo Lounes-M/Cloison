@@ -3,13 +3,19 @@
 import { useActionState, useEffect, useId, useRef } from 'react'
 
 import { ajouterNote, supprimerNote, type EtatNote } from '@/lib/agences/action-notes'
-import { notesDossier as texte } from '@/lib/content/notes'
+import { notesDossier as texteFr } from '@/lib/content/notes'
 import { cn } from '@/lib/utils'
+import { notesDossier as texteEn } from '@/lib/content/en/notes'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatNote = { statut: 'inactif' }
 
 /** Ajouter une note interne au dossier. */
 export function FormulaireNote({ dossierId }: { dossierId: string }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(ajouterNote, ETAT_INITIAL)
   const formulaire = useRef<HTMLFormElement>(null)
   const idChamp = useId()
@@ -72,6 +78,9 @@ export function BoutonSupprimerNote({
   noteId: string
   date: string
 }) {
+  const langue = useLangue()
+  const texte = choisir(langue, texteFr, texteEn)
+
   const [etat, envoyer, enCours] = useActionState(supprimerNote, ETAT_INITIAL)
   return (
     <form action={envoyer} className="inline">

@@ -1,7 +1,8 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -9,7 +10,11 @@ import { z } from 'zod'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { verifierMention, type Element } from '@/lib/garant/mention'
 import { versionConditions } from '@/lib/garant/version-conditions'
-import { conditionsEngagement } from '@/lib/content/conditions-engagement'
+import { conditionsEngagement as conditionsEngagementFr } from '@/lib/content/conditions-engagement'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { conditionsEngagement as conditionsEngagementEn } from '@/lib/content/en/conditions-engagement'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Le garant se nomme, et appose sa mention.
@@ -41,6 +46,11 @@ const schema = z.object({
 })
 
 export async function apposerMaMention(_p: EtatMention, donnees: FormData): Promise<EtatMention> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+  const conditionsEngagement = choisir(langue, conditionsEngagementFr, conditionsEngagementEn)
+
   const valeurs: Record<string, string> = {}
   for (const nom of ['nom', 'prenom', 'adresse', 'mention']) {
     valeurs[nom] = String(donnees.get(nom) ?? '')
@@ -50,7 +60,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!analyse.success) {
     return {
       statut: 'erreur',
-      message: analyse.error.issues[0]?.message ?? 'Saisie invalide.',
+      message: dire(analyse.error.issues[0]?.message ?? 'Saisie invalide.'),
       valeurs,
     }
   }
@@ -62,7 +72,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!porteur || porteur.capacite.partie !== 'garant') {
     return {
       statut: 'erreur',
-      message: 'Votre lien a expiré. Demandez au locataire de vous le renvoyer.',
+      message: dire('Votre lien a expiré. Demandez au locataire de vous le renvoyer.'),
     }
   }
 
@@ -84,8 +94,9 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   if (!engagement || !engagement.montant_max_cents) {
     return {
       statut: 'erreur',
-      message:
+      message: dire(
         'Enregistrez d’abord un montant maximum dans la partie consacrée à votre engagement.',
+      ),
       valeurs,
     }
   }
@@ -101,7 +112,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
   ) {
     return {
       statut: 'erreur',
-      message: 'Il manque quelque chose à votre mention.',
+      message: dire('Il manque quelque chose à votre mention.'),
       manques: verdict.ok ? ['montant'] : verdict.manques,
       valeurs,
     }
@@ -125,7 +136,7 @@ export async function apposerMaMention(_p: EtatMention, donnees: FormData): Prom
     console.error('[garant] mention refusee')
     return {
       statut: 'erreur',
-      message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
+      message: dire("L'enregistrement n'a pas abouti. Réessayez dans un instant."),
       valeurs,
     }
   }

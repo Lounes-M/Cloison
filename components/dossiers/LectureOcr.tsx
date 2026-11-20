@@ -1,9 +1,12 @@
 'use client'
 import { useEffect, useId, useRef, useState } from 'react'
-import { ocr } from '@/lib/content/ocr'
+import { ocr as ocrFr } from '@/lib/content/ocr'
 import { analyserPagesOcr } from '@/lib/ocr/selection'
 import { lireResultatOcr } from '@/lib/ocr/lecture-resultat'
 import type { ResultatOcr } from '@/lib/ocr/resultat'
+import { ocr as ocrEn } from '@/lib/content/en/ocr'
+import { choisir as choisirTexte } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 /** Une autre piece ne reutilise ni consentement, ni requete, ni transcription. */
 export function LectureOcr({ pieceId }: { pieceId: string }) {
@@ -11,6 +14,9 @@ export function LectureOcr({ pieceId }: { pieceId: string }) {
 }
 
 function LecturePiece({ pieceId }: { pieceId: string }) {
+  const langue = useLangue()
+  const ocr = choisirTexte(langue, ocrFr, ocrEn)
+
   const aidePages = useId()
   const caseAccord = useRef<HTMLInputElement | null>(null)
   const [accord, consentir] = useState(false)

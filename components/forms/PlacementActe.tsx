@@ -4,9 +4,15 @@ import { apercevoirActe } from '@/lib/signature/action-apercu'
 import type { ApercuActe } from '@/lib/signature/apercu-types'
 import { bornerPlacement } from '@/lib/signature/placement'
 import { CHAMP_SIGNATURE, PAGES_ACTE_MAX } from '@/lib/signature/position'
-import { signature as t } from '@/lib/content/signature'
+import { signature as tFr } from '@/lib/content/signature'
+import { signature as tEn } from '@/lib/content/en/signature'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 export function PlacementActe({ dossier, disabled }: { dossier: string; disabled: boolean }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const fichier = useRef<HTMLInputElement>(null)
   const generation = useRef(0)
   const [apercu, setApercu] = useState<ApercuActe>()

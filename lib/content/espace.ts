@@ -7,6 +7,8 @@
  */
 
 export const tableau = {
+  connecte: 'Connecté en tant que',
+  administrateur: ', administrateur',
   tri: 'Trier les dossiers',
   tris: {
     recent: 'Ouverts récemment',
@@ -117,6 +119,10 @@ export const activation = {
 } as const
 
 export const dossier = {
+  couvreLibelle: 'Couvre',
+  nature: 'Nature',
+  ouvertLe: 'Ouvert le',
+  expireLe: ', expire le',
   derniereActivite: (date: string) => `Dernière activité sur le dossier : ${date}.`,
   relancesGarant: (nombre: number, date: string) =>
     `Relances automatiques au garant : ${nombre} sur 3, la dernière le ${date}.`,
@@ -158,7 +164,7 @@ export const dossier = {
   refuser: 'Refuser le dossier',
   refuserAide: 'Le locataire est informé du refus, sans le motif.',
   prisTexte:
-    'Dossier pris. Les pièces sont figées ; l’acte de cautionnement arrive au prochain chantier.',
+    'Dossier pris. Les pièces sont figées ; vous pouvez maintenant préparer l’acte de cautionnement.',
   refuseTexte: 'Dossier refusé.',
 } as const
 

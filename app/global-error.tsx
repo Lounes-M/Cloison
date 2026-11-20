@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
-import { erreurs } from '@/lib/content/erreurs'
+import { useEffect, useSyncExternalStore } from 'react'
+import { erreurs as erreursEn } from '@/lib/content/en/erreurs'
+import { erreurs as erreursFr } from '@/lib/content/erreurs'
+import { COOKIE_LANGUE, type Langue } from '@/lib/i18n'
 import { fontVariables } from './fonts'
 import './globals.css'
 
@@ -14,18 +16,28 @@ import './globals.css'
  * partage casse est precisement un scenario qui amene ici. Tout est ecrit en
  * dur, sans dependance.
  */
+function langueDuNavigateur(): Langue {
+  const chemin = window.location.pathname
+  if (chemin === '/en' || chemin.startsWith('/en/')) return 'en'
+  return document.cookie.split('; ').includes(`${COOKIE_LANGUE}=en`) ? 'en' : 'fr'
+}
+const sansAbonnement = () => () => {}
+
 export default function GlobalError({
   error,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const langue = useSyncExternalStore<Langue>(sansAbonnement, langueDuNavigateur, () => 'fr')
+  const erreurs = langue === 'en' ? erreursEn : erreursFr
+
   useEffect(() => {
     console.error('[interface] application indisponible')
   }, [error])
 
   return (
-    <html lang="fr" className={fontVariables}>
+    <html lang={langue} className={fontVariables}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>

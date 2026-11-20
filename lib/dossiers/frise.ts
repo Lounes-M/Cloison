@@ -1,6 +1,8 @@
-import { frise } from '@/lib/content/frise'
+import { frise as friseFr } from '@/lib/content/frise'
+import { frise as friseEn } from '@/lib/content/en/frise'
+import { choisir, type Langue } from '@/lib/i18n'
 
-export type EtatEtape = keyof typeof frise.etats
+export type EtatEtape = keyof typeof friseFr.etats
 export type Etape = { titre: string; etat: EtatEtape }
 
 /**
@@ -16,8 +18,12 @@ function suite(titres: string[], courante: number, arret = false): Etape[] {
 }
 
 /** Le locataire voit les statuts tels quels : la frise n'en apprend pas davantage. */
-export function etapesLocataire(statut: string, garantDesigne: boolean): Etape[] {
-  const e = frise.locataire.etapes
+export function etapesLocataire(
+  statut: string,
+  garantDesigne: boolean,
+  langue: Langue = 'fr',
+): Etape[] {
+  const e = choisir(langue, friseFr, friseEn).locataire.etapes
   const titres = [e.ouverture, e.garant, e.depot, e.decision, e.signature]
   switch (statut) {
     case 'ouvert':
@@ -43,8 +49,8 @@ export function etapesLocataire(statut: string, garantDesigne: boolean): Etape[]
  * Le garant ne lit pas de verdict : complet et garant insuffisant donnent la
  * meme frise, qui ne depend que de son propre depot.
  */
-export function etapesGarant(statut: string, depotFait: boolean): Etape[] {
-  const e = frise.garant.etapes
+export function etapesGarant(statut: string, depotFait: boolean, langue: Langue = 'fr'): Etape[] {
+  const e = choisir(langue, friseFr, friseEn).garant.etapes
   const titres = [e.invitation, e.depot, e.decision, e.signature]
   switch (statut) {
     case 'ouvert':

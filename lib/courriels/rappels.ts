@@ -3,8 +3,11 @@ import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { scellerMaitresse } from '@/lib/coffre/rotation-maitresse'
 import { env } from '@/lib/env'
-import { courrielsRappels as t } from '@/lib/content/rappels'
+import { courrielsRappels as tFr } from '@/lib/content/rappels'
 import { adresseDuSite } from './envoi'
+import { courrielsRappels as tEn } from '@/lib/content/en/rappels'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 const rappel = z.object({
   id: z.uuid(),
   dossier_id: z.uuid(),
@@ -14,6 +17,9 @@ const rappel = z.object({
   expiration: z.iso.datetime({ offset: true }),
 })
 export async function preparerRappels(db: SupabaseClient, signal?: AbortSignal) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const { data: compte, error: planification } = await db.rpc('programmer_rappels')
   if (planification || !Number.isInteger(compte) || compte < 0 || compte > 20)
     throw new Error('Planification des rappels indisponible')

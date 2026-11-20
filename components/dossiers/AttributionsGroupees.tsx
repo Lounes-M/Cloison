@@ -1,9 +1,13 @@
 import Link from 'next/link'
 import type { ContexteAgence } from '@/lib/agences/contexte'
 import type { ResponsableDossier } from '@/lib/content/responsables'
-import { responsables as r } from '@/lib/content/responsables'
-import { pilotage as t } from '@/lib/content/pilotage'
+import { responsables as rFr } from '@/lib/content/responsables'
+import { pilotage as tFr } from '@/lib/content/pilotage'
 import { FormulaireAttributions } from '@/components/forms/FormulaireAttributions'
+import { responsables as rEn } from '@/lib/content/en/responsables'
+import { pilotage as tEn } from '@/lib/content/en/pilotage'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export async function AttributionsGroupees({
   contexte,
@@ -18,6 +22,10 @@ export async function AttributionsGroupees({
   pageEquipe: unknown
   baseUrl: `/espace?${string}`
 }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const r = choisir(langue, rFr, rEn)
+
   const page =
     typeof pageEquipe === 'string' && /^[1-9]\d{0,3}$/.test(pageEquipe) ? Number(pageEquipe) : 1
   let disponible = true

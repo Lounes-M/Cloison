@@ -1,10 +1,14 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { revalidatePath } from 'next/cache'
 
-import { rattachement as textes } from '@/lib/content/rattachement'
+import { rattachement as textesFr } from '@/lib/content/rattachement'
 
 import { rattacher } from './rattachement'
+import { rattachement as textesEn } from '@/lib/content/en/rattachement'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Nommer son agence, une seule fois, par la premiere personne qui arrive.
@@ -20,6 +24,10 @@ export async function nommerAgence(
   _precedent: EtatNomAgence,
   donnees: FormData,
 ): Promise<EtatNomAgence> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const textes = choisir(langue, textesFr, textesEn)
+
   const saisie = String(donnees.get('nom') ?? '').trim()
 
   // La base exige deux caracteres au minimum. On le verifie aussi ici, pour
@@ -49,7 +57,7 @@ export async function nommerAgence(
 
   return {
     statut: 'erreur',
-    message: "L'enregistrement n'a pas abouti. Réessayez dans un instant.",
+    message: dire("L'enregistrement n'a pas abouti. Réessayez dans un instant."),
     valeur: saisie,
   }
 }

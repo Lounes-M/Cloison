@@ -1,3 +1,6 @@
+import { calendrier as calendrierEn } from '@/lib/content/en/calendrier'
+import { calendrier as calendrierFr } from '@/lib/content/calendrier'
+import { choisir, type Langue } from '@/lib/i18n'
 import 'server-only'
 import { z } from 'zod'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -40,7 +43,9 @@ function texte(valeur: string) {
 export function calendrierEcheance(
   dossier: { id: string; reference: string; expire_le: string },
   maintenant = new Date(),
+  langue: Langue = 'fr',
 ) {
+  const textes = choisir(langue, calendrierFr, calendrierEn)
   if (
     !estUuidCanonique(dossier.id) ||
     typeof dossier.reference !== 'string' ||
@@ -63,8 +68,8 @@ export function calendrierEcheance(
       `UID:coffre-${dossier.id}@cloison.immo`,
       `DTSTAMP:${dateIcs(maintenant)}`,
       `DTSTART:${dateIcs(expiration)}`,
-      `SUMMARY:${texte(`Cloison : fin du coffre ${dossier.reference}`)}`,
-      `DESCRIPTION:${texte('Échéance du coffre documentaire. Cette date ne décrit pas la durée de l’acte signé. Copie ponctuelle : vérifier la date courante dans Cloison. Aucun suivi automatique après import.')}`,
+      `SUMMARY:${texte(`${textes.evenement} ${dossier.reference}`)}`,
+      `DESCRIPTION:${texte(textes.description)}`,
       'CLASS:PRIVATE',
       'TRANSP:TRANSPARENT',
       'END:VEVENT',

@@ -12,6 +12,12 @@ export const juridique = {
   aCompleter: 'To be completed',
   avertissementIncomplet: 'Some information about the publisher is being published.',
   miseAJour: 'Last updated: 21 October 2026.',
+  navigation: 'Legal information',
+  liens: {
+    mentions: { label: 'Legal notice', href: '/mentions-legales' },
+    confidentialite: { label: 'Privacy', href: '/confidentialite' },
+    conditions: { label: 'Terms', href: '/conditions' },
+  },
   traduction:
     'This page is a translation provided for convenience. The French version is the one that applies.',
 } as const

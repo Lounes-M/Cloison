@@ -3,8 +3,12 @@ import Link from 'next/link'
 import { useActionState, useRef, useState } from 'react'
 import { telechargerModeleActe } from '@/lib/acte/actions'
 import { preparerActe } from '@/lib/signature/actions'
-import { acte as t } from '@/lib/content/acte'
-import { signature as ts } from '@/lib/content/signature'
+import { acte as tFr } from '@/lib/content/acte'
+import { signature as tsFr } from '@/lib/content/signature'
+import { acte as tEn } from '@/lib/content/en/acte'
+import { signature as tsEn } from '@/lib/content/en/signature'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const champ = 'border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3'
 const bouton =
@@ -50,6 +54,10 @@ export function ModeleActe({
   aujourdHui: string
   signatureOuverte: boolean
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+  const ts = choisir(langue, tsFr, tsEn)
+
   const formulaire = useRef<HTMLFormElement>(null)
   const [message, setMessage] = useState('')
   const [attente, setAttente] = useState(false)

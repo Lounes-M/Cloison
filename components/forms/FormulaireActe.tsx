@@ -2,9 +2,15 @@
 import { PlacementActe } from './PlacementActe'
 import { useActionState } from 'react'
 import { preparerActe, validerActe, reprendreDepotActe } from '@/lib/signature/actions'
-import { signature as t } from '@/lib/content/signature'
+import { signature as tFr } from '@/lib/content/signature'
 import Link from 'next/link'
+import { signature as tEn } from '@/lib/content/en/signature'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 export function FormulaireActe({ dossier }: { dossier: string }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, action, attente] = useActionState(preparerActe, { message: '' })
   return (
     <form action={action} className="grid gap-5">
@@ -46,6 +52,9 @@ export function ValidationActe({
   dossier: string
   empreinte: string
 }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, action, attente] = useActionState(validerActe, { message: '' })
   return (
     <form action={action} className="mt-6 grid gap-4">
@@ -80,6 +89,9 @@ export function ValidationActe({
 }
 
 export function RepriseActe({ id }: { id: string }) {
+  const langue = useLangue()
+  const t = choisir(langue, tFr, tEn)
+
   const [etat, action, attente] = useActionState(reprendreDepotActe, { message: '' })
   return (
     <form action={action} className="mt-6 grid gap-4">

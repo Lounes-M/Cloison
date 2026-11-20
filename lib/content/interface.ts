@@ -5,6 +5,7 @@ export const interfaceEspace = {
   navigation: 'Navigation de votre espace',
   tableau: 'Mes dossiers',
   principal: 'Aller au contenu',
+  langue: 'Langue',
   signature: 'Un dossier commun. Des espaces séparés.',
   ouverture: 'On commence ici',
   retrouver: 'Tu as déjà un dossier ?',

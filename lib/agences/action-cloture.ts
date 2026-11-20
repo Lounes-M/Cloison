@@ -1,14 +1,18 @@
 'use server'
+import { traducteur } from '@/lib/messages'
 import { createHash } from 'node:crypto'
 
 import { revalidatePath } from 'next/cache'
 
 import { clientServeur } from '@/lib/acces/serveur'
-import { cloture as texte } from '@/lib/content/espace'
+import { cloture as texteFr } from '@/lib/content/espace'
 import { cloture as courriels, pied } from '@/lib/content/courriels'
 import { envoyer } from '@/lib/courriels/envoi'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
+import { cloture as texteEn } from '@/lib/content/en/espace'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 export type EtatCloture =
   | { statut: 'inactif' }
@@ -30,6 +34,10 @@ function identifiant(dossierId: string, partie: string): string {
  * file de notifications ne porterait plus pour un dossier echu.
  */
 export async function cloreLeDossier(_p: EtatCloture, donnees: FormData): Promise<EtatCloture> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const texte = choisir(langue, texteFr, texteEn)
+
   const id = String(donnees.get('dossier') ?? '')
   const reference = String(donnees.get('reference') ?? '').trim()
   if (!estUuidCanonique(id) || reference.length === 0 || reference.length > 64) {
@@ -37,7 +45,7 @@ export async function cloreLeDossier(_p: EtatCloture, donnees: FormData): Promis
   }
 
   const contexte = await contexteAgence()
-  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: 'Session expirée.' }
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
 
   const { data, error } = await contexte.supabase.rpc('clore_dossier', {
     le_dossier: id,

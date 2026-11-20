@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
@@ -9,15 +8,21 @@ import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDo
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { reglerLaCandidature } from '@/lib/agences/action-logements'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { candidature as tc } from '@/lib/content/candidature'
-import { statuts } from '@/lib/content/espace'
-import { logements as t } from '@/lib/content/logements'
-import { euros } from '@/lib/content/tarifs'
+import { candidature as tcFr } from '@/lib/content/candidature'
+import { statuts as statutsFr } from '@/lib/content/espace'
+import { logements as tFr } from '@/lib/content/logements'
+import { euros as eurosFr } from '@/lib/content/tarifs'
 import { site } from '@/lib/site'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { cn } from '@/lib/utils'
+import { candidature as tcEn } from '@/lib/content/en/candidature'
+import { statuts as statutsEn } from '@/lib/content/en/espace'
+import { logements as tEn } from '@/lib/content/en/logements'
+import { euros as eurosEn } from '@/lib/content/en/tarifs'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
 
-export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 
 const tons = {
   sky: 'bg-sky',
@@ -46,6 +51,12 @@ function ratioDe(c: Candidat): number | null {
  * est exactement ce que l'espace montre deja, regroupe.
  */
 export default async function PageLogement({ params }: { params: Promise<{ id: string }> }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const euros = choisir(langue, eurosFr, eurosEn)
+  const statuts = choisir(langue, statutsFr, statutsEn)
+  const tc = choisir(langue, tcFr, tcEn)
+
   const { id } = await params
   if (!estUuidCanonique(id)) notFound()
   const c = await contexteAgence()
@@ -77,7 +88,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
     .filter((d) => d.statut === 'transmis' || d.statut === 'signe')
     .map((d) => ({ id: d.id, reference: d.reference }))
   const seuil = c.agence.seuilRatio
-  const fmt = (n: number) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
+  const fmt = (n: number) => n.toLocaleString(locale(langue), { minimumFractionDigits: 2 })
   const code = typeof logement.code_candidature === 'string' ? logement.code_candidature : null
   const lienCandidature = code ? `${site.url}/candidater/${code}` : null
   const loyer =

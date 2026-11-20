@@ -13,13 +13,6 @@ import { informationCollecte as collecteFr } from '@/lib/content/information-col
 
 const ETAT_INITIAL: EtatOuverture = { statut: 'inactif' }
 
-/** Les refus de candidature viennent du contenu : ils ont leur propre traduction. */
-function messageServeur(message: string) {
-  if (message === candidatureFr.page.invalideTexte) return candidatureEn.page.invalideTexte
-  if (message === candidatureFr.erreurs.accord) return candidatureEn.erreurs.accord
-  return en.messageEn(message)
-}
-
 /**
  * La porte principale : un champ, un bouton.
  *
@@ -68,12 +61,13 @@ export function FormulaireOuverture({
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
+      <input type="hidden" name="langue" value={langue} />
       {etat.statut === 'erreur' ? (
         <p
           role="alert"
           className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
         >
-          {langue === 'en' ? messageServeur(etat.message) : etat.message}
+          {etat.message}
         </p>
       ) : null}
 

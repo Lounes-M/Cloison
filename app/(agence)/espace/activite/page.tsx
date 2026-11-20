@@ -1,15 +1,15 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { libelleMois, totauxActivite, type MoisActivite } from '@/lib/agences/activite'
 import { contexteAgence } from '@/lib/agences/contexte'
-import { activite as t } from '@/lib/content/activite'
+import { activite as tFr } from '@/lib/content/activite'
+import { activite as tEn } from '@/lib/content/en/activite'
+import { choisir, locale } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
 
-export const metadata: Metadata = { title: t.titre, robots: { index: false, follow: false } }
-
-const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 1 })
+export const generateMetadata = () => titreEspace(tFr.titre, tEn.titre)
 
 /**
  * L'activite de l'agence sur douze mois.
@@ -18,6 +18,10 @@ const fmt = (n: number) => n.toLocaleString('fr-FR', { maximumFractionDigits: 1 
  * part des dossiers et qui survivent donc a leur purge (0068).
  */
 export default async function PageActivite() {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+  const fmt = (n: number) => n.toLocaleString(locale(langue), { maximumFractionDigits: 1 })
+
   const c = await contexteAgence()
   if (c.etat !== 'rattache') redirect('/connexion')
   const { data, error } = await c.supabase.rpc('activite_de_mon_agence')
@@ -80,7 +84,7 @@ export default async function PageActivite() {
             {lignes.map((l) => (
               <tr key={l.mois} className="border-ink/10 border-b last:border-0">
                 <th scope="row" className="py-2 pr-4 font-semibold capitalize">
-                  {libelleMois(String(l.mois))}
+                  {libelleMois(String(l.mois), langue)}
                 </th>
                 <td className="py-2 pr-4 text-right tabular-nums">{l.ouverts}</td>
                 <td className="py-2 pr-4 text-right tabular-nums">{l.pris}</td>

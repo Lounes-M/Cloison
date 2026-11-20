@@ -3,14 +3,54 @@
  *
  * Le francais vit a la racine (`/agences`), l'anglais sous `/en`
  * (`/en/agences`) : deux adresses stables, indexables, et aucune page ne
- * depend d'un cookie pour savoir quoi afficher. Les espaces connectes et les
- * courriels restent en francais.
+ * depend d'un cookie pour savoir quoi afficher.
+ *
+ * Les espaces connectes ne sont pas indexes et gardent une seule adresse :
+ * leur langue vient du cookie `cloison_langue`, pose par la bascule, par le
+ * lien recu et par la connexion (voir `lib/langue-espace.ts`). La langue
+ * preferee de chaque personne vit en base : c'est elle qui choisit la langue
+ * de ses courriels.
  */
 import type { Route } from 'next'
 
 export type Langue = 'fr' | 'en'
 
 export const LANGUES = ['fr', 'en'] as const satisfies readonly Langue[]
+
+/** Le cookie qui porte la langue d'affichage des espaces connectes. */
+export const COOKIE_LANGUE = 'cloison_langue'
+
+export function estLangue(valeur: unknown): valeur is Langue {
+  return valeur === 'fr' || valeur === 'en'
+}
+
+/** La langue lue dans une saisie ou un cookie, le francais par defaut. */
+export function versLangue(valeur: unknown): Langue {
+  return estLangue(valeur) ? valeur : 'fr'
+}
+
+/** La locale des dates et des nombres dans cette langue. */
+export function locale(langue: Langue): 'fr-FR' | 'en-GB' {
+  return langue === 'en' ? 'en-GB' : 'fr-FR'
+}
+
+/**
+ * La forme d'un module de textes, sans ses litteraux : ce qu'une traduction
+ * doit fournir. Les cles, les tuples et les signatures restent ceux du
+ * francais, donc une cle oubliee ou en trop ne compile pas.
+ */
+export type Textes<T> = T extends string
+  ? string
+  : T extends (...args: infer A) => infer R
+    ? (...args: A) => Textes<R>
+    : T extends object
+      ? // Les cles techniques (ancre, lien, ton) gardent leur valeur exacte.
+        {
+          readonly [K in keyof T]: K extends 'cle' | 'href' | 'ton' | 'id' | 'valeur'
+            ? T[K]
+            : Textes<T[K]>
+        }
+      : T
 
 /** Les pages qui existent dans les deux langues. */
 const TRADUITES = [

@@ -1,7 +1,8 @@
 'use server'
 
+import { traducteur } from '@/lib/messages'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { sessionPorteur } from '@/lib/content/session-porteur'
+import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
@@ -13,6 +14,9 @@ import { capaciteDepuisCookies, clientPorteurDeLien, urlDuLien } from '@/lib/acc
 import { signerJeton } from '@/lib/acces/jeton'
 import { envoyerLienGarant } from '@/lib/courriels/liens'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
+import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 
 /**
  * Le locataire designe son garant, et c'est tout ce qu'il ecrit.
@@ -54,13 +58,17 @@ export async function designerMonGarant(
   _precedent: EtatGarant,
   donnees: FormData,
 ): Promise<EtatGarant> {
+  const langue = await langueEspace()
+  const dire = traducteur(langue)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+
   const saisie = String(donnees.get('courriel') ?? '')
   const analyse = schema.safeParse({ courriel: saisie })
 
   if (!analyse.success) {
     return {
       statut: 'erreur',
-      message: analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.',
+      message: dire(analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.'),
       valeur: saisie,
     }
   }
@@ -74,14 +82,14 @@ export async function designerMonGarant(
     return { statut: 'erreur', message: sessionPorteur.autreDossier }
   }
   if (!porteur || porteur.capacite.partie !== 'locataire') {
-    return { statut: 'erreur', message: 'Ton lien a expiré. Demande-en un nouveau.' }
+    return { statut: 'erreur', message: dire('Ton lien a expiré. Demande-en un nouveau.') }
   }
 
   try {
     if (!(await consommerDebit(await clientServeur(), 'lien_garant', await empreinteAppelant()))) {
       return {
         statut: 'erreur',
-        message: 'Trop de liens envoyés. Réessaie dans un quart d’heure.',
+        message: dire('Trop de liens envoyés. Réessaie dans un quart d’heure.'),
         valeur: saisie,
       }
     }
@@ -98,7 +106,7 @@ export async function designerMonGarant(
       .maybeSingle()
 
     if (!dossier) {
-      return { statut: 'erreur', message: 'Ton lien a expiré. Demande-en un nouveau.' }
+      return { statut: 'erreur', message: dire('Ton lien a expiré. Demande-en un nouveau.') }
     }
 
     // La base refuserait de toute facon d'emettre le lien (migration 0018) ;
@@ -106,7 +114,9 @@ export async function designerMonGarant(
     if (!dossier.paye_le && !dossier.agence_id && !dossier.demonstration) {
       return {
         statut: 'erreur',
-        message: 'Règle d’abord ton dossier, plus haut : le lien de ton garant partira ensuite.',
+        message: dire(
+          'Règle d’abord ton dossier, plus haut : le lien de ton garant partira ensuite.',
+        ),
         valeur: saisie,
       }
     }
@@ -114,7 +124,7 @@ export async function designerMonGarant(
     if (courriel === String(dossier.email_locataire).toLowerCase()) {
       return {
         statut: 'erreur',
-        message: 'Ton garant ne peut pas être toi-même.',
+        message: dire('Ton garant ne peut pas être toi-même.'),
         valeur: saisie,
       }
     }
@@ -124,8 +134,9 @@ export async function designerMonGarant(
     if (error || !emis?.jti || !emis.expire_le) {
       return {
         statut: 'erreur',
-        message:
+        message: dire(
           'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.',
+        ),
         valeur: saisie,
       }
     }
@@ -146,7 +157,7 @@ export async function designerMonGarant(
       if (!envoye) {
         return {
           statut: 'erreur',
-          message: "Le lien n'a pas pu être envoyé. Vérifie l'adresse et réessaie.",
+          message: dire("Le lien n'a pas pu être envoyé. Vérifie l'adresse et réessaie."),
           valeur: saisie,
         }
       }
@@ -155,8 +166,9 @@ export async function designerMonGarant(
     console.error('[locataire] designation impossible')
     return {
       statut: 'erreur',
-      message:
+      message: dire(
         'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.',
+      ),
       valeur: saisie,
     }
   }

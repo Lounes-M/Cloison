@@ -3,10 +3,21 @@
 import { BrouillonEngagement } from './BrouillonEngagement'
 import { useActionState, useId, useRef, useState } from 'react'
 
-import { engagement as texte, profilsRessources, type ProfilRessources } from '@/lib/content/garant'
-import { conditionsEngagement } from '@/lib/content/conditions-engagement'
+import {
+  engagement as texteFr,
+  profilsRessources as profilsRessourcesFr,
+  type ProfilRessources,
+} from '@/lib/content/garant'
+import { conditionsEngagement as conditionsEngagementFr } from '@/lib/content/conditions-engagement'
 import { declarerMonEngagement, type EtatEngagement } from '@/lib/garant/action-engagement'
 import { cn } from '@/lib/utils'
+import {
+  engagement as texteEn,
+  profilsRessources as profilsRessourcesEn,
+} from '@/lib/content/en/garant'
+import { conditionsEngagement as conditionsEngagementEn } from '@/lib/content/en/conditions-engagement'
+import { choisir } from '@/lib/i18n'
+import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatEngagement = { statut: 'inactif' }
 
@@ -40,6 +51,11 @@ export function FormulaireEngagement({
   dossierId: string
   version: number
 }) {
+  const langue = useLangue()
+  const conditionsEngagement = choisir(langue, conditionsEngagementFr, conditionsEngagementEn)
+  const texte = choisir(langue, texteFr, texteEn)
+  const profilsRessources = choisir(langue, profilsRessourcesFr, profilsRessourcesEn)
+
   const [etat, envoyer, enCours] = useActionState(declarerMonEngagement, ETAT_INITIAL)
   const id = useId()
   const formulaire = useRef<HTMLFormElement>(null)

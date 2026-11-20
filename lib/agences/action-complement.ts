@@ -4,13 +4,19 @@ import { z } from 'zod'
 import { contexteAgence } from './contexte'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { formulaireDuDossier } from '@/lib/acces/formulaire'
-import { complements } from '@/lib/content/complements'
+import { complements as complementsFr } from '@/lib/content/complements'
+import { complements as complementsEn } from '@/lib/content/en/complements'
+import { choisir } from '@/lib/i18n'
+import { langueEspace } from '@/lib/langue-espace'
 export type EtatComplement = { statut: 'inactif' | 'enregistre' | 'erreur' }
 const uuid = z.uuid()
 export async function modifierComplement(
   _p: EtatComplement,
   donnees: FormData,
 ): Promise<EtatComplement> {
+  const langue = await langueEspace()
+  const complements = choisir(langue, complementsFr, complementsEn)
+
   const dossier = uuid.safeParse(donnees.get('dossier'))
   const cible = uuid.safeParse(donnees.get('cible'))
   const operation = donnees.get('operation')

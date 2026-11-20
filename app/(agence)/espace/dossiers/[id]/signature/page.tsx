@@ -9,11 +9,19 @@ import { configurationParcours } from '@/lib/signature/configuration-parcours'
 
 import { FormulaireActe } from '@/components/forms/FormulaireActe'
 
-import { signature as t } from '@/lib/content/signature'
+import { signature as tFr } from '@/lib/content/signature'
+import { signature as tEn } from '@/lib/content/en/signature'
+import { choisir } from '@/lib/i18n'
+import { langueEspace, titreEspace } from '@/lib/langue-espace'
+import { titres as titresEn } from '@/lib/content/en/titres'
+import { titres as titresFr } from '@/lib/content/titres'
 
-export const metadata = { title: 'Préparer la signature', robots: { index: false, follow: false } }
+export const generateMetadata = () => titreEspace(titresFr.signature, titresEn.signature)
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const langue = await langueEspace()
+  const t = choisir(langue, tFr, tEn)
+
   const { id } = await params
 
   if (!z.uuid().safeParse(id).success) notFound()
