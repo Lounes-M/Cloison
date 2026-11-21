@@ -99,9 +99,7 @@ export default async function Page({
                   <input type="hidden" name="facture" value={f.id} />
                   <input type="hidden" name="montant" value={f.montant_cents} />
                   <input type="hidden" name="tarif" value={f.tarif_version} />
-                  <button className="press outlined bg-cobalt rounded-brut px-5 py-3 font-bold text-white">
-                    {t.payer}
-                  </button>
+                  <button className="btn btn-principal">{t.payer}</button>
                 </form>
               ) : null}
             </li>

@@ -71,10 +71,7 @@ export function FormulaireSupportDossier({
           className="outlined bg-paper w-full min-w-0 rounded-lg p-3 text-sm"
         />
         <div className="flex flex-wrap gap-3">
-          <a
-            href={message.lien}
-            className="press outlined bg-cobalt text-paper shadow-brut-xs rounded-lg px-4 py-2 font-bold"
-          >
+          <a href={message.lien} className="btn btn-principal">
             {t.ouvrir}
           </a>
           <button

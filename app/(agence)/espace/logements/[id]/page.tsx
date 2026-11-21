@@ -210,10 +210,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                 <form action={reglerLaCandidature}>
                   <input type="hidden" name="logement" value={id} />
                   <input type="hidden" name="candidature" value="ouvrir" />
-                  <button
-                    type="submit"
-                    className="press outlined bg-sun rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
-                  >
+                  <button type="submit" className="btn btn-secondaire">
                     {lienCandidature ? tc.agence.renouveler : tc.agence.ouvrir}
                   </button>
                 </form>
@@ -222,10 +219,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                 <form action={reglerLaCandidature}>
                   <input type="hidden" name="logement" value={id} />
                   <input type="hidden" name="candidature" value="fermer" />
-                  <button
-                    type="submit"
-                    className="press outlined bg-paper rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
-                  >
+                  <button type="submit" className="btn btn-secondaire">
                     {tc.agence.fermer}
                   </button>
                 </form>

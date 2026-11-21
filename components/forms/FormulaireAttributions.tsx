@@ -93,7 +93,7 @@ export function FormulaireAttributions({
           <button
             type="submit"
             disabled={selection.length === 0 || !selectionVisible}
-            className="press outlined bg-cobalt text-paper rounded-lg p-3 font-bold disabled:opacity-50"
+            className="btn btn-principal"
           >
             {attente ? t.attente : t.envoyer}
           </button>

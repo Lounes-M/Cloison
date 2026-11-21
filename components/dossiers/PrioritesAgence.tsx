@@ -18,15 +18,23 @@ export async function PrioritesAgence({
   return (
     <section className="panneau-espace mt-8" aria-label={t.titre}>
       <h2 className="text-xl font-bold">{t.titre}</h2>
-      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {t.indicateurs.map((carte) => {
           const nombre = nombres.find((n) => n.cle === carte.cle)?.nombre
           return (
             <li key={carte.cle}>
               <Link href={carte.href} className="carte-priorite">
-                <span className="text-sm leading-snug font-semibold">{carte.titre}</span>
+                <span className="text-[13px] leading-snug font-semibold hyphens-auto sm:text-sm">
+                  {carte.titre}
+                </span>
                 <strong
-                  className={nombre == null ? 'text-sm' : 'text-cobalt text-3xl tabular-nums'}
+                  className={
+                    nombre == null
+                      ? 'text-sm'
+                      : nombre === 0
+                        ? 'text-muted text-3xl font-medium tabular-nums'
+                        : 'text-cobalt text-3xl tabular-nums'
+                  }
                 >
                   {nombre == null ? t.indisponible : nombre.toLocaleString(locale(langue))}
                 </strong>

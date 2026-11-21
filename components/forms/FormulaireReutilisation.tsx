@@ -103,7 +103,7 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
           </>
         ) : null}
         <button
-          className="bg-cobalt text-paper outlined shadow-brut hover:shadow-brut-sm rounded-xl px-5 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-50 motion-reduce:transform-none"
+          className="btn btn-principal"
           type="submit"
           disabled={attente || (etat?.statut === 'liste' && !etat.pieces.length)}
         >

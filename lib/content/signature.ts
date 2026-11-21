@@ -1,6 +1,9 @@
 export const signature = {
   etiquette: 'Acte de cautionnement',
   lienArchives: 'Archives',
+  aucunAgence: 'Aucun acte n’est encore préparé pour ce dossier.',
+  aucunGarant:
+    'Aucun acte à signer pour l’instant. L’agence le prépare une fois votre dossier accepté ; vous recevrez un courriel dès qu’il sera prêt.',
   titre: 'Signature de l’acte',
   preparation: 'Préparer l’acte',
   explication:

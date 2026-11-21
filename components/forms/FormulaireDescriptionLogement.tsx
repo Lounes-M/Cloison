@@ -35,18 +35,12 @@ export function FormulaireDescriptionLogement({
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       <input type="hidden" name="logement" value={logementId} />
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
       {etat.statut === 'enregistre' ? (
-        <p
-          role="status"
-          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="status" className="message-succes">
           {t.succes}
         </p>
       ) : null}
@@ -119,11 +113,7 @@ export function FormulaireDescriptionLogement({
           />
         </div>
       </div>
-      <button
-        type="submit"
-        disabled={enCours}
-        className="press outlined bg-sun rounded-brut cursor-pointer self-start px-5 py-3 text-[14px] font-bold disabled:cursor-wait disabled:opacity-70"
-      >
+      <button type="submit" disabled={enCours} className="btn btn-secondaire self-start">
         {enCours ? t.envoi : t.bouton}
       </button>
     </form>

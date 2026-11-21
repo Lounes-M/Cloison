@@ -65,10 +65,7 @@ export function FormulaireConnexion({
       ) : null}
 
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -93,14 +90,7 @@ export function FormulaireConnexion({
         </p>
       </div>
 
-      <button
-        type="submit"
-        disabled={enCours}
-        className={cn(
-          'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer px-8 py-4',
-          'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
-        )}
-      >
+      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand">
         {enCours ? t.envoi : t.recevoir}
       </button>
     </form>

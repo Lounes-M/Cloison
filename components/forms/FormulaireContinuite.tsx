@@ -64,7 +64,7 @@ export function FormulaireContinuite({
             </label>
           </>
         )}
-        <button disabled={pending} className="bg-ink text-paper rounded-lg p-3 font-bold">
+        <button disabled={pending} className="btn btn-principal">
           {mode === 'retrouver' ? continuite.envoyer : continuite.transmettre}
         </button>
         {etat.message ? <p role="status">{etat.message}</p> : null}

@@ -88,18 +88,12 @@ export function FormulaireEngagement({
         </p>
       </div>
       {etat.statut === 'enregistre' ? (
-        <p
-          role="status"
-          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="status" className="message-succes">
           {texte.succes}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -202,10 +196,7 @@ export function FormulaireEngagement({
       <button
         type="submit"
         disabled={enCours || brouillonEnCours}
-        className={cn(
-          'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer self-start px-8 py-4',
-          'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
-        )}
+        className="btn btn-principal btn-grand self-start"
       >
         {enCours ? texte.envoi : texte.bouton}
       </button>

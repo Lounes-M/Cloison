@@ -11,8 +11,7 @@ import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
 
 const champ = 'border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3'
-const bouton =
-  'press outlined rounded-brut px-6 py-3 font-bold disabled:opacity-60 bg-paper shadow-brut'
+const bouton = 'btn btn-secondaire'
 
 function Texte({
   nom,
@@ -208,9 +207,7 @@ export function ModeleActe({
             <input type="checkbox" name="accord" required />
             {t.accord}
           </label>
-          <button className="press outlined bg-cobalt shadow-brut rounded-brut px-6 py-3 font-bold text-white disabled:opacity-60">
-            {envoi ? ts.attente : t.soumettre}
-          </button>
+          <button className="btn btn-principal">{envoi ? ts.attente : t.soumettre}</button>
           <p role="status">{etat.message}</p>
           {etat.id ? <Link href={`/espace/actes/${etat.id}`}>{ts.suivi}</Link> : null}
         </fieldset>

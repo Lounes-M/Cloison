@@ -24,6 +24,7 @@
   --color-flame-texte: #c43e00; /* orange lisible en texte, 4.5:1 sur creme et blanc */
   --color-mint: #d5e3dc; /* vert pale, espace locataire */
   --color-sky: #f6dfeb; /* rose pale, espace agence */
+  --color-erreur: #b42318; /* erreurs et actions destructives : jamais l'orange de marque */
   --color-muted: #5e5e5e;
   --color-live: #1db954; /* pastille "en vie" */
 
@@ -320,8 +321,8 @@
   }
 
   .retour-formulaire-erreur {
-    border-left-color: var(--color-flame);
-    background: color-mix(in srgb, var(--color-flame) 8%, var(--color-paper));
+    border-left-color: var(--color-erreur);
+    background: color-mix(in srgb, var(--color-erreur) 6%, var(--color-paper));
   }
 
   .retour-formulaire-succes {
@@ -573,7 +574,7 @@
     border: 1px solid color-mix(in srgb, var(--color-ink) 15%, transparent);
     border-radius: 12px;
     background: var(--color-cream);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .carte-priorite:hover {
     border-color: var(--color-cobalt);
@@ -584,7 +585,7 @@
   }
 
   .page-espace > h1 {
-    color: var(--color-cobalt);
+    color: var(--color-ink);
     line-height: 1.12;
     overflow-wrap: anywhere;
   }
@@ -1393,4 +1394,203 @@ html:has(.site-public) {
 }
 .site-public details.question-faq[open] > summary .chevron-question {
   rotate: 45deg;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Boutons et messages des formulaires                                 */
+/* ------------------------------------------------------------------ */
+/* Un seul jeu de boutons pour tous les formulaires et les espaces
+   connectes : principal (une action par ecran), secondaire, destructif.
+   Le bouton a case orange de `ui/Button.tsx` reste reserve a la navigation
+   du site public. L'orange n'est ni une erreur ni un bouton plein. */
+.btn {
+  display: inline-flex;
+  min-height: 48px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid transparent;
+  border-radius: var(--radius-brut);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  font-weight: 700;
+  text-align: center;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.btn-grand {
+  min-height: 56px;
+  padding: 0.875rem 2rem;
+  font-size: 1.0625rem;
+}
+.btn-principal {
+  background: var(--color-cobalt);
+  color: #fff;
+}
+.btn-principal:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-cobalt) 86%, #000);
+}
+.btn-secondaire {
+  border-color: color-mix(in srgb, var(--color-ink) 16%, transparent);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.btn-secondaire:hover:not(:disabled) {
+  border-color: var(--color-cobalt);
+  color: var(--color-cobalt);
+}
+.btn-danger {
+  border-color: color-mix(in srgb, var(--color-erreur) 45%, transparent);
+  background: var(--color-paper);
+  color: var(--color-erreur);
+}
+.btn-danger:hover:not(:disabled) {
+  border-color: var(--color-erreur);
+  background: color-mix(in srgb, var(--color-erreur) 6%, var(--color-paper));
+}
+.btn-texte-danger {
+  display: inline-flex;
+  min-height: 44px;
+  cursor: pointer;
+  align-items: center;
+  color: var(--color-erreur);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-underline-offset: 2px;
+}
+.btn-texte-danger:hover {
+  text-decoration: underline;
+}
+.btn-texte-danger:disabled {
+  cursor: wait;
+}
+
+/* Retour d'un formulaire : l'erreur est rouge, jamais orange, pour ne pas
+   se confondre avec une action ; la reussite reprend le vert de la marque. */
+.message-erreur,
+.message-succes {
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.message-erreur {
+  border-color: color-mix(in srgb, var(--color-erreur) 35%, transparent);
+  border-left-color: var(--color-erreur);
+  background: color-mix(in srgb, var(--color-erreur) 6%, var(--color-paper));
+}
+.message-succes {
+  border-color: color-mix(in srgb, var(--color-cobalt) 30%, transparent);
+  border-left-color: var(--color-cobalt);
+  background: color-mix(in srgb, var(--color-mint) 45%, var(--color-paper));
+}
+
+/* ------------------------------------------------------------------ */
+/*  Navigation de l'espace agence (layout/NavigationAgence.tsx)         */
+/* ------------------------------------------------------------------ */
+.nav-agence-liens,
+.nav-agence-outils {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.nav-agence-outils {
+  gap: 0.75rem;
+}
+.nav-agence-lien {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 0.625rem;
+  padding: 0.5rem 0.8rem;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.nav-agence-lien:hover {
+  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+}
+.nav-agence-lien[aria-current='page'] {
+  background: var(--color-cobalt);
+  color: #fff;
+}
+.nav-agence-large {
+  display: none;
+}
+.nav-agence-repli > summary {
+  list-style: none;
+}
+.nav-agence-repli > summary::-webkit-details-marker {
+  display: none;
+}
+.nav-agence-bouton {
+  display: inline-flex;
+  min-height: 44px;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+  border-radius: 0.625rem;
+  background: var(--color-paper);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.nav-agence-barres {
+  width: 1rem;
+  height: 0.75rem;
+  border-block: 2px solid currentcolor;
+  background: linear-gradient(currentcolor, currentcolor) center / 100% 2px no-repeat;
+}
+/* Le panneau du menu replie occupe toute la largeur, sous la rangee du logo. */
+.entete-agence {
+  position: relative;
+}
+.nav-agence-panneau {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  z-index: 20;
+  display: grid;
+  gap: 0.75rem;
+  border-bottom: 2px solid var(--color-ink);
+  background: var(--color-cream);
+  padding: 0.5rem 1.25rem 1.25rem;
+}
+.nav-agence-panneau .nav-agence-liens {
+  display: grid;
+  gap: 0.25rem;
+}
+.nav-agence-panneau .nav-agence-outils {
+  flex-wrap: wrap;
+  border-top: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  padding-top: 0.75rem;
+}
+@media (min-width: 1024px) {
+  .nav-agence-large {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .nav-agence-repli {
+    display: none;
+  }
 }

@@ -50,7 +50,7 @@ export function FormulaireMention({
 
   if (etat.statut === 'apposee') {
     return (
-      <p role="status" className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+      <p role="status" className="message-succes">
         {texte.succes}
       </p>
     )
@@ -64,10 +64,7 @@ export function FormulaireMention({
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="versionConditions" value={version} />
       {etat.statut === 'erreur' ? (
-        <div
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <div role="alert" className="message-erreur">
           <p>{etat.message}</p>
           {manques.length > 0 ? (
             <ul className="mt-2 list-disc pl-5 font-medium">
@@ -150,14 +147,7 @@ export function FormulaireMention({
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={enCours}
-        className={cn(
-          'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer self-start px-8 py-4',
-          'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
-        )}
-      >
+      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand self-start">
         {enCours ? texte.envoi : actuel?.apposeeLe ? texte.corriger : texte.bouton}
       </button>
     </form>

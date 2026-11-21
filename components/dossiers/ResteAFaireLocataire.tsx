@@ -29,10 +29,10 @@ export async function ResteAFaireLocataire({ etapes }: { etapes: EtapeLocataire[
               <li key={etape}>
                 <a
                   href={`#${ancres[etape]}`}
-                  className="bg-paper outlined flex items-start gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold"
+                  className="bg-paper outlined hover:border-cobalt flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors"
                 >
-                  <Icone nom="direction" className="mt-0.5 size-4 shrink-0" />
-                  <span className="underline underline-offset-4">{t.etapes[etape]}</span>
+                  <span>{t.etapes[etape]}</span>
+                  <Icone nom="fleche" className="text-cobalt size-4 shrink-0 rotate-90" />
                 </a>
               </li>
             ))}

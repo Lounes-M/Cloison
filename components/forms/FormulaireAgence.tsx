@@ -18,7 +18,7 @@ const champBase =
 function Erreur({ id, message }: { id: string; message?: string }) {
   if (!message) return null
   return (
-    <p id={id} className="text-flame-texte mt-1.5 text-[13px] font-semibold">
+    <p id={id} className="text-erreur mt-1.5 text-[13px] font-semibold">
       {message}
     </p>
   )
@@ -79,7 +79,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
           role="alert"
           // `scroll-mt` : le focus fait defiler jusqu'a l'alerte, et l'en-tete
           // collant la masquerait sans cette marge.
-          className="bg-flame outlined text-ink scroll-mt-28 rounded-xl px-4 py-3 text-[14px] font-bold"
+          className="message-erreur scroll-mt-28"
         >
           {etat.message}
         </div>
@@ -100,7 +100,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
             defaultValue={valeurs.nomAgence ?? ''}
             aria-invalid={Boolean(champs.nomAgence)}
             aria-describedby={champs.nomAgence ? `${idBase}-nom-erreur` : undefined}
-            className={cn(champBase, champs.nomAgence && 'border-flame')}
+            className={cn(champBase, champs.nomAgence && 'border-erreur')}
           />
           <Erreur id={`${idBase}-nom-erreur`} message={champs.nomAgence} />
         </div>
@@ -119,7 +119,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
             defaultValue={valeurs.ville ?? ''}
             aria-invalid={Boolean(champs.ville)}
             aria-describedby={champs.ville ? `${idBase}-ville-erreur` : undefined}
-            className={cn(champBase, champs.ville && 'border-flame')}
+            className={cn(champBase, champs.ville && 'border-erreur')}
           />
           <Erreur id={`${idBase}-ville-erreur`} message={champs.ville} />
         </div>
@@ -140,7 +140,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
           defaultValue={valeurs.email ?? ''}
           aria-invalid={Boolean(champs.email)}
           aria-describedby={champs.email ? `${idBase}-email-erreur` : undefined}
-          className={cn(champBase, champs.email && 'border-flame')}
+          className={cn(champBase, champs.email && 'border-erreur')}
         />
         <Erreur id={`${idBase}-email-erreur`} message={champs.email} />
       </div>
@@ -182,7 +182,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
           defaultValue={valeurs.message ?? ''}
           aria-invalid={Boolean(champs.message)}
           aria-describedby={champs.message ? `${idBase}-message-erreur` : undefined}
-          className={cn(champBase, 'resize-y', champs.message && 'border-flame')}
+          className={cn(champBase, 'resize-y', champs.message && 'border-erreur')}
         />
         <Erreur id={`${idBase}-message-erreur`} message={champs.message} />
       </div>
@@ -197,11 +197,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
 
       <input ref={horodatage} type="hidden" name="affichéÀ" defaultValue="" />
 
-      <button
-        type="submit"
-        disabled={enCours}
-        className="press bg-cobalt outlined rounded-brut shadow-brut inline-flex cursor-pointer items-center justify-center px-8 py-4 text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70"
-      >
+      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand">
         {enCours ? t.envoi : t.bouton}
       </button>
 

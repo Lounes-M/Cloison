@@ -54,7 +54,7 @@ export default function GlobalError({
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="press bg-cobalt outlined rounded-brut shadow-brut inline-flex cursor-pointer items-center justify-center px-8 py-4 text-[17px] font-bold text-white"
+                className="btn btn-principal btn-grand"
               >
                 {erreurs.recharger}
               </button>

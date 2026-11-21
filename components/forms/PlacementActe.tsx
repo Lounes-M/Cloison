@@ -110,7 +110,7 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
         type="button"
         onClick={() => void afficher()}
         disabled={disabled || chargement}
-        className="press outlined bg-paper rounded-brut justify-self-start px-5 py-3 font-bold disabled:opacity-60"
+        className="btn btn-secondaire justify-self-start"
       >
         {chargement ? t.apercuAttente : t.apercu}
       </button>

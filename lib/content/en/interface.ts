@@ -3,6 +3,7 @@ import type { interfaceEspace as Fr } from '../interface'
 
 /** Les libelles communs des espaces et des pages d'entree, en anglais. */
 export const interfaceEspace: Textes<typeof Fr> = {
+  menu: 'Menu',
   agence: 'Agency space',
   porteur: 'Private space',
   accueil: 'Back to home',

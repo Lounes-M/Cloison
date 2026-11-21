@@ -21,15 +21,11 @@ export function BoutonRetrait({ pieceId, dossierId }: { pieceId: string; dossier
     <form action={envoyer} className="flex items-center gap-3">
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       <input type="hidden" name="piece" value={pieceId} />
-      <button
-        type="submit"
-        disabled={enCours}
-        className="text-flame-texte cursor-pointer text-[13px] font-bold underline-offset-2 hover:underline disabled:cursor-wait"
-      >
+      <button type="submit" disabled={enCours} className="btn-texte-danger">
         {enCours ? depot.retraitEnCours : depot.retirer}
       </button>
       {etat.statut === 'erreur' ? (
-        <span className="text-flame-texte text-[12px] font-semibold">{etat.message}</span>
+        <span className="text-erreur text-[12px] font-semibold">{etat.message}</span>
       ) : null}
     </form>
   )

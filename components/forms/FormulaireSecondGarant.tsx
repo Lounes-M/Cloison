@@ -36,18 +36,12 @@ export function FormulaireSecondGarant({
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       <input type="hidden" name="dossier" value={dossierId} />
       {etat.statut === 'envoye' ? (
-        <p
-          role="status"
-          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="status" className="message-succes">
           {texte.succes}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -71,14 +65,7 @@ export function FormulaireSecondGarant({
         />
       </div>
       {secondActuel ? null : <ChoixLangueDestinataire name="langueGarant" destinataire="garant" />}
-      <button
-        type="submit"
-        disabled={enCours}
-        className={cn(
-          'press outlined bg-paper shadow-brut-xs cursor-pointer rounded-[10px] px-6 py-3',
-          'text-[15px] font-bold disabled:cursor-wait disabled:opacity-70',
-        )}
-      >
+      <button type="submit" disabled={enCours} className="btn btn-secondaire">
         {enCours ? texte.envoi : secondActuel ? texte.renvoyer : texte.bouton}
       </button>
     </form>

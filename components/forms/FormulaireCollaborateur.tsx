@@ -72,11 +72,7 @@ export function FormulaireCollaborateur({
         <input type="checkbox" name="confirmation" required className="mt-1" />
         {textes.confirmer}
       </label>
-      <button
-        type="submit"
-        disabled={enCours}
-        className="press shadow-brut-xs outlined bg-sky cursor-pointer rounded-lg px-4 py-2 font-bold disabled:translate-none disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <button type="submit" disabled={enCours} className="btn btn-secondaire">
         {enCours ? textes.attente : textes.appliquer}
       </button>
     </form>

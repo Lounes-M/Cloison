@@ -33,18 +33,12 @@ export function FormulaireNouveauDossier({
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       {logementId ? <input type="hidden" name="logement" value={logementId} /> : null}
       {etat.statut === 'ouvert' ? (
-        <p
-          role="status"
-          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="status" className="message-succes">
           {tableau.nouveauSucces(etat.email)}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -100,10 +94,7 @@ export function FormulaireNouveauDossier({
       <button
         type="submit"
         disabled={enCours || !verifiee}
-        className={cn(
-          'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer self-start px-8 py-4',
-          'text-[17px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-50',
-        )}
+        className="btn btn-principal btn-grand self-start"
       >
         {enCours ? tableau.nouveauEnvoi : tableau.nouveauBouton}
       </button>

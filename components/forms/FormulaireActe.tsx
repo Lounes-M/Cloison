@@ -32,10 +32,7 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
         <input type="checkbox" name="accord" required disabled={attente} />
         {t.accordAgence}
       </label>
-      <button
-        className="press outlined bg-cobalt shadow-brut rounded-brut px-6 py-3 font-bold text-white disabled:opacity-60"
-        disabled={attente}
-      >
+      <button className="btn btn-principal" disabled={attente}>
         {attente ? t.attente : t.envoyer}
       </button>
       <p role="status">{etat.message}</p>
@@ -66,20 +63,10 @@ export function ValidationActe({
         {t.accordGarant}
       </label>
       <div className="flex flex-wrap gap-4">
-        <button
-          name="decision"
-          value="accepter"
-          className="press outlined bg-cobalt shadow-brut rounded-brut px-6 py-3 font-bold text-white disabled:opacity-60"
-          disabled={attente}
-        >
+        <button name="decision" value="accepter" className="btn btn-principal" disabled={attente}>
           {t.accepter}
         </button>
-        <button
-          name="decision"
-          value="refuser"
-          className="press outlined bg-paper rounded-brut px-6 py-3 font-bold disabled:opacity-60"
-          disabled={attente}
-        >
+        <button name="decision" value="refuser" className="btn btn-secondaire" disabled={attente}>
           {t.refuser}
         </button>
       </div>
@@ -107,10 +94,7 @@ export function RepriseActe({ id }: { id: string }) {
           className="mt-2 block w-full"
         />
       </label>
-      <button
-        disabled={attente}
-        className="press outlined bg-cobalt rounded-brut px-5 py-3 font-bold text-white"
-      >
+      <button disabled={attente} className="btn btn-principal">
         {t.reprendre}
       </button>
       <p role="status">{etat.message}</p>

@@ -1,4 +1,3 @@
-import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -26,8 +25,6 @@ import {
   statuts as statutsFr,
   tableau as tableauFr,
 } from '@/lib/content/espace'
-import { activite as texteActiviteFr } from '@/lib/content/activite'
-import { logements as texteLogementsFr } from '@/lib/content/logements'
 import { Repere } from '@/components/ui/Repere'
 import {
   responsables as texteResponsablesFr,
@@ -41,8 +38,6 @@ import {
   statuts as statutsEn,
   tableau as tableauEn,
 } from '@/lib/content/en/espace'
-import { activite as texteActiviteEn } from '@/lib/content/en/activite'
-import { logements as texteLogementsEn } from '@/lib/content/en/logements'
 import { responsables as texteResponsablesEn } from '@/lib/content/en/responsables'
 import { choisir, locale, type Langue } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
@@ -114,8 +109,6 @@ export default async function PageEspace({
   const collaborateurs = choisir(langue, collaborateursFr, collaborateursEn)
   const statuts = choisir(langue, statutsFr, statutsEn)
   const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
-  const texteActivite = choisir(langue, texteActiviteFr, texteActiviteEn)
-  const texteLogements = choisir(langue, texteLogementsFr, texteLogementsEn)
   const tableau = choisir(langue, tableauFr, tableauEn)
   const activation = choisir(langue, activationFr, activationEn)
   const texteResponsables = choisir(langue, texteResponsablesFr, texteResponsablesEn)
@@ -279,21 +272,9 @@ export default async function PageEspace({
       </p>
 
       <div className="mt-6 flex flex-wrap items-center gap-4">
-        <a
-          href="#nouveau-dossier"
-          className="press outlined bg-cobalt text-paper shadow-brut-xs inline-flex min-h-[44px] items-center rounded-xl px-5 py-3 text-sm font-bold"
-        >
+        <a href="#nouveau-dossier" className="btn btn-principal">
           {interfaceEspace.nouveauDossier}
         </a>
-        <a href="#reglages" className="lien-espace">
-          {interfaceEspace.reglages}
-        </a>
-        <Link href="/espace/activite" className="lien-espace">
-          {texteActivite.lien}
-        </Link>
-        <Link href="/espace/logements" className="lien-espace">
-          {texteLogements.lien}
-        </Link>
       </div>
 
       {demandesEnAttente > 0 ? (
@@ -500,10 +481,7 @@ export default async function PageEspace({
               </label>
             </div>
           </details>
-          <button
-            type="submit"
-            className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg px-4 py-2 font-bold"
-          >
+          <button type="submit" className="btn btn-principal">
             {tableau.rechercher}
           </button>
           {reference ||
@@ -726,6 +704,26 @@ export default async function PageEspace({
         </nav>
       </section>
 
+      <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
+        <div>
+          <h2 className="font-display text-2xl">{tableau.nouveau}</h2>
+          <div className="mt-6">
+            <FormulaireNouveauDossier verifiee={verifiee} />
+          </div>
+        </div>
+        <div className="bg-sky outlined self-start rounded-[18px] p-6">
+          <p className="font-display text-lg">{tableau.demoTitre}</p>
+          <p className="mt-2 text-[14px] leading-relaxed font-medium">{tableau.demoAide}</p>
+          {/* Une action serveur sans etat : elle se termine toujours par une
+                redirection, vers le dossier de demonstration ou vers l'espace. */}
+          <form action={ouvrirMaDemonstration} className="mt-4">
+            <button type="submit" className="btn btn-secondaire">
+              {tableau.demoBouton}
+            </button>
+          </form>
+        </div>
+      </section>
+
       <AttributionsGroupees
         contexte={contexte}
         lignes={lignes}
@@ -738,44 +736,16 @@ export default async function PageEspace({
           <ExportRegistre registre="dossiers" />
         </div>
       ) : null}
-      <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
-        <div>
-          <h2 className="font-display text-2xl">{tableau.nouveau}</h2>
-          <div className="mt-6">
-            <FormulaireNouveauDossier verifiee={verifiee} />
-          </div>
-
-          <div className="bg-sky outlined shadow-brut mt-10 rounded-[18px] p-6">
-            <p className="font-display text-lg">{tableau.demoTitre}</p>
-            <p className="mt-2 text-[14px] leading-relaxed font-medium">{tableau.demoAide}</p>
-            {/* Une action serveur sans etat : elle se termine toujours par une
-                redirection, vers le dossier de demonstration ou vers l'espace. */}
-            <form action={ouvrirMaDemonstration} className="mt-4">
-              <button
-                type="submit"
-                className="press outlined bg-paper shadow-brut-xs cursor-pointer rounded-[10px] px-5 py-3 text-[14px] font-bold"
-              >
-                {tableau.demoBouton}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="font-display text-2xl">{tableau.seuilTitre}</h2>
-          <p className="text-muted mt-2 mb-6 text-[13px] leading-relaxed font-medium">
-            {tableau.seuilAide}
-          </p>
-          {role === 'admin' ? (
-            <FormulaireSeuil seuilActuel={seuil} />
-          ) : (
-            <p className="text-[14px] font-medium">{tableau.seuilLecture(seuil)}</p>
-          )}
-        </div>
-      </section>
-      <section id="reglages" className="border-ink/15 mt-8 border-t pt-6">
-        <h2 className="text-xl font-bold">{interfaceEspace.reglages}</h2>
-        <NavigationReglages administration={role === 'admin'} />
+      <section className="panneau-espace mt-8">
+        <h2 className="font-display text-2xl">{tableau.seuilTitre}</h2>
+        <p className="text-muted mt-2 mb-6 text-[13px] leading-relaxed font-medium">
+          {tableau.seuilAide}
+        </p>
+        {role === 'admin' ? (
+          <FormulaireSeuil seuilActuel={seuil} />
+        ) : (
+          <p className="text-[14px] font-medium">{tableau.seuilLecture(seuil)}</p>
+        )}
       </section>
     </div>
   )

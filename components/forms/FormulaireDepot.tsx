@@ -198,11 +198,7 @@ export function FormulaireDepot({
       ) : null}
 
       {choisi ? (
-        <button
-          type="submit"
-          disabled={enCours || preparation}
-          className="press shadow-brut-xs outlined bg-cobalt cursor-pointer rounded-xl px-4 py-3 font-bold text-white disabled:translate-none disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <button type="submit" disabled={enCours || preparation} className="btn btn-principal">
           {preparation ? depot.preparation : enCours ? depot.envoi : depot.deposer}
         </button>
       ) : null}
@@ -212,10 +208,7 @@ export function FormulaireDepot({
         </p>
       ) : null}
       {erreur ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-3 py-2 text-[13px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {erreur}
         </p>
       ) : null}

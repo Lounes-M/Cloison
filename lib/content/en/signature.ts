@@ -4,6 +4,9 @@ import type { signature as Fr } from '../signature'
 export const signature: Textes<typeof Fr> = {
   etiquette: 'Guarantee deed',
   lienArchives: 'Archives',
+  aucunAgence: 'No deed has been prepared for this file yet.',
+  aucunGarant:
+    'Nothing to sign yet. The agency prepares the deed once your file is accepted; you will get an email as soon as it is ready.',
   titre: 'Signing the deed',
   preparation: 'Prepare the deed',
   explication:

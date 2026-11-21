@@ -52,6 +52,8 @@ import {
 } from '@/lib/content/en/garant'
 import { journal as texteJournalEn } from '@/lib/content/en/journal'
 import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
+import { signature as texteSignatureEn } from '@/lib/content/en/signature'
+import { signature as texteSignatureFr } from '@/lib/content/signature'
 import { choisir, locale, deuxPoints } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
@@ -90,6 +92,7 @@ export default async function PageGarant({
 }: { searchParams?: Promise<Record<string, string | string[] | undefined>> } = {}) {
   const langue = await langueEspace()
   const natures = choisir(langue, naturesFr, naturesEn)
+  const texteSignature = choisir(langue, texteSignatureFr, texteSignatureEn)
   const depot = choisir(langue, depotFr, depotEn)
   const texteAgence = choisir(langue, texteAgenceFr, texteAgenceEn)
   const frise = choisir(langue, friseFr, friseEn)
@@ -243,11 +246,34 @@ export default async function PageGarant({
 
       <SommaireDossier
         liens={[
-          { id: 'pieces', titre: interfaceEspace.pieces },
           { id: 'engagement', titre: interfaceEspace.engagement },
+          { id: 'pieces', titre: interfaceEspace.pieces },
+          ...(process.env.SIGNATURE_PARCOURS_ENABLED === 'true'
+            ? [{ id: 'signature', titre: texteSignature.titre }]
+            : []),
           { id: 'journal', titre: interfaceEspace.historique },
         ]}
       />
+      <section id="engagement" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texteEngagement.titre}</h2>
+        <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
+          {texteEngagement.aide}
+        </p>
+        {ouvert ? (
+          <FormulaireEngagement
+            key={Number(engagement?.version_conditions ?? 0)}
+            version={Number(engagement?.version_conditions ?? 0)}
+            dossierId={dossierId}
+            actuel={engagementAffiche}
+          />
+        ) : (
+          <p className="text-[15px] font-medium">
+            {engagementAffiche
+              ? `${engagementAffiche.couvre === 'loyer' ? texteEngagement.resume.loyer : texteEngagement.resume.loyerCharges}${engagementAffiche.montant ? `${texteEngagement.resume.plafond} ${engagementAffiche.montant} ${texteEngagement.resume.auTotal}` : ''}${engagementAffiche.jusquAu ? `${texteEngagement.resume.jusquAu} ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? texteEngagement.resume.solidaire : ''}.`
+              : texteEngagement.resume.aucun}
+          </p>
+        )}
+      </section>
       <Complements
         dossierId={dossierId}
         demandes={(demandes ?? []) as Complement[]}
@@ -376,6 +402,7 @@ export default async function PageGarant({
         </section>
       ) : null}
 
+      <SuiviSignature db={supabase} dossier={dossierId} partie="garant" />
       <section id="journal" className="panneau-espace mt-8">
         <h2 className="text-xl font-bold">{texteJournal.titre}</h2>
         <p className="text-muted mt-2 text-sm">{texteJournal.aide}</p>
@@ -415,26 +442,6 @@ export default async function PageGarant({
           />
         ) : null}
       </section>
-      <section id="engagement" className="panneau-espace mt-8">
-        <h2 className="text-xl font-bold">{texteEngagement.titre}</h2>
-        <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
-          {texteEngagement.aide}
-        </p>
-        {ouvert ? (
-          <FormulaireEngagement
-            key={Number(engagement?.version_conditions ?? 0)}
-            version={Number(engagement?.version_conditions ?? 0)}
-            dossierId={dossierId}
-            actuel={engagementAffiche}
-          />
-        ) : (
-          <p className="text-[15px] font-medium">
-            {engagementAffiche
-              ? `${engagementAffiche.couvre === 'loyer' ? texteEngagement.resume.loyer : texteEngagement.resume.loyerCharges}${engagementAffiche.montant ? `${texteEngagement.resume.plafond} ${engagementAffiche.montant} ${texteEngagement.resume.auTotal}` : ''}${engagementAffiche.jusquAu ? `${texteEngagement.resume.jusquAu} ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? texteEngagement.resume.solidaire : ''}.`
-              : texteEngagement.resume.aucun}
-          </p>
-        )}
-      </section>
       {dossier.expire_le ? (
         <p className="text-muted mt-10 text-[13px] font-medium">
           {depot.expire(
@@ -448,7 +455,6 @@ export default async function PageGarant({
         </p>
       ) : null}
       <SupportDossier reference={String(dossier.reference)} espace="garant" />
-      <SuiviSignature db={supabase} dossier={dossierId} partie="garant" />
     </div>
   )
 }

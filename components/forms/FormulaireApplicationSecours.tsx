@@ -50,7 +50,7 @@ export function FormulaireApplicationSecours({ facteur }: { facteur?: string }) 
             disabled={pending}
             name="operation"
             value="verifier"
-            className="press outlined bg-cobalt text-paper shadow-brut-xs rounded-lg p-3 font-bold disabled:opacity-50"
+            className="btn btn-principal"
           >
             {securite.verifier}
           </button>
@@ -65,12 +65,7 @@ export function FormulaireApplicationSecours({ facteur }: { facteur?: string }) 
           </button>
         </>
       ) : (
-        <button
-          disabled={pending}
-          name="operation"
-          value="preparer"
-          className="press outlined bg-cobalt text-paper shadow-brut-xs rounded-lg p-3 font-bold disabled:opacity-50"
-        >
+        <button disabled={pending} name="operation" value="preparer" className="btn btn-principal">
           {t.ajouter}
         </button>
       )}
