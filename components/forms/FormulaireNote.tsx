@@ -4,7 +4,6 @@ import { useActionState, useEffect, useId, useRef } from 'react'
 
 import { ajouterNote, supprimerNote, type EtatNote } from '@/lib/agences/action-notes'
 import { notesDossier as texteFr } from '@/lib/content/notes'
-import { cn } from '@/lib/utils'
 import { notesDossier as texteEn } from '@/lib/content/en/notes'
 import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
@@ -45,22 +44,12 @@ export function FormulaireNote({ dossierId }: { dossierId: string }) {
         {texte.indication}
       </p>
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
       <div>
-        <button
-          type="submit"
-          disabled={enCours}
-          className={cn(
-            'press outlined bg-paper shadow-brut-xs min-h-[44px] cursor-pointer rounded-[10px] px-5 py-3',
-            'text-[14px] font-bold disabled:cursor-wait disabled:opacity-70',
-          )}
-        >
+        <button type="submit" disabled={enCours} className="btn btn-secondaire">
           {enCours ? texte.envoi : texte.bouton}
         </button>
       </div>

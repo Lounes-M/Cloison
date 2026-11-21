@@ -1,4 +1,6 @@
 export const interfaceEspace = {
+  menu: 'Menu',
+  navActivite: 'Activité',
   agence: 'Espace agence',
   porteur: 'Espace privé',
   accueil: 'Retour à l’accueil',

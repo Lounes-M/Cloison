@@ -4,7 +4,6 @@ import { useActionState } from 'react'
 
 import { dossier as texteFr } from '@/lib/content/espace'
 import { prendreLeDossier, refuserLeDossier, type EtatDecision } from '@/lib/agences/action-dossier'
-import { cn } from '@/lib/utils'
 import { dossier as texteEn } from '@/lib/content/en/espace'
 import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
@@ -36,10 +35,7 @@ export function BoutonsDecision({
   return (
     <div className="flex flex-col gap-4">
       {prise.statut === 'erreur' || refus.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {prise.statut === 'erreur'
             ? prise.message
             : refus.statut === 'erreur'
@@ -54,10 +50,7 @@ export function BoutonsDecision({
           <button
             type="submit"
             disabled={!peutPrendre || priseEnCours}
-            className={cn(
-              'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer px-8 py-4',
-              'text-[17px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-50',
-            )}
+            className="btn btn-principal btn-grand"
           >
             {texte.prendre}
           </button>
@@ -69,10 +62,7 @@ export function BoutonsDecision({
           <button
             type="submit"
             disabled={!peutRefuser || refusEnCours}
-            className={cn(
-              'press outlined bg-paper shadow-brut rounded-brut cursor-pointer px-8 py-4',
-              'text-flame-texte text-[17px] font-bold disabled:cursor-not-allowed disabled:opacity-50',
-            )}
+            className="btn btn-danger btn-grand"
           >
             {texte.refuser}
           </button>

@@ -110,7 +110,7 @@ export const commentCaMarche = {
  * et la dernière ligne est un zéro.
  */
 export const tarifAgence = {
-  titre: ['Ce que ça', 'vous', 'coûte'],
+  titre: ['Ce que Cloison', 'vous', 'facture'],
   regleOr:
     "Le garant ne paie jamais rien, dans aucun cas. C'est la règle qui fait que le dossier avance jusqu'au bout.",
   tampon: 'Sans surprise',

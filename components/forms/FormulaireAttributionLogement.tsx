@@ -4,7 +4,6 @@ import { useActionState, useId } from 'react'
 
 import { attribuerLeLogement, type EtatAttribution } from '@/lib/agences/action-logements'
 import { logements as texteFr } from '@/lib/content/logements'
-import { cn } from '@/lib/utils'
 import { logements as texteEn } from '@/lib/content/en/logements'
 import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
@@ -33,7 +32,7 @@ export function FormulaireAttributionLogement({
 
   if (etat.statut === 'attribue') {
     return (
-      <p role="status" className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+      <p role="status" className="message-succes">
         {texte.attribution.succes(etat.refuses)}
       </p>
     )
@@ -43,10 +42,7 @@ export function FormulaireAttributionLogement({
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       <input type="hidden" name="logement" value={logementId} />
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -81,14 +77,7 @@ export function FormulaireAttributionLogement({
         </label>
       </div>
       <div>
-        <button
-          type="submit"
-          disabled={enCours}
-          className={cn(
-            'press outlined bg-paper shadow-brut-xs min-h-[44px] cursor-pointer rounded-[10px] px-5 py-3',
-            'text-[14px] font-bold disabled:cursor-wait disabled:opacity-70',
-          )}
-        >
+        <button type="submit" disabled={enCours} className="btn btn-secondaire">
           {enCours ? texte.attribution.envoi : texte.attribution.bouton}
         </button>
       </div>

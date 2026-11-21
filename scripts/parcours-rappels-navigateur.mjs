@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { resolve } from 'node:path'
 export async function parcourirRappels(page, site, moteur, largeur, simulation) {
-  await page.goto(`${site}/espace`)
+  await page.goto(`${site}/espace/notifications`)
   await page.getByRole('link', { name: 'Relances et échéances', exact: true }).click()
   const relance = page.getByRole('combobox', {
     name: 'Relancer le garant après une période sans modification',
@@ -71,7 +71,7 @@ export async function parcourirRappels(page, site, moteur, largeur, simulation) 
       animations: 'disabled',
     })
   simulation.role('membre')
-  await page.goto(`${site}/espace`)
+  await page.goto(`${site}/espace/notifications`)
   assert.equal(
     await page.getByRole('link', { name: 'Relances et échéances', exact: true }).count(),
     0,

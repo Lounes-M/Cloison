@@ -2,8 +2,19 @@ import type { Textes } from '@/lib/i18n'
 import type { signature as Fr } from '../signature'
 
 export const signature: Textes<typeof Fr> = {
+  retourDossier: 'Back to the file',
   etiquette: 'Guarantee deed',
   lienArchives: 'Archives',
+  aucunAgence: 'No deed has been prepared for this file yet.',
+  aucunGarant:
+    'Nothing to sign yet. The agency prepares the deed once your file is accepted; you will get an email as soon as it is ready.',
+  parcours: {
+    titre: 'Where the deed stands',
+    etapes: ['PDF preparation', 'Guarantor validation', 'Electronic signature', 'Archiving'],
+    termine: 'Deed signed and archived. The deed and its proof are available below.',
+    termineGarant: 'You have signed. The deed and its proof are archived and available below.',
+    refuse: 'The guarantor declined this draft. Prepare a new deed to resume.',
+  },
   titre: 'Signing the deed',
   preparation: 'Prepare the deed',
   explication:

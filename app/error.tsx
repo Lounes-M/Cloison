@@ -55,9 +55,12 @@ export default function Error({
             <p className="description-reprise">{erreurs.chargement}</p>
             <div className="actions-reprise">
               <Button onClick={() => window.location.reload()}>{erreurs.reessayer}</Button>
-              <Button href={lien(langue, '/')} tone="paper">
+              <a
+                href={lien(langue, '/')}
+                className="lien-trace inline-flex min-h-[44px] items-center font-semibold"
+              >
                 {erreurs.accueil}
-              </Button>
+              </a>
             </div>
             <NavigationReprise langue={langue} />
             {error.digest ? (

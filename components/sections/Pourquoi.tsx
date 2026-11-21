@@ -52,7 +52,7 @@ const cartes: {
 export function Pourquoi({ langue = 'fr' }: { langue?: Langue }) {
   const { vision, whyNow } = choisir(langue, fr, en)
   return (
-    <section className="bg-cream gouttiere section-espace overflow-hidden">
+    <section className="bg-cream gouttiere overflow-hidden pt-[3rem] pb-[11.25rem] max-[767px]:py-[3.75rem]">
       <div className="conteneur grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_39.4rem]">
         <Reveal>
           <h2 className="titre-84">{whyNow.eyebrow}</h2>
@@ -67,7 +67,7 @@ export function Pourquoi({ langue = 'fr' }: { langue?: Langue }) {
         <p
           aria-hidden
           data-mot={vision.headline[2]}
-          className="texte-128 text-cobalt/20 pointer-events-none absolute inset-x-0 -top-[0.5em] text-center whitespace-nowrap before:content-[attr(data-mot)]"
+          className="texte-128 text-cobalt/20 pointer-events-none absolute inset-x-0 -top-[0.5em] text-center whitespace-nowrap before:content-[attr(data-mot)] max-[767px]:hidden"
         />
         <ul className="relative grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-0">
           {vision.useCases.map((useCase, index) => {

@@ -90,7 +90,7 @@ export const commentCaMarche = {
 } as const
 
 export const tarifAgence = {
-  titre: ['What it', 'will', 'cost you'],
+  titre: ['What Cloison', 'will', 'charge you'],
   regleOr:
     'The guarantor never pays anything, under any circumstances. That is the rule that gets the file all the way through.',
   lignes: [

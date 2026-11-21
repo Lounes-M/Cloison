@@ -2,7 +2,7 @@
 export const activite = {
   titre: 'Activité de l’agence',
   etiquette: 'Douze derniers mois',
-  retour: '← Retour aux dossiers',
+  retour: 'Retour aux dossiers',
   lien: 'Activité de l’agence',
   aide: 'Des compteurs mois par mois, conservés après la purge des dossiers. Ils ne désignent aucun candidat ni aucun garant : ni référence, ni adresse, ni montant.',
   totaux: {

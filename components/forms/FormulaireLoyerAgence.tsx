@@ -4,7 +4,6 @@ import { useActionState, useId } from 'react'
 
 import { fixerLeLoyer, type EtatLoyerAgence } from '@/lib/agences/action-loyer'
 import { loyerAgence as texteFr } from '@/lib/content/espace'
-import { cn } from '@/lib/utils'
 import { loyerAgence as texteEn } from '@/lib/content/en/espace'
 import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
@@ -29,18 +28,12 @@ export function FormulaireLoyerAgence({
     <form action={envoyer} noValidate className="flex flex-col gap-3">
       <input type="hidden" name="dossier" value={dossierId} />
       {etat.statut === 'enregistre' ? (
-        <p
-          role="status"
-          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="status" className="message-succes">
           {texte.succes}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -61,14 +54,7 @@ export function FormulaireLoyerAgence({
             className="border-ink bg-paper w-full max-w-[220px] rounded-xl border-2 px-4 py-3 text-[15px] font-medium"
           />
         </div>
-        <button
-          type="submit"
-          disabled={enCours}
-          className={cn(
-            'press outlined bg-paper shadow-brut-xs min-h-[44px] cursor-pointer rounded-[10px] px-5 py-3',
-            'text-[14px] font-bold disabled:cursor-wait disabled:opacity-70',
-          )}
-        >
+        <button type="submit" disabled={enCours} className="btn btn-secondaire">
           {enCours ? texte.envoi : texte.bouton}
         </button>
       </div>

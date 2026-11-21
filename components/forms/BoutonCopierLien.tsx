@@ -25,7 +25,7 @@ export function BoutonCopierLien({
     <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"
-        className="press outlined bg-paper rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
+        className="btn btn-secondaire"
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(lien)

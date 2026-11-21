@@ -11,7 +11,9 @@ import { auditerAccessibilite, verifierDetectionAccessibilite } from './audit-ac
 
 async function verifierCommandes(page, nom) {
   const commandes = await page
-    .locator('button, a.press, .lien-espace, .carte-priorite, .navigation-reprise a, summary')
+    .locator(
+      'button, a.press, .btn, .nav-agence-lien, .lien-espace, .carte-priorite, .navigation-reprise a, summary',
+    )
     .evaluateAll((elements) =>
       elements
         .filter((e) => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden')

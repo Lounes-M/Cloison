@@ -34,8 +34,8 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
     }
   }
   return (
-    <section className="bg-sky outlined shadow-brut mt-8 rounded-[18px] p-5">
-      <h3 className="font-display text-xl">{texte.titre}</h3>
+    <section className="outlined bg-paper mt-8 rounded-[18px] p-5">
+      <h3 className="text-[16px] font-bold">{texte.titre}</h3>
       <p className="mt-3 text-sm leading-relaxed">{texte.aide}</p>
       <p className="mt-3 text-sm leading-relaxed">{texte.separation}</p>
       <form
@@ -103,7 +103,7 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
           </>
         ) : null}
         <button
-          className="bg-cobalt text-paper outlined shadow-brut hover:shadow-brut-sm rounded-xl px-5 py-3 text-sm font-bold transition-transform hover:-translate-y-0.5 disabled:opacity-50 motion-reduce:transform-none"
+          className="btn btn-principal"
           type="submit"
           disabled={attente || (etat?.statut === 'liste' && !etat.pieces.length)}
         >

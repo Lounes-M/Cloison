@@ -49,10 +49,7 @@ export default async function PageCollaborateurs({
   const membres = (data ?? []) as Membre[]
   const traces = (journal ?? []) as Trace[]
   return (
-    <div className="page-espace w-full max-w-[960px] self-start">
-      <Link href="/espace" className="lien-espace mb-6">
-        {textes.retour}
-      </Link>
+    <div className="page-espace w-full max-w-[880px] self-start">
       <EnteteEspace titre={textes.titre} etiquette={interfaceEspace.equipe}>
         <p>{textes.aide}</p>
         <p className="mt-2 text-sm">{textes.readmission}</p>

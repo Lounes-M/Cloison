@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { resolve } from 'node:path'
 export async function parcourirPreferences(page, site, moteur, largeur, conflit) {
-  await page.goto(`${site}/espace`)
+  await page.goto(`${site}/espace/notifications`)
   await page.getByRole('link', { name: 'Mes notifications', exact: true }).click()
   const couleurs = await page
     .getByRole('button', { name: 'Enregistrer mes préférences' })

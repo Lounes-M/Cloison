@@ -3,8 +3,8 @@ export const logements = {
   titre: 'Logements',
   etiquette: 'Comparer les candidats',
   lien: 'Logements',
-  retour: '← Retour aux dossiers',
-  retourListe: '← Tous les logements',
+  retour: 'Retour aux dossiers',
+  retourListe: 'Tous les logements',
   aide: 'Regroupez les dossiers par bien pour comparer les candidats d’un même logement. Un logement ne contient aucune donnée de candidat et reste après la purge des dossiers.',
   aucun: 'Aucun logement pour l’instant. Créez-en un pour y rattacher des dossiers.',
   nouveau: {

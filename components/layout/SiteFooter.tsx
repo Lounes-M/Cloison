@@ -1,5 +1,5 @@
 import { Logo } from '@/components/brand/Logo'
-import { Button } from '@/components/ui/Button'
+import { AppelPrincipal } from '@/components/layout/AppelPrincipal'
 import { Reveal } from '@/components/ui/Reveal'
 import * as homeEn from '@/lib/content/en/home'
 import * as siteEn from '@/lib/content/en/site'
@@ -17,7 +17,7 @@ export function SiteFooter({ langue = 'fr' }: { langue?: Langue }) {
   const { footerLinks, site, chrome } = choisir(langue, siteFr, siteEn)
   return (
     <footer className="bg-sun text-ink">
-      <div className="gouttiere pt-[5.125rem] max-[479px]:pt-12">
+      <div className="gouttiere overflow-clip pt-[5.125rem] max-[479px]:pt-12">
         <div className="conteneur grid gap-3 md:grid-cols-[7.45rem_1fr]">
           <p className="texte-16 text-ink/75 font-semibold">{chrome.principe}</p>
           <div className="max-w-[44rem]">
@@ -26,7 +26,7 @@ export function SiteFooter({ langue = 'fr' }: { langue?: Langue }) {
           </div>
         </div>
 
-        <Reveal className="conteneur relative mt-[7.5rem] max-[479px]:mt-16">
+        <Reveal variante="ressort" className="conteneur relative mt-[7.5rem] max-[479px]:mt-16">
           <div
             aria-hidden
             className="bg-cobalt absolute inset-x-0 -top-6 h-24 rounded-t-[1.5rem] [clip-path:polygon(0_45%,100%_0,100%_100%,0_100%)]"
@@ -37,9 +37,7 @@ export function SiteFooter({ langue = 'fr' }: { langue?: Langue }) {
           />
           <div className="bg-cream relative flex flex-col items-start justify-between gap-8 rounded-t-[1.5rem] px-[5.9rem] pt-[6rem] pb-[6.5rem] max-[767px]:px-6 max-[767px]:pt-14 max-[767px]:pb-14 md:flex-row md:items-center">
             <h2 className="texte-60 text-cobalt">{site.tagline}</h2>
-            <Button href={lien(langue, '/demarrer')} tone="paper">
-              {hero.primaryCta}
-            </Button>
+            <AppelPrincipal langue={langue} libelle={hero.primaryCta} />
           </div>
         </Reveal>
       </div>

@@ -157,7 +157,7 @@ export default async function PageLocataire({
     : null
 
   return (
-    <div className="page-espace w-full max-w-[560px]">
+    <div className="page-espace w-full max-w-[640px]">
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
         {espace.reference} {String(dossier.reference)}
       </p>
@@ -221,9 +221,7 @@ export default async function PageLocataire({
             </p>
           ) : null}
           {paiement === 'ok' && dossier.paye_le ? (
-            <p className="bg-mint outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
-              {paiementLocataire.confirme}
-            </p>
+            <p className="message-succes mt-4">{paiementLocataire.confirme}</p>
           ) : null}
           {paiement === 'annule' ? (
             <p className="bg-paper outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
@@ -231,17 +229,12 @@ export default async function PageLocataire({
             </p>
           ) : null}
           {paiement === 'accords' ? (
-            <p
-              role="alert"
-              className="bg-flame outlined text-ink mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold"
-            >
+            <p role="alert" className="message-erreur mt-4">
               {paiementLocataire.accordsManquants}
             </p>
           ) : null}
           {paiement === 'indisponible' ? (
-            <p className="bg-flame outlined text-ink mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
-              {paiementLocataire.indisponible}
-            </p>
+            <p className="message-erreur mt-4">{paiementLocataire.indisponible}</p>
           ) : null}
 
           {dossier.paye_le ? (
@@ -265,7 +258,7 @@ export default async function PageLocataire({
               </p>
               {/* La retractation au prorata s'affiche AVANT de payer, avec la
                   demande d'execution immediate qu'elle suppose (L221-25). */}
-              <p className="mt-3 text-[13px] leading-relaxed font-semibold">
+              <p className="text-muted mt-3 text-[13px] leading-relaxed font-medium">
                 {paiementLocataire.regle}
               </p>
               <form action={payerMonDossier} className="mt-5">
@@ -296,10 +289,7 @@ export default async function PageLocataire({
                   />
                   <span>{paiementLocataire.executionImmediate}</span>
                 </label>
-                <button
-                  type="submit"
-                  className="press outlined bg-flame shadow-brut rounded-brut text-ink cursor-pointer px-8 py-4 text-[17px] font-bold"
-                >
+                <button type="submit" className="btn btn-principal btn-grand">
                   {paiementLocataire.boutonPour(prixDossier)}
                 </button>
               </form>
@@ -314,7 +304,7 @@ export default async function PageLocataire({
           {garant ? espace.garantDesigne(garant) : espace.garantAucun}
         </p>
         {aRegler ? (
-          <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+          <p className="border-sun bg-sun/15 rounded-r-xl border-l-4 px-4 py-3 text-[14px] leading-relaxed font-medium">
             {paiementLocataire.attente}
           </p>
         ) : ouvert ||

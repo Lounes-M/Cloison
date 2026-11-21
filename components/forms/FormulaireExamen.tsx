@@ -45,10 +45,7 @@ export function FormulaireExamen({
         <input type="checkbox" name="confirmation" required disabled={attente} />
         {t.confirmation}
       </label>
-      <button
-        disabled={attente}
-        className="press shadow-brut-xs outlined bg-cobalt text-paper cursor-pointer rounded-lg px-4 py-2 font-bold disabled:translate-none disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <button disabled={attente} className="btn btn-principal">
         {attente ? t.attente : t.enregistrer}
       </button>
       {!attente && etat.statut === 'erreur' ? (

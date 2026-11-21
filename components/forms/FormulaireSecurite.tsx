@@ -71,7 +71,7 @@ export function FormulaireSecurite({
             disabled={pending}
             name="operation"
             value="verifier"
-            className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg p-3 font-bold disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn btn-principal"
           >
             {securite.verifier}
           </button>
@@ -81,7 +81,7 @@ export function FormulaireSecurite({
           disabled={pending}
           name="operation"
           value="configurer"
-          className="press outlined bg-cobalt text-paper shadow-brut-xs cursor-pointer rounded-lg p-3 font-bold disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn btn-principal"
         >
           {securite.activer}
         </button>

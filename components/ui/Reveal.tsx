@@ -11,7 +11,7 @@ type RevealProps = {
   /** Rotation à conserver une fois l'élément révélé (cartes penchées). */
   tilt?: number
   /** Entree : par defaut le bloc monte ; une photo peut grossir ou glisser. */
-  variante?: 'zoom' | 'gauche' | 'droite'
+  variante?: 'zoom' | 'gauche' | 'droite' | 'ressort'
 }
 
 /**

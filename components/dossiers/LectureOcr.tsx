@@ -150,7 +150,7 @@ function LecturePiece({ pieceId }: { pieceId: string }) {
           type="button"
           disabled={!accord || !valide || attente}
           onClick={lire}
-          className="bg-cobalt text-paper press shadow-brut-xs outlined cursor-pointer rounded-lg px-3 py-2 font-bold disabled:translate-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn btn-principal"
         >
           {attente ? ocr.attente : ocr.lancer}
         </button>

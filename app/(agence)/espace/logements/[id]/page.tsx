@@ -90,8 +90,8 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
       : (Number(logement.loyer_cents) / 100).toLocaleString('fr-FR', { useGrouping: false })
 
   return (
-    <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace/logements" className="lien-espace mb-6">
+    <div className="page-espace w-full max-w-[880px]">
+      <Link href="/espace/logements" className="lien-retour">
         {t.retourListe}
       </Link>
       <EnteteEspace
@@ -210,10 +210,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                 <form action={reglerLaCandidature}>
                   <input type="hidden" name="logement" value={id} />
                   <input type="hidden" name="candidature" value="ouvrir" />
-                  <button
-                    type="submit"
-                    className="press outlined bg-sun rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
-                  >
+                  <button type="submit" className="btn btn-secondaire">
                     {lienCandidature ? tc.agence.renouveler : tc.agence.ouvrir}
                   </button>
                 </form>
@@ -222,10 +219,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                 <form action={reglerLaCandidature}>
                   <input type="hidden" name="logement" value={id} />
                   <input type="hidden" name="candidature" value="fermer" />
-                  <button
-                    type="submit"
-                    className="press outlined bg-paper rounded-brut cursor-pointer px-5 py-3 text-[14px] font-bold"
-                  >
+                  <button type="submit" className="btn btn-secondaire">
                     {tc.agence.fermer}
                   </button>
                 </form>

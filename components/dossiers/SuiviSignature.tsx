@@ -32,10 +32,14 @@ export async function SuiviSignature({
     .max(10)
     .safeParse(r.data)
   return (
-    <section className="panneau-espace mt-8">
-      <h2 className="font-display text-2xl">{t.titre}</h2>
+    <section id="signature" className="panneau-espace mt-8">
+      <h2 className="text-xl font-bold">{t.titre}</h2>
       {r.error || !liste.success ? (
         <p>{t.erreur}</p>
+      ) : liste.data.length === 0 ? (
+        <p className="text-muted mt-3 text-[15px] leading-relaxed font-medium">
+          {partie === 'agence' ? t.aucunAgence : t.aucunGarant}
+        </p>
       ) : (
         <ul className="mt-4 grid gap-3">
           {liste.data.map((a) => (

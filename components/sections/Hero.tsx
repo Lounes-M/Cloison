@@ -25,7 +25,7 @@ export function Hero({ langue = 'fr' }: { langue?: Langue }) {
       <VideoFond
         sources={{ large: '/accueil/hero-1920.mp4', reduite: '/accueil/hero-960.mp4' }}
         poster="/accueil/hero-poster.jpg"
-        className="absolute inset-0 size-full opacity-45"
+        className="entree-fond absolute inset-0 size-full opacity-45"
       />
 
       <div className="relative">

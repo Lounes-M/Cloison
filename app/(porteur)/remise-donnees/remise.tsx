@@ -169,11 +169,7 @@ export function Remise() {
             maxLength={44}
             className="rounded-brut border-ink bg-paper w-full border-2 p-3"
           />
-          <button
-            disabled={occupe}
-            className="rounded-brut border-ink bg-sun shadow-brut-xs border-2 px-4 py-3 font-semibold disabled:opacity-50"
-            type="submit"
-          >
+          <button disabled={occupe} className="btn btn-principal" type="submit">
             {occupe ? texte.attente : texte.ouvrir}
           </button>
         </form>
@@ -193,11 +189,7 @@ export function Remise() {
               </li>
             ))}
           </ul>
-          <button
-            disabled={occupe}
-            className="rounded-brut border-ink bg-sun shadow-brut-xs border-2 px-4 py-3 font-semibold disabled:opacity-50"
-            onClick={() => void confirmer()}
-          >
+          <button disabled={occupe} className="btn btn-principal" onClick={() => void confirmer()}>
             {texte.confirmer}
           </button>
         </div>

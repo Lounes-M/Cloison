@@ -75,6 +75,8 @@ import {
   documentsDeclares as documentsDeclaresEn,
   profilsRessources as profilsRessourcesEn,
 } from '@/lib/content/en/garant'
+import { signature as texteSignatureEn } from '@/lib/content/en/signature'
+import { signature as texteSignatureFr } from '@/lib/content/signature'
 import { choisir, locale, type Langue } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
@@ -119,6 +121,7 @@ export default async function PageDossier({
   const euros = (cents: unknown) => eurosDe(cents, langue)
   const date = (valeur: unknown, heure = false) => dateDe(valeur, heure, langue)
   const statuts = choisir(langue, statutsFr, statutsEn)
+  const texteSignature = choisir(langue, texteSignatureFr, texteSignatureEn)
   const texte = choisir(langue, texteFr, texteEn)
   const tableau = choisir(langue, tableauFr, tableauEn)
   const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
@@ -266,11 +269,8 @@ export default async function PageDossier({
 
   return (
     <div className="page-espace w-full max-w-[880px] self-start">
-      <Link
-        href="/espace"
-        className="text-muted hover:text-cobalt text-[13px] font-bold underline-offset-2 hover:underline"
-      >
-        ← {texte.retour}
+      <Link href="/espace" className="lien-retour">
+        {texte.retour}
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
@@ -335,9 +335,12 @@ export default async function PageDossier({
 
       <SommaireDossier
         liens={[
-          { id: 'pieces', titre: interfaceEspace.pieces },
           { id: 'engagement', titre: interfaceEspace.engagement },
+          { id: 'pieces', titre: interfaceEspace.pieces },
           { id: 'decision', titre: interfaceEspace.decision },
+          ...(process.env.SIGNATURE_PARCOURS_ENABLED === 'true'
+            ? [{ id: 'signature', titre: texteSignature.titre }]
+            : []),
           { id: 'organisation', titre: interfaceEspace.organisation },
           { id: 'notes', titre: texteNotes.titre },
           { id: 'journal', titre: interfaceEspace.historique },
@@ -530,7 +533,7 @@ export default async function PageDossier({
                   href={`/espace/pieces/${String(p.id)}`}
                   target="_blank"
                   rel="noopener"
-                  className="press outlined bg-paper shadow-brut-xs inline-flex min-h-[44px] items-center rounded-[10px] px-4 py-2 text-[13px] font-bold"
+                  className="btn btn-secondaire"
                 >
                   {texte.ouvrir}
                 </a>
@@ -565,9 +568,7 @@ export default async function PageDossier({
         <h2 className="text-xl font-bold">{texte.actionsTitre}</h2>
         <div className="mt-6">
           {d.statut === 'transmis' || d.statut === 'signe' ? (
-            <p className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
-              {texte.prisTexte}
-            </p>
+            <p className="message-succes">{texte.prisTexte}</p>
           ) : d.statut === 'refuse' ? (
             <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
               {texte.refuseTexte}
@@ -589,6 +590,17 @@ export default async function PageDossier({
           </div>
         ) : null}
       </section>
+
+      {d.statut === 'transmis' && !d.demonstration ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="font-display text-2xl">{texteActe.etiquette}</h2>
+          <p className="mt-2">{texteActe.mention}</p>
+          <Link className="lien-espace mt-4 inline-block" href={`/espace/dossiers/${id}/acte`}>
+            {texteActe.titre}
+          </Link>
+        </section>
+      ) : null}
+      <SuiviSignature db={supabase} dossier={id} partie="agence" />
 
       <section id="organisation" className="border-ink/15 mt-8 border-t pt-6">
         <h2 className="text-xl font-bold">{interfaceEspace.organisation}</h2>
@@ -644,16 +656,6 @@ export default async function PageDossier({
       </p>
       <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />
-      {d.statut === 'transmis' && !d.demonstration ? (
-        <section className="panneau-espace mt-8">
-          <h2 className="font-display text-2xl">{texteActe.etiquette}</h2>
-          <p className="mt-2">{texteActe.mention}</p>
-          <Link className="lien-espace mt-4 inline-block" href={`/espace/dossiers/${id}/acte`}>
-            {texteActe.titre}
-          </Link>
-        </section>
-      ) : null}
-      <SuiviSignature db={supabase} dossier={id} partie="agence" />
     </div>
   )
 }

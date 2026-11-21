@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { Logo } from '@/components/brand/Logo'
-import { Button } from '@/components/ui/Button'
+import { AppelPrincipal } from '@/components/layout/AppelPrincipal'
 import { BarrePublics } from '@/components/layout/BarrePublics'
 import { MenuMobile } from '@/components/layout/MenuMobile'
 import * as navEn from '@/lib/content/en/navigation'
@@ -57,9 +57,11 @@ export function SiteHeader({ langue = 'fr' }: { langue?: Langue }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button href={lien(langue, '/demarrer')} tone="paper" className="hidden sm:inline-flex">
-              {barrePublics.cta}
-            </Button>
+            <AppelPrincipal
+              langue={langue}
+              libelle={barrePublics.cta}
+              className="hidden sm:inline-flex"
+            />
             <MenuMobile langue={langue} />
           </div>
         </nav>

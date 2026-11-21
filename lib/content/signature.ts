@@ -1,6 +1,22 @@
 export const signature = {
+  retourDossier: 'Retour au dossier',
   etiquette: 'Acte de cautionnement',
   lienArchives: 'Archives',
+  aucunAgence: 'Aucun acte n’est encore préparé pour ce dossier.',
+  aucunGarant:
+    'Aucun acte à signer pour l’instant. L’agence le prépare une fois votre dossier accepté ; vous recevrez un courriel dès qu’il sera prêt.',
+  parcours: {
+    titre: 'Où en est l’acte',
+    etapes: [
+      'Préparation du PDF',
+      'Validation par le garant',
+      'Signature électronique',
+      'Archivage',
+    ],
+    termine: 'Acte signé et archivé. L’acte et sa preuve sont disponibles ci-dessous.',
+    termineGarant: 'Vous avez signé. L’acte et sa preuve sont archivés et disponibles ci-dessous.',
+    refuse: 'Le garant a refusé ce projet. Préparez un nouvel acte pour reprendre.',
+  },
   titre: 'Signature de l’acte',
   preparation: 'Préparer l’acte',
   explication:

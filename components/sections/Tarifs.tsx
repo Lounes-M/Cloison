@@ -1,3 +1,4 @@
+import { Defilement } from '@/components/ui/Defilement'
 import { Reveal } from '@/components/ui/Reveal'
 import * as en from '@/lib/content/en/home'
 import * as fr from '@/lib/content/home'
@@ -23,7 +24,7 @@ export function Tarifs({ langue = 'fr' }: { langue?: Langue }) {
     >
       <div className="conteneur">
         <Reveal>
-          <h2 className="titre-84 md:pl-[15.8rem]">
+          <h2 className="titre-84">
             {pricing.headline[0]}
             <br />
             <span className="text-sun">{pricing.headline[1]}</span>
@@ -42,14 +43,16 @@ export function Tarifs({ langue = 'fr' }: { langue?: Langue }) {
                     </span>
                   )}
                 </h3>
-                <p
-                  className={cn(
-                    'texte-60 flex min-h-[11rem] items-end self-end rounded-t-[1.5rem] px-[1.75rem] pt-[3.5rem] pb-[1.5rem] [clip-path:polygon(0_22%,100%_0,100%_100%,0_100%)] max-[767px]:min-h-[8rem] max-[767px]:rounded-[1.5rem] max-[767px]:pt-[2.5rem] max-[479px]:text-[2.25rem]',
-                    pans[index % pans.length],
-                  )}
-                >
-                  {ligne.price}
-                </p>
+                <Defilement mode="entree" className="flex self-end">
+                  <p
+                    className={cn(
+                      'montee texte-60 flex min-h-[11rem] w-full items-end rounded-t-[1.5rem] px-[1.75rem] pt-[3.5rem] pb-[1.5rem] [clip-path:polygon(0_22%,100%_0,100%_100%,0_100%)] max-[767px]:min-h-[8rem] max-[767px]:rounded-[1.5rem] max-[767px]:pt-[2.5rem] max-[479px]:text-[2.25rem]',
+                      pans[index % pans.length],
+                    )}
+                  >
+                    {ligne.price}
+                  </p>
+                </Defilement>
                 <p className="texte-14 text-sun md:max-w-[32.25rem]">{ligne.detail}</p>
               </Reveal>
             </li>

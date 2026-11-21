@@ -40,9 +40,6 @@ export default async function Page({
     .parse(r.data)
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <Link className="lien-espace mb-6" href="/espace">
-        {t.retour}
-      </Link>
       <EnteteEspace titre={t.archives} etiquette={t.etiquette}>
         <p>{t.conserve}</p>
       </EnteteEspace>

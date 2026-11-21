@@ -5,8 +5,8 @@ export const logements: Textes<typeof Fr> = {
   titre: 'Properties',
   etiquette: 'Compare applicants',
   lien: 'Properties',
-  retour: '← Back to files',
-  retourListe: '← All properties',
+  retour: 'Back to files',
+  retourListe: 'All properties',
   aide: 'Group files by property to compare the applicants for the same home. A property holds no applicant data and remains after files are purged.',
   aucun: 'No property yet. Create one to attach files to it.',
   nouveau: {

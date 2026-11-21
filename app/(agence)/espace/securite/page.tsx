@@ -1,6 +1,5 @@
 import { FormulaireTestApplication } from '@/components/forms/FormulaireTestApplication'
 import { securite as securiteFr } from '@/lib/content/securite'
-import Link from 'next/link'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { FormulaireApplicationSecours } from '@/components/forms/FormulaireApplicationSecours'
@@ -19,10 +18,7 @@ export default async function PageApplicationSecours() {
 
   const c = await contexteApplicationSecours().catch(() => null)
   return (
-    <div className="page-espace w-full max-w-[600px]">
-      <Link href="/espace" className="lien-espace mb-6">
-        {t.retour}
-      </Link>
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

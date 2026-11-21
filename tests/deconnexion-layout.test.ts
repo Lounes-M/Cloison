@@ -10,13 +10,22 @@ vi.mock('@/lib/env', () => ({
 import { deplier } from './doublures/deplier'
 import LayoutAgence from '@/app/(agence)/layout'
 import { CadreEspace } from '@/components/layout/CadreEspace'
+import { NavigationAgence } from '@/components/layout/NavigationAgence'
 import { seDeconnecter } from '@/lib/agences/action-securite'
 // Le cadre reel est deplie avant la lecture : lire simplement la prop passee
-// ferait reussir le test meme si le cadre oubliait de la rendre.
+// ferait reussir le test meme si le cadre oubliait de la rendre. Dans l'espace
+// agence, le cadre confie la sortie a la navigation, qui la place a droite sur
+// ordinateur et au pied du menu sur telephone : on la lit donc la ou le cadre
+// la remet, dans la prop `sortie` de `NavigationAgence`.
 function formulaires(node: ReactNode): Array<{ action?: unknown }> {
   if (Array.isArray(node)) return node.flatMap(formulaires)
-  if (!isValidElement<{ children?: ReactNode; action?: unknown }>(node)) return []
-  return [...(node.type === 'form' ? [node.props] : []), ...formulaires(node.props.children)]
+  if (!isValidElement<{ children?: ReactNode; action?: unknown; sortie?: ReactNode }>(node))
+    return []
+  return [
+    ...(node.type === 'form' ? [node.props] : []),
+    ...(node.type === NavigationAgence ? formulaires(node.props.sortie) : []),
+    ...formulaires(node.props.children),
+  ]
 }
 beforeEach(() => vi.resetAllMocks())
 test('une session agence a un vrai formulaire de deconnexion dans le layout commun', async () => {

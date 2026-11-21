@@ -30,7 +30,7 @@ export default async function PageLienInvalide() {
       <p className="text-muted mt-6 text-[14px] font-medium">{lienInvalide.locataire}</p>
       <FormulaireContinuite mode="retrouver" />
       <div className="mt-6">
-        <Button href="/demarrer" tone="paper">
+        <Button href="/demarrer" tone="cobalt">
           {lienInvalide.bouton}
         </Button>
       </div>

@@ -1,4 +1,5 @@
 export const acte = {
+  retourDossier: 'Retour au dossier',
   etiquette: 'Acte de cautionnement',
   titre: 'Modèle d’acte de cautionnement',
   lien: 'Acte de cautionnement',

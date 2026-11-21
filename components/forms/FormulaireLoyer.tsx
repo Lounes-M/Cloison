@@ -29,18 +29,12 @@ export function FormulaireLoyer({
     <form action={envoyer} noValidate className="flex flex-col gap-4">
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       {etat.statut === 'enregistre' ? (
-        <p
-          role="status"
-          className="bg-mint outlined rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="status" className="message-succes">
           {espace.loyerSucces}
         </p>
       ) : null}
       {etat.statut === 'erreur' ? (
-        <p
-          role="alert"
-          className="bg-flame outlined text-ink rounded-xl px-4 py-3 text-[14px] font-semibold"
-        >
+        <p role="alert" className="message-erreur">
           {etat.message}
         </p>
       ) : null}
@@ -67,14 +61,7 @@ export function FormulaireLoyer({
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={enCours}
-        className={cn(
-          'press outlined bg-cobalt shadow-brut rounded-brut cursor-pointer self-start px-8 py-4',
-          'text-[17px] font-bold text-white disabled:cursor-wait disabled:opacity-70',
-        )}
-      >
+      <button type="submit" disabled={enCours} className="btn btn-principal self-start">
         {enCours ? espace.loyerEnvoi : espace.loyerBouton}
       </button>
     </form>

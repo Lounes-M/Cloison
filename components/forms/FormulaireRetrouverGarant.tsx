@@ -34,7 +34,7 @@ export function FormulaireRetrouverGarant() {
           required
           maxLength={100}
         />
-        <button disabled={pending} className="bg-ink text-paper rounded-lg p-3 font-bold">
+        <button disabled={pending} className="btn btn-principal">
           {t.envoyer}
         </button>
         {etat.message ? <p role="status">{etat.message}</p> : null}

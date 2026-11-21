@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
@@ -42,10 +41,7 @@ export default async function PageActivite() {
   ]
 
   return (
-    <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace" className="lien-espace mb-6">
-        {t.retour}
-      </Link>
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

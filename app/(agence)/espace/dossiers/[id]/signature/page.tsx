@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { notFound, redirect } from 'next/navigation'
 
@@ -44,6 +45,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   return (
     <div className="page-espace w-full max-w-[880px]">
+      <Link href={`/espace/dossiers/${id}`} className="lien-retour">
+        {t.retourDossier}
+      </Link>
       <EnteteEspace titre={t.preparation} etiquette={t.etiquette} />
       <p className="my-6">{t.explication}</p>
       <p className="mb-6">
@@ -51,8 +55,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         {deuxPoints(langue)}
         {config.modele}
       </p>
-      {config.mode === 'sandbox' ? <p className="mb-6 font-bold">{t.sandbox}</p> : null}
-      <FormulaireActe dossier={id} />
+      {config.mode === 'sandbox' ? (
+        <p className="border-sun bg-sun/15 mb-6 rounded-r-xl border-l-4 px-4 py-3 text-sm leading-relaxed font-semibold">
+          {t.sandbox}
+        </p>
+      ) : null}
+      <section className="panneau-espace">
+        <FormulaireActe dossier={id} />
+      </section>
     </div>
   )
 }
