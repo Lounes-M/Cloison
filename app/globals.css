@@ -1433,10 +1433,10 @@ html:has(.site-public) {
 }
 .btn-principal {
   background: var(--color-cobalt);
-  color: #fff;
+  color: var(--color-paper);
 }
 .btn-principal:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-cobalt) 86%, #000);
+  background: color-mix(in srgb, var(--color-cobalt) 86%, var(--color-night));
 }
 .btn-secondaire {
   border-color: color-mix(in srgb, var(--color-ink) 16%, transparent);
@@ -1528,7 +1528,7 @@ html:has(.site-public) {
 }
 .nav-agence-lien[aria-current='page'] {
   background: var(--color-cobalt);
-  color: #fff;
+  color: var(--color-paper);
 }
 .nav-agence-large {
   display: none;
