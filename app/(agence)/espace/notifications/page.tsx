@@ -21,7 +21,7 @@ export default async function PageNotifications() {
   const { data, error } = await c.supabase.rpc('mes_preferences_notifications')
   if (error || !data?.[0]) throw new Error('Preferences indisponibles')
   return (
-    <div className="page-espace w-full max-w-[960px]">
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

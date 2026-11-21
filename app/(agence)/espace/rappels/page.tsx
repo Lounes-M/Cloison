@@ -21,7 +21,7 @@ export default async function PageRappels() {
   const { data, error } = await c.supabase.rpc('reglages_rappels_agence')
   if (error || !data?.[0]) throw new Error('Reglages des rappels indisponibles')
   return (
-    <div className="page-espace w-full max-w-[960px]">
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

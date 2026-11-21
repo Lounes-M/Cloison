@@ -90,7 +90,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
       : (Number(logement.loyer_cents) / 100).toLocaleString('fr-FR', { useGrouping: false })
 
   return (
-    <div className="page-espace w-full max-w-[960px]">
+    <div className="page-espace w-full max-w-[880px]">
       <Link href="/espace/logements" className="lien-retour">
         {t.retourListe}
       </Link>

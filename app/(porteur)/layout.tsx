@@ -1,7 +1,9 @@
+import { cookies } from 'next/headers'
 import { connection } from 'next/server'
 
 import { CadreEspace } from '@/components/layout/CadreEspace'
 import { quitterMonDossier } from '@/lib/acces/action-porteur'
+import { NOM_COOKIE_CAPACITE } from '@/lib/acces/session'
 import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
 import { choisir } from '@/lib/i18n'
@@ -23,14 +25,21 @@ export default async function LayoutPorteur({ children }: { children: React.Reac
   // alors refuses par le navigateur, sans bruit.
   await connection()
 
+  // La presence du cookie ne sert qu'a afficher la sortie : sans dossier
+  // ouvert (lien refuse, remise de donnees), il n'y a rien a quitter. Les
+  // pages verifient toujours le jeton elles-memes.
+  const dossierOuvert = Boolean((await cookies()).get(NOM_COOKIE_CAPACITE)?.value)
+
   return (
     <CadreEspace
       sortie={
-        <form action={quitterMonDossier}>
-          <button type="submit" className="lien-espace">
-            {sessionPorteur.quitter}
-          </button>
-        </form>
+        dossierOuvert ? (
+          <form action={quitterMonDossier}>
+            <button type="submit" className="lien-espace">
+              {sessionPorteur.quitter}
+            </button>
+          </form>
+        ) : null
       }
     >
       {children}

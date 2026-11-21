@@ -330,20 +330,24 @@ export default async function PageGarant({
                         key={piece.id}
                         className="bg-paper outlined flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3"
                       >
-                        <span className="flex flex-wrap items-center gap-2 text-[14px] font-medium">
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] font-semibold">
                           <Icone nom="fichier" className="size-4" />
-                          {tailleLisible(piece.taille_octets, langue)}
                           <span>{documentsDeclares.bilan(piece.nombre_documents ?? 1)}</span>
-                          <span className="text-muted">
+                          <span className="text-muted font-medium">
                             {depot.deposeLe(
                               new Date(piece.depose_le).toLocaleDateString(locale(langue), {
                                 day: 'numeric',
                                 month: 'long',
                               }),
                             )}
+                            {' · '}
+                            {tailleLisible(piece.taille_octets, langue)}
                           </span>
                         </span>
-                        <a className="font-bold underline" href={`/garant/pieces/${piece.id}`}>
+                        <a
+                          className="text-cobalt inline-flex min-h-[44px] items-center text-[13px] font-bold underline underline-offset-2"
+                          href={`/garant/pieces/${piece.id}`}
+                        >
                           {depot.original}
                         </a>
                         {ouvert ? <BoutonRetrait dossierId={dossierId} pieceId={piece.id} /> : null}

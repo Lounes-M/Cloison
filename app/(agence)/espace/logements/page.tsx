@@ -47,7 +47,7 @@ export default async function PageLogements({
   const lignes = data as Ligne[]
 
   return (
-    <div className="page-espace w-full max-w-[960px]">
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

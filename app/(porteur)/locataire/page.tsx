@@ -157,7 +157,7 @@ export default async function PageLocataire({
     : null
 
   return (
-    <div className="page-espace w-full max-w-[560px]">
+    <div className="page-espace w-full max-w-[640px]">
       <p className="text-muted text-[13px] font-bold tracking-wide uppercase">
         {espace.reference} {String(dossier.reference)}
       </p>
@@ -258,7 +258,7 @@ export default async function PageLocataire({
               </p>
               {/* La retractation au prorata s'affiche AVANT de payer, avec la
                   demande d'execution immediate qu'elle suppose (L221-25). */}
-              <p className="mt-3 text-[13px] leading-relaxed font-semibold">
+              <p className="text-muted mt-3 text-[13px] leading-relaxed font-medium">
                 {paiementLocataire.regle}
               </p>
               <form action={payerMonDossier} className="mt-5">
@@ -304,7 +304,7 @@ export default async function PageLocataire({
           {garant ? espace.garantDesigne(garant) : espace.garantAucun}
         </p>
         {aRegler ? (
-          <p className="bg-paper outlined rounded-xl px-4 py-3 text-[14px] font-semibold">
+          <p className="border-sun bg-sun/15 rounded-r-xl border-l-4 px-4 py-3 text-[14px] leading-relaxed font-medium">
             {paiementLocataire.attente}
           </p>
         ) : ouvert ||

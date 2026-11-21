@@ -23,7 +23,7 @@ export default async function PageConnecteurs() {
   const date = (v: string) =>
     new Date(v).toLocaleDateString(locale(langue), { timeZone: 'Europe/Paris' })
   return (
-    <div className="page-espace w-full max-w-[960px]">
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={interfaceEspace.connecteurs}>
         <p>{t.aide}</p>
         <p className="mt-2 text-sm">{t.limites}</p>

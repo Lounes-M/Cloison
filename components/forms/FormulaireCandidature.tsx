@@ -49,7 +49,7 @@ export function FormulaireCandidature({ dossierId }: { dossierId: string }) {
             />
             <label htmlFor={idAccord}>{texte.espace.consentement}</label>
           </div>
-          <button disabled={enCours} className="btn btn-principal">
+          <button disabled={enCours} className="btn btn-secondaire">
             {enCours ? texte.espace.envoi : texte.espace.bouton}
           </button>
           {etat.statut === 'erreur' ? <p role="alert">{etat.message}</p> : null}

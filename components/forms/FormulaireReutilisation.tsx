@@ -34,8 +34,16 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
     }
   }
   return (
-    <section className="bg-sky outlined shadow-brut mt-8 rounded-[18px] p-5">
-      <h3 className="font-display text-xl">{texte.titre}</h3>
+    <details
+      className="outlined bg-paper group mt-8 rounded-[18px] p-5"
+      open={etat ? true : undefined}
+    >
+      <summary className="flex cursor-pointer items-center justify-between gap-3 text-[15px] font-bold">
+        {texte.titre}
+        <span aria-hidden className="text-cobalt text-xl leading-none group-open:rotate-45">
+          +
+        </span>
+      </summary>
       <p className="mt-3 text-sm leading-relaxed">{texte.aide}</p>
       <p className="mt-3 text-sm leading-relaxed">{texte.separation}</p>
       <form
@@ -123,6 +131,6 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
                 : ''}
         </p>
       </form>
-    </section>
+    </details>
   )
 }

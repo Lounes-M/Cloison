@@ -61,7 +61,7 @@ export function FormulaireLoyer({
         </div>
       </div>
 
-      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand self-start">
+      <button type="submit" disabled={enCours} className="btn btn-principal self-start">
         {enCours ? espace.loyerEnvoi : espace.loyerBouton}
       </button>
     </form>

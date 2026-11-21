@@ -18,7 +18,7 @@ export default async function PageApplicationSecours() {
 
   const c = await contexteApplicationSecours().catch(() => null)
   return (
-    <div className="page-espace w-full max-w-[600px]">
+    <div className="page-espace w-full max-w-[880px]">
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>
