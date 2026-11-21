@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { BasculeLangue } from '@/components/langue/BasculeLangue'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
@@ -23,9 +22,6 @@ export default async function PageNotifications() {
   if (error || !data?.[0]) throw new Error('Preferences indisponibles')
   return (
     <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace" className="lien-espace mb-6">
-        {t.retour}
-      </Link>
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

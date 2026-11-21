@@ -43,9 +43,6 @@ export default async function Page({
     actif = process.env.FACTURATION_ACTES_ENABLED === 'true'
   return (
     <div className="page-espace w-full max-w-[880px]">
-      <Link className="lien-espace mb-6" href="/espace">
-        {t.retour}
-      </Link>
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.explication}</p>
       </EnteteEspace>

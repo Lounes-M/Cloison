@@ -48,9 +48,6 @@ export default async function PageLogements({
 
   return (
     <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace" className="lien-espace mb-6">
-        {t.retour}
-      </Link>
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

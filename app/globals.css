@@ -1594,3 +1594,23 @@ html:has(.site-public) {
     display: none;
   }
 }
+
+/* Lien de retour vers la page parente : un seul dessin partout. */
+.lien-retour {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+.lien-retour::before {
+  content: '←';
+}
+.lien-retour:hover {
+  color: var(--color-cobalt);
+  text-decoration: underline;
+}

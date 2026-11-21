@@ -91,7 +91,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
 
   return (
     <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace/logements" className="lien-espace mb-6">
+      <Link href="/espace/logements" className="lien-retour">
         {t.retourListe}
       </Link>
       <EnteteEspace

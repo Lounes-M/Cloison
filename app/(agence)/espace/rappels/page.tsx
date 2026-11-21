@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { FormulaireRappels } from '@/components/forms/FormulaireRappels'
@@ -23,9 +22,6 @@ export default async function PageRappels() {
   if (error || !data?.[0]) throw new Error('Reglages des rappels indisponibles')
   return (
     <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace" className="lien-espace mb-6">
-        {t.retour}
-      </Link>
       <EnteteEspace titre={t.titre} etiquette={t.etiquette}>
         <p>{t.aide}</p>
       </EnteteEspace>

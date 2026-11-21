@@ -6,6 +6,7 @@ import type { acte as Fr } from '../acte'
  * francais : c'est un contrat de droit francais, sur le modele officiel.
  */
 export const acte: Textes<typeof Fr> = {
+  retourDossier: 'Back to the file',
   etiquette: 'Guarantee deed',
   titre: 'Guarantee deed template',
   lien: 'Guarantee deed',

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { notFound, redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -45,6 +46,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   return (
     <div className="page-espace w-full max-w-[880px]">
+      <Link href={`/espace/dossiers/${id}`} className="lien-retour">
+        {t.retourDossier}
+      </Link>
       <EnteteEspace titre={t.titre} etiquette={t.etiquette} />
       <p className="my-6">{t.explication}</p>
       <p className="mb-6 font-bold">{t.mention}</p>
@@ -86,12 +90,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       </section>
 
       <p className="text-muted mb-6">{t.relecture}</p>
-      <ModeleActe
-        dossier={id}
-        locataire={d.locataire_nom ? String(d.locataire_nom) : ''}
-        aujourdHui={aujourdHui}
-        signatureOuverte={configurationParcours() !== null}
-      />
+      <section className="panneau-espace">
+        <ModeleActe
+          dossier={id}
+          locataire={d.locataire_nom ? String(d.locataire_nom) : ''}
+          aujourdHui={aujourdHui}
+          signatureOuverte={configurationParcours() !== null}
+        />
+      </section>
     </div>
   )
 }

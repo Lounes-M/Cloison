@@ -9,7 +9,7 @@ const pastilles = {
   fait: 'bg-mint',
   encours: 'bg-sun',
   avenir: 'bg-paper',
-  arrete: 'bg-flame text-ink',
+  arrete: 'border-erreur text-erreur bg-paper',
 } as const
 
 /** Une liste ordonnee : l'ordre et l'etat se lisent sans la couleur. */

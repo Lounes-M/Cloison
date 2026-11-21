@@ -1,7 +1,6 @@
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { NavigationReglages } from '@/components/layout/NavigationReglages'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { contexteAgence } from '@/lib/agences/contexte'
 import { listerConnecteurs } from '@/lib/connecteurs/liste'
@@ -25,9 +24,6 @@ export default async function PageConnecteurs() {
     new Date(v).toLocaleDateString(locale(langue), { timeZone: 'Europe/Paris' })
   return (
     <div className="page-espace w-full max-w-[960px]">
-      <Link href="/espace" className="lien-espace mb-6">
-        {t.retour}
-      </Link>
       <EnteteEspace titre={t.titre} etiquette={interfaceEspace.connecteurs}>
         <p>{t.aide}</p>
         <p className="mt-2 text-sm">{t.limites}</p>

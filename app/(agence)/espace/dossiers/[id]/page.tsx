@@ -269,11 +269,8 @@ export default async function PageDossier({
 
   return (
     <div className="page-espace w-full max-w-[880px] self-start">
-      <Link
-        href="/espace"
-        className="text-muted hover:text-cobalt text-[13px] font-bold underline-offset-2 hover:underline"
-      >
-        ← {texte.retour}
+      <Link href="/espace" className="lien-retour">
+        {texte.retour}
       </Link>
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">

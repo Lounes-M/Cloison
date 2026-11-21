@@ -4,7 +4,7 @@ import type { activite as Fr } from '../activite'
 export const activite: Textes<typeof Fr> = {
   titre: 'Agency activity',
   etiquette: 'Last twelve months',
-  retour: '← Back to files',
+  retour: 'Back to files',
   lien: 'Agency activity',
   aide: 'Month-by-month counters, kept after files are purged. They identify no applicant and no guarantor: no reference, no address, no amount.',
   totaux: {
