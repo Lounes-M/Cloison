@@ -36,7 +36,7 @@ export function Espaces({ langue = 'fr' }: { langue?: Langue }) {
   return (
     <section
       aria-label={espacesAccueil.aria}
-      className="bg-cream gouttiere pt-[11.25rem] pb-[11.25rem] max-[767px]:py-[3.75rem]"
+      className="bg-cream gouttiere pt-[11.25rem] pb-0 max-[767px]:py-[3.75rem]"
     >
       <ol className="conteneur">
         {spaces.map((space, index) => {

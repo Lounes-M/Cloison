@@ -2,7 +2,7 @@ import type { Textes } from '@/lib/i18n'
 import type { gabaritCourriel as Fr } from '../gabarit-courriel'
 
 export const gabaritCourriel: Textes<typeof Fr> = {
-  signature: 'One shared file. Separate spaces.',
+  signature: 'The three-key vault.',
   reference: 'File reference',
   echeance: 'End of vault',
   heure: 'Paris time',

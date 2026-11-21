@@ -146,7 +146,9 @@ export async function PageCandidater({
                   ].map((d) => (
                     <div key={d.terme} className="border-b border-[#4e8478] py-[1rem]">
                       <dt className="texte-14 opacity-80">{d.terme}</dt>
-                      <dd className="texte-22 mt-[0.25rem] font-semibold">{d.valeur}</dd>
+                      <dd className="texte-22 mt-[0.25rem] font-semibold normal-case">
+                        {d.valeur}
+                      </dd>
                     </div>
                   ))}
                 </dl>

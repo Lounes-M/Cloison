@@ -172,14 +172,12 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
       >
         <div className="conteneur">
           <Reveal>
-            <h2 className="titre-84 md:pl-[15.8rem]">
+            <h2 className="titre-84">
               {formulaire.titre[0]}
               <br />
               <span className="text-sun">{formulaire.titre[1]}</span>
             </h2>
-            <p className="mt-[1.5rem] max-w-[42rem] md:max-w-[58rem] md:pl-[15.8rem]">
-              {formulaire.sousTitre}
-            </p>
+            <p className="mt-[1.5rem] max-w-[42rem] md:max-w-[58rem]">{formulaire.sousTitre}</p>
           </Reveal>
           <dl className="mt-[2.9rem] grid border-t border-[#4e8478] sm:grid-cols-3">
             {formulaire.metriques.map((metrique) => (

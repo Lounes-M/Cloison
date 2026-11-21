@@ -24,7 +24,7 @@ export function Tarifs({ langue = 'fr' }: { langue?: Langue }) {
     >
       <div className="conteneur">
         <Reveal>
-          <h2 className="titre-84 md:pl-[15.8rem]">
+          <h2 className="titre-84">
             {pricing.headline[0]}
             <br />
             <span className="text-sun">{pricing.headline[1]}</span>

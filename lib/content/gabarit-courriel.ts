@@ -4,7 +4,7 @@
  * `courriels.ts`, `liens.ts` et `rappels.ts`.
  */
 export const gabaritCourriel = {
-  signature: 'Un dossier commun. Des espaces séparés.',
+  signature: 'Le coffre à trois clés.',
   reference: 'Référence du dossier',
   echeance: 'Fin du coffre',
   heure: 'heure de Paris',

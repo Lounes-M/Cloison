@@ -1024,7 +1024,7 @@ html:has(.site-public) {
   font-size: 3.75rem;
   font-weight: 600;
   line-height: 1.4;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.015em;
   @media (max-width: 479px) {
     font-size: 1.5rem;
   }
@@ -1035,10 +1035,10 @@ html:has(.site-public) {
   font-size: 2.625rem;
   font-weight: 600;
   line-height: 1.1;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.015em;
   @media (max-width: 479px) {
     font-size: 1.625rem;
-    letter-spacing: 0.032em;
+    letter-spacing: -0.015em;
   }
 }
 

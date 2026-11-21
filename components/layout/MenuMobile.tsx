@@ -1,6 +1,9 @@
 'use client'
 
 import { useRef } from 'react'
+import { useSurPageAgences } from '@/components/layout/AppelPrincipal'
+import { heroAgences as agencesFr } from '@/lib/content/agences'
+import { heroAgences as agencesEn } from '@/lib/content/en/agences'
 import * as navEn from '@/lib/content/en/navigation'
 import * as siteEn from '@/lib/content/en/site'
 import * as navFr from '@/lib/content/navigation'
@@ -11,6 +14,7 @@ export function MenuMobile({ langue = 'fr' }: { langue?: Langue }) {
   const { barrePublics, navigationMobile } = choisir(langue, navFr, navEn)
   const { navLinks } = choisir(langue, siteFr, siteEn)
   const menu = useRef<HTMLDetailsElement>(null)
+  const surAgences = useSurPageAgences()
   const fermer = () => {
     if (menu.current) menu.current.open = false
   }
@@ -41,11 +45,11 @@ export function MenuMobile({ langue = 'fr' }: { langue?: Langue }) {
           </a>
         ))}
         <a
-          href={lien(langue, '/demarrer')}
+          href={surAgences ? '#demander' : lien(langue, '/demarrer')}
           onClick={fermer}
-          className="bg-flame text-ink rounded-brut mt-2 flex min-h-[44px] items-center px-4 py-3 text-[1rem] font-semibold"
+          className="bg-cobalt rounded-brut mt-2 flex min-h-[44px] items-center px-4 py-3 text-[1rem] font-semibold text-white"
         >
-          {barrePublics.cta}
+          {surAgences ? choisir(langue, agencesFr, agencesEn).ancreFormulaire : barrePublics.cta}
         </a>
       </div>
     </details>
