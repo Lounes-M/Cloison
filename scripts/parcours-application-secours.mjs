@@ -11,7 +11,7 @@ export async function parcourirApplicationSecours(page, site, moteur, largeur, f
   }
   fixture.preparer([principal])
   try {
-    await page.goto(site + '/espace')
+    await page.goto(site + '/espace/notifications')
     await page.getByRole('link', { name: 'Application de secours', exact: true }).click()
     await page.waitForURL((u) => u.pathname === '/espace/securite')
     const preparer = page.getByRole('button', {

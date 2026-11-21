@@ -1514,7 +1514,7 @@ html:has(.site-public) {
   min-height: 44px;
   align-items: center;
   border-radius: 0.625rem;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.7rem;
   color: var(--color-ink);
   font-size: 0.875rem;
   font-weight: 600;
@@ -1577,21 +1577,24 @@ html:has(.site-public) {
   display: grid;
   gap: 0.25rem;
 }
-.nav-agence-panneau .nav-agence-outils {
-  flex-wrap: wrap;
+.nav-agence-pied {
   border-top: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
   padding-top: 0.75rem;
+}
+.nav-agence-sortie-large {
+  display: none;
 }
 @media (min-width: 1024px) {
   .nav-agence-large {
     display: flex;
     flex: 1;
     align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
   }
   .nav-agence-repli {
     display: none;
+  }
+  .nav-agence-sortie-large {
+    display: block;
   }
 }
 

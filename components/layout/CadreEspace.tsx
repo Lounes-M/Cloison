@@ -4,8 +4,6 @@ import { Logo } from '@/components/brand/Logo'
 import { BasculeLangue } from '@/components/langue/BasculeLangue'
 import { FournisseurLangue } from '@/components/langue/LangueContexte'
 import { NavigationAgence } from '@/components/layout/NavigationAgence'
-import { activite as activiteFr } from '@/lib/content/activite'
-import { activite as activiteEn } from '@/lib/content/en/activite'
 import { logements as logementsEn } from '@/lib/content/en/logements'
 import { logements as logementsFr } from '@/lib/content/logements'
 import { facturation as facturationEn } from '@/lib/content/en/facturation'
@@ -18,6 +16,7 @@ import { juridique as juridiqueFr } from '@/lib/content/juridique'
 import { signature as signatureFr } from '@/lib/content/signature'
 import { choisir, lien as lienLangue } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
+import { cn } from '@/lib/utils'
 
 /**
  * Identite commune, sans lecture de session ni decision d'autorisation.
@@ -43,7 +42,6 @@ export async function CadreEspace({
   const signature = choisir(langue, signatureFr, signatureEn)
   const facturation = choisir(langue, facturationFr, facturationEn)
   const juridique = choisir(langue, juridiqueFr, juridiqueEn)
-  const activite = choisir(langue, activiteFr, activiteEn)
   const logements = choisir(langue, logementsFr, logementsEn)
   return (
     <FournisseurLangue langue={langue}>
@@ -62,7 +60,12 @@ export async function CadreEspace({
           <div className="entete-agence mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-3 sm:px-8 lg:px-12">
             <div className="flex items-center gap-4">
               <Logo className="text-xl" langue={langue} />
-              <span className="border-ink/25 text-muted border-l pl-4 text-[13px] font-semibold tracking-wide uppercase">
+              <span
+                className={cn(
+                  'border-ink/25 text-muted border-l pl-4 text-[13px] font-semibold tracking-wide uppercase',
+                  agence && navigation && 'max-[1439px]:hidden',
+                )}
+              >
                 {agence ? t.agence : t.porteur}
               </span>
             </div>
@@ -73,7 +76,7 @@ export async function CadreEspace({
                 liens={[
                   { href: '/espace', libelle: t.tableau },
                   { href: '/espace/logements', libelle: logements.lien },
-                  { href: '/espace/activite', libelle: activite.lien },
+                  { href: '/espace/activite', libelle: t.navActivite },
                   { href: '/espace/archives', libelle: signature.lienArchives },
                   { href: '/espace/facturation', libelle: facturation.lien },
                   {
@@ -87,10 +90,9 @@ export async function CadreEspace({
                     ],
                   },
                 ]}
-              >
-                <BasculeLangue langue={langue} libelle={t.langue} />
-                {sortie}
-              </NavigationAgence>
+                langue={<BasculeLangue langue={langue} libelle={t.langue} />}
+                sortie={sortie}
+              />
             ) : (
               <nav aria-label={t.navigation} className="flex flex-wrap items-center gap-3">
                 {navigation ? (

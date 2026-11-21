@@ -30,13 +30,16 @@ export function NavigationAgence({
   liens,
   libelle,
   menu,
-  children,
+  langue,
+  sortie,
 }: {
   liens: readonly LienAgence[]
   libelle: string
   menu: string
-  /** Langue et deconnexion, rangees a la suite des liens. */
-  children?: React.ReactNode
+  /** La bascule de langue, toujours visible. */
+  langue: React.ReactNode
+  /** La deconnexion : a droite sur ordinateur, au pied du menu sur telephone. */
+  sortie?: React.ReactNode
 }) {
   const chemin = usePathname() ?? ''
   const repli = useRef<HTMLDetailsElement>(null)
@@ -60,18 +63,21 @@ export function NavigationAgence({
     <>
       <nav aria-label={libelle} className="nav-agence nav-agence-large">
         <div className="nav-agence-liens">{rangee}</div>
-        <div className="nav-agence-outils">{children}</div>
       </nav>
-      <details ref={repli} className="nav-agence-repli">
-        <summary className="nav-agence-bouton">
-          <span aria-hidden className="nav-agence-barres" />
-          {menu}
-        </summary>
-        <nav aria-label={libelle} className="nav-agence nav-agence-panneau">
-          <div className="nav-agence-liens">{rangee}</div>
-          <div className="nav-agence-outils">{children}</div>
-        </nav>
-      </details>
+      <div className="nav-agence-outils">
+        {langue}
+        <div className="nav-agence-sortie-large">{sortie}</div>
+        <details ref={repli} className="nav-agence-repli">
+          <summary className="nav-agence-bouton">
+            <span aria-hidden className="nav-agence-barres" />
+            {menu}
+          </summary>
+          <nav aria-label={libelle} className="nav-agence nav-agence-panneau">
+            <div className="nav-agence-liens">{rangee}</div>
+            <div className="nav-agence-pied">{sortie}</div>
+          </nav>
+        </details>
+      </div>
     </>
   )
 }
