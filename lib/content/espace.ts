@@ -67,6 +67,8 @@ export const tableau = {
   nouveauLoyerAide:
     'Si vous le connaissez, le locataire n’aura pas à le saisir. Il reste modifiable jusqu’à la déclaration du garant.',
   nouveauLoyerInvalide: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
+  nouveauComplementEchec:
+    'Le loyer ou le logement n’a pas pu être enregistré : complétez-les depuis la fiche du dossier.',
   nouveauBouton: 'Envoyer le lien',
   nouveauEnvoi: 'Envoi…',
   nouveauSucces: (email: string) => `Dossier ouvert. L’envoi du lien à ${email} est programmé.`,
@@ -164,7 +166,18 @@ export const dossier = {
   prendreAide:
     'Fige les pièces : le garant ne peut plus rien retirer. À faire quand vous avez ce qu’il vous faut pour décider.',
   refuser: 'Refuser le dossier',
-  refuserAide: 'Le locataire est informé du refus, sans le motif.',
+  refuserAide:
+    'Le locataire est informé du refus, sans le motif. Le refus est définitif et inscrit au journal.',
+  refuserConfirmer: 'Je confirme le refus de ce dossier.',
+  refuserConfirmationRequise: 'Cochez la case de confirmation pour refuser ce dossier.',
+  acteIncomplet:
+    'Le garant n’a pas encore écrit sa mention de cautionnement ni déclaré son plafond. Une fois le dossier pris, il ne pourra plus le faire, et l’acte de cautionnement ne pourra pas être préparé ici.',
+  prendreSansActe: 'Prendre le dossier sans mention de cautionnement',
+  prendreSansActeRequis:
+    'Le garant n’a pas écrit sa mention de cautionnement. Cochez la case pour prendre le dossier sans elle, ou attendez qu’il l’ait écrite.',
+  mentionLibelle: 'Mention de cautionnement',
+  mentionEcrite: (date: string) => `Écrite par le garant le ${date}`,
+  mentionAbsente: 'Pas encore écrite par le garant',
   prisTexte:
     'Dossier pris. Les pièces sont figées ; vous pouvez maintenant préparer l’acte de cautionnement.',
   refuseTexte: 'Dossier refusé.',
@@ -189,9 +202,10 @@ export const loyerAgence = {
   envoi: 'Enregistrement…',
   succes: 'Loyer enregistré. Le locataire le voit dans son dossier.',
   invalide: 'Le loyer ne se lit pas. Exemple : 850 ou 850,50.',
-  erreur:
-    'Le loyer n’a pas pu être enregistré. Il est peut-être déjà figé par la déclaration du garant.',
-  fige: 'Le loyer est figé : le garant a déclaré ses revenus sur cette base.',
+  erreur: 'Le loyer n’a pas pu être enregistré. Réessayez dans un instant.',
+  fige: 'Le loyer est figé : le dossier n’est plus en cours.',
+  correction:
+    'Le garant a déjà déclaré ses revenus sur ce loyer. Vous pouvez encore le corriger : la solvabilité est recalculée et la correction est inscrite au journal.',
   second: 'Le loyer se saisit sur le dossier du premier garant et se recopie ici.',
 } as const
 
@@ -261,6 +275,8 @@ export const actions: Record<string, string> = {
   complement_refuse: 'a demandé une nouvelle correction',
   dossier_transmis: 'a pris le dossier',
   relances_reprises: 'a relancé à nouveau le garant',
+  loyer_corrige: 'a corrigé le loyer après la déclaration du garant',
+  dossier_refuse: 'a refusé le dossier',
 }
 
 export const acteurs: Record<string, string> = {

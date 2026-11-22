@@ -24,7 +24,12 @@ export const porte = {
 /** Le second garant (0067), proposé seulement dans un dossier ouvert par une agence. */
 export const secondGarant = {
   titre: 'Un second garant',
-  aide: 'Si un seul garant ne suffit pas, tu peux en ajouter un deuxième. Ses revenus s’ajoutent à ceux du premier, et chacun dépose ses pièces de son côté, sans voir celles de l’autre.',
+  aide: 'Si un seul garant ne suffit pas, tu peux en ajouter un deuxième. Ses revenus s’ajoutent à ceux du premier, et chacun dépose ses pièces de son côté, sans voir celles de l’autre. Ton dossier attend alors que les deux aient tout déposé, même s’il était déjà complet.',
+  libre:
+    'Tant qu’il n’a rien commencé, tu peux corriger son adresse ou le retirer. Ton dossier est alors de nouveau jugé sur ton premier garant seul.',
+  retirer: 'Retirer le second garant',
+  retrait: 'Retrait…',
+  retire: 'Le second garant est retiré. Ton dossier est de nouveau jugé sur ton premier garant.',
   designe: (email: string) => `Second garant désigné : ${email}. Il dépose ses pièces de son côté.`,
   champ: 'Son adresse e-mail',
   bouton: 'Envoyer le lien au second garant',
@@ -35,17 +40,30 @@ export const secondGarant = {
     adresse: 'Cette adresse ne ressemble pas à une adresse e-mail.',
     doublon: 'Le second garant doit être une autre personne que toi et ton premier garant.',
     refus: 'Ce dossier ne peut pas recevoir de second garant pour l’instant.',
+    fige: 'Ce second garant a déjà commencé son dépôt : son adresse ne peut plus changer. Tu peux lui renvoyer son lien.',
+    retrait:
+      'Le second garant ne peut plus être retiré : il a commencé son dépôt, ou le dossier est déjà parti.',
     debit: 'Trop de liens envoyés. Réessaie dans un quart d’heure.',
     expire: 'Ton lien a expiré. Demande-en un nouveau.',
   },
 } as const
+
+/** Sans agence rattachée, personne ne décide encore : le locataire a un geste à faire. */
+export const statutsSansAgence: Record<string, string> = {
+  complet:
+    'Toutes les pièces sont là et ton garant est éligible. Rattache ton dossier à ton agence, plus bas, pour qu’elle puisse le consulter et décider.',
+  garant_insuffisant:
+    'Les revenus déclarés par ce garant ne suffisent pas pour ce loyer. Pour solliciter une autre personne, ouvre un nouveau dossier. Les données de ce garant restent dans son dossier.',
+}
 
 export const espace = {
   loyerFige: 'Loyer :',
   loyerFigeSuite:
     '€. Ce montant est figé pour préserver la confidentialité de la déclaration du garant.',
   garantAssocie:
-    'Le garant invité reste associé à ce dossier. Pour désigner une autre personne, ouvre un nouveau dossier.',
+    'Ton garant a commencé son dossier : il y reste associé. Pour désigner une autre personne, ouvre un nouveau dossier.',
+  garantCorrigeable:
+    'Une faute dans son adresse ? Corrige-la ici tant que ton garant n’a rien commencé : l’ancien lien cesse de fonctionner.',
   plusModifiable: 'Ce dossier ne peut plus être modifié.',
   garantRenouvellement:
     'Tu peux renvoyer son accès au même garant. Le dossier reste figé et le nouveau lien remplace le précédent.',

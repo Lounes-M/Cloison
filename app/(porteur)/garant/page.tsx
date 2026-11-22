@@ -54,7 +54,7 @@ import { journal as texteJournalEn } from '@/lib/content/en/journal'
 import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
 import { signature as texteSignatureEn } from '@/lib/content/en/signature'
 import { signature as texteSignatureFr } from '@/lib/content/signature'
-import { choisir, locale, deuxPoints } from '@/lib/i18n'
+import { choisir, lien, locale, deuxPoints, type Langue } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -87,6 +87,19 @@ type Piece = {
  * a partir de ses propres pieces. On ne l'affiche pas parce qu'un chiffre sans
  * le seuil qui va avec inquiete sans renseigner.
  */
+/** Une date de calendrier (AAAA-MM-JJ) dans la langue du lecteur, sans decalage horaire. */
+function dateCalendaire(iso: string, langue: Langue): string {
+  const jour = new Date(`${iso.slice(0, 10)}T12:00:00Z`)
+  return Number.isNaN(jour.getTime())
+    ? iso
+    : jour.toLocaleDateString(locale(langue), {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+}
+
 export default async function PageGarant({
   searchParams,
 }: { searchParams?: Promise<Record<string, string | string[] | undefined>> } = {}) {
@@ -269,7 +282,7 @@ export default async function PageGarant({
         ) : (
           <p className="text-[15px] font-medium">
             {engagementAffiche
-              ? `${engagementAffiche.couvre === 'loyer' ? texteEngagement.resume.loyer : texteEngagement.resume.loyerCharges}${engagementAffiche.montant ? `${texteEngagement.resume.plafond} ${engagementAffiche.montant} ${texteEngagement.resume.auTotal}` : ''}${engagementAffiche.jusquAu ? `${texteEngagement.resume.jusquAu} ${engagementAffiche.jusquAu}` : ''}${engagementAffiche.solidaire ? texteEngagement.resume.solidaire : ''}.`
+              ? `${engagementAffiche.couvre === 'loyer' ? texteEngagement.resume.loyer : texteEngagement.resume.loyerCharges}${engagementAffiche.montant ? `${texteEngagement.resume.plafond} ${engagementAffiche.montant} ${texteEngagement.resume.auTotal}` : ''}${engagementAffiche.jusquAu ? `${texteEngagement.resume.jusquAu} ${dateCalendaire(engagementAffiche.jusquAu, langue)}` : ''}${engagementAffiche.solidaire ? texteEngagement.resume.solidaire : ''}.`
               : texteEngagement.resume.aucun}
           </p>
         )}
@@ -295,7 +308,7 @@ export default async function PageGarant({
         <div className="border-ink/15 text-muted mt-3 mb-6 flex flex-col gap-1.5 border-l-2 pl-4 text-[13px] leading-relaxed font-medium">
           <p>
             {informationCollecte.garant}{' '}
-            <a href="/confidentialite" className="underline underline-offset-4">
+            <a href={lien(langue, '/confidentialite')} className="underline underline-offset-4">
               {informationCollecte.lien}
             </a>
           </p>
@@ -340,6 +353,7 @@ export default async function PageGarant({
                               new Date(piece.depose_le).toLocaleDateString(locale(langue), {
                                 day: 'numeric',
                                 month: 'long',
+                                timeZone: 'Europe/Paris',
                               }),
                             )}
                             {' · '}
@@ -405,6 +419,18 @@ export default async function PageGarant({
             }
             solidaire={Boolean(engagement?.solidaire ?? true)}
           />
+        </section>
+      ) : null}
+
+      {!mentionAttendue && engagement?.mention ? (
+        <section id="mention" className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{texteMention.titre}</h2>
+          <p className="text-muted mt-2 text-[14px] leading-relaxed font-medium">
+            {texteMention.figee}
+          </p>
+          <blockquote className="border-ink/30 mt-4 border-l-4 pl-4 text-[15px] leading-relaxed font-medium whitespace-pre-wrap">
+            {String(engagement.mention)}
+          </blockquote>
         </section>
       ) : null}
 

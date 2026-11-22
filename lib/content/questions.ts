@@ -38,7 +38,7 @@ export const questions = {
         {
           question: 'Je peux avoir deux garants ?',
           reponse:
-            'Oui. Tu peux désigner un second garant depuis ton espace. Chacun dépose ses pièces de son côté, sans voir celles de l’autre, et l’agence juge les deux ensemble.',
+            'Oui, quand ton dossier est suivi par une agence. Tu désignes alors un second garant depuis ton espace. Chacun dépose ses pièces de son côté, sans voir celles de l’autre, et l’agence juge les deux ensemble.',
         },
         {
           question: 'J’ai perdu le lien de mon dossier.',

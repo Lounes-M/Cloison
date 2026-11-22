@@ -30,7 +30,7 @@ test.each(['transmis', 'refuse', 'signe'])(
     expect(second.rows[0]!.jti).not.toBe(premier.rows[0]!.jti)
     expect(
       await refus(db, "select * from public.designer_garant_avec_lien('autre@example.invalid')"),
-    ).toContain('ne peut pas etre remplace')
+    ).toContain('Ce dossier est fige')
     const ligne = await db.query('select statut,email_garant from public.dossiers where id=$1', [
       dossier,
     ])

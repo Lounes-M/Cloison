@@ -29,6 +29,7 @@ import { langueEspace } from '@/lib/langue-espace'
 export type EtatSecondGarant =
   | { statut: 'inactif' }
   | { statut: 'envoye'; a: string }
+  | { statut: 'retire' }
   | { statut: 'erreur'; message: string; valeur?: string }
 
 const schema = z.string().trim().toLowerCase().min(5).max(180).pipe(z.email())
@@ -82,7 +83,12 @@ export async function designerSecondGarant(
     const { data, error } = await supabase.rpc('designer_second_garant', { courriel })
     const emis = Array.isArray(data) ? data[0] : null
     if (error || !emis?.dossier || !emis.jti) {
-      return { statut: 'erreur', message: texte.erreurs.refus, valeur: saisie }
+      const fige = error?.message?.includes('ne peut pas etre remplace')
+      return {
+        statut: 'erreur',
+        message: fige ? texte.erreurs.fige : texte.erreurs.refus,
+        valeur: saisie,
+      }
     }
     await reglerLangueDossier(String(emis.dossier), 'locataire', langue)
     await reglerLangueDossier(
@@ -98,4 +104,30 @@ export async function designerSecondGarant(
 
   revalidatePath('/locataire')
   return { statut: 'envoye', a: courriel }
+}
+
+/** Retire un second garant qui n'a rien commence : la base tranche (0084). */
+export async function retirerSecondGarant(
+  _precedent: EtatSecondGarant,
+  donnees: FormData,
+): Promise<EtatSecondGarant> {
+  const langue = await langueEspace()
+  const texte = choisir(langue, texteFr, texteEn)
+  const sessionPorteur = choisir(langue, sessionPorteurFr, sessionPorteurEn)
+  const porteur = await capaciteDepuisCookies()
+  if (porteur && !formulaireDuDossier(donnees, porteur.capacite.dossierId)) {
+    return { statut: 'erreur', message: sessionPorteur.autreDossier }
+  }
+  if (!porteur || porteur.capacite.partie !== 'locataire') {
+    return { statut: 'erreur', message: texte.erreurs.expire }
+  }
+  try {
+    const { data, error } = await clientPorteurDeLien(porteur.jeton).rpc('retirer_second_garant')
+    if (error || data !== true) return { statut: 'erreur', message: texte.erreurs.retrait }
+  } catch {
+    console.error('[locataire] retrait du second garant impossible')
+    return { statut: 'erreur', message: texte.erreurs.retrait }
+  }
+  revalidatePath('/locataire')
+  return { statut: 'retire' }
 }

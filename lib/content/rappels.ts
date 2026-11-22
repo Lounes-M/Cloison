@@ -28,7 +28,7 @@ export const courrielsRappels = {
   depot: {
     sujet: 'Votre dépôt Cloison attend votre retour',
     texte:
-      'Votre dépôt ou une correction demandée par votre agence reste en attente. Revenez dans votre espace avec votre lien habituel pour voir la prochaine étape. Si votre lien a expiré, demandez un nouveau lien à votre agence. Aucun justificatif ne doit être envoyé par courriel.',
+      'Votre dépôt ou une correction demandée par votre agence reste en attente. Revenez dans votre espace avec votre lien habituel pour voir la prochaine étape. Si votre lien a expiré, demandez au locataire de vous en renvoyer un depuis son espace. Aucun justificatif ne doit être envoyé par courriel.',
   },
   echeance: {
     sujet: 'Un dossier Cloison approche de son échéance',

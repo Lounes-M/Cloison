@@ -206,7 +206,8 @@ test('deux rotations concurrentes d une session expiree n ont qu un gagnant', as
 test('une session complete ne devient pas une nouvelle session payable', async () => {
   ligne.session_ref = 'cs_complete'
   doubles.retrouver.mockResolvedValue({ id: 'cs_complete', status: 'complete', url: null })
-  expect(await creerSessionLocataire(OPTIONS)).toBeNull()
+  // Le locataire retourne a l'attente de confirmation, sans nouveau paiement.
+  expect(await creerSessionLocataire(OPTIONS)).toBe(OPTIONS.retourOk)
   expect(doubles.creer).not.toHaveBeenCalled()
 })
 
@@ -228,6 +229,14 @@ for (const [nom, date] of [
     expect(doubles.creer).not.toHaveBeenCalled()
   })
 }
+
+test('une tentative sans reference de plus de vingt-cinq heures est remplacee', async () => {
+  ligne.cree_le = new Date(MAINTENANT.getTime() - 25 * 60 * 60 * 1000).toISOString()
+  expect(await creerSessionLocataire(OPTIONS)).toBe('https://checkout.example.invalid/1')
+  expect(ligne.tentative).not.toBe(TENTATIVE)
+  expect(clesUtilisees()).toEqual([`cloison:${DOSSIER}:${ligne.tentative}`])
+  expect(ligne.session_ref).toBe('cs_fixture_1')
+})
 
 test('une inscription qui ne touche aucune ligne ne rend pas une URL obsolete', async () => {
   inscriptionSansLigne = true

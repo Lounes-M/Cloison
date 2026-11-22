@@ -61,12 +61,17 @@ export const logements: Textes<typeof Fr> = {
       'I confirm: the other applicants will be told that their file has not been selected.',
     bouton: 'Award and notify the others',
     envoi: 'Awarding…',
-    succes: (refuses) =>
-      refuses === 0
+    succes: (refuses, enCours) =>
+      (refuses === 0
         ? 'Property awarded and archived. No other applicant to notify.'
         : refuses === 1
           ? 'Property awarded and archived. One other applicant has been notified.'
-          : `Property awarded and archived. ${refuses} other applicants have been notified.`,
+          : `Property awarded and archived. ${refuses} other applicants have been notified.`) +
+      (enCours === 0
+        ? ''
+        : enCours === 1
+          ? ' One file that is still incomplete stays open and its applicant has not been notified: close it from its page.'
+          : ` ${enCours} files that are still incomplete stay open and their applicants have not been notified: close them from their pages.`),
     erreurs: {
       candidat: 'This applicant is not accepted for this property, or no longer is.',
       confirmation: 'Tick the confirmation: the other applicants are going to be notified.',

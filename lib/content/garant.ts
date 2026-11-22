@@ -184,6 +184,8 @@ export const engagement = {
  */
 export const mention = {
   titre: 'Votre mention',
+  figee:
+    'Le dossier a été transmis : votre mention est figée. La voici, telle que vous l’avez écrite.',
   intro:
     'Vous pouvez préparer votre mention avant la transmission du dossier. Cette étape n’est pas une signature et le contrôle automatique ne certifie pas la validité juridique du texte.',
   prenom: 'Votre prénom',

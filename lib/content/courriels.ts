@@ -12,7 +12,7 @@ export const locataire: Record<string, { sujet: string; texte: string }> = {
   complet: {
     sujet: 'Ton dossier est complet',
     texte:
-      'Ton garant a déposé ses pièces et il est éligible. L’agence a maintenant tout ce qu’il lui faut pour décider. Tu n’as rien à faire : elle revient vers toi.',
+      'Ton garant a déposé ses pièces et il est éligible. Si une agence suit ton dossier, elle a maintenant tout ce qu’il lui faut pour décider et revient vers toi. Sinon, rattache ton dossier à ton agence depuis ton espace pour qu’elle puisse le consulter.',
   },
   garant_insuffisant: {
     sujet: 'Ton dossier a besoin d’un autre garant',

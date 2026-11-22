@@ -116,6 +116,9 @@ export async function creerSessionLocataire(options: {
           return null
         return ancienne.url
       }
+      // Deja payee, mais le webhook n'a pas encore credite le dossier : le
+      // locataire retrouve l'ecran d'attente, pas une panne.
+      if (ancienne.status === 'complete') return options.retourOk
       if (ancienne.status !== 'expired') return null
       // Seule une session definitivement expiree peut etre remplacee.
       tentative = randomUUID()
@@ -130,7 +133,26 @@ export async function creerSessionLocataire(options: {
       const age = Date.now() - new Date(etat.cree_le).getTime()
       // Marge avant la retention minimale Stripe de 24 h ; une date incoherente
       // ne doit pas prolonger cette fenetre. Tolerance de cinq minutes entre horloges.
-      if (!Number.isFinite(age) || age < -5 * 60 * 1000 || age >= 23 * 60 * 60 * 1000) {
+      if (!Number.isFinite(age) || age < -5 * 60 * 1000) {
+        console.error('[paiement] tentative a reconcilier')
+        return null
+      }
+      if (age >= 25 * 60 * 60 * 1000) {
+        // Passe vingt-cinq heures, une session creee sans avoir ete inscrite
+        // est expiree chez Stripe, et son adresse n'a jamais ete remise au
+        // locataire. La tentative se remplace, sinon le paiement resterait
+        // bloque pour toujours.
+        tentative = randomUUID()
+        const { data: rotation, error } = await db
+          .from('sessions_paiement')
+          .update({ tentative, session_ref: null, cree_le: new Date().toISOString() })
+          .eq('dossier_id', options.dossierId)
+          .eq('tentative', etat.tentative)
+          .select('tentative')
+        if (error || rotation?.length !== 1) return null
+      } else if (age >= 23 * 60 * 60 * 1000) {
+        // Entre les deux, la cle d'idempotence peut encore expirer en cours
+        // d'appel : on attend l'heure suivante.
         console.error('[paiement] tentative a reconcilier')
         return null
       }

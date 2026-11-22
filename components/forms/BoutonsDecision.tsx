@@ -21,10 +21,13 @@ export function BoutonsDecision({
   dossierId,
   peutPrendre,
   peutRefuser,
+  acteIncomplet = false,
 }: {
   dossierId: string
   peutPrendre: boolean
   peutRefuser: boolean
+  /** Le garant n'a pas ecrit sa mention ou declare son plafond. */
+  acteIncomplet?: boolean
 }) {
   const langue = useLangue()
   const texte = choisir(langue, texteFr, texteEn)
@@ -47,6 +50,17 @@ export function BoutonsDecision({
       <div className="flex flex-wrap gap-6">
         <form action={prendre} className="flex flex-col gap-2">
           <input type="hidden" name="dossier" value={dossierId} />
+          {peutPrendre && acteIncomplet ? (
+            <>
+              <p className="border-sun bg-sun/15 max-w-[320px] rounded-r-xl border-l-4 px-3 py-2 text-[13px] leading-relaxed font-medium">
+                {texte.acteIncomplet}
+              </p>
+              <label className="flex max-w-[320px] items-start gap-2 text-[13px] font-semibold">
+                <input type="checkbox" name="sansActe" required className="mt-1" />
+                <span>{texte.prendreSansActe}</span>
+              </label>
+            </>
+          ) : null}
           <button
             type="submit"
             disabled={!peutPrendre || priseEnCours}
@@ -59,6 +73,12 @@ export function BoutonsDecision({
 
         <form action={refuser} className="flex flex-col gap-2">
           <input type="hidden" name="dossier" value={dossierId} />
+          {peutRefuser ? (
+            <label className="flex max-w-[280px] items-start gap-2 text-[13px] font-semibold">
+              <input type="checkbox" name="confirme" required className="mt-1" />
+              <span>{texte.refuserConfirmer}</span>
+            </label>
+          ) : null}
           <button
             type="submit"
             disabled={!peutRefuser || refusEnCours}

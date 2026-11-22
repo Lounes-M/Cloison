@@ -9,6 +9,7 @@ const d = vi.hoisted(() => ({
   archive: { id: 'x' } as unknown,
   refuses: [] as { id: string }[] | null,
   erreurRefus: null as unknown,
+  enCours: [] as { id: string }[],
 }))
 vi.mock('@/lib/agences/contexte', () => ({ contexteAgence: d.contexte }))
 vi.mock('next/cache', () => ({ revalidatePath: d.revalider }))
@@ -36,7 +37,12 @@ function client() {
             data: table === 'logements' ? d.archive : d.candidat,
             error: null,
           }),
-          then: (r: (v: unknown) => unknown) => r({ data: d.refuses, error: d.erreurRefus }),
+          then: (r: (v: unknown) => unknown) =>
+            r(
+              op === 'select'
+                ? { data: d.enCours, error: null }
+                : { data: d.refuses, error: d.erreurRefus },
+            ),
         }
         return chaine
       }
@@ -61,6 +67,7 @@ beforeEach(() => {
   d.archive = { id: LOGEMENT }
   d.refuses = [{ id: AUTRE }, { id: AUTRE2 }]
   d.erreurRefus = null
+  d.enCours = [{ id: 'encours' }]
   d.contexte.mockResolvedValue({ etat: 'rattache', agence: { id: 'a' }, supabase: client() })
 })
 afterEach(() => vi.resetAllMocks())
@@ -69,6 +76,7 @@ test('attribuer archive le logement puis refuse et previent les autres candidats
   expect(await attribuerLeLogement({ statut: 'inactif' }, valide())).toEqual({
     statut: 'attribue',
     refuses: 2,
+    enCours: 1,
   })
   expect(d.appels).toEqual([
     {
@@ -95,6 +103,16 @@ test('attribuer archive le logement puis refuse et previent les autres candidats
         ['eq', 'logement_id', LOGEMENT],
         ['neq', 'id', RETENU],
         ['in', 'statut', ['complet', 'garant_insuffisant', 'transmis']],
+      ],
+    },
+    {
+      table: 'dossiers',
+      op: 'select',
+      valeurs: undefined,
+      filtres: [
+        ['eq', 'logement_id', LOGEMENT],
+        ['neq', 'id', RETENU],
+        ['in', 'statut', ['ouvert', 'depot_en_cours']],
       ],
     },
   ])
@@ -152,7 +170,10 @@ test('des identifiants invalides sont refuses avant toute lecture', async () => 
 })
 
 test('les textes de succes s accordent au nombre de candidats prevenus', () => {
-  expect(texte.attribution.succes(0)).toContain('Aucun autre candidat')
-  expect(texte.attribution.succes(1)).toContain('Un autre candidat a été prévenu')
-  expect(texte.attribution.succes(3)).toContain('3 autres candidats ont été prévenus')
+  expect(texte.attribution.succes(0, 0)).toContain('Aucun autre candidat')
+  expect(texte.attribution.succes(1, 0)).toContain('Un autre candidat a été prévenu')
+  expect(texte.attribution.succes(3, 0)).toContain('3 autres candidats ont été prévenus')
+  expect(texte.attribution.succes(3, 0)).not.toContain('incomplet')
+  expect(texte.attribution.succes(0, 1)).toContain('Un dossier encore incomplet reste ouvert')
+  expect(texte.attribution.succes(1, 2)).toContain('2 dossiers encore incomplets restent ouverts')
 })

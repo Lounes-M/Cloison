@@ -133,10 +133,15 @@ export async function designerMonGarant(
     const { data: emissions, error } = await supabase.rpc('designer_garant_avec_lien', { courriel })
     const emis = Array.isArray(emissions) ? emissions[0] : null
     if (error || !emis?.jti || !emis.expire_le) {
+      // La base distingue le garant fige (0020, 0084) d'une panne passagere.
+      const fige = /ne peut pas etre remplace|Ce dossier est fige/.test(error?.message ?? '')
+      if (error && !fige) console.error('[locataire] designation refusee')
       return {
         statut: 'erreur',
         message: dire(
-          'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.',
+          fige
+            ? 'Ton garant a déjà commencé son dossier : son adresse ne peut plus changer. Tu peux lui renvoyer son lien.'
+            : 'Le lien n’a pas pu être préparé. Réessaie dans un instant.',
         ),
         valeur: saisie,
       }
@@ -173,9 +178,7 @@ export async function designerMonGarant(
     console.error('[locataire] designation impossible')
     return {
       statut: 'erreur',
-      message: dire(
-        'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.',
-      ),
+      message: dire('Le lien n’a pas pu être préparé. Réessaie dans un instant.'),
       valeur: saisie,
     }
   }

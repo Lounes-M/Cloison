@@ -23,6 +23,8 @@ export const journal: Textes<typeof Fr> = {
     complement_refuse: 'New correction requested',
     dossier_transmis: 'File handed over',
     relances_reprises: 'New series of reminders started',
+    loyer_corrige: 'Rent corrected by the agency',
+    dossier_refuse: 'File declined',
     ocr_demande: 'AI transcription of a document requested',
   },
   acteurs: { agence: 'the agency', garant: 'the guarantor', locataire: 'the tenant' },

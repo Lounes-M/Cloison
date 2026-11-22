@@ -59,12 +59,17 @@ export const logements = {
       'Je confirme : les autres candidats seront prévenus que leur dossier n’est pas retenu.',
     bouton: 'Attribuer et prévenir les autres',
     envoi: 'Attribution…',
-    succes: (refuses: number) =>
-      refuses === 0
+    succes: (refuses: number, enCours: number) =>
+      (refuses === 0
         ? 'Logement attribué et archivé. Aucun autre candidat à prévenir.'
         : refuses === 1
           ? 'Logement attribué et archivé. Un autre candidat a été prévenu.'
-          : `Logement attribué et archivé. ${refuses} autres candidats ont été prévenus.`,
+          : `Logement attribué et archivé. ${refuses} autres candidats ont été prévenus.`) +
+      (enCours === 0
+        ? ''
+        : enCours === 1
+          ? ' Un dossier encore incomplet reste ouvert et son candidat n’a pas été prévenu : clôturez-le depuis sa fiche.'
+          : ` ${enCours} dossiers encore incomplets restent ouverts et leurs candidats n’ont pas été prévenus : clôturez-les depuis leur fiche.`),
     erreurs: {
       candidat: 'Ce candidat n’est pas pris pour ce logement, ou ne l’est plus.',
       confirmation: 'Cochez la confirmation : les autres candidats vont être prévenus.',

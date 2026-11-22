@@ -32,7 +32,7 @@ export const questions = {
         {
           question: 'Can I have two guarantors?',
           reponse:
-            'Yes. You can name a second guarantor from your space. Each one uploads their documents on their side, without seeing the other’s, and the agency assesses the two together.',
+            'Yes, when your file is followed by an agency. You then name a second guarantor from your space. Each one uploads their documents on their side, without seeing the other’s, and the agency assesses the two together.',
         },
         {
           question: 'I lost the link to my file.',

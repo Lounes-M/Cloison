@@ -140,6 +140,6 @@ test("un loyer refuse apres l'ouverture ne defait pas le dossier", async () => {
       { statut: 'inactif' },
       form({ courriel: 'loc@example.invalid', loyer: '700' }),
     ),
-  ).toEqual({ statut: 'ouvert', email: 'loc@example.invalid' })
+  ).toEqual({ statut: 'ouvert', email: 'loc@example.invalid', incomplet: true })
   expect(d.livrer).toHaveBeenCalledWith(id)
 })

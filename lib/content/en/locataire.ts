@@ -18,7 +18,13 @@ export const porte: Textes<typeof Fr.porte> = {
 
 export const secondGarant: Textes<typeof Fr.secondGarant> = {
   titre: 'A second guarantor',
-  aide: 'If one guarantor is not enough, you can add a second one. Their income is added to the first guarantor’s, and each uploads their documents separately, without seeing the other’s.',
+  aide: 'If one guarantor is not enough, you can add a second one. Their income is added to the first guarantor’s, and each uploads their documents separately, without seeing the other’s. Your file then waits until both have uploaded everything, even if it was already complete.',
+  libre:
+    'Until they have started, you can correct their address or remove them. Your file is then assessed on your first guarantor alone again.',
+  retirer: 'Remove the second guarantor',
+  retrait: 'Removing…',
+  retire:
+    'The second guarantor has been removed. Your file is assessed on your first guarantor again.',
   designe: (email) => `Second guarantor named: ${email}. They upload their documents separately.`,
   champ: 'Their email address',
   bouton: 'Send the link to the second guarantor',
@@ -30,16 +36,28 @@ export const secondGarant: Textes<typeof Fr.secondGarant> = {
     adresse: 'This does not look like an email address.',
     doublon: 'The second guarantor must be someone other than you and your first guarantor.',
     refus: 'This file cannot take a second guarantor for now.',
+    fige: 'This second guarantor has already started uploading: their address can no longer change. You can resend their link.',
+    retrait:
+      'The second guarantor can no longer be removed: they have started uploading, or the file has already been sent.',
     debit: 'Too many links sent. Try again in fifteen minutes.',
     expire: 'Your link has expired. Request a new one.',
   },
+}
+
+export const statutsSansAgence: Record<string, string> = {
+  complet:
+    'All the documents are there and your guarantor is eligible. Attach your file to your agency, below, so that it can view it and decide.',
+  garant_insuffisant:
+    'The income declared by this guarantor is not enough for this rent. To ask someone else, open a new file. This guarantor’s data stays in their own file.',
 }
 
 export const espace: Textes<typeof Fr.espace> = {
   loyerFige: 'Rent:',
   loyerFigeSuite: '€. This amount is locked to keep the guarantor’s declaration confidential.',
   garantAssocie:
-    'The invited guarantor stays attached to this file. To name someone else, open a new file.',
+    'Your guarantor has started their file and stays attached to it. To name someone else, open a new file.',
+  garantCorrigeable:
+    'A typo in their address? Correct it here until your guarantor has started: the previous link stops working.',
   plusModifiable: 'This file can no longer be changed.',
   garantRenouvellement:
     'You can resend access to the same guarantor. The file stays frozen and the new link replaces the previous one.',

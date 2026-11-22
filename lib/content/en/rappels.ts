@@ -27,7 +27,7 @@ export const courrielsRappels: Textes<typeof Fr.courrielsRappels> = {
   depot: {
     sujet: 'Your Cloison upload is waiting for you',
     texte:
-      'Your upload, or a correction requested by your agency, is still pending. Come back to your space with your usual link to see the next step. If your link has expired, ask your agency for a new one. No supporting document should be sent by email.',
+      'Your upload, or a correction requested by your agency, is still pending. Come back to your space with your usual link to see the next step. If your link has expired, ask the tenant to send you a new one from their space. No supporting document should be sent by email.',
   },
   echeance: {
     sujet: 'A Cloison file is nearing its deadline',
