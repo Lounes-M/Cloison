@@ -1,6 +1,7 @@
 import 'server-only'
 import type { ContexteAgence } from './contexte'
 import { pilotage as pilotageFr } from '@/lib/content/pilotage'
+import { lireRelancesEpuisees } from './relances-epuisees'
 import { STATUTS_EN_ATTENTE, limiteSansNouvelles } from './inactivite'
 import { pilotage as pilotageEn } from '@/lib/content/en/pilotage'
 import { choisir } from '@/lib/i18n'
@@ -17,8 +18,8 @@ export async function lirePriorites(contexte: Extract<ContexteAgence, { etat: 'r
         // Les relances epuisees se lisent par une fonction (0077) : la table
         // des rappels reste fermee aux agences.
         if (cle === 'relances_epuisees') {
-          const { data, error } = await contexte.supabase.rpc('dossiers_relances_epuisees')
-          return { cle, nombre: !error && Array.isArray(data) ? data.length : null }
+          const { panne, ids } = await lireRelancesEpuisees(contexte.supabase)
+          return { cle, nombre: panne ? null : ids.length }
         }
         // Un dossier compte une fois, quel que soit le nombre de pieces
         // proposees : l'embarquement `!inner` filtre les dossiers, pas les lignes.

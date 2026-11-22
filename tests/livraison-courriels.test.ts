@@ -110,3 +110,78 @@ test.each([true, false, null])(
     )
   },
 )
+
+test('un lot plein et sans echec appelle le suivant, un lot incomplet arrete le passage', async () => {
+  vi.useFakeTimers()
+  try {
+    ouvrir.mockReturnValue(Buffer.from('{}'))
+    envoyerResend.mockResolvedValue({ data: { id: 'resend_fictif' }, error: null })
+    const lots = [10, 10, 3]
+    let pris = 0
+    const rpc = vi.fn(async (nom: string) => {
+      if (nom === 'prendre_courriels') {
+        const taille = lots[pris++] ?? 0
+        return {
+          data: Array.from({ length: taille }, (_, i) => ({
+            id: `id-${pris}-${i}`,
+            contenu: '',
+            bail: 'bail-fictif',
+          })),
+          error: null,
+        }
+      }
+      return { data: nom === 'acquitter_courriel' ? true : 0, error: null }
+    })
+    const passage = distribuerCourriels({ rpc } as unknown as SupabaseClient)
+    await vi.runAllTimersAsync()
+    expect(await passage).toEqual({ traites: 23, echecs: 0 })
+    expect(pris).toBe(3)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+test('un echec dans un lot plein arrete la serie : le fournisseur n est pas presse', async () => {
+  vi.useFakeTimers()
+  try {
+    ouvrir.mockReturnValue(Buffer.from('{}'))
+    envoyerResend.mockResolvedValue({ data: null, error: { name: 'rate_limit_exceeded' } })
+    let pris = 0
+    const rpc = vi.fn(async (nom: string) => {
+      if (nom === 'prendre_courriels') {
+        pris++
+        return {
+          data: Array.from({ length: 10 }, (_, i) => ({
+            id: `id-${i}`,
+            contenu: '',
+            bail: 'bail-fictif',
+          })),
+          error: null,
+        }
+      }
+      return { data: nom === 'acquitter_courriel' ? true : 0, error: null }
+    })
+    const passage = distribuerCourriels({ rpc } as unknown as SupabaseClient)
+    await vi.runAllTimersAsync()
+    expect(await passage).toEqual({ traites: 0, echecs: 10 })
+    expect(pris).toBe(1)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+test('un envoi immediat ne prend jamais qu un lot', async () => {
+  ouvrir.mockReturnValue(Buffer.from('{}'))
+  envoyerResend.mockResolvedValue({ data: { id: 'resend_fictif' }, error: null })
+  const rpc = vi.fn(async (nom: string) => ({
+    data:
+      nom === 'prendre_courriels'
+        ? [{ id: 'id-fictif', contenu: '', bail: 'bail-fictif' }]
+        : nom === 'acquitter_courriel'
+          ? true
+          : 0,
+    error: null,
+  }))
+  await distribuerCourriels({ rpc } as unknown as SupabaseClient, 'id-fictif')
+  expect(rpc.mock.calls.filter(([nom]) => nom === 'prendre_courriels')).toHaveLength(1)
+})
