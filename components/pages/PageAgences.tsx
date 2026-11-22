@@ -1,6 +1,5 @@
 import { FormulaireAgence } from '@/components/forms/FormulaireAgence'
 import { Button } from '@/components/ui/Button'
-import { Compteur } from '@/components/ui/Compteur'
 import { Accent, EnTetePage } from '@/components/ui/EnTetePage'
 import { Icone, type NomIcone } from '@/components/ui/Icone'
 import { Photo } from '@/components/ui/Photo'
@@ -150,13 +149,17 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
             {[...tarifAgence.lignes, tarifAgence.total].map((ligne, index) => (
               <li key={ligne.libelle}>
                 <Reveal delay={index * 0.06} className="h-full">
-                  <article className="lift bg-paper h-full rounded-[1.5rem] p-[2rem]">
-                    <Icone
-                      nom={ICONES_TARIF[index % ICONES_TARIF.length]!}
-                      className="size-[2rem]"
-                    />
-                    <p className="texte-28 text-cobalt mt-[1.5rem]">{ligne.valeur}</p>
-                    <h3 className="mt-[0.75rem]">{ligne.libelle}</h3>
+                  <article className="lift bg-paper flex h-full items-start gap-[1.5rem] rounded-[1.5rem] p-[1.75rem]">
+                    <span className="bg-mint text-cobalt flex size-[3.25rem] shrink-0 items-center justify-center rounded-[0.9rem]">
+                      <Icone
+                        nom={ICONES_TARIF[index % ICONES_TARIF.length]!}
+                        className="size-[1.6rem]"
+                      />
+                    </span>
+                    <div>
+                      <p className="texte-28 text-cobalt">{ligne.valeur}</p>
+                      <h3 className="mt-[0.4rem]">{ligne.libelle}</h3>
+                    </div>
                   </article>
                 </Reveal>
               </li>
@@ -179,20 +182,7 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
             </h2>
             <p className="mt-[1.5rem] max-w-[42rem] md:max-w-[58rem]">{formulaire.sousTitre}</p>
           </Reveal>
-          <dl className="mt-[2.9rem] grid border-t border-[#4e8478] sm:grid-cols-3">
-            {formulaire.metriques.map((metrique) => (
-              <div
-                key={metrique.libelle}
-                className="flex items-baseline gap-[1rem] border-b border-[#4e8478] py-[2rem] sm:flex-col sm:gap-[0.5rem]"
-              >
-                <dt className="texte-18">{metrique.libelle}</dt>
-                <dd className="chiffre-100 text-sun order-first">
-                  <Compteur valeur={metrique.valeur} />
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <div className="bg-paper text-ink mx-auto mt-[5rem] max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
+          <div className="bg-paper text-ink mt-[3.5rem] max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
             <FormulaireAgence langue={langue} />
           </div>
         </div>

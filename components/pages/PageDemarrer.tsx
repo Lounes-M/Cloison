@@ -67,11 +67,12 @@ export function PageDemarrer({ langue = 'fr' }: { langue?: Langue }) {
         </div>
         <div
           aria-hidden
-          className="bg-flame relative flex h-[3.9rem] items-center overflow-hidden whitespace-nowrap"
+          className="bg-cobalt relative flex h-[3.9rem] items-center overflow-hidden whitespace-nowrap text-white"
         >
-          <div className="animate-marquee texte-16 text-ink flex w-max">
+          <div className="animate-marquee texte-16 flex w-max">
             {items.map((item, index) => (
-              <span key={`${item}-${index}`} className="pr-[3rem]">
+              <span key={`${item}-${index}`} className="flex items-center gap-[2rem] pr-[2rem]">
+                <span className="border-y-[5px] border-r-[8px] border-y-transparent border-r-white" />
                 {item}
               </span>
             ))}

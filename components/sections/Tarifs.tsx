@@ -53,7 +53,9 @@ export function Tarifs({ langue = 'fr' }: { langue?: Langue }) {
                     {ligne.price}
                   </p>
                 </Defilement>
-                <p className="texte-14 text-sun md:max-w-[32.25rem]">{ligne.detail}</p>
+                <p className="texte-18 text-white/90 md:max-w-[26rem] md:pt-[1.5rem]">
+                  {ligne.detail}
+                </p>
               </Reveal>
             </li>
           ))}

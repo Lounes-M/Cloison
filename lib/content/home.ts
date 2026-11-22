@@ -174,20 +174,20 @@ export const pricing = {
     },
     {
       audience: "L'agence",
-      price: 'Gratuit pour lire',
-      detail: `${prixActe} par acte signé et archivé`,
+      price: prixActe,
+      detail: 'par acte signé et archivé. Consulter les dossiers reste gratuit.',
     },
   ],
   goldenRule: {
     tag: "Règle d'or",
     audience: 'Le garant',
-    price: 'Jamais.',
-    detail: 'Sinon ça ne part pas.',
+    price: 'Rien.',
+    detail: 'Le garant ne paie jamais, à aucune étape.',
   },
 } as const
 
 export const whyNow = {
-  eyebrow: 'Pourquoi maintenant',
+  eyebrow: 'Pourquoi maintenant ?',
   body: 'Les pièces du garant circulent encore entre plusieurs personnes et plusieurs outils.',
   emphasis: 'Le garant a besoin de son propre espace.',
 } as const
@@ -196,7 +196,7 @@ export const goToMarket = {
   eyebrow: 'Cloison en chiffres',
   metrics: [
     { value: '3', label: 'espaces séparés' },
-    { value: '7', label: 'jours par lien' },
+    { value: '7', label: 'jours de validité par lien' },
     { value: '3', label: 'mois de conservation' },
   ],
 } as const
@@ -281,7 +281,7 @@ export const espacesAccueil = {
   etape: 'Étape',
   liens: [
     { href: '/demarrer', libelle: 'Créer mon dossier' },
-    { href: '/demarrer', libelle: 'Créer mon dossier' },
+    { href: '/questions', libelle: 'Les questions du garant' },
     { href: '/agences', libelle: 'Je suis une agence' },
   ],
 } as const
