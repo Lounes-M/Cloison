@@ -118,7 +118,7 @@ export const parcours = {
   eyebrow: 'Comment ça marche',
   headline: ['Trois étapes,', 'chacun son espace.'],
   /** Lu par les lecteurs d'écran à la place du groupe d'onglets. */
-  legende: 'Par où commences-tu ?',
+  legende: 'Par où commences-tu\u00a0?',
   pistes: [
     {
       id: 'locataire',
@@ -187,7 +187,7 @@ export const pricing = {
 } as const
 
 export const whyNow = {
-  eyebrow: 'Pourquoi maintenant ?',
+  eyebrow: 'Pourquoi maintenant\u00a0?',
   body: 'Les pièces du garant circulent encore entre plusieurs personnes et plusieurs outils.',
   emphasis: 'Le garant a besoin de son propre espace.',
 } as const

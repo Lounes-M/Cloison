@@ -19,6 +19,7 @@ export const tableau: Textes<typeof Fr.tableau> = {
   },
   aideEcheance:
     'Periods start from now. This deadline concerns the document vault; it does not describe the duration of the signed deed. Dates are shown in Paris time.',
+  ratioAVenir: 'pending',
   finCoffre: (date) => `End of vault: ${date}`,
   dateIndisponible: 'date unavailable',
   rechercheReference: 'File reference',

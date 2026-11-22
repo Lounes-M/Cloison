@@ -60,7 +60,7 @@ export default async function PageLogements({
       </section>
 
       <section
-        className="panneau-espace relative mt-8 overflow-x-auto"
+        className="panneau-espace ombres-defilement relative mt-8 overflow-x-auto"
         tabIndex={0}
         role="region"
         aria-label={t.titre}

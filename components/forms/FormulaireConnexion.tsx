@@ -90,7 +90,7 @@ export function FormulaireConnexion({
         </p>
       </div>
 
-      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand">
+      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand w-full">
         {enCours ? t.envoi : t.recevoir}
       </button>
     </form>

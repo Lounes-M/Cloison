@@ -113,7 +113,7 @@ export function FormulaireOuverture({
         </div>
       ) : null}
 
-      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand">
+      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand w-full">
         {enCours ? porte.envoi : porte.bouton}
       </button>
     </form>
