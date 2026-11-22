@@ -1,0 +1,48 @@
+name: Migrations
+# Applique a la base de production les migrations fusionnees dans main.
+#
+# Chaque migration passe dans sa propre transaction, avec son inscription au
+# registre : une erreur n'en laisse aucune a moitie appliquee, et arrete la
+# suite. Le lancement manuel permet de verifier sans rien ecrire, ou d'inscrire
+# une fois pour toutes ce qui a ete applique a la main avant ce workflow.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'verifier (lecture seule), appliquer, ou reference (inscrire sans executer)'
+        type: choice
+        default: verifier
+        options: [verifier, appliquer, reference]
+      reference:
+        description: 'Pour « reference » : derniere migration deja en place, par exemple 0084'
+        type: string
+        default: ''
+permissions:
+  contents: read
+concurrency:
+  group: migrations-production
+  cancel-in-progress: false
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Migrations de la base
+        env:
+          MIGRATIONS_DATABASE_URL: ${{ secrets.MIGRATIONS_DATABASE_URL }}
+          OPERATION: ${{ github.event_name == 'push' && 'appliquer' || inputs.operation }}
+          REFERENCE: ${{ inputs.reference }}
+        run: |
+          if [ -z "$MIGRATIONS_DATABASE_URL" ]; then
+            echo "::warning::Le secret MIGRATIONS_DATABASE_URL n'est pas configure : aucune migration appliquee."
+            exit 0
+          fi
+          scripts/appliquer-migrations.sh "$OPERATION" "$REFERENCE"
