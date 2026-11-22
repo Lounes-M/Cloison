@@ -283,22 +283,24 @@ export default async function PageGarant({
       />
       <section id="pieces" className="panneau-espace mt-6">
         <h2 className="text-xl font-bold">{depot.piecesTitre}</h2>
-        <p className="text-muted mt-2 text-[13px] leading-relaxed font-medium">
-          {informationCollecte.garant}{' '}
-          <a href="/confidentialite" className="underline underline-offset-4">
-            {informationCollecte.lien}
-          </a>
-        </p>
-        <p className="text-muted mt-2 mb-8 text-[14px] font-medium">{depot.formats}</p>
-        <p className="text-muted mb-6 text-sm">{documentsDeclares.presence}</p>
-        <p className="mb-6 text-sm">
+        <p className="mt-2 text-[15px] font-semibold">
           {documentsDeclares.profil(profilsRessources.find((p) => p.valeur === profil)!.libelle)}
           {ouvert ? (
-            <a href="#engagement" className="ml-2 font-bold underline">
+            <a href="#engagement" className="ml-2 font-bold underline underline-offset-4">
               {documentsDeclares.changerProfil}
             </a>
           ) : null}
         </p>
+        <p className="mt-2 text-[14px] font-medium">{depot.formats}</p>
+        <div className="border-ink/15 text-muted mt-3 mb-6 flex flex-col gap-1.5 border-l-2 pl-4 text-[13px] leading-relaxed font-medium">
+          <p>
+            {informationCollecte.garant}{' '}
+            <a href="/confidentialite" className="underline underline-offset-4">
+              {informationCollecte.lien}
+            </a>
+          </p>
+          <p>{documentsDeclares.presence}</p>
+        </div>
 
         <ol className="flex flex-col gap-8">
           {visibles.map((nature) => {

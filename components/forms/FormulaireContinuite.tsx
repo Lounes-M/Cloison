@@ -20,8 +20,8 @@ export function FormulaireContinuite({
     {},
   )
   return (
-    <section className="mt-10">
-      <h2 className="font-display text-xl">
+    <section className={mode === 'agence' ? 'panneau-espace mt-6' : 'mt-10'}>
+      <h2 className={mode === 'agence' ? 'text-xl font-bold' : 'font-display text-xl'}>
         {mode === 'retrouver' ? continuite.retrouver : continuite.agence}
       </h2>
       <form action={action} className="mt-4 flex flex-col gap-3">
@@ -29,7 +29,9 @@ export function FormulaireContinuite({
         <input type="hidden" name="dossier" value={dossierId ?? ''} />
         {mode === 'retrouver' ? (
           <>
-            <label htmlFor="email-retour">{continuite.email}</label>
+            <label htmlFor="email-retour" className="text-[14px] font-bold">
+              {continuite.email}
+            </label>
             <input
               className="outlined bg-paper rounded-lg p-3"
               id="email-retour"
@@ -38,7 +40,9 @@ export function FormulaireContinuite({
               required
               maxLength={180}
             />
-            <label htmlFor="reference-retour">{continuite.reference}</label>
+            <label htmlFor="reference-retour" className="text-[14px] font-bold">
+              {continuite.reference}
+            </label>
             <input
               className="outlined bg-paper rounded-lg p-3"
               id="reference-retour"
@@ -49,8 +53,10 @@ export function FormulaireContinuite({
           </>
         ) : (
           <>
-            <p>{continuite.aide}</p>
-            <label htmlFor="domaine-agence">{continuite.domaine}</label>
+            <p className="text-muted text-[14px] leading-relaxed font-medium">{continuite.aide}</p>
+            <label htmlFor="domaine-agence" className="text-[14px] font-bold">
+              {continuite.domaine}
+            </label>
             <input
               className="outlined bg-paper rounded-lg p-3"
               id="domaine-agence"
@@ -58,13 +64,18 @@ export function FormulaireContinuite({
               required
               maxLength={180}
             />
-            <label className="flex gap-3">
-              <input type="checkbox" name="accord" required />
+            <label className="flex gap-3 text-[14px] font-medium">
+              <input
+                type="checkbox"
+                name="accord"
+                required
+                className="accent-cobalt mt-0.5 size-5 shrink-0"
+              />
               {continuite.consentement}
             </label>
           </>
         )}
-        <button disabled={pending} className="btn btn-principal">
+        <button disabled={pending} className="btn btn-principal self-start">
           {mode === 'retrouver' ? continuite.envoyer : continuite.transmettre}
         </button>
         {etat.message ? <p role="status">{etat.message}</p> : null}
