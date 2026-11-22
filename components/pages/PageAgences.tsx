@@ -173,16 +173,16 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
         id="demander"
         className="bg-cobalt rounded-t-carte gouttiere relative z-10 pt-[11.25rem] pb-[6.2rem] text-white max-[767px]:pt-[4.8rem] max-[767px]:pb-[3rem]"
       >
-        <div className="conteneur">
-          <Reveal>
+        <div className="conteneur lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] lg:items-start lg:gap-[4rem]">
+          <Reveal className="lg:sticky lg:top-[7rem]">
             <h2 className="titre-84">
               {formulaire.titre[0]}
               <br />
               <span className="text-sun">{formulaire.titre[1]}</span>
             </h2>
-            <p className="mt-[1.5rem] max-w-[42rem] md:max-w-[58rem]">{formulaire.sousTitre}</p>
+            <p className="mt-[1.5rem] max-w-[42rem]">{formulaire.sousTitre}</p>
           </Reveal>
-          <div className="bg-paper text-ink mt-[3.5rem] max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5">
+          <div className="bg-paper text-ink mt-[3.5rem] max-w-[56rem] rounded-[1.5rem] p-[2.5rem] max-[479px]:p-5 lg:mt-0">
             <FormulaireAgence langue={langue} />
           </div>
         </div>

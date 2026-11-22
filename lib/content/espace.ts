@@ -23,6 +23,7 @@ export const tableau = {
   },
   aideEcheance:
     'Les périodes partent de maintenant. Cette échéance concerne le coffre documentaire ; elle ne décrit pas la durée de l’acte signé. Les dates sont affichées à l’heure de Paris.',
+  ratioAVenir: 'à venir',
   finCoffre: (date: string) => `Fin du coffre : ${date}`,
   dateIndisponible: 'date indisponible',
   rechercheReference: 'Référence du dossier',

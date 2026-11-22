@@ -27,6 +27,15 @@ export function AppelPrincipal({
   className?: string
 }) {
   const surAgences = useSurPageAgences()
+  const surConnexion = (usePathname() ?? '').replace(/\/$/, '').endsWith('/connexion')
+  // La connexion est une page d'agence : on n'y propose pas de créer un dossier locataire.
+  if (surConnexion) {
+    return (
+      <Button href={`${lien(langue, '/agences')}#demander`} tone="paper" className={className}>
+        {choisir(langue, agencesFr, agencesEn).ancreFormulaire}
+      </Button>
+    )
+  }
   if (surAgences) {
     return (
       <Button href="#demander" tone="paper" className={className}>

@@ -33,7 +33,9 @@ export function FormulaireResponsable({
       <input type="hidden" name="revision" value={courant.revision ?? ''} />
       {admin ? (
         <>
-          <label htmlFor={id}>{t.choix}</label>
+          <label htmlFor={id} className="text-[14px] font-bold">
+            {t.choix}
+          </label>
           <select
             key={courant.revision ?? 'nouveau'}
             id={id}
@@ -57,7 +59,7 @@ export function FormulaireResponsable({
         <input type="checkbox" name="confirmation" required disabled={attente} />
         {t.confirmation}
       </label>
-      <button disabled={attente} className="btn btn-principal">
+      <button disabled={attente} className="btn btn-secondaire justify-self-start">
         {attente ? t.attente : admin ? t.enregistrer : moi ? t.liberer : t.prendre}
       </button>
       {!attente && etat.statut === 'erreur' ? (

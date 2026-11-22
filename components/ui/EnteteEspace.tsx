@@ -3,12 +3,12 @@ export function EnteteEspace({
   titre,
   etiquette,
   children,
-  ton = 'sky',
+  ton = 'flame',
 }: {
   titre: React.ReactNode
   etiquette: string
   children?: React.ReactNode
-  ton?: 'sky' | 'mint' | 'sun'
+  ton?: 'sky' | 'mint' | 'sun' | 'flame'
 }) {
   return (
     <header className="entete-espace border-ink/15 mb-6 border-b pb-6">

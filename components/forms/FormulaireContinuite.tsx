@@ -21,7 +21,7 @@ export function FormulaireContinuite({
   )
   return (
     <section className={mode === 'agence' ? 'panneau-espace mt-6' : 'mt-10'}>
-      <h2 className={mode === 'agence' ? 'text-xl font-bold' : 'font-display text-xl'}>
+      <h2 className="text-xl font-bold">
         {mode === 'retrouver' ? continuite.retrouver : continuite.agence}
       </h2>
       <form action={action} className="mt-4 flex flex-col gap-3">

@@ -10,7 +10,7 @@ import { signature as tsEn } from '@/lib/content/en/signature'
 import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
 
-const champ = 'border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3'
+const champ = 'border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3 font-normal'
 const bouton = 'btn btn-secondaire'
 
 function Texte({
@@ -28,7 +28,7 @@ function Texte({
   defaut?: string
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label>
+    <label className="text-[14px] font-bold">
       {libelle}
       <input
         className={champ}
@@ -102,7 +102,7 @@ export function ModeleActe({
 
       <fieldset disabled={occupe} className="grid min-w-0 gap-4">
         <legend className="font-display mb-2 text-xl">{t.sections.caution}</legend>
-        <label>
+        <label className="text-[14px] font-bold">
           {t.champs.civilite}
           <select className={champ} name="civilite" required defaultValue="">
             <option value="" disabled />
@@ -120,7 +120,7 @@ export function ModeleActe({
         <Texte nom="bailleur_nom" libelle={t.champs.bailleurNom} maxLength={240} />
         <Texte nom="bailleur_adresse" libelle={t.champs.bailleurAdresse} maxLength={400} />
         <Texte nom="logement" libelle={t.champs.logement} maxLength={400} />
-        <label>
+        <label className="text-[14px] font-bold">
           {t.champs.coCautions}
           <textarea className={champ} name="co_cautions" rows={2} maxLength={800} />
         </label>
@@ -141,7 +141,7 @@ export function ModeleActe({
           inputMode="decimal"
           pattern="[0-9]{1,9}([,.][0-9]{1,2})?"
         />
-        <label>
+        <label className="text-[14px] font-bold">
           {t.champs.periodicite}
           <select className={champ} name="periodicite" defaultValue="mois">
             <option value="mois">{t.champs.mois}</option>
@@ -151,7 +151,7 @@ export function ModeleActe({
         </label>
         <Texte nom="revision_le" libelle={t.champs.revisionLe} type="date" />
         <div className="grid gap-4 sm:grid-cols-2">
-          <label>
+          <label className="text-[14px] font-bold">
             {t.champs.irlTrimestre}
             <select className={champ} name="irl_trimestre" required defaultValue="">
               <option value="" disabled />
@@ -192,7 +192,7 @@ export function ModeleActe({
 
       {signatureOuverte ? (
         <fieldset data-envoi disabled={occupe} className="grid min-w-0 gap-4 border-t-2 pt-6">
-          <label>
+          <label className="text-[14px] font-bold">
             {ts.telephone}
             <input
               className={champ}
@@ -203,7 +203,7 @@ export function ModeleActe({
               pattern="\+[1-9][0-9]{7,14}"
             />
           </label>
-          <label className="flex items-start gap-3">
+          <label className="flex items-start gap-3 text-[14px] font-medium">
             <input type="checkbox" name="accord" required />
             {t.accord}
           </label>

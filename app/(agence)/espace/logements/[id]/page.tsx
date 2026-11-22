@@ -102,7 +102,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
       </EnteteEspace>
 
       <section
-        className="panneau-espace relative overflow-x-auto"
+        className="panneau-espace ombres-defilement relative overflow-x-auto"
         tabIndex={0}
         role="region"
         aria-label={t.candidats.titre}

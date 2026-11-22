@@ -197,7 +197,7 @@ export function FormulaireAgence({ langue = 'fr' }: { langue?: Langue }) {
 
       <input ref={horodatage} type="hidden" name="affichéÀ" defaultValue="" />
 
-      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand">
+      <button type="submit" disabled={enCours} className="btn btn-principal btn-grand w-full">
         {enCours ? t.envoi : t.bouton}
       </button>
 

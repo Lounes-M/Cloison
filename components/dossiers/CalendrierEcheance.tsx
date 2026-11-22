@@ -73,8 +73,8 @@ export function CalendrierEcheance({ dossierId }: { dossierId: string }) {
     }
   }
   return (
-    <section className="outlined bg-paper mt-6 rounded-xl p-4" aria-label={calendrier.titre}>
-      <h2 className="font-bold">{calendrier.titre}</h2>
+    <section className="panneau-espace mt-6" aria-label={calendrier.titre}>
+      <h2 className="text-xl font-bold">{calendrier.titre}</h2>
       <p className="text-muted mt-2 text-sm">{calendrier.aide}</p>
       <button
         type="button"

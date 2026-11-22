@@ -54,12 +54,12 @@ export async function ResponsableDossier({
   )
     choix.unshift({ id: courant.responsable_id, email: courant.responsable_email })
   return (
-    <section id="responsable" className="panneau-espace bg-sky/20 mt-8">
-      <h2 className="font-display text-xl">{t.titre}</h2>
+    <section id="responsable" className="panneau-espace mt-8">
+      <h2 className="text-xl font-bold">{t.titre}</h2>
       <p className="mt-2 font-semibold break-all">
         {courant.responsable_id ? (courant.responsable_email ?? t.indisponible) : t.aucun}
       </p>
-      <p className="mt-2 text-sm">{t.aide}</p>
+      <p className="text-muted mt-2 text-[14px] font-medium">{t.aide}</p>
       {modifiable ? (
         <FormulaireResponsable
           dossierId={dossierId}
