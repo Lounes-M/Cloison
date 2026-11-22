@@ -71,7 +71,7 @@ export function FormulaireSecurite({
             disabled={pending}
             name="operation"
             value="verifier"
-            className="btn btn-principal"
+            className="btn btn-principal self-start"
           >
             {securite.verifier}
           </button>
@@ -81,7 +81,7 @@ export function FormulaireSecurite({
           disabled={pending}
           name="operation"
           value="configurer"
-          className="btn btn-principal"
+          className="btn btn-principal self-start"
         >
           {securite.activer}
         </button>

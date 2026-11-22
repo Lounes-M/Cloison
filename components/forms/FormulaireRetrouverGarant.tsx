@@ -12,11 +12,13 @@ export function FormulaireRetrouverGarant() {
   const [etat, action, pending] = useActionState(retrouverMonLienGarant, {})
   return (
     <section className="mt-10">
-      <h2 className="font-display text-xl">{t.titre}</h2>
-      <p className="mt-2 text-sm leading-relaxed">{t.aide}</p>
+      <h2 className="text-xl font-bold">{t.titre}</h2>
+      <p className="text-muted mt-2 text-[14px] leading-relaxed font-medium">{t.aide}</p>
       <form action={action} className="mt-4 flex flex-col gap-3">
         <input type="hidden" name="langue" value={langue} />
-        <label htmlFor="email-garant">{t.email}</label>
+        <label htmlFor="email-garant" className="text-[14px] font-bold">
+          {t.email}
+        </label>
         <input
           className="outlined bg-paper rounded-lg p-3"
           id="email-garant"
@@ -26,7 +28,9 @@ export function FormulaireRetrouverGarant() {
           required
           maxLength={180}
         />
-        <label htmlFor="reference-garant">{t.reference}</label>
+        <label htmlFor="reference-garant" className="text-[14px] font-bold">
+          {t.reference}
+        </label>
         <input
           className="outlined bg-paper rounded-lg p-3"
           id="reference-garant"
@@ -34,7 +38,7 @@ export function FormulaireRetrouverGarant() {
           required
           maxLength={100}
         />
-        <button disabled={pending} className="btn btn-principal">
+        <button disabled={pending} className="btn btn-principal self-start">
           {t.envoyer}
         </button>
         {etat.message ? <p role="status">{etat.message}</p> : null}

@@ -71,7 +71,7 @@ export function PageQuestions({ langue = 'fr' }: { langue?: Langue }) {
         </nav>
       </EnTetePage>
 
-      <section className="bg-cream gouttiere pt-[6.8rem] pb-[11.25rem] max-[767px]:py-[3.75rem]">
+      <section className="bg-cream gouttiere pt-[6.8rem] pb-[11.25rem] max-[767px]:pt-4 max-[767px]:pb-[3.75rem]">
         <div className="conteneur">
           <Reveal>
             <h2 className="titre-84">

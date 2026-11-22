@@ -443,6 +443,20 @@
     margin-bottom: 1rem;
   }
 
+  /* Tableau plus large que l'écran : une ombre au bord dit qu'il reste des colonnes. */
+  .ombres-defilement {
+    background:
+      linear-gradient(to right, var(--color-paper) 30%, transparent) left center / 2.5rem 100%
+        no-repeat local,
+      linear-gradient(to left, var(--color-paper) 30%, transparent) right center / 2.5rem 100%
+        no-repeat local,
+      linear-gradient(to right, color-mix(in srgb, var(--color-ink) 16%, transparent), transparent)
+        left center / 0.9rem 100% no-repeat scroll,
+      linear-gradient(to left, color-mix(in srgb, var(--color-ink) 16%, transparent), transparent)
+        right center / 0.9rem 100% no-repeat scroll,
+      var(--color-paper);
+  }
+
   .lien-espace {
     display: inline-flex;
     align-items: center;
@@ -1422,6 +1436,7 @@ html:has(.site-public) {
   min-height: 48px;
   cursor: pointer;
   align-items: center;
+  justify-self: start;
   justify-content: center;
   gap: 0.5rem;
   border: 2px solid transparent;

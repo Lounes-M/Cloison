@@ -16,10 +16,10 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
     <form action={action} className="grid gap-5">
       <input type="hidden" name="dossier" value={dossier} />
       <PlacementActe dossier={dossier} disabled={attente} />
-      <label>
+      <label className="text-[14px] font-bold">
         {t.telephone}
         <input
-          className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3"
+          className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3 font-normal"
           name="telephone"
           type="tel"
           placeholder="+33600000000"
@@ -28,8 +28,14 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
           disabled={attente}
         />
       </label>
-      <label className="flex items-start gap-3">
-        <input type="checkbox" name="accord" required disabled={attente} />
+      <label className="flex items-start gap-3 text-[14px] font-medium">
+        <input
+          type="checkbox"
+          name="accord"
+          required
+          disabled={attente}
+          className="accent-cobalt mt-0.5 size-5 shrink-0"
+        />
         {t.accordAgence}
       </label>
       <button className="btn btn-principal" disabled={attente}>

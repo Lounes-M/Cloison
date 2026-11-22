@@ -145,8 +145,8 @@ export function Remise() {
     }
   }
   return (
-    <section className="mx-auto max-w-xl space-y-6 px-4 py-12">
-      <h1 className="font-display text-3xl">{texte.titre}</h1>
+    <section className="panneau-espace mx-auto w-full max-w-[540px] space-y-6 self-start">
+      <h1 className="font-display text-2xl md:text-3xl">{texte.titre}</h1>
       <p>{texte.introduction}</p>
       {fichiers.length === 0 ? (
         <form
@@ -156,7 +156,7 @@ export function Remise() {
           }}
           className="space-y-4"
         >
-          <label className="block" htmlFor="cle-remise">
+          <label className="block text-[14px] font-bold" htmlFor="cle-remise">
             {texte.cle}
           </label>
           <input
@@ -197,8 +197,8 @@ export function Remise() {
       <p role="status" aria-live="polite">
         {message}
       </p>
-      <p className="text-sm">{texte.confidentialite}</p>
-      <p className="text-sm">{texte.limite}</p>
+      <p className="text-muted text-[13px] leading-relaxed font-medium">{texte.confidentialite}</p>
+      <p className="text-muted text-[13px] leading-relaxed font-medium">{texte.limite}</p>
       <button
         className="inline-flex min-h-[44px] items-center py-2 underline"
         onClick={() => location.replace('/remise-donnees')}

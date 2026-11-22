@@ -574,7 +574,13 @@ export default async function PageEspace({
                       </div>
                       <div>
                         <dt className="text-muted text-xs font-bold">{tableau.colonnes.ratio}</dt>
-                        <dd>{ratio ? `${ratio}×` : '·'}</dd>
+                        <dd>
+                          {ratio ? (
+                            `${ratio}×`
+                          ) : (
+                            <span className="text-muted font-medium">{tableau.ratioAVenir}</span>
+                          )}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-muted text-xs font-bold">{tableau.colonnes.ouvert}</dt>
@@ -582,6 +588,7 @@ export default async function PageEspace({
                           {new Date(ligne.cree_le).toLocaleDateString(locale(langue), {
                             day: 'numeric',
                             month: 'short',
+                            year: 'numeric',
                           })}
                           <span className="mt-1 block text-xs">
                             {tableau.finCoffre(dateEcheance(ligne.expire_le))}
@@ -668,11 +675,18 @@ export default async function PageEspace({
                               texteResponsables.indisponible)
                             : texteResponsables.aucun}
                         </td>
-                        <td className="px-4 py-3 font-medium">{ratio ? `${ratio}×` : '·'}</td>
+                        <td className="px-4 py-3 font-medium">
+                          {ratio ? (
+                            `${ratio}×`
+                          ) : (
+                            <span className="text-muted font-medium">{tableau.ratioAVenir}</span>
+                          )}
+                        </td>
                         <td className="text-muted px-4 py-3 font-medium">
                           {new Date(ligne.cree_le).toLocaleDateString(locale(langue), {
                             day: 'numeric',
                             month: 'short',
+                            year: 'numeric',
                           })}
                           <span className="mt-1 block text-xs">
                             {tableau.finCoffre(dateEcheance(ligne.expire_le))}
