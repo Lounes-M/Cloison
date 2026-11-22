@@ -83,8 +83,12 @@ export function FormulaireReutilisation({ dossierId }: { dossierId: string }) {
                 {etat.pieces.map((p) => (
                   <option key={p.id} value={p.id}>
                     {natures.find((n) => n.valeur === p.nature)?.libelle} ·{' '}
-                    {new Date(p.date).toLocaleDateString(locale(langue))} ·{' '}
-                    {tailleLisible(p.taille, langue)}
+                    {new Date(p.date).toLocaleDateString(locale(langue), {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}{' '}
+                    · {tailleLisible(p.taille, langue)}
                   </option>
                 ))}
               </select>
