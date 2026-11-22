@@ -111,7 +111,12 @@ export async function DetailActe({ id, partie }: { id: string; partie: 'agence' 
       {partie === 'agence' && d.acte.etape === 'preparation' ? <RepriseActe id={id} /> : null}
       <div className="border-ink/15 text-muted mt-8 border-t pt-5 text-sm leading-relaxed">
         <p>
-          {t.echeance} {new Date(d.acte.conserver_jusqu_au).toLocaleDateString(locale(langue))}
+          {t.echeance}{' '}
+          {new Date(d.acte.conserver_jusqu_au).toLocaleDateString(locale(langue), {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })}
         </p>
         <p className="mt-2">{t.conserve}</p>
       </div>

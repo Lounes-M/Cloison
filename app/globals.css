@@ -546,6 +546,20 @@
   .navigation-reglages a {
     flex-shrink: 0;
   }
+  /* Sur téléphone la rangée défile : le fondu à droite dit qu'il reste des onglets. */
+  @media (max-width: 767px) {
+    .navigation-reglages {
+      mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+      padding-right: 2.5rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .navigation-reglages {
+      flex-wrap: wrap;
+      overflow-x: visible;
+      padding: 0;
+    }
+  }
   .navigation-reglages a[aria-current='page'] {
     background: var(--color-cobalt);
     color: var(--color-paper);

@@ -57,10 +57,20 @@ export default async function Page({
                     className="text-cobalt inline-flex min-h-[44px] items-center font-bold break-words underline-offset-4 hover:underline"
                     href={`/espace/actes/${a.id}`}
                   >
-                    {a.modele} · {new Date(a.archive_le).toLocaleDateString(locale(langue))}
+                    {a.modele} ·{' '}
+                    {new Date(a.archive_le).toLocaleDateString(locale(langue), {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
                   </Link>
                   <p className="text-muted mt-2 text-sm leading-relaxed">
-                    {t.echeance} {new Date(a.conserver_jusqu_au).toLocaleDateString(locale(langue))}
+                    {t.echeance}{' '}
+                    {new Date(a.conserver_jusqu_au).toLocaleDateString(locale(langue), {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
                   </p>
                 </div>
               </div>

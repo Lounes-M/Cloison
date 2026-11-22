@@ -97,7 +97,7 @@ export const depot: Textes<typeof Fr.depot> = {
     'Your documents are encrypted by our server before they are stored, and the tenant has no access to them. They only see that the file is moving forward.',
   piecesTitre: 'Your documents',
   formats: 'PDF, JPEG or PNG, 4 MB per file. A well-framed photo is enough.',
-  ajouter: 'Add',
+  ajouter: 'Add a file',
   deposer: 'Upload the selected file',
   envoi: 'Sending…',
   retirer: 'Remove',

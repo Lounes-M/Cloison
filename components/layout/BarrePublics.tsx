@@ -69,7 +69,10 @@ export function BarrePublics({ langue = 'fr' }: { langue?: Langue }) {
           </nav>
           <Link
             href={lien(langue, barrePublics.connexion.href)}
-            className="hidden whitespace-nowrap underline-offset-4 hover:underline sm:inline"
+            aria-current={
+              chemin.startsWith(lien(langue, barrePublics.connexion.href)) ? 'page' : undefined
+            }
+            className="hidden rounded-full px-[0.9rem] py-2 leading-none whitespace-nowrap underline-offset-4 hover:underline aria-[current=page]:bg-white/20 aria-[current=page]:font-semibold aria-[current=page]:no-underline sm:inline"
           >
             {barrePublics.connexion.label}
           </Link>

@@ -86,8 +86,8 @@ export function ExportRegistre({ registre }: { registre: 'archives' | 'reglement
     }
   }
   return (
-    <section className="outlined bg-paper mb-6 rounded-xl p-4" aria-label={t.titre}>
-      <h2 className="font-bold">{t.titre}</h2>
+    <section className="panneau-espace mb-6" aria-label={t.titre}>
+      <h2 className="text-xl font-bold">{t.titre}</h2>
       <p className="text-muted mt-2 text-sm">{t.aide}</p>
       <button
         type="button"

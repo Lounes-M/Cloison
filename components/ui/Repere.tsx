@@ -2,8 +2,8 @@ import { cn } from '@/lib/utils'
 
 const points = {
   sky: 'bg-sky',
-  sun: 'bg-sun',
-  mint: 'bg-mint',
+  sun: 'bg-sun border-sun',
+  mint: 'bg-cobalt border-cobalt',
   flame: 'bg-flame border-flame',
   paper: 'bg-paper',
 } as const
@@ -30,7 +30,7 @@ export function Repere({
       <span
         aria-hidden
         className={cn(
-          'border-ink/35 inline-block size-[0.6em] shrink-0 -translate-y-[0.05em] rounded-full border',
+          'border-ink/35 inline-block size-[0.65em] shrink-0 -translate-y-[0.05em] rounded-full border',
           points[ton],
         )}
       />

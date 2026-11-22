@@ -78,7 +78,11 @@ export default async function Page({
                   <dt className="text-muted text-xs font-semibold">{t.date}</dt>
                   <dd className="mt-2 text-sm font-semibold">
                     <time dateTime={f.cree_le}>
-                      {new Date(f.cree_le).toLocaleDateString(locale(langue))}
+                      {new Date(f.cree_le).toLocaleDateString(locale(langue), {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
                     </time>
                   </dd>
                 </div>

@@ -20,8 +20,8 @@ export function FormulaireCandidature({ dossierId }: { dossierId: string }) {
   const idAccord = useId()
 
   return (
-    <section className="mt-10">
-      <h2 className="font-display text-xl">{texte.espace.titre}</h2>
+    <section className="panneau-espace mt-6">
+      <h2 className="text-xl font-bold">{texte.espace.titre}</h2>
       {etat.statut === 'transmis' ? (
         <p role="status" className="message-succes mt-4">
           {texte.espace.succes(etat.agence)}
@@ -29,8 +29,10 @@ export function FormulaireCandidature({ dossierId }: { dossierId: string }) {
       ) : (
         <form action={envoyer} className="mt-4 flex flex-col gap-3">
           <input type="hidden" name="dossier" value={dossierId} />
-          <p>{texte.espace.aide}</p>
-          <label htmlFor={idChamp}>{texte.espace.champ}</label>
+          <p className="text-muted text-[14px] leading-relaxed font-medium">{texte.espace.aide}</p>
+          <label htmlFor={idChamp} className="text-[14px] font-bold">
+            {texte.espace.champ}
+          </label>
           <input
             id={idChamp}
             name="code"
@@ -45,14 +47,20 @@ export function FormulaireCandidature({ dossierId }: { dossierId: string }) {
               type="checkbox"
               name="accord"
               required
-              className="accent-ink mt-1 size-5 shrink-0"
+              className="accent-cobalt mt-0.5 size-5 shrink-0"
             />
-            <label htmlFor={idAccord}>{texte.espace.consentement}</label>
+            <label htmlFor={idAccord} className="text-[14px] font-medium">
+              {texte.espace.consentement}
+            </label>
           </div>
-          <button disabled={enCours} className="btn btn-secondaire">
+          <button disabled={enCours} className="btn btn-principal self-start">
             {enCours ? texte.espace.envoi : texte.espace.bouton}
           </button>
-          {etat.statut === 'erreur' ? <p role="alert">{etat.message}</p> : null}
+          {etat.statut === 'erreur' ? (
+            <p role="alert" className="message-erreur">
+              {etat.message}
+            </p>
+          ) : null}
         </form>
       )}
     </section>

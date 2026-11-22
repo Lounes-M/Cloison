@@ -40,7 +40,7 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
     setX(String(p.x))
     setY(String(p.y))
   }
-  async function afficher() {
+  async function afficher(pageVoulue = page) {
     const actuelle = ++generation.current
     setChargement(true)
     setApercu(undefined)
@@ -48,7 +48,7 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
     try {
       const form = new FormData()
       form.set('dossier', dossier)
-      form.set('page', page)
+      form.set('page', pageVoulue)
       const pdf = fichier.current?.files?.[0]
       if (!pdf) throw new Error()
       form.set('pdf', pdf)
@@ -64,11 +64,11 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
   }
   return (
     <fieldset disabled={disabled} className="grid min-w-0 gap-4">
-      <label>
+      <label className="text-[14px] font-bold">
         {t.fichier}
         <input
           ref={fichier}
-          className="mt-2 block w-full"
+          className="file:border-ink file:bg-paper mt-2 block w-full text-sm font-medium file:mr-3 file:cursor-pointer file:rounded-[10px] file:border-2 file:px-4 file:py-2 file:text-[14px] file:font-bold"
           name="pdf"
           type="file"
           accept="application/pdf"
@@ -78,16 +78,18 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
             setPage('1')
             setX('40')
             setY('40')
+            // Le fichier choisi, la première page s'affiche d'elle-même.
+            if (fichier.current?.files?.[0]) void afficher('1')
           }}
         />
       </label>
       <p className="text-muted text-sm">{t.placement}</p>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {(['page', 'x', 'y'] as const).map((nom) => (
-          <label key={nom}>
+      <div className="flex flex-wrap items-end gap-4">
+        {(['page'] as ('page' | 'x' | 'y')[]).map((nom) => (
+          <label key={nom} className="w-full text-[14px] font-bold sm:w-[16rem]">
             {t[nom]}
             <input
-              className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3"
+              className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3 font-normal"
               name={nom}
               type="number"
               min={nom === 'page' ? 1 : 0}
@@ -105,15 +107,15 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
             />
           </label>
         ))}
+        <button
+          type="button"
+          onClick={() => void afficher()}
+          disabled={disabled || chargement}
+          className="btn btn-secondaire"
+        >
+          {chargement ? t.apercuAttente : t.apercu}
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={() => void afficher()}
-        disabled={disabled || chargement}
-        className="btn btn-secondaire justify-self-start"
-      >
-        {chargement ? t.apercuAttente : t.apercu}
-      </button>
       <p role="status" aria-live="polite">
         {message}
       </p>
@@ -179,6 +181,30 @@ export function PlacementActe({ dossier, disabled }: { dossier: string; disabled
           <p className="text-muted text-sm">{t.apercuConfidentialite}</p>
         </>
       )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {(['x', 'y'] as ('page' | 'x' | 'y')[]).map((nom) => (
+          <label key={nom} className="text-[14px] font-bold">
+            {t[nom]}
+            <input
+              className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3 font-normal"
+              name={nom}
+              type="number"
+              min={nom === 'page' ? 1 : 0}
+              max={nom === 'page' ? PAGES_ACTE_MAX : 10000}
+              step={1}
+              value={{ page, x, y }[nom]}
+              required
+              onChange={(e) => {
+                if (nom === 'page') {
+                  invalider()
+                  setPage(e.target.value)
+                } else if (nom === 'x') setX(e.target.value)
+                else setY(e.target.value)
+              }}
+            />
+          </label>
+        ))}
+      </div>
     </fieldset>
   )
 }

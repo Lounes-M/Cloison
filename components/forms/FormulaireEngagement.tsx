@@ -187,12 +187,6 @@ export function FormulaireEngagement({
         </span>
       </label>
 
-      <BrouillonEngagement
-        key={version}
-        formulaire={formulaire}
-        indisponible={enCours}
-        attente={setBrouillonEnCours}
-      />
       <button
         type="submit"
         disabled={enCours || brouillonEnCours}
@@ -200,6 +194,12 @@ export function FormulaireEngagement({
       >
         {enCours ? texte.envoi : texte.bouton}
       </button>
+      <BrouillonEngagement
+        key={version}
+        formulaire={formulaire}
+        indisponible={enCours}
+        attente={setBrouillonEnCours}
+      />
     </form>
   )
 }

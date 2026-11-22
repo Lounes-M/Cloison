@@ -204,13 +204,13 @@ export default async function PageLocataire({
             {espace.loyerFige} {loyer} {espace.loyerFigeSuite}
           </p>
         )}
-        {ouvert && !dossier.agence_id && !dossier.demonstration ? (
-          <FormulaireCandidature dossierId={porteur.capacite.dossierId} />
-        ) : null}
-        {ouvert && !dossier.agence_id ? (
-          <FormulaireContinuite mode="agence" dossierId={porteur.capacite.dossierId} />
-        ) : null}
       </section>
+      {ouvert && !dossier.agence_id && !dossier.demonstration ? (
+        <FormulaireCandidature dossierId={porteur.capacite.dossierId} />
+      ) : null}
+      {ouvert && !dossier.agence_id ? (
+        <FormulaireContinuite mode="agence" dossierId={porteur.capacite.dossierId} />
+      ) : null}
 
       {aRegler || dossier.paye_le ? (
         <section id="paiement" className="panneau-espace mt-6">

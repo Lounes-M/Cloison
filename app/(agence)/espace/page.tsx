@@ -706,7 +706,7 @@ export default async function PageEspace({
 
       <section id="nouveau-dossier" className="panneau-espace mt-8 grid gap-8 md:grid-cols-2">
         <div>
-          <h2 className="font-display text-2xl">{tableau.nouveau}</h2>
+          <h2 className="text-xl font-bold">{tableau.nouveau}</h2>
           <div className="mt-6">
             <FormulaireNouveauDossier verifiee={verifiee} />
           </div>
@@ -737,7 +737,7 @@ export default async function PageEspace({
         </div>
       ) : null}
       <section className="panneau-espace mt-8">
-        <h2 className="font-display text-2xl">{tableau.seuilTitre}</h2>
+        <h2 className="text-xl font-bold">{tableau.seuilTitre}</h2>
         <p className="text-muted mt-2 mb-6 text-[13px] leading-relaxed font-medium">
           {tableau.seuilAide}
         </p>

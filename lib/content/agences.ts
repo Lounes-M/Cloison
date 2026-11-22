@@ -130,7 +130,7 @@ export const formulaire = {
     'Nous vous montrons le parcours complet sur un dossier réel, puis nous vous accompagnons sur vos premiers dossiers.',
   metriques: [
     { valeur: '3', libelle: 'espaces séparés' },
-    { valeur: '7', libelle: 'jours par lien' },
+    { valeur: '7', libelle: 'jours de validité par lien' },
     { valeur: '3', libelle: 'mois de conservation' },
   ],
   merci: 'C’est noté.',

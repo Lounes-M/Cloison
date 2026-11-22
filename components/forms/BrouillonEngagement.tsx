@@ -53,10 +53,13 @@ export function BrouillonEngagement({
     setEtat({ revision: etat.revision })
   }
   return (
-    <fieldset className="outlined bg-sky rounded-xl p-4" disabled={pending || indisponible}>
-      <legend className="px-2 font-bold">{t.sauvegarder}</legend>
-      <p className="mb-3 text-sm">{t.aide}</p>
-      <div className="flex flex-wrap gap-3">
+    <fieldset
+      className="border-ink/15 border-t pt-4 text-[13px] font-medium"
+      disabled={pending || indisponible}
+    >
+      <legend className="sr-only">{t.sauvegarder}</legend>
+      <p className="text-muted mb-3 leading-relaxed">{t.aide}</p>
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
         <button type="button" onClick={() => agir('sauver')} className="lien-espace">
           {t.sauvegarder}
         </button>

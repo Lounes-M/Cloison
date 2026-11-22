@@ -128,20 +128,20 @@ export const pricing = {
     },
     {
       audience: 'The agency',
-      price: 'Free to read',
-      detail: `${prixActe} per signed and archived deed`,
+      price: prixActe,
+      detail: 'per signed and archived deed. Reading files stays free.',
     },
   ],
   goldenRule: {
     tag: 'Golden rule',
     audience: 'The guarantor',
-    price: 'Never.',
-    detail: 'Otherwise it goes nowhere.',
+    price: 'Nothing.',
+    detail: 'The guarantor never pays, at any step.',
   },
 } as const
 
 export const whyNow = {
-  eyebrow: 'Why now',
+  eyebrow: 'Why now?',
   body: 'A guarantor’s documents still travel between several people and several tools.',
   emphasis: 'The guarantor needs a space of their own.',
 } as const
@@ -150,7 +150,7 @@ export const goToMarket = {
   eyebrow: 'Cloison in numbers',
   metrics: [
     { value: '3', label: 'separate spaces' },
-    { value: '7', label: 'days per link' },
+    { value: '7', label: 'days of validity per link' },
     { value: '3', label: 'months of retention' },
   ],
 } as const
@@ -230,7 +230,7 @@ export const espacesAccueil = {
   etape: 'Step',
   liens: [
     { href: '/demarrer', libelle: 'Create my file' },
-    { href: '/demarrer', libelle: 'Create my file' },
+    { href: '/questions', libelle: 'Guarantor questions' },
     { href: '/agences', libelle: 'I am an agency' },
   ],
 } as const

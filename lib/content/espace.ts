@@ -121,6 +121,7 @@ export const activation = {
 export const dossier = {
   couvreLibelle: 'Couvre',
   nature: 'Nature',
+  profilDeclare: 'Profil déclaré :',
   ouvertLe: 'Ouvert le',
   expireLe: ', expire le',
   derniereActivite: (date: string) => `Dernière activité sur le dossier : ${date}.`,

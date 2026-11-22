@@ -38,11 +38,15 @@ function details(l: Logement, langue: Langue): { terme: string; valeur: string }
       valeur:
         date.getTime() <= Date.now()
           ? t.page.disponibleDes
-          : date.toLocaleDateString(langue === 'en' ? 'en-GB' : 'fr-FR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            }),
+          : date
+              .toLocaleDateString(langue === 'en' ? 'en-GB' : 'fr-FR', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                timeZone: 'UTC',
+              })
+              // En francais, le premier du mois s'ecrit « 1er ».
+              .replace(/^1 /, langue === 'fr' ? '1er ' : '1 '),
     })
   }
   return lignes
@@ -132,7 +136,7 @@ export async function PageCandidater({
               </p>
               <div className="mt-[2.5rem] border-t border-[#4e8478]">
                 <p className="texte-42 text-sun py-[1.5rem]">{logement.libelle}</p>
-                <dl className="grid border-t border-[#4e8478] sm:grid-cols-2">
+                <dl className="grid grid-cols-2 gap-x-4 border-t border-[#4e8478]">
                   {[
                     { terme: t.page.agence, valeur: logement.agence },
                     ...details(logement, langue),

@@ -108,7 +108,7 @@ export const formulaire = {
     'We walk you through the full journey on a real file, then support you on your first files.',
   metriques: [
     { valeur: '3', libelle: 'separate spaces' },
-    { valeur: '7', libelle: 'days per link' },
+    { valeur: '7', libelle: 'days of validity per link' },
     { valeur: '3', libelle: 'months of retention' },
   ],
 } as const

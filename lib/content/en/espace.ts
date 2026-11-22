@@ -107,6 +107,7 @@ export const activation: Textes<typeof Fr.activation> = {
 export const dossier: Textes<typeof Fr.dossier> = {
   couvreLibelle: 'Covers',
   nature: 'Type',
+  profilDeclare: 'Declared profile:',
   ouvertLe: 'Opened on',
   expireLe: ', expires on',
   derniereActivite: (date) => `Last activity on the file: ${date}.`,

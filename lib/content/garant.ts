@@ -119,7 +119,7 @@ export const depot = {
     'Vos pièces sont chiffrées par notre serveur avant leur stockage, et le locataire n’y a pas accès. Il voit seulement que le dossier avance.',
   piecesTitre: 'Vos pièces',
   formats: 'PDF, JPEG ou PNG, 4 Mo par fichier. Une photo bien cadrée suffit.',
-  ajouter: 'Ajouter',
+  ajouter: 'Ajouter un fichier',
   deposer: 'Déposer le fichier sélectionné',
   envoi: 'Envoi…',
   retirer: 'Retirer',

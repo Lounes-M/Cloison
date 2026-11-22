@@ -169,7 +169,14 @@ export function FormulaireDepot({
           enCours && 'cursor-wait opacity-70',
         )}
       >
-        {enCours ? depot.envoi : `${depot.ajouter} : ${libelle.toLowerCase()}`}
+        {enCours ? (
+          depot.envoi
+        ) : (
+          <>
+            {depot.ajouter}
+            <span className="sr-only"> : {libelle.toLowerCase()}</span>
+          </>
+        )}
       </label>
       {/* Les formats sont dits une fois en tete de liste ; ici, seulement aux lecteurs d'ecran. */}
       <p id={`${idChamp}-aide`} className={interactif ? 'sr-only' : 'text-muted text-sm'}>

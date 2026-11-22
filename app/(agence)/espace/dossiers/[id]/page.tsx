@@ -284,6 +284,10 @@ export default async function PageDossier({
           <p className={cn('text-muted text-sm break-all', d.locataire_nom ? 'mt-1' : 'mt-2')}>
             {String(d.email_locataire)}
           </p>
+          <p className="text-muted mt-1 text-sm">
+            {texte.ouvertLe} {date(d.cree_le)}
+            {texte.expireLe} {date(d.expire_le)}.
+          </p>
           {d.activite_rappel_le ? (
             <p className="text-muted mt-1 text-sm">
               {texte.derniereActivite(date(d.activite_rappel_le, true))}
@@ -504,14 +508,15 @@ export default async function PageDossier({
 
       <section id="pieces" className="panneau-espace mt-8">
         <h2 className="text-xl font-bold">{texte.piecesTitre}</h2>
-        <p className="text-muted mt-2 text-sm">{documentsDeclares.presence}</p>
-        <p className="mt-2 text-sm">{texteExamen.aide}</p>
-        <p className="mt-2 text-sm font-bold">
+        <p className="mt-2 text-[15px] font-semibold">
+          <span className="text-muted font-medium">{texte.profilDeclare}</span>{' '}
           {profilsRessources.find((p) => p.valeur === (e?.profil_ressources ?? 'salarie'))?.libelle}
         </p>
-        <p className="text-muted mt-2 mb-6 text-[13px] leading-relaxed font-medium">
-          {texte.ouvrirAide}
-        </p>
+        <div className="border-ink/15 text-muted mt-3 mb-6 flex flex-col gap-1.5 border-l-2 pl-4 text-[13px] leading-relaxed font-medium">
+          <p>{documentsDeclares.presence}</p>
+          <p>{texteExamen.aide}</p>
+          <p>{texte.ouvrirAide}</p>
+        </div>
         {!pieces || pieces.length === 0 ? (
           <p className="text-muted text-[15px] font-medium">{texte.piecesAucune}</p>
         ) : (
@@ -593,7 +598,7 @@ export default async function PageDossier({
 
       {d.statut === 'transmis' && !d.demonstration ? (
         <section className="panneau-espace mt-8">
-          <h2 className="font-display text-2xl">{texteActe.etiquette}</h2>
+          <h2 className="text-xl font-bold">{texteActe.etiquette}</h2>
           <p className="mt-2">{texteActe.mention}</p>
           <Link className="lien-espace mt-4 inline-block" href={`/espace/dossiers/${id}/acte`}>
             {texteActe.titre}
@@ -624,7 +629,7 @@ export default async function PageDossier({
       </section>
       <NotesDossier dossierId={id} supabase={supabase} modifiable={!d.demonstration} />
       <section id="journal" className="panneau-espace mt-8">
-        <h2 className="font-display text-2xl">{texte.journalTitre}</h2>
+        <h2 className="text-xl font-bold">{texte.journalTitre}</h2>
         {historique.lignes.length === 0 ? (
           <p className="text-muted mt-4 text-[15px] font-medium">{texte.journalAucun}</p>
         ) : (
@@ -650,10 +655,6 @@ export default async function PageDossier({
         />
       </section>
 
-      <p className="text-muted mt-10 text-[13px] font-medium">
-        {texte.ouvertLe} {date(d.cree_le)}
-        {texte.expireLe} {date(d.expire_le)}.
-      </p>
       <CalendrierEcheance dossierId={id} />
       <SupportDossier reference={String(d.reference)} espace="agence" />
     </div>

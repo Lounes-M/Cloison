@@ -23,7 +23,7 @@ export const signature: Textes<typeof Fr> = {
   pdfInvalide:
     'PDF not accepted. Check that it is legible, unprotected, with no form or attachment, and has at most 40 unrotated pages. The signature field must fit entirely within the chosen page.',
   placement:
-    'The field measures 85 × 37 points. Measure its position from the top left corner of the page.',
+    'Choose the page, then click in the preview to place the signature field. It measures 85 × 37 points.',
   apercu: 'Show the page',
   apercuAttente: 'Preparing the preview…',
   apercuPret: 'Preview ready. Check the text and the position of the field before submitting.',
