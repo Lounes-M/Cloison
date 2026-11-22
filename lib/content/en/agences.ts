@@ -55,6 +55,12 @@ export const cequonapporte = {
         'The guarantee deed is signed online, then archived with its proof, apart from the supporting documents.',
     },
   ],
+  acteAVenir: {
+    ton: 'sky',
+    titre: 'A deed ready to sign',
+    texte:
+      'The draft guarantee deed is prepared from the file, with the statement written by the guarantor. Online signature and archiving with its proof are opening soon.',
+  },
   garantie: {
     titre: 'And the documents stay watermarked',
     texte:

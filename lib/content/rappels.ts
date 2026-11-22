@@ -43,3 +43,23 @@ export const courrielsRappels = {
   reference: 'Référence du dossier',
   expiration: 'Échéance de conservation',
 }
+
+/**
+ * L’annonce de fin de dossier, envoyée sept jours avant l’échéance au
+ * locataire (tutoyé) et au garant (vouvoyé). Elle ne dépend d’aucun réglage
+ * d’agence et ne prolonge rien.
+ */
+export const courrielsFinDossier = {
+  locataire: {
+    sujet: 'Ton dossier Cloison arrive à échéance',
+    texte:
+      'Ton dossier arrive à la fin de sa durée de conservation. À la date ci-dessous, il sera fermé et les justificatifs de ton garant seront supprimés. Si la décision est encore en cours, préviens ton agence avant cette date. Passé ce délai, il faudra ouvrir un nouveau dossier. Ce message ne prolonge pas la conservation.',
+  },
+  garant: {
+    sujet: 'Votre dossier Cloison arrive à échéance',
+    texte:
+      'Le dossier pour lequel vous vous portez garant arrive à la fin de sa durée de conservation. À la date ci-dessous, il sera fermé et vos justificatifs seront supprimés définitivement. Vous n’avez rien à faire. Si un dépôt ou une signature est encore attendu de votre part, faites-le avant cette date avec votre lien habituel. Ce message ne prolonge pas la conservation.',
+  },
+  reference: 'Référence du dossier',
+  expiration: 'Échéance de conservation',
+}

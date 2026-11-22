@@ -62,6 +62,16 @@ export const cequonapporte = {
         'L’acte de cautionnement se signe en ligne, puis s’archive avec sa preuve, à part des justificatifs.',
     },
   ],
+  /**
+   * Remplace la troisième carte tant que la signature en ligne n’est pas
+   * ouverte (SIGNATURE_PARCOURS_ENABLED) : le site ne promet que ce qui marche.
+   */
+  acteAVenir: {
+    ton: 'sky',
+    titre: 'Un acte prêt à signer',
+    texte:
+      'Le projet d’acte de cautionnement se prépare depuis le dossier, avec la mention écrite par le garant. La signature en ligne et l’archivage avec sa preuve ouvrent bientôt.',
+  },
   garantie: {
     titre: 'Et les pièces restent filigranées',
     texte:

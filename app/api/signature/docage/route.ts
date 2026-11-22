@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
@@ -46,13 +45,12 @@ export async function POST(requete: Request) {
     const etat = lu.success ? etatDocage(lu.data.globalStatus ?? lu.data.GlobalStatus) : null
     if (!transaction || !etat) return NextResponse.json({ recu: false }, { status: 400, headers })
     const db = await clientServeur(AbortSignal.any([requete.signal, AbortSignal.timeout(5000)]))
-    // Docage ne donne aucun identifiant d'evenement : chaque appel est un reveil distinct.
-    const { data, error } = await db.rpc('enregistrer_evenement_signature', {
+    // Docage ne donne aucun identifiant d'evenement : la base en derive un de la
+    // transaction et de son etat (0085), et un rejeu ne fait que reveiller la lecture.
+    const { data, error } = await db.rpc('enregistrer_reveil_docage', {
       le_mode: mode,
-      evenement: randomUUID(),
       la_reference: transaction,
       le_statut: etat,
-      survenu: new Date().toISOString(),
     })
     if (error || !resultat.safeParse(data).success) throw new Error('Registre indisponible')
     return NextResponse.json({ recu: true }, { headers })

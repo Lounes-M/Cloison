@@ -42,3 +42,18 @@ export const courrielsRappels: Textes<typeof Fr.courrielsRappels> = {
   reference: 'File reference',
   expiration: 'Retention deadline',
 }
+
+export const courrielsFinDossier: Textes<typeof Fr.courrielsFinDossier> = {
+  locataire: {
+    sujet: 'Your Cloison file is nearing its deadline',
+    texte:
+      'Your file is nearing the end of its retention period. On the date below it will be closed and your guarantor’s supporting documents will be deleted. If a decision is still pending, tell your agency before that date. After it, you will need to open a new file. This message does not extend the retention period.',
+  },
+  garant: {
+    sujet: 'Your Cloison file is nearing its deadline',
+    texte:
+      'The file you are guaranteeing is nearing the end of its retention period. On the date below it will be closed and your supporting documents will be permanently deleted. You have nothing to do. If an upload or a signature is still expected from you, complete it before that date with your usual link. This message does not extend the retention period.',
+  },
+  reference: 'File reference',
+  expiration: 'Retention deadline',
+}
