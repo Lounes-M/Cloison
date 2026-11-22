@@ -173,7 +173,7 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
         id="demander"
         className="bg-cobalt rounded-t-carte gouttiere relative z-10 pt-[11.25rem] pb-[6.2rem] text-white max-[767px]:pt-[4.8rem] max-[767px]:pb-[3rem]"
       >
-        <div className="conteneur lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] lg:items-start lg:gap-[4rem]">
+        <div className="conteneur lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,40rem)] lg:items-start lg:gap-[3rem]">
           <Reveal className="lg:sticky lg:top-[7rem]">
             <h2 className="titre-84">
               {formulaire.titre[0]}
