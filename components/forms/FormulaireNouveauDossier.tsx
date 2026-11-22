@@ -37,6 +37,11 @@ export function FormulaireNouveauDossier({
           {tableau.nouveauSucces(etat.email)}
         </p>
       ) : null}
+      {etat.statut === 'ouvert' && etat.incomplet ? (
+        <p role="alert" className="message-erreur">
+          {tableau.nouveauComplementEchec}
+        </p>
+      ) : null}
       {etat.statut === 'erreur' ? (
         <p role="alert" className="message-erreur">
           {etat.message}

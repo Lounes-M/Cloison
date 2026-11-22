@@ -19,6 +19,7 @@ import { agenceDuDossier as texteAgenceFr } from '@/lib/content/agence-du-dossie
 import {
   espace as espaceFr,
   secondGarant as texteSecondFr,
+  statutsSansAgence as statutsSansAgenceFr,
   statuts as statutsFr,
 } from '@/lib/content/locataire'
 import { mentionTva as mentionTvaFr, versionConditions } from '@/lib/content/juridique'
@@ -36,11 +37,12 @@ import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dos
 import {
   espace as espaceEn,
   secondGarant as texteSecondEn,
+  statutsSansAgence as statutsSansAgenceEn,
   statuts as statutsEn,
 } from '@/lib/content/en/locataire'
 import { mentionTva as mentionTvaEn } from '@/lib/content/en/juridique'
 import { paiementLocataire as paiementLocataireEn, euros as eurosEn } from '@/lib/content/en/tarifs'
-import { choisir, locale } from '@/lib/i18n'
+import { choisir, lien, locale } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -101,6 +103,10 @@ export default async function PageLocataire({
   if (!dossier) redirect('/lien-invalide')
 
   const statut = statuts[String(dossier.statut)] ?? statuts.ouvert!
+  const explication =
+    (!dossier.agence_id && !dossier.demonstration
+      ? choisir(langue, statutsSansAgenceFr, statutsSansAgenceEn)[String(dossier.statut)]
+      : undefined) ?? statut.explication
   const ouvert = ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
     String(dossier.statut),
   )
@@ -108,10 +114,16 @@ export default async function PageLocataire({
   // Le second garant n'existe que dans un dossier d'agence (0067).
   const secondPossible = Boolean(dossier.agence_id) && !dossier.demonstration && Boolean(garant)
   let second: string | null = null
+  let secondLibre = false
   if (secondPossible) {
     const { data, error } = await supabase.rpc('mon_second_garant')
     if (error) throw new Error('Chargement du dossier indisponible.')
     second = typeof data === 'string' && data.length > 0 ? data : null
+    if (second) {
+      const { data: libre, error: erreurLibre } = await supabase.rpc('second_garant_libre')
+      if (erreurLibre) throw new Error('Chargement du dossier indisponible.')
+      secondLibre = libre === true
+    }
   }
 
   // Ce que le locataire achete, c'est le lien de son garant. Un dossier ouvert
@@ -165,7 +177,7 @@ export default async function PageLocataire({
 
       <div className={cn('outlined shadow-brut mt-8 rounded-[18px] p-6', tons[statut.ton])}>
         <p className="text-xl font-bold">{statut.libelle}</p>
-        <p className="mt-2 text-[15px] leading-relaxed font-medium">{statut.explication}</p>
+        <p className="mt-2 text-[15px] leading-relaxed font-medium">{explication}</p>
       </div>
       {suivi ? (
         <p className="mt-4 text-[14px] leading-relaxed font-semibold">
@@ -244,6 +256,7 @@ export default async function PageLocataire({
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
+                  timeZone: 'Europe/Paris',
                 }),
               )}
             </p>
@@ -275,7 +288,7 @@ export default async function PageLocataire({
                   />
                   <span>
                     {paiementLocataire.accordConditions}{' '}
-                    <a href="/conditions" className="underline underline-offset-4">
+                    <a href={lien(langue, '/conditions')} className="underline underline-offset-4">
                       {paiementLocataire.lienConditions}
                     </a>
                   </span>
@@ -318,6 +331,8 @@ export default async function PageLocataire({
             {!ouvert ? <p className="mt-3 text-sm">{espace.garantRenouvellement}</p> : null}
             {dossier.garant_verrouille ? (
               <p className="mt-3 text-sm">{espace.garantAssocie}</p>
+            ) : ouvert && garant ? (
+              <p className="mt-3 text-sm">{espace.garantCorrigeable}</p>
             ) : null}
           </>
         ) : (
@@ -332,7 +347,11 @@ export default async function PageLocataire({
             {second ? texteSecond.designe(second) : texteSecond.aide}
           </p>
           {ouvert ? (
-            <FormulaireSecondGarant dossierId={porteur.capacite.dossierId} secondActuel={second} />
+            <FormulaireSecondGarant
+              dossierId={porteur.capacite.dossierId}
+              secondActuel={second}
+              libre={secondLibre}
+            />
           ) : null}
         </section>
       ) : null}

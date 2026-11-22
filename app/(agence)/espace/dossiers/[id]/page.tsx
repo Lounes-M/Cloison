@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
@@ -99,6 +100,14 @@ function dateDe(valeur: unknown, heure: boolean, langue: Langue): string {
   })
 }
 
+async function renduApresAction(): Promise<boolean> {
+  try {
+    return (await headers()).has('next-action')
+  } catch {
+    return false
+  }
+}
+
 /**
  * Un dossier, tel que l'agence le voit.
  *
@@ -169,7 +178,7 @@ export default async function PageDossier({
     supabase
       .from('engagements')
       .select(
-        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, ratio, calcule_le, profil_ressources',
+        'couvre, montant_max_cents, jusqu_au, solidaire, revenu_net_mensuel_cents, ratio, calcule_le, profil_ressources, mention_saisie_le',
       )
       .eq('dossier_id', id)
       .maybeSingle(),
@@ -225,12 +234,16 @@ export default async function PageDossier({
     ? undefined
     : (planification as { actives: boolean; prochaine: string | null }[] | null)?.[0]
 
-  const { error: inscription } = await supabase.rpc('journaliser', {
-    le_dossier: id,
-    l_action: 'dossier_consulte',
-    la_piece: null,
-  })
-  if (inscription) console.error('[agence] consultation non journalisee')
+  // Le rendu qui suit une action de la fiche n'est pas une nouvelle
+  // consultation : il ne s'inscrit pas une seconde fois au journal.
+  if (!(await renduApresAction())) {
+    const { error: inscription } = await supabase.rpc('journaliser', {
+      le_dossier: id,
+      l_action: 'dossier_consulte',
+      la_piece: null,
+    })
+    if (inscription) console.error('[agence] consultation non journalisee')
+  }
 
   const statut = statuts[String(d.statut)] ?? statuts.ouvert!
   const ratio = e?.ratio == null ? null : Number(e.ratio)
@@ -240,14 +253,14 @@ export default async function PageDossier({
   const lie = Array.isArray(groupes) ? groupes[0] : null
   const ratioGroupe = lie?.ratio_groupe == null ? null : Number(lie.ratio_groupe)
 
-  // La base tranche (0011, 0020, 0067) ; l'ecran ne propose que ce qui peut aboutir.
+  // La base tranche (0011, 0067, 0084) ; l'ecran ne propose que ce qui peut aboutir.
   const loyerModifiable =
     !d.demonstration &&
-    !d.loyer_verrouille &&
     !d.dossier_principal &&
     ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(String(d.statut))
 
   const peutPrendre = d.statut === 'complet'
+  const acteIncomplet = !d.demonstration && (!e?.mention_saisie_le || !e.montant_max_cents)
   const peutRefuser = ['complet', 'garant_insuffisant', 'transmis'].includes(String(d.statut))
   // La base tranche (0066) ; l'ecran ne propose le geste que la ou il peut aboutir.
   const peutClore =
@@ -412,6 +425,9 @@ export default async function PageDossier({
                     })
               }
             />
+            {d.loyer_verrouille ? (
+              <p className="text-muted mt-3 text-[13px] font-medium">{texteLoyer.correction}</p>
+            ) : null}
           </div>
         </section>
       ) : d.dossier_principal && !d.demonstration ? (
@@ -491,6 +507,14 @@ export default async function PageDossier({
             <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
               <dt className="text-muted font-medium">{texte.nature}</dt>
               <dd className="font-semibold">{e.solidaire ? texte.solidaire : texte.simple}</dd>
+            </div>
+            <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
+              <dt className="text-muted font-medium">{texte.mentionLibelle}</dt>
+              <dd className="font-semibold">
+                {e.mention_saisie_le
+                  ? texte.mentionEcrite(date(e.mention_saisie_le))
+                  : texte.mentionAbsente}
+              </dd>
             </div>
             <div className="border-ink/20 flex justify-between gap-4 border-b py-2">
               <dt className="text-muted font-medium">{texte.revenu}</dt>
@@ -581,7 +605,12 @@ export default async function PageDossier({
           ) : null}
           {peutPrendre || peutRefuser ? (
             <div className="mt-4">
-              <BoutonsDecision dossierId={id} peutPrendre={peutPrendre} peutRefuser={peutRefuser} />
+              <BoutonsDecision
+                dossierId={id}
+                peutPrendre={peutPrendre}
+                peutRefuser={peutRefuser}
+                acteIncomplet={acteIncomplet}
+              />
             </div>
           ) : null}
         </div>

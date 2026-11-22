@@ -95,7 +95,7 @@ export async function rattacherAuLogement(
 
 export type EtatAttribution =
   | { statut: 'inactif' }
-  | { statut: 'attribue'; refuses: number }
+  | { statut: 'attribue'; refuses: number; enCours: number }
   | { statut: 'erreur'; message: string }
 
 /** Statuts que le refus accepte, comme `refuserLeDossier`. */
@@ -174,7 +174,21 @@ export async function attribuerLeLogement(
     await prevenirSiLeStatutAChange(contexte.supabase, id, null)
     revalidatePath(`/espace/dossiers/${id}`)
   }
-  return { statut: 'attribue', refuses: refuses.length }
+
+  // Un dossier encore incomplet ne se refuse pas : il reste ouvert et son
+  // candidat n'apprend rien. L'agence sait combien il lui en reste a clore.
+  const { data: restants, error: lectureRestants } = await contexte.supabase
+    .from('dossiers')
+    .select('id')
+    .eq('logement_id', logement)
+    .neq('id', retenu)
+    .in('statut', ['ouvert', 'depot_en_cours'])
+  if (lectureRestants) console.error('[agence] candidats en cours illisibles')
+  return {
+    statut: 'attribue',
+    refuses: refuses.length,
+    enCours: Array.isArray(restants) ? restants.length : 0,
+  }
 }
 
 /**

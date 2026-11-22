@@ -58,6 +58,8 @@ export const tableau: Textes<typeof Fr.tableau> = {
   nouveauLoyerAide:
     'If you know it, the tenant will not have to enter it. It can still be changed until the guarantor makes their declaration.',
   nouveauLoyerInvalide: 'The rent cannot be read. Example: 850 or 850.50.',
+  nouveauComplementEchec:
+    'The rent or the property could not be saved: complete them from the file’s page.',
   nouveauBouton: 'Send the link',
   nouveauEnvoi: 'Sending…',
   nouveauSucces: (email) => `File opened. The link to ${email} is scheduled to be sent.`,
@@ -148,7 +150,18 @@ export const dossier: Textes<typeof Fr.dossier> = {
   prendreAide:
     'Freezes the documents: the guarantor can no longer remove anything. Do this once you have what you need to decide.',
   refuser: 'Decline the file',
-  refuserAide: 'The tenant is told of the refusal, without the reason.',
+  refuserAide:
+    'The tenant is told of the refusal, without the reason. The refusal is final and recorded in the log.',
+  refuserConfirmer: 'I confirm that this file is declined.',
+  refuserConfirmationRequise: 'Tick the confirmation box to decline this file.',
+  acteIncomplet:
+    'The guarantor has not yet written their guarantee statement or declared their cap. Once the file is accepted they can no longer do so, and the guarantee deed cannot be prepared here.',
+  prendreSansActe: 'Accept the file without a guarantee statement',
+  prendreSansActeRequis:
+    'The guarantor has not written their guarantee statement. Tick the box to accept the file without it, or wait until they have written it.',
+  mentionLibelle: 'Guarantee statement',
+  mentionEcrite: (date) => `Written by the guarantor on ${date}`,
+  mentionAbsente: 'Not yet written by the guarantor',
   prisTexte: 'File accepted. The documents are frozen; you can now prepare the guarantee deed.',
   refuseTexte: 'File declined.',
 }
@@ -169,8 +182,10 @@ export const loyerAgence: Textes<typeof Fr.loyerAgence> = {
   envoi: 'Saving…',
   succes: 'Rent saved. The tenant sees it in their file.',
   invalide: 'The rent cannot be read. Example: 850 or 850.50.',
-  erreur: 'The rent could not be saved. It may already be frozen by the guarantor’s declaration.',
-  fige: 'The rent is frozen: the guarantor declared their income on this basis.',
+  erreur: 'The rent could not be saved. Try again in a moment.',
+  fige: 'The rent is frozen: the file is no longer in progress.',
+  correction:
+    'The guarantor has already declared their income against this rent. You can still correct it: affordability is recalculated and the correction is recorded in the log.',
   second: 'The rent is entered on the first guarantor’s file and copied here.',
 }
 
@@ -235,6 +250,8 @@ export const actions: Textes<typeof Fr.actions> = {
   complement_refuse: 'requested a new correction',
   dossier_transmis: 'accepted the file',
   relances_reprises: 'reminded the guarantor again',
+  loyer_corrige: 'corrected the rent after the guarantor’s declaration',
+  dossier_refuse: 'declined the file',
 }
 
 export const acteurs: Textes<typeof Fr.acteurs> = {

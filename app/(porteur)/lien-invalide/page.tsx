@@ -4,7 +4,7 @@ import { FormulaireRetrouverGarant } from '@/components/forms/FormulaireRetrouve
 import { Button } from '@/components/ui/Button'
 import { lienInvalide as lienInvalideFr } from '@/lib/content/locataire'
 import { lienInvalide as lienInvalideEn } from '@/lib/content/en/locataire'
-import { choisir } from '@/lib/i18n'
+import { choisir, lien } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -30,7 +30,7 @@ export default async function PageLienInvalide() {
       <p className="text-muted mt-6 text-[14px] font-medium">{lienInvalide.locataire}</p>
       <FormulaireContinuite mode="retrouver" />
       <div className="mt-6">
-        <Button href="/demarrer" tone="cobalt">
+        <Button href={lien(langue, '/demarrer')} tone="cobalt">
           {lienInvalide.bouton}
         </Button>
       </div>

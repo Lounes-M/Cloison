@@ -86,8 +86,10 @@ export const messagesServeur: Record<string, string> = {
   'Règle d’abord ton dossier, plus haut : le lien de ton garant partira ensuite.':
     'Pay for your file first, above: your guarantor’s link will be sent right after.',
   'Ton garant ne peut pas être toi-même.': 'You cannot be your own guarantor.',
-  'Un garant déjà invité ne peut pas être remplacé dans ce dossier. Tu peux lui renvoyer son lien.':
-    'A guarantor who has already been invited cannot be replaced in this file. You can send them their link again.',
+  'Ton garant a déjà commencé son dossier : son adresse ne peut plus changer. Tu peux lui renvoyer son lien.':
+    'Your guarantor has already started their file: their address can no longer change. You can send them their link again.',
+  'Le lien n’a pas pu être préparé. Réessaie dans un instant.':
+    'The link could not be prepared. Try again in a moment.',
   "Le lien n'a pas pu être envoyé. Vérifie l'adresse et réessaie.":
     'The link could not be sent. Check the address and try again.',
 

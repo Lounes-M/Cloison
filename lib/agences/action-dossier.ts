@@ -8,10 +8,10 @@ import { z } from 'zod'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
-import { tableau as tableauFr } from '@/lib/content/espace'
+import { dossier as dossierFr, tableau as tableauFr } from '@/lib/content/espace'
 import { montantEnCents } from '@/lib/garant/validation'
 import { contexteAgence } from './contexte'
-import { tableau as tableauEn } from '@/lib/content/en/espace'
+import { dossier as dossierEn, tableau as tableauEn } from '@/lib/content/en/espace'
 import { choisir, versLangue } from '@/lib/i18n'
 import { reglerLangueDossier } from '@/lib/langue-preferee'
 import { langueAction, langueEspace } from '@/lib/langue-espace'
@@ -31,7 +31,7 @@ import { langueAction, langueEspace } from '@/lib/langue-espace'
 
 export type EtatNouveauDossier =
   | { statut: 'inactif' }
-  | { statut: 'ouvert'; email: string }
+  | { statut: 'ouvert'; email: string; incomplet?: true }
   | { statut: 'erreur'; message: string; valeur?: string; loyer?: string }
 
 const schemaLocataire = z.object({
@@ -107,6 +107,7 @@ export async function ouvrirUnDossier(
   }
 
   const { courriel } = analyse.data
+  let complementPerdu = false
 
   try {
     // Avec le client de l'agence, et non le client anonyme : c'est ce qui
@@ -132,7 +133,10 @@ export async function ouvrirUnDossier(
         .from('dossiers')
         .update(complement)
         .eq('id', ouvert.dossierId)
-      if (error) console.error('[agence] complement d ouverture non enregistre')
+      if (error) {
+        console.error('[agence] complement d ouverture non enregistre')
+        complementPerdu = true
+      }
     }
 
     // La langue du locataire, choisie par l'agence : celle de son lien et de
@@ -153,10 +157,43 @@ export async function ouvrirUnDossier(
   }
 
   revalidatePath('/espace')
-  return { statut: 'ouvert', email: courriel }
+  return complementPerdu
+    ? { statut: 'ouvert', email: courriel, incomplet: true }
+    : { statut: 'ouvert', email: courriel }
 }
 
 export type EtatDecision = { statut: 'inactif' } | { statut: 'erreur'; message: string }
+
+type ClientAgence = Extract<
+  Awaited<ReturnType<typeof contexteAgence>>,
+  { etat: 'rattache' }
+>['supabase']
+
+/** Vrai quand un garant du groupe n'a pas ecrit sa mention ou declare son plafond. */
+async function acteIncomplet(supabase: ClientAgence, id: string): Promise<boolean> {
+  const { data: d } = await supabase
+    .from('dossiers')
+    .select('id, dossier_principal, demonstration')
+    .eq('id', id)
+    .maybeSingle()
+  // Dossier illisible ou demonstration : la mise a jour qui suit tranche.
+  if (!d || d.demonstration) return false
+  const racine = String(d.dossier_principal ?? d.id)
+  const { data: membres } = await supabase
+    .from('dossiers')
+    .select('id')
+    .or(`id.eq.${racine},dossier_principal.eq.${racine}`)
+  const ids = (membres ?? []).map((m) => String(m.id))
+  if (ids.length === 0) return false
+  const { data: engagements } = await supabase
+    .from('engagements')
+    .select('dossier_id, mention_saisie_le, montant_max_cents')
+    .in('dossier_id', ids)
+  return ids.some((membre) => {
+    const e = (engagements ?? []).find((ligne) => String(ligne.dossier_id) === membre)
+    return !e?.mention_saisie_le || !e.montant_max_cents
+  })
+}
 
 /**
  * Prendre un dossier : le figer pour decider dessus.
@@ -173,6 +210,15 @@ export async function prendreLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
+
+  // Une fois le dossier pris, le garant n'ecrit plus rien : prendre sans
+  // mention ni plafond est un choix que l'agence confirme, jamais un oubli.
+  if (donnees.get('sansActe') !== 'on' && (await acteIncomplet(contexte.supabase, id))) {
+    return {
+      statut: 'erreur',
+      message: choisir(langue, dossierFr, dossierEn).prendreSansActeRequis,
+    }
+  }
 
   const { data, error } = await contexte.supabase
     .from('dossiers')
@@ -214,6 +260,14 @@ export async function refuserLeDossier(_p: EtatDecision, donnees: FormData): Pro
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: dire('Session expirée.') }
+
+  // Le refus est definitif et notifie : il ne part jamais d'un seul clic.
+  if (donnees.get('confirme') !== 'on') {
+    return {
+      statut: 'erreur',
+      message: choisir(langue, dossierFr, dossierEn).refuserConfirmationRequise,
+    }
+  }
 
   const { data, error } = await contexte.supabase
     .from('dossiers')

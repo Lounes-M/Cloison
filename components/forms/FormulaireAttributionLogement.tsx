@@ -33,7 +33,7 @@ export function FormulaireAttributionLogement({
   if (etat.statut === 'attribue') {
     return (
       <p role="status" className="message-succes">
-        {texte.attribution.succes(etat.refuses)}
+        {texte.attribution.succes(etat.refuses, etat.enCours)}
       </p>
     )
   }

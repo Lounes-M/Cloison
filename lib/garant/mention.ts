@@ -147,6 +147,12 @@ export function montantsEnChiffres(texte: string): number[] {
   return [...trouves]
 }
 
+const MOTS_NOMBRES = new Set(
+  [...UNITES, ...DIZAINES, 'cent', 'mille', 'million', 'millions']
+    .filter(Boolean)
+    .flatMap((mot) => normaliserLettres(mot).split(' ')),
+)
+
 export type Element = 'caution' | 'paiement' | 'montant' | 'solidarite'
 
 export type Verdict = { ok: true; montantEuros: number } | { ok: false; manques: Element[] }
@@ -168,22 +174,30 @@ export function verifierMention(texte: string, solidaire: boolean): Verdict {
   const manques: Element[] = []
   // Reperage indicatif, jamais une validation juridique ou semantique complete.
   // La negation dans la condition de defaillance ne nie pas l'engagement.
-  const plat = normaliserLettres(texte).replace(
-    /\b(?:si|lorsque|quand) (?:le|mon|ce) (?:locataire|debiteur) ne (?:paie|paye|regle) pas\b/g,
+  const plat = normaliserLettres(texte.replace(/[’ʼ]/g, "'")).replace(
+    /(?:\bs'il|\b(?:si|lorsque|quand) (?:(?:le|mon|ce) (?:locataire|debiteur)|celui ci|ce dernier)) (?:ne (?:paie|paye|regle|payait|reglait)|n'y satisfait) pas\b/g,
     'defaillance',
   )
 
-  const negation = /\b(?:ne|pas|jamais|refuse)\b/.test(plat)
+  // Seule la negation de son propre engagement compte. La formule legale de la
+  // solidarite (« ne pouvoir exiger ») et le loyer « non paye » n'en sont pas.
+  const negation =
+    /\bje (?:ne |n')(?:me |m'|m )?(?:porte|suis|serai|paie|paye|paierai|payerai|regle|reglerai|rembourse|rembourserai|engage|veux|souhaite|accepte)\b/.test(
+      plat,
+    ) || /\brefuse\b/.test(plat)
   if (!plat.includes('caution') || negation) manques.push('caution')
 
   // Payer, et en cas de defaillance : les deux idees, pas une formule.
-  const paie = /\bpa(?:yer|ie|ierai|iera|yerai)\b/.test(plat) || plat.includes('regler')
+  const paie =
+    /\bpa(?:yer|ie|ierai|iera|yerai|yera)\b/.test(plat) ||
+    /\b(?:regl|rembours)(?:er|erai|era|e)\b/.test(plat)
   const defaut = plat.includes('defaillance') || plat.includes('defaut') || plat.includes('impaye')
   if (!paie || !defaut || negation) manques.push('paiement')
 
-  let montantEuros: number | null = null
-  const chiffres = montantsEnChiffres(texte)
-  for (const chiffre of chiffres.length === 1 ? chiffres : []) {
+  // Un loyer cite a cote du plafond ne gene pas : seul compte le montant ecrit
+  // a la fois en chiffres et en lettres. Deux montants concordants, en
+  // revanche, laissent le plafond indetermine.
+  const concordants = montantsEnChiffres(texte).filter((chiffre) => {
     const cents = Math.round(chiffre * 100)
     const mots = normaliserLettres(nombreEnLettres(Math.floor(cents / 100)))
     const centimes = cents % 100
@@ -191,22 +205,27 @@ export function verifierMention(texte: string, solidaire: boolean): Verdict {
       `(?:^|[^a-z])${mots} euros?\\b(?: ([a-z]+(?: [a-z]+){0,6}) centimes?\\b)?`,
       'g',
     )
-    const concorde = [...plat.matchAll(montantsEnLettres)].some((lecture) =>
-      lecture[1] === undefined
+    return [...plat.matchAll(montantsEnLettres)].some((lecture) => {
+      // « huit cents euros » a la fin de « vingt-huit mille huit cents euros »
+      // n'est pas un montant a part.
+      const avant = plat.slice(0, lecture.index).trimEnd().split(' ').pop() ?? ''
+      if (MOTS_NOMBRES.has(avant)) return false
+      return lecture[1] === undefined
         ? centimes === 0
-        : lecture[1] === normaliserLettres(nombreEnLettres(centimes)),
-    )
-    if (concorde) {
-      montantEuros = chiffre
-      break
-    }
-  }
+        : lecture[1] === normaliserLettres(nombreEnLettres(centimes))
+    })
+  })
+  const montantEuros = concordants.length === 1 ? concordants[0]! : null
   if (montantEuros === null) manques.push('montant')
 
   if (solidaire) {
     const renonce = CONTIENT(texte, 'renonc', 'discussion', 'division')
     const dit = plat.includes('solidaire')
-    if (!renonce || !dit) manques.push('solidarite')
+    // L'article 2297 formule la solidarite sans nommer les deux benefices :
+    // ne pouvoir exiger que le creancier poursuive d'abord le debiteur, ni
+    // qu'il divise ses poursuites entre les cautions.
+    const formuleLegale = /\bpoursui/.test(plat) && plat.includes('abord') && /\bdivis/.test(plat)
+    if (!(renonce && dit) && !formuleLegale) manques.push('solidarite')
   }
 
   return manques.length === 0 && montantEuros !== null

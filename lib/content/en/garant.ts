@@ -158,6 +158,7 @@ export const engagement: Textes<typeof Fr.engagement> = {
  */
 export const mention: Textes<typeof Fr.mention> = {
   titre: 'Your handwritten statement',
+  figee: 'The file has been handed over: your statement is frozen. Here it is, as you wrote it.',
   intro:
     'You can prepare your statement before the file is handed over. This step is not a signature, and the automatic check does not certify that the text is legally valid. The statement is written in French, the language of the deed.',
   prenom: 'Your first name',

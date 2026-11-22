@@ -9,7 +9,7 @@ export const locataire: typeof Fr.locataire = {
   complet: {
     sujet: 'Your file is complete',
     texte:
-      'Your guarantor has uploaded their documents and is eligible. The agency now has everything it needs to decide. You have nothing to do: it will get back to you.',
+      'Your guarantor has uploaded their documents and is eligible. If an agency is following your file, it now has everything it needs to decide and will get back to you. If not, attach your file to your agency from your space so that it can view it.',
   },
   garant_insuffisant: {
     sujet: 'Your file needs another guarantor',
