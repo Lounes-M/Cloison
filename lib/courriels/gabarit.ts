@@ -161,7 +161,7 @@ ${paragraphes}${bouton}${notes}${details}
 <tr><td align="center" bgcolor="${COULEURS.primaire}" style="background:${COULEURS.primaire};padding:0 24px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
 <tr><td style="padding:32px 0 36px;">
-<p style="margin:0 0 18px;font-family:${POLICE};font-size:15px;line-height:1.4;color:#ffffff;"><span style="font-size:18px;font-weight:600;">${logo}</span> &nbsp; ${echapper(t.signature)}</p>
+<p style="margin:0 0 18px;font-family:${POLICE};font-size:15px;line-height:1.4;color:#ffffff;"><span style="display:block;margin:0 0 6px;font-size:18px;font-weight:600;">${logo}</span>${echapper(t.signature)}</p>
 ${surVert(t.automatique)}${surVert(t.pourquoi)}
 <p style="margin:18px 0 0;font-family:${POLICE};font-size:14px;line-height:1.6;color:#ffffff;">${pied}</p>
 </td></tr>

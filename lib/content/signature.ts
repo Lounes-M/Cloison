@@ -25,7 +25,7 @@ export const signature = {
   pdfInvalide:
     'PDF non accepté. Vérifiez qu’il est lisible, non protégé, sans formulaire ni pièce jointe, avec au plus 40 pages non pivotées. Le champ de signature doit tenir entièrement dans la page choisie.',
   placement:
-    'Le champ mesure 85 × 37 points. Mesurez sa position depuis le coin supérieur gauche de la page.',
+    'Choisissez la page, puis cliquez dans l’aperçu pour poser le champ de signature. Il mesure 85 × 37 points.',
   apercu: 'Afficher la page',
   apercuAttente: 'Préparation de l’aperçu…',
   apercuPret: 'Aperçu prêt. Vérifiez le texte et la position du champ avant de soumettre.',
