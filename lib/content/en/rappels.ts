@@ -6,12 +6,12 @@ export const rappels: Textes<typeof Fr.rappels> = {
   etiquette: 'Agency settings',
   retour: 'Back to files',
   aide: 'Support pending uploads and anticipate the deletion of supporting documents at their deadline.',
-  relance: 'Remind the guarantor after a period with no change',
+  relance: 'Remind the tenant and the guarantor after a period with no change',
   echeance: 'Warn team members before the file reaches its deadline',
   desactive: 'Off',
   jours: (n) => `${n} days`,
   limites:
-    'Reminders concern incomplete uploads and corrections still expected. Three reminders at most per file, at least three days apart. New activity postpones the reminder. No new link is created and no deadline is extended.',
+    'Guarantor reminders concern incomplete uploads and corrections still expected. Tenant reminders concern a file still to be paid, a guarantor still to be named or a rent still to be declared. Three reminders at most per person and per step, at least three days apart. New activity postpones the reminder. No new link is created and no deadline is extended.',
   preferences:
     'Deadline reminders, and the alert sent when a guarantor’s three reminders go unanswered, follow your team members’ personal preferences. They stop after signature, refusal or expiry. An email already handed to the provider cannot be recalled.',
   cadence:
@@ -39,6 +39,29 @@ export const courrielsRappels: Textes<typeof Fr.courrielsRappels> = {
     texte:
       'The guarantor of this file has received their three automatic reminders without resuming their upload. Cloison will not remind them again: contacting them directly may unblock things. The file is marked “Reminders used up” in your space.',
   },
+  reference: 'File reference',
+  expiration: 'Retention deadline',
+}
+
+export const courrielsRelanceLocataire: Textes<typeof Fr.courrielsRelanceLocataire> = {
+  paiement: {
+    sujet: 'Your Cloison file is waiting for its payment',
+    texte:
+      'Your file is open but not yet paid for: your guarantor’s link cannot be sent. Come back to your space with your usual link to pay for the file, then name your guarantor.',
+  },
+  garant: {
+    sujet: 'Your Cloison file is waiting for your guarantor',
+    texte:
+      'You have not named your guarantor yet. Come back to your space with your usual link and enter their email address: they will receive a link to upload their documents on their side.',
+  },
+  loyer: {
+    sujet: 'Your Cloison file is waiting for your rent',
+    texte:
+      'The rent of your file has not been declared yet. Without it, the file stays on hold. Come back to your space with your usual link to enter it.',
+  },
+  lienExpire:
+    'If your link has expired, request a new one from “Find my file”, with the reference below. This message does not extend the retention of the file.',
+  bouton: 'Find my file',
   reference: 'File reference',
   expiration: 'Retention deadline',
 }
