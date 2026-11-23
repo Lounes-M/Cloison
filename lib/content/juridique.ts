@@ -72,7 +72,7 @@ export const mentionsLegales = {
   },
   hebergement: 'Hébergement',
   hebergementTexte: [
-    'Le site et ses fonctions serveur sont hébergés par un prestataire d’infrastructure en nuage, dans la région de Francfort (Union européenne).',
+    'Le site et ses fonctions serveur sont hébergés par un prestataire d’infrastructure cloud, dans la région de Francfort (Union européenne).',
     'La base de données, l’authentification et les pièces chiffrées sont hébergées par un prestataire distinct, dans l’Union européenne.',
     'Les coordonnées de ces prestataires sont communiquées sur demande à l’adresse de contact ci-dessus.',
   ],
