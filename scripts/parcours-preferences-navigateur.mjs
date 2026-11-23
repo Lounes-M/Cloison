@@ -4,11 +4,12 @@ export async function parcourirPreferences(page, site, moteur, largeur, conflit)
   await page.goto(`${site}/espace/notifications`)
   await page.getByRole('link', { name: 'Mes notifications', exact: true }).click()
   // Le pointeur reste ou le dernier clic l'a laisse : s'il survole le bouton,
-  // la couleur lue est celle du survol, pas celle du repos qu'on verifie ici.
+  // la couleur lue est celle du survol, puis celle de la transition de retour.
+  // On l'ecarte et on laisse la transition finir avant de lire la couleur au repos.
   await page.mouse.move(0, 0)
-  const couleurs = await page
-    .getByRole('button', { name: 'Enregistrer mes préférences' })
-    .evaluate((el) => {
+  const bouton = page.getByRole('button', { name: 'Enregistrer mes préférences' })
+  const lire = () =>
+    bouton.evaluate((el) => {
       const token = getComputedStyle(document.documentElement)
         .getPropertyValue('--color-cobalt')
         .trim()
@@ -18,6 +19,11 @@ export async function parcourirPreferences(page, site, moteur, largeur, conflit)
         attendu: `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`,
       }
     })
+  let couleurs = await lire()
+  for (let essai = 0; essai < 20 && couleurs.fond !== couleurs.attendu; essai++) {
+    await page.waitForTimeout(100)
+    couleurs = await lire()
+  }
   assert.equal(couleurs.fond, couleurs.attendu, 'Bouton principal sans style de marque')
   const mode = page.getByRole('combobox', { name: 'Notifications de suivi' })
   assert.equal(await mode.inputValue(), 'tous')
