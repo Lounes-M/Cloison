@@ -1,3 +1,6 @@
+import { maColocation } from '@/lib/acces/ma-colocation'
+import { colocation as texteColocationFr } from '@/lib/content/colocation'
+import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import { detailDossierOuvert, resteAFaireLocataire } from '@/lib/locataire/reste-a-faire'
@@ -78,6 +81,7 @@ export default async function PageLocataire({
   const statuts = choisir(langue, statutsFr, statutsEn)
   const espace = choisir(langue, espaceFr, espaceEn)
   const texteAgence = choisir(langue, texteAgenceFr, texteAgenceEn)
+  const texteColocation = choisir(langue, texteColocationFr, texteColocationEn)
   const frise = choisir(langue, friseFr, friseEn)
   const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
   const texteSecond = choisir(langue, texteSecondFr, texteSecondEn)
@@ -163,6 +167,7 @@ export default async function PageLocataire({
     }
   }
   const suivi = dossier.agence_id ? await agenceDuDossier(supabase) : null
+  const coloc = dossier.agence_id ? await maColocation(supabase) : null
   const loyer =
     dossier.loyer_cents == null ? '' : (Number(dossier.loyer_cents) / 100).toLocaleString('fr-FR')
   const expire = new Date(String(dossier.expire_le)).toLocaleDateString(locale(langue), {
@@ -221,7 +226,21 @@ export default async function PageLocataire({
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {espace.loyerAide}
         </p>
-        {ouvert && !dossier.loyer_verrouille ? (
+        {coloc ? (
+          <div className="text-sm leading-relaxed font-medium">
+            <p>
+              {texteColocation.locataire.texte(coloc.colocataires, euros(coloc.loyerTotalCents))}
+            </p>
+            <p className="mt-2">
+              {coloc.etendue === 'loyer_entier'
+                ? texteColocation.locataire.loyerEntier
+                : texteColocation.locataire.loyerPart}
+              {dossier.loyer_cents != null
+                ? ` ${texteColocation.locataire.montant(euros(Number(dossier.loyer_cents)))}`
+                : ''}
+            </p>
+          </div>
+        ) : ouvert && !dossier.loyer_verrouille ? (
           <FormulaireLoyer dossierId={porteur.capacite.dossierId} loyerActuel={loyer} />
         ) : (
           <p className="text-sm">
