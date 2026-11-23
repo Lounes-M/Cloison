@@ -49,7 +49,7 @@ async function executerConteneur(entree, image) {
       !['contenu,filigrane,operation,type', 'contenu,filigrane,operation,pagination,type'].includes(
         Object.keys(demande).sort().join(','),
       ) ||
-      !['verifier', 'rasteriser'].includes(demande.operation) ||
+      !['verifier', 'rasteriser', 'lire_code'].includes(demande.operation) ||
       (demande.pagination !== undefined &&
         (demande.pagination !== true || demande.operation !== 'rasteriser')) ||
       !['application/pdf', 'image/png', 'image/jpeg'].includes(demande.type) ||
@@ -111,7 +111,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       blocs.push(bloc)
     }
     const resultat = await traiterDocumentIsole(Buffer.concat(blocs), process.argv[2])
-    // PDF binaire sur stdout pour rasteriser, sortie vide pour verifier.
+    // PDF binaire sur stdout pour rasteriser, octets du code pour lire_code, sortie vide pour verifier.
     process.stdout.write(resultat)
   } catch {
     process.stderr.write('Traitement isole refuse.\n')

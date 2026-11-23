@@ -12,3 +12,4 @@ workers/**
 !workers/dimensions.ts
 !workers/validation-document.ts
 !workers/rasterisation.ts
+!workers/lecture-code.ts

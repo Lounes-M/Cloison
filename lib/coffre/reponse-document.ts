@@ -1,11 +1,13 @@
 const PDF_MAX = 20 * 1024 * 1024
+/** Un 2D-Doc tient dans quelques centaines d'octets ; meme borne que le moteur. */
+export const CODE_MAX = 2048
 
 /** Refus bien forme du moteur ({ ok: false }), distinct d'une reponse invalide. */
 export class RefusDocumentaire extends Error {}
 
 export function lireReponseDocumentaire(
   sortie: Buffer,
-  operation: 'verifier' | 'rasteriser',
+  operation: 'verifier' | 'rasteriser' | 'lire_code',
 ): Buffer
 export function lireReponseDocumentaire(
   sortie: Buffer,
@@ -14,7 +16,7 @@ export function lireReponseDocumentaire(
 ): { pdf: Buffer; pages: number }
 export function lireReponseDocumentaire(
   sortie: Buffer,
-  operation: 'verifier' | 'rasteriser',
+  operation: 'verifier' | 'rasteriser' | 'lire_code',
   pagination = false,
 ): Buffer | { pdf: Buffer; pages: number } {
   let resultat: Record<string, unknown>
@@ -32,9 +34,11 @@ export function lireReponseDocumentaire(
       ? ['ok', 'pages']
       : operation === 'verifier'
         ? ['ok']
-        : pagination
-          ? ['ok', 'pdf', 'pages']
-          : ['ok', 'pdf']
+        : operation === 'lire_code'
+          ? ['ok', 'code']
+          : pagination
+            ? ['ok', 'pdf', 'pages']
+            : ['ok', 'pdf']
   if (
     (resultat.ok !== true && resultat.ok !== false) ||
     Object.keys(resultat).length !== champs.length ||
@@ -56,6 +60,19 @@ export function lireReponseDocumentaire(
     throw new RefusDocumentaire('Document invalide ou trop volumineux a traiter')
   }
   if (operation === 'verifier') return Buffer.alloc(0)
+  if (operation === 'lire_code') {
+    // Octets du code seulement, vides si la piece n'en porte pas de lisible.
+    if (typeof resultat.code !== 'string' || resultat.code.length > 4 * Math.ceil(CODE_MAX / 3))
+      throw new Error('Sortie documentaire invalide')
+    const code = Buffer.from(resultat.code, 'base64')
+    if (
+      code.length > CODE_MAX ||
+      code.toString('base64') !== resultat.code ||
+      (code.length > 0 && code.subarray(0, 2).toString('latin1') !== 'DC')
+    )
+      throw new Error('Sortie documentaire invalide')
+    return code
+  }
   // Borne la representation avant allocation. Buffer.from(base64) ignore sinon
   // certains caracteres invalides et accepte des encodages incomplets.
   if (typeof resultat.pdf !== 'string' || resultat.pdf.length > 4 * Math.ceil(PDF_MAX / 3))

@@ -272,6 +272,7 @@ export const actions: Record<string, string> = {
   piece_ouverte: 'a ouvert une pièce',
   ocr_demande: 'a demandé une transcription par IA',
   lecture_ia_garant: 'a demandé une lecture IA de ses revenus',
+  code_2ddoc_verifie: 'a vérifié le code 2D-Doc d’un avis d’imposition',
   synthese_bailleur: 'a téléchargé la synthèse pour le bailleur',
   complement_demande: 'a demandé le remplacement d’une pièce',
   complement_fourni: 'a fourni une pièce de remplacement',

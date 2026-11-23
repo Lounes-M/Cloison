@@ -1,5 +1,6 @@
 import { verifierDocument } from './validation-document.ts'
 import { rasteriserAvecPages } from './rasterisation.ts'
+import { lireCode2dDoc } from './lecture-code.ts'
 
 try {
   let taille = 0
@@ -11,7 +12,7 @@ try {
   }
   const demande = JSON.parse(Buffer.concat(blocs).toString('utf8'))
   if (
-    !['verifier', 'rasteriser'].includes(demande.operation) ||
+    !['verifier', 'rasteriser', 'lire_code'].includes(demande.operation) ||
     !['application/pdf', 'image/png', 'image/jpeg'].includes(demande.type) ||
     typeof demande.contenu !== 'string' ||
     typeof demande.filigrane !== 'string' ||
@@ -24,14 +25,18 @@ try {
   if (!contenu.length || contenu.length > 20 * 1024 * 1024) throw new Error('Taille invalide')
   let pdf
   let pages
+  let code
   if (demande.operation === 'verifier') await verifierDocument(contenu, demande.type)
-  else {
+  else if (demande.operation === 'lire_code') {
+    // Seuls les octets du code sortent, jamais une page : chaine vide sans code lisible.
+    code = ((await lireCode2dDoc(contenu, demande.type)) ?? Buffer.alloc(0)).toString('base64')
+  } else {
     const sortie = await rasteriserAvecPages(contenu, demande.type, demande.filigrane)
     if (sortie.pdf.length > 20 * 1024 * 1024) throw new Error('Sortie trop volumineuse')
     pdf = sortie.pdf.toString('base64')
     if (demande.pagination) pages = sortie.pages
   }
-  process.stdout.write(JSON.stringify({ ok: true, pdf, pages }), () => process.exit(0))
+  process.stdout.write(JSON.stringify({ ok: true, pdf, pages, code }), () => process.exit(0))
 } catch (erreur) {
   // Les erreurs des decodeurs peuvent contenir du texte du document.
   // Seul un nombre de pages extrait d'une erreur controlee sort du processus.

@@ -148,6 +148,8 @@ for (const type of ['application/pdf', 'image/png', 'image/jpeg']) {
   assert.equal((await traiterDocumentIsole(demande(contenu, type), image)).length, 0)
   const rendu = await traiterDocumentIsole(demande(contenu, type, 'rasteriser'), image)
   assert.equal((await PDFDocument.load(rendu)).getPageCount(), 1)
+  // Le decodeur de 2D-Doc se charge sans reseau et ne trouve rien sur une page vide.
+  assert.equal((await traiterDocumentIsole(demande(contenu, type, 'lire_code'), image)).length, 0)
 }
 await assert.rejects(
   traiterDocumentIsole(demande(Buffer.from('%PDF-invalide'), 'application/pdf'), image),

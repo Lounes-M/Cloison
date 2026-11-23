@@ -10,6 +10,7 @@ const attendus = [
   'workers/dimensions.ts',
   'workers/validation-document.ts',
   'workers/rasterisation.ts',
+  'workers/lecture-code.ts',
 ].sort()
 const trouves = []
 async function parcourir(racine, prefixe = '') {
@@ -23,4 +24,4 @@ async function parcourir(racine, prefixe = '') {
 assert(process.argv.length === 3, 'Repertoire de contexte requis')
 await parcourir(process.argv[2])
 assert.deepEqual(trouves.sort(), attendus, 'Contexte documentaire non minimal')
-console.log('OK : contexte limite aux sept fichiers attendus, fichiers prives exclus')
+console.log('OK : contexte limite aux huit fichiers attendus, fichiers prives exclus')
