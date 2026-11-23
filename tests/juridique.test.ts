@@ -8,12 +8,6 @@ import PageMentionsLegales from '@/app/(marketing)/mentions-legales/page'
 import { editeur, retentionSauvegardes } from '@/lib/juridique/editeur'
 
 const COMPLET = {
-  EDITEUR_DENOMINATION: 'Cloison Fixture',
-  EDITEUR_FORME: 'SAS',
-  EDITEUR_SIREN: '552 100 554',
-  EDITEUR_ADRESSE: '1 rue des essais, 75000 Paris',
-  EDITEUR_COURRIEL: 'contact@example.fr',
-  EDITEUR_DIRECTEUR_PUBLICATION: 'Directeur Fixture',
   MEDIATEUR_NOM: 'Mediateur Fixture',
   MEDIATEUR_SITE: 'https://mediateur.example.fr',
   SAUVEGARDE_RETENTION_JOURS: '7',
@@ -28,51 +22,44 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-test('sans configuration, chaque champ obligatoire est signale manquant', () => {
-  poser({ EDITEUR_DENOMINATION: '', EMAIL_SUPPORT: '' })
-  expect(editeur().manquants).toEqual([
-    'denomination',
-    'forme',
-    'siren',
-    'adresse',
-    'courriel',
-    'directeurPublication',
-    'mediateur',
-  ])
+test('sans mediateur declare, il est signale manquant', () => {
+  poser({ MEDIATEUR_NOM: '', MEDIATEUR_SITE: '' })
+  expect(editeur().manquants).toEqual(['mediateur'])
 })
 
-test('une valeur mal formee vaut absente, jamais affichee telle quelle', () => {
+test('un site de mediateur qui n est pas en https vaut absent', () => {
+  poser({ ...COMPLET, MEDIATEUR_SITE: 'http://mediateur.example.fr' })
+  const e = editeur()
+  expect(e.mediateur).toBeNull()
+  expect(e.manquants).toEqual(['mediateur'])
+})
+
+test('une configuration complete ne laisse rien a completer', () => {
+  poser(COMPLET)
+  expect(editeur().manquants).toEqual([])
+})
+
+test('l identite de l editeur vient du contenu et suit la langue, pas les variables', () => {
   poser({
     ...COMPLET,
-    EDITEUR_SIREN: '12345',
-    EDITEUR_COURRIEL: 'javascript:alert(1)',
-    MEDIATEUR_SITE: 'http://mediateur.example.fr',
+    EDITEUR_DENOMINATION: 'Autre Societe',
+    EDITEUR_DIRECTEUR_PUBLICATION: 'Quelqu un',
   })
-  const e = editeur()
-  expect(e.siren).toBeNull()
-  expect(e.courriel).toBeNull()
-  expect(e.mediateur).toBeNull()
-  expect(e.manquants).toEqual(['siren', 'courriel', 'mediateur'])
-})
-
-test('une configuration complete ne laisse rien a completer, SIREN mis en forme', () => {
-  poser(COMPLET)
-  const e = editeur()
-  expect(e.manquants).toEqual([])
-  expect(e.siren).toBe('552 100 554')
-})
-
-test('l adresse de support sert de contact par defaut', () => {
-  poser({ ...COMPLET, EDITEUR_COURRIEL: '', EMAIL_SUPPORT: 'support@example.fr' })
-  expect(editeur().courriel).toBe('support@example.fr')
+  const francais = editeur('fr')
+  expect(francais.denomination).toBe('LM Services')
+  expect(francais.siren).toBe('994 493 435')
+  expect(francais.directeurPublication).toBe('Le président de LM Services')
+  const anglais = editeur('en')
+  expect(anglais.denomination).toBe('LM Services')
+  expect(anglais.directeurPublication).toBe('The chair (président) of LM Services')
+  expect(anglais.forme).toContain('single-shareholder')
 })
 
 test.each([
   ['mentions', PageMentionsLegales],
-  ['confidentialite', PageConfidentialite],
   ['conditions', PageConditions],
-])('la page %s porte le marqueur tant que l editeur manque', (_nom, page) => {
-  poser({ EDITEUR_DENOMINATION: '', EMAIL_SUPPORT: '', EDITEUR_COURRIEL: '' })
+])('la page %s porte le marqueur tant que le mediateur manque', (_nom, page) => {
+  poser({ ...COMPLET, MEDIATEUR_NOM: '' })
   const html = rendre(page)
   expect(html).toContain('data-editeur-incomplet')
   expect(html).toContain('<h1')
@@ -84,11 +71,11 @@ test.each([
 test('les mentions affichent l editeur et l hebergeur de l application', () => {
   poser(COMPLET)
   const html = rendre(PageMentionsLegales)
-  for (const attendu of ['Cloison Fixture', '552 100 554', 'Directeur Fixture', 'Francfort'])
+  for (const attendu of ['LM Services', '994 493 435', 'Le président de LM Services', 'Francfort'])
     expect(html).toContain(attendu)
   // L'hebergement est decrit sans nommer les prestataires.
   for (const absent of ['Vercel', 'Supabase']) expect(html).not.toContain(absent)
-  expect(html).toContain('href="mailto:contact@example.fr"')
+  expect(html).toContain('href="mailto:contact@cloison.immo"')
 })
 
 test('la politique ne cite OpenRouter et le prestataire de signature que s ils sont actives', () => {
@@ -143,22 +130,13 @@ test('le prix porte la mention fiscale de l editeur', () => {
 })
 
 test('sans variable posee, les pages nomment la societe qui exploite la marque', () => {
-  poser({
-    EDITEUR_DENOMINATION: '',
-    EDITEUR_FORME: '',
-    EDITEUR_SIREN: '',
-    EDITEUR_ADRESSE: '',
-    EDITEUR_COURRIEL: '',
-    EMAIL_SUPPORT: '',
-    EDITEUR_DIRECTEUR_PUBLICATION: '',
-    MEDIATEUR_NOM: '',
-    SAUVEGARDE_RETENTION_JOURS: '',
-  })
+  poser({ MEDIATEUR_NOM: '', MEDIATEUR_SITE: '', SAUVEGARDE_RETENTION_JOURS: '', EDITEUR_TVA: '' })
   const mentions = rendre(PageMentionsLegales)
   // Cloison est une marque : l'editeur nomme est la societe immatriculee qui l'exploite.
   for (const attendu of [
     'LM Services',
     'SASU, société par actions simplifiée unipersonnelle',
+    '1 000 €',
     '994 493 435',
     '994 493 435 R.C.S. Paris',
     '231 rue Saint-Honoré, 75001 Paris',
@@ -167,7 +145,7 @@ test('sans variable posee, les pages nomment la societe qui exploite la marque',
     expect(mentions).toContain(attendu)
   expect(mentions).not.toContain('En cours d’immatriculation')
   expect(mentions).not.toContain('À compléter')
-  // La supervision, elle, continue de reclamer les vraies valeurs.
+  // La supervision, elle, continue de reclamer le mediateur.
   expect(mentions).toContain('data-editeur-incomplet')
 
   const confidentialite = rendre(PageConfidentialite)
@@ -181,15 +159,4 @@ test('sans variable posee, les pages nomment la societe qui exploite la marque',
   const conditions = rendre(PageConditions)
   expect(conditions).toContain('article L. 612-1 du code de la consommation')
   expect(conditions).toContain('article 293 B du CGI')
-})
-
-test('une valeur declaree remplace toujours celle du projet', () => {
-  poser(COMPLET)
-  const mentions = rendre(PageMentionsLegales)
-  expect(mentions).toContain('Cloison Fixture')
-  expect(mentions).not.toContain('LM Services')
-  expect(mentions).not.toContain('1 000 €')
-  expect(mentions).not.toContain('994 493 435')
-  expect(mentions).not.toContain('En cours d’immatriculation')
-  expect(rendre(PageConditions)).not.toContain('article L. 612-1')
 })

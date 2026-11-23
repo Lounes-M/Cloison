@@ -22,8 +22,8 @@ export const juridique = {
     'This page is a translation provided for convenience. The French version is the one that applies.',
 } as const
 
-/** L'editeur en projet, tel que la page anglaise le presente. */
-export const editeurEnProjet = {
+/** L'identite de l'editeur, telle que la page anglaise la presente. */
+export const identiteEditeur = {
   denomination: 'LM Services',
   forme: 'SASU (société par actions simplifiée unipersonnelle, French single-shareholder company)',
   capital: '€1,000',

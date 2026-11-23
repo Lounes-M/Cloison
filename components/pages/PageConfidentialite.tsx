@@ -3,7 +3,6 @@ import * as en from '@/lib/content/en/juridique'
 import * as fr from '@/lib/content/juridique'
 import { choisir, type Langue } from '@/lib/i18n'
 import {
-  editeur,
   editeurAffiche,
   retentionAffichee,
   retentionSauvegardes,
@@ -18,16 +17,14 @@ import {
  */
 export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
   const textes = choisir(langue, fr.confidentialite, en.confidentialite)
-  const { juridique } = choisir(langue, fr, en)
-  const declare = editeur()
   const e = editeurAffiche(langue)
   const facultatifs = traitementsFacultatifs()
-  const incomplet = !declare.denomination || !declare.courriel || retentionSauvegardes() === null
+  const incomplet = retentionSauvegardes() === null
 
   return (
     <PageJuridique langue={langue} titre={textes.titre} incomplet={incomplet}>
       <p>{textes.introduction}</p>
-      <p>{textes.responsable(e.denomination ?? juridique.aCompleter)}</p>
+      <p>{textes.responsable(e.denomination)}</p>
 
       {textes.sections.map((section) => (
         <SectionJuridique
@@ -49,7 +46,7 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
       ))}
 
       <SectionJuridique titre={textes.droits.titre} paragraphes={textes.droits.paragraphes}>
-        <p className="font-semibold">{textes.droits.contact(e.courriel ?? juridique.aCompleter)}</p>
+        <p className="font-semibold">{textes.droits.contact(e.courriel)}</p>
         <p>
           {textes.droits.cnil}{' '}
           <a href={textes.droits.lienCnil} className="underline underline-offset-4" rel="noopener">

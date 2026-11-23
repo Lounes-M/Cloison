@@ -32,11 +32,12 @@ export const juridique = {
  *
  * Cloison est une marque exploitee par LM Services : c'est cette societe qui
  * edite le site et encaisse, et c'est elle que les pages juridiques nomment.
- * Ces valeurs servent de repli ; chaque variable `EDITEUR_*` posee les
- * remplace. La TVA n'a pas de repli : elle depend du regime reel de la
- * societe, et se declare par `EDITEUR_TVA`.
+ * Ces valeurs sont ecrites ici, et traduites dans `en/juridique.ts`, plutot
+ * que lues dans des variables : elles suivent ainsi la langue de la page. La
+ * TVA n'y figure pas : elle depend du regime reel de la societe, et se declare
+ * par `EDITEUR_TVA`.
  */
-export const editeurEnProjet = {
+export const identiteEditeur = {
   denomination: 'LM Services',
   forme: 'SASU, société par actions simplifiée unipersonnelle',
   capital: '1 000 €',
