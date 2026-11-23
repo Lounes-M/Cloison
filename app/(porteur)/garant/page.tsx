@@ -9,6 +9,8 @@ import { Complements } from '@/components/dossiers/Complements'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { type Complement } from '@/lib/content/complements'
 import { redirect } from 'next/navigation'
+import { configurationLectureGarant } from '@/lib/ocr/extraction-revenus'
+import { estNatureLisible } from '@/lib/ocr/revenus'
 
 import { BoutonRetrait } from '@/components/forms/BoutonRetrait'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
@@ -278,6 +280,10 @@ export default async function PageGarant({
             version={Number(engagement?.version_conditions ?? 0)}
             dossierId={dossierId}
             actuel={engagementAffiche}
+            lectureIa={
+              configurationLectureGarant() !== null &&
+              deposees.some((piece) => estNatureLisible(piece.type))
+            }
           />
         ) : (
           <p className="text-[15px] font-medium">

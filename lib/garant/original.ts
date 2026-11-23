@@ -12,6 +12,7 @@ export async function lireOriginalGarant(
   capacite: Capacite,
   id: string,
   tailleMax = 20 * 1024 * 1024,
+  journaliser = true,
 ) {
   if (capacite.partie !== 'garant' || !estUuidCanonique(id)) return null
   const { data: p, error } = await db
@@ -37,7 +38,9 @@ export async function lireOriginalGarant(
     !['application/pdf', 'image/png', 'image/jpeg'].includes(p.type_reel)
   )
     return null
-  if (!(await inscrireAuJournal(db, capacite.dossierId, 'piece_ouverte', id))) return null
+  // La lecture IA inscrit sa propre ligne par sa reservation, avant d'arriver ici.
+  if (journaliser && !(await inscrireAuJournal(db, capacite.dossierId, 'piece_ouverte', id)))
+    return null
   const cle = await lireCleScellee(db, capacite.dossierId)
   if (!cle) return null
   const objet = await db.storage.from(SEAU).download(p.chemin)
