@@ -8,10 +8,12 @@ import { revalidatePath } from 'next/cache'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
-import { analyserEngagement } from '@/lib/garant/validation'
+import { engagement as texteEngagementFr } from '@/lib/content/garant'
+import { analyserEngagement, plafondSousLeLoyer } from '@/lib/garant/validation'
 import { versionConditions } from '@/lib/garant/version-conditions'
 import { conditionsEngagement as conditionsEngagementFr } from '@/lib/content/conditions-engagement'
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
+import { engagement as texteEngagementEn } from '@/lib/content/en/garant'
 import { conditionsEngagement as conditionsEngagementEn } from '@/lib/content/en/conditions-engagement'
 import { choisir } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
@@ -32,7 +34,9 @@ import { langueEspace } from '@/lib/langue-espace'
  */
 
 export type EtatEngagement =
-  { statut: 'inactif' } | { statut: 'enregistre' } | { statut: 'erreur'; message: string }
+  | { statut: 'inactif' }
+  | { statut: 'enregistre'; avertissement?: string }
+  | { statut: 'erreur'; message: string }
 
 export async function declarerMonEngagement(
   _precedent: EtatEngagement,
@@ -80,6 +84,7 @@ export async function declarerMonEngagement(
     revenu_net_mensuel_cents: analyse.engagement.revenuNetMensuelCents,
   }
 
+  let avertissement: string | undefined
   try {
     const { data: existant, error: erreurLecture } = await supabase
       .from('engagements')
@@ -91,6 +96,16 @@ export async function declarerMonEngagement(
     if (Number(existant?.version_conditions ?? 0) !== version) {
       return { statut: 'erreur', message: conditionsEngagement.perimees }
     }
+
+    const { data: ligneLoyer } = await supabase
+      .from('dossiers')
+      .select('loyer_cents')
+      .eq('id', dossierId)
+      .maybeSingle()
+    const loyerCents = ligneLoyer?.loyer_cents == null ? null : Number(ligneLoyer.loyer_cents)
+    avertissement = plafondSousLeLoyer(analyse.engagement.montantMaxCents, loyerCents)
+      ? choisir(langue, texteEngagementFr, texteEngagementEn).avertissementLoyer
+      : undefined
 
     const avant = await statutActuel(supabase, dossierId)
 
@@ -124,5 +139,5 @@ export async function declarerMonEngagement(
   }
 
   revalidatePath('/garant')
-  return { statut: 'enregistre' }
+  return avertissement ? { statut: 'enregistre', avertissement } : { statut: 'enregistre' }
 }
