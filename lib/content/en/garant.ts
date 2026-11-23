@@ -206,3 +206,29 @@ export const resteAFaire: Textes<typeof Fr.resteAFaire> = {
       : `${libelle}: to upload.`,
   mention: 'Record your statement, written by you.',
 }
+
+export const lectureRevenus: Textes<typeof Fr.lectureRevenus> = {
+  titre: 'Suggest my income from my documents',
+  explication:
+    'An AI reads the payslips and pension statement you have already uploaded, then suggests a net monthly income. Nothing is saved until you click Save.',
+  accord:
+    'I agree that these files are sent to OpenRouter and its AI provider, without retention, to read only the month and the net amount paid.',
+  lancer: 'Read my documents',
+  attente: 'Reading, this can take half a minute…',
+  erreur: 'The reading did not succeed. You can still enter your income yourself.',
+  quota: 'Too many readings in a short time. Try again in about ten minutes.',
+  aucun: 'No net amount paid could be read. Please enter your income yourself.',
+  proposition: (montant: string) => `Suggested income: €${montant} per month.`,
+  salaire: (montant: string, mois: string) => `Average net salary paid (${mois}): €${montant}.`,
+  pension: (montant: string, mois: string) => `Net pension paid (${mois}): €${montant}.`,
+  variable:
+    'Your salary varies by more than 20% from one month to the next: check that this average reflects your situation.',
+  contradictoires: (mois: string) =>
+    `Two different amounts were read for ${mois}: this month is not counted.`,
+  illisibles: (n: number) =>
+    n > 1 ? `${n} files could not be read.` : 'One file could not be read.',
+  utiliser: 'Copy this amount into the field',
+  reporte: 'Amount copied. Check it, then save.',
+  verifier:
+    'Compare this amount with your documents: the AI can make mistakes, and the agency will compare your declaration with your documents.',
+}

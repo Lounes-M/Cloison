@@ -271,6 +271,7 @@ export const actions: Record<string, string> = {
   piece_retiree: 'a retiré une pièce',
   piece_ouverte: 'a ouvert une pièce',
   ocr_demande: 'a demandé une transcription par IA',
+  lecture_ia_garant: 'a demandé une lecture IA de ses revenus',
   complement_demande: 'a demandé le remplacement d’une pièce',
   complement_fourni: 'a fourni une pièce de remplacement',
   complement_valide: 'a validé une pièce de remplacement',

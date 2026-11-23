@@ -154,6 +154,8 @@ export const confidentialite = {
         'Electronic signature of the guarantee deed is entrusted to Youtrust, an electronic signature provider hosted in France, which also receives the guarantor’s phone number, needed for signing. The signed deed is kept for the period stated at the time of signing, separate from that of the supporting documents.',
     },
     ocr: 'At the explicit request of an agency, a document other than the identity document may be read by a text recognition service (OpenRouter) to make it easier to review. This reading makes no decision and is never triggered automatically.',
+    lectureGarant:
+      'At your explicit request, an AI reached through OpenRouter may read your payslips and pension statement to suggest a net monthly income. Only the month and the net amount paid are extracted, with no retention by the provider. The suggestion is saved only if you copy it and save it yourself. The identity document is never sent.',
   },
   droits: {
     titre: 'Your rights',

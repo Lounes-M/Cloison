@@ -234,3 +234,31 @@ export const resteAFaire = {
       : `${libelle} : à déposer.`,
   mention: 'Apposez votre mention, écrite par vous.',
 } as const
+
+/** Proposition du revenu par lecture IA : une aide, jamais une saisie a sa place. */
+export const lectureRevenus = {
+  titre: 'Proposer mon revenu à partir de mes justificatifs',
+  explication:
+    'Une IA lit les bulletins de paie et l’attestation de pension que vous avez déjà déposés, puis propose un revenu net mensuel. Rien n’est enregistré tant que vous ne cliquez pas sur Enregistrer.',
+  accord:
+    'J’accepte que ces fichiers soient envoyés à OpenRouter et à son fournisseur d’IA, sans conservation, pour y lire seulement le mois et le montant net payé.',
+  lancer: 'Lire mes justificatifs',
+  attente: 'Lecture en cours, cela peut prendre une demi-minute…',
+  erreur: 'La lecture n’a pas abouti. Vous pouvez toujours saisir votre revenu vous-même.',
+  quota: 'Trop de lectures en peu de temps. Réessayez dans une dizaine de minutes.',
+  aucun: 'Aucun montant net payé n’a pu être lu. Saisissez votre revenu vous-même.',
+  proposition: (montant: string) => `Revenu proposé : ${montant} € par mois.`,
+  salaire: (montant: string, mois: string) =>
+    `Moyenne des salaires nets payés (${mois}) : ${montant} €.`,
+  pension: (montant: string, mois: string) => `Pension nette versée (${mois}) : ${montant} €.`,
+  variable:
+    'Vos salaires varient de plus de 20 % d’un mois à l’autre : vérifiez que cette moyenne vous correspond.',
+  contradictoires: (mois: string) =>
+    `Deux montants différents ont été lus pour ${mois} : ce mois n’est pas compté.`,
+  illisibles: (n: number) =>
+    n > 1 ? `${n} fichiers n’ont pas pu être lus.` : 'Un fichier n’a pas pu être lu.',
+  utiliser: 'Reporter ce montant dans le champ',
+  reporte: 'Montant reporté. Vérifiez-le, puis enregistrez.',
+  verifier:
+    'Comparez ce montant à vos justificatifs : l’IA peut se tromper, et l’agence comparera votre déclaration à vos pièces.',
+}

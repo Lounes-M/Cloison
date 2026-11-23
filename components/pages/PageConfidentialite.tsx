@@ -39,6 +39,7 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
                     ? [textes.facultatifs.signature[facultatifs.signature]]
                     : []),
                   ...(facultatifs.ocr ? [textes.facultatifs.ocr] : []),
+                  ...(facultatifs.lectureGarant ? [textes.facultatifs.lectureGarant] : []),
                 ]
               : []),
           ]}

@@ -55,6 +55,7 @@ export type Textes<T> = T extends string
 /** Les pages qui existent dans les deux langues. */
 const TRADUITES = [
   '/agences',
+  '/intelligence-artificielle',
   '/questions',
   '/demarrer',
   '/connexion',
