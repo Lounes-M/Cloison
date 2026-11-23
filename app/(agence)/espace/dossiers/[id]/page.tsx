@@ -3,6 +3,8 @@ import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
 import { acte as texteActeFr } from '@/lib/content/acte'
+import { synthese as texteSyntheseFr } from '@/lib/content/synthese'
+import { synthese as texteSyntheseEn } from '@/lib/content/en/synthese'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -18,6 +20,8 @@ import { configurationOcr } from '@/lib/ocr/openrouter'
 import { Complements } from '@/components/dossiers/Complements'
 import { type Complement } from '@/lib/content/complements'
 import Link from 'next/link'
+import { colocation as texteColocationFr } from '@/lib/content/colocation'
+import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
 import { notFound, redirect } from 'next/navigation'
 
 import { BoutonsDecision } from '@/components/forms/BoutonsDecision'
@@ -138,6 +142,7 @@ export default async function PageDossier({
   const texteLoyer = choisir(langue, texteLoyerFr, texteLoyerEn)
   const texteLogements = choisir(langue, texteLogementsFr, texteLogementsEn)
   const texteGroupe = choisir(langue, texteGroupeFr, texteGroupeEn)
+  const texteColocation = choisir(langue, texteColocationFr, texteColocationEn)
   const documentsDeclares = choisir(langue, documentsDeclaresFr, documentsDeclaresEn)
   const texteExamen = choisir(langue, texteExamenFr, texteExamenEn)
   const profilsRessources = choisir(langue, profilsRessourcesFr, profilsRessourcesEn)
@@ -147,6 +152,7 @@ export default async function PageDossier({
   const texteJournal = choisir(langue, texteJournalFr, texteJournalEn)
   const actions = choisir(langue, actionsFr, actionsEn)
   const texteActe = choisir(langue, texteActeFr, texteActeEn)
+  const texteSynthese = choisir(langue, texteSyntheseFr, texteSyntheseEn).ecran
 
   const { id } = await params
   if (!estUuidCanonique(id)) notFound()
@@ -171,7 +177,7 @@ export default async function PageDossier({
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, locataire_nom, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, activite_rappel_le',
+        'id, reference, statut, email_locataire, locataire_nom, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, colocation_id, activite_rappel_le',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -251,12 +257,39 @@ export default async function PageDossier({
   const fmt = (n: number) => n.toLocaleString(locale(langue), { minimumFractionDigits: 2 })
 
   const lie = Array.isArray(groupes) ? groupes[0] : null
+
+  // La colocation du dossier (0092) : son etendue et le nombre de dossiers
+  // ouverts, lus avec les droits de l'agence. Une panne ne bloque pas la fiche.
+  let coloc: { id: string; etendue: string; colocataires: number } | null = null
+  if (d.colocation_id) {
+    const [{ data: laColoc }, { count }] = await Promise.all([
+      supabase.from('colocations').select('id, etendue').eq('id', d.colocation_id).maybeSingle(),
+      supabase
+        .from('dossiers')
+        .select('id', { count: 'exact', head: true })
+        .eq('colocation_id', d.colocation_id)
+        .in('statut', [
+          'ouvert',
+          'depot_en_cours',
+          'complet',
+          'garant_insuffisant',
+          'transmis',
+          'signe',
+        ])
+        .gt('expire_le', new Date().toISOString()),
+    ])
+    if (laColoc) {
+      coloc = { id: String(laColoc.id), etendue: String(laColoc.etendue), colocataires: count ?? 0 }
+    }
+  }
   const ratioGroupe = lie?.ratio_groupe == null ? null : Number(lie.ratio_groupe)
 
   // La base tranche (0011, 0067, 0084) ; l'ecran ne propose que ce qui peut aboutir.
   const loyerModifiable =
     !d.demonstration &&
     !d.dossier_principal &&
+    // Bail solidaire : le loyer est celui de la colocation, la base le repose.
+    coloc?.etendue !== 'loyer_entier' &&
     ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(String(d.statut))
 
   const peutPrendre = d.statut === 'complet'
@@ -459,6 +492,21 @@ export default async function PageDossier({
         </section>
       ) : null}
 
+      {coloc ? (
+        <div className="outlined bg-paper mt-4 rounded-xl p-4 text-[14px]">
+          <p className="font-semibold">{texteColocation.fiche.lien(coloc.colocataires)}</p>
+          <p className="mt-1 font-medium">
+            {texteColocation.etendues[coloc.etendue === 'loyer_entier' ? 'loyer_entier' : 'part']}
+          </p>
+          <Link
+            href={`/espace/colocations/${coloc.id}`}
+            className="text-cobalt mt-2 inline-block text-[14px] font-bold underline underline-offset-2"
+          >
+            {texteColocation.fiche.ouvrir}
+          </Link>
+        </div>
+      ) : null}
+
       {lie ? (
         <div
           className={cn(
@@ -632,6 +680,19 @@ export default async function PageDossier({
           </div>
         ) : null}
       </section>
+
+      {/* La base tranche (0090) ; l'ecran ne propose la synthese que la ou elle peut aboutir. */}
+      {['complet', 'garant_insuffisant', 'transmis', 'signe'].includes(String(d.statut)) ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{texteSynthese.titre}</h2>
+          <p className="text-muted mt-2 text-[14px] leading-relaxed font-medium">
+            {texteSynthese.aide}
+          </p>
+          <a href={`/espace/dossiers/${id}/synthese`} className="btn btn-secondaire mt-4">
+            {texteSynthese.telecharger}
+          </a>
+        </section>
+      ) : null}
 
       {d.statut === 'transmis' && !d.demonstration ? (
         <section className="panneau-espace mt-8">
