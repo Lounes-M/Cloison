@@ -13,12 +13,12 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: 'verifier (lecture seule), appliquer, ou reference (inscrire sans executer)'
+        description: 'verifier (rien n'est applique), appliquer, ou reference (inscrire sans executer)'
         type: choice
         default: verifier
         options: [verifier, appliquer, reference]
       reference:
-        description: 'Pour « reference » : derniere migration deja en place, par exemple 0084'
+        description: 'Pour « reference » : migrations deja en place, par exemple 0001-0063,0083'
         type: string
         default: ''
 permissions:
