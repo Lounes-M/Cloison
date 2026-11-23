@@ -84,6 +84,13 @@ export const espace: Textes<typeof Fr.espace> = {
   loyerSucces: 'Rent saved.',
 }
 
+export const bandeauOuvert: Textes<typeof Fr.bandeauOuvert> = {
+  loyer: 'Enter the monthly rent, below. Without it, the file stays on hold.',
+  paiement: 'Pay for your file first. You can then name your guarantor so they receive their link.',
+  garant: 'Waiting for your guarantor. Name them below so they receive their link.',
+  attente: 'Your guarantor is named. Nothing to do on your side for now.',
+}
+
 export const resteAFaire: Textes<typeof Fr.resteAFaire> = {
   titre: 'What you still need to do',
   aide: 'Each line takes you to the place on the page where you can do it.',

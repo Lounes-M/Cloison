@@ -90,7 +90,19 @@ export const espace = {
   loyerSucces: 'Loyer enregistré.',
 } as const
 
-/** L'encart du haut : tes gestes a toi, jamais ce que depose ton garant. */
+/**
+ * Le bandeau du dossier encore `ouvert`, derive des memes faits que
+ * `resteAFaireLocataire` : loyer, reglement, puis designation.
+ * Tes gestes a toi, jamais ce que depose ton garant.
+ */
+export const bandeauOuvert = {
+  loyer: 'Indique le loyer mensuel, plus bas. Sans lui, le dossier reste en attente.',
+  paiement:
+    'Règle d’abord ton dossier. Tu pourras ensuite désigner ton garant pour qu’il reçoive son lien.',
+  garant: 'En attente de ton garant. Désigne-le ci-dessous pour qu’il reçoive son lien.',
+  attente: 'Ton garant est désigné. Rien à faire de ton côté pour l’instant.',
+} as const
+
 export const resteAFaire = {
   titre: 'Ce qu’il te reste à faire',
   aide: 'Chaque ligne mène à l’endroit de la page où le faire.',
