@@ -4,7 +4,10 @@ import { notFound, redirect } from 'next/navigation'
 import { BoutonCopierLien } from '@/components/forms/BoutonCopierLien'
 import { FormulaireAttributionLogement } from '@/components/forms/FormulaireAttributionLogement'
 import { FormulaireDescriptionLogement } from '@/components/forms/FormulaireDescriptionLogement'
+import { FormulaireColocation } from '@/components/forms/FormulaireColocation'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
+import { colocation as tColocFr } from '@/lib/content/colocation'
+import { colocation as tColocEn } from '@/lib/content/en/colocation'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { reglerLaCandidature } from '@/lib/agences/action-logements'
 import { contexteAgence } from '@/lib/agences/contexte'
@@ -49,6 +52,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
   const euros = choisir(langue, eurosFr, eurosEn)
   const statuts = choisir(langue, statutsFr, statutsEn)
   const tc = choisir(langue, tcFr, tcEn)
+  const tColoc = choisir(langue, tColocFr, tColocEn)
 
   const { id } = await params
   if (!estUuidCanonique(id)) notFound()
@@ -263,6 +267,18 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
           <h2 className="text-xl font-bold">{t.candidats.ouvrir}</h2>
           <p className="text-muted mt-2 mb-5 text-[14px] font-medium">{t.candidats.ouvrirAide}</p>
           <FormulaireNouveauDossier
+            verifiee={c.agence.statut === 'verifiee'}
+            logementId={id}
+            loyerParDefaut={loyer}
+          />
+        </section>
+      ) : null}
+
+      {!logement.archive ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{tColoc.formulaire.titre}</h2>
+          <p className="text-muted mt-2 mb-5 text-[14px] font-medium">{tColoc.formulaire.aide}</p>
+          <FormulaireColocation
             verifiee={c.agence.statut === 'verifiee'}
             logementId={id}
             loyerParDefaut={loyer}

@@ -1,3 +1,8 @@
+import { maColocation } from '@/lib/acces/ma-colocation'
+import { colocation as texteColocationFr } from '@/lib/content/colocation'
+import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
+import { euros as eurosFr } from '@/lib/content/tarifs'
+import { euros as eurosEn } from '@/lib/content/en/tarifs'
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { frise as friseFr } from '@/lib/content/frise'
 import { etapesGarant } from '@/lib/dossiers/frise'
@@ -110,6 +115,8 @@ export default async function PageGarant({
   const texteSignature = choisir(langue, texteSignatureFr, texteSignatureEn)
   const depot = choisir(langue, depotFr, depotEn)
   const texteAgence = choisir(langue, texteAgenceFr, texteAgenceEn)
+  const texteColocation = choisir(langue, texteColocationFr, texteColocationEn)
+  const euros = choisir(langue, eurosFr, eurosEn)
   const frise = choisir(langue, friseFr, friseEn)
   const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
   const informationCollecte = choisir(langue, informationCollecteFr, informationCollecteEn)
@@ -171,6 +178,7 @@ export default async function PageGarant({
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
   const suivi = await agenceDuDossier(supabase)
+  const coloc = suivi ? await maColocation(supabase) : null
 
   // La preparation reste possible pendant le depot, des qu'un plafond existe.
   // Apres transmission les conditions et la mention sont figees par la base.
@@ -233,6 +241,13 @@ export default async function PageGarant({
       {suivi ? (
         <p className="mt-2 text-[14px] leading-relaxed font-semibold">
           {texteAgence.garant(suivi)}
+        </p>
+      ) : null}
+      {coloc ? (
+        <p className="mt-2 text-[14px] leading-relaxed font-medium">
+          {(coloc.etendue === 'loyer_entier'
+            ? texteColocation.garant.loyerEntier
+            : texteColocation.garant.part)(coloc.colocataires, euros(coloc.loyerTotalCents))}
         </p>
       ) : null}
 

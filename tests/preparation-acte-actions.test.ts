@@ -167,7 +167,7 @@ test('le modele Cloison est redige depuis le dossier, reserve puis archive', asy
   expect(etat.id).toBeDefined()
   expect(mocks.reserver).toHaveBeenCalledWith(
     'preparer_acte_signature',
-    expect.objectContaining({ le_modele: 'cloison-cautionnement-2026-10' }),
+    expect.objectContaining({ le_modele: 'cloison-cautionnement-2026-11' }),
   )
   const pdf = mocks.archiver.mock.calls[0]![3] as Buffer
   expect(pdf.subarray(0, 5).toString()).toBe('%PDF-')
