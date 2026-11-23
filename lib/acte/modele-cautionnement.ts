@@ -20,7 +20,7 @@
 import { z } from 'zod'
 import { nombreEnLettres, verifierMention } from '@/lib/garant/mention'
 
-export const MODELE_CAUTIONNEMENT = 'cloison-cautionnement-2026-10'
+export const MODELE_CAUTIONNEMENT = 'cloison-cautionnement-2026-11'
 
 const texte = (min: number, max: number) => z.string().trim().min(min).max(max)
 const jour = z.iso.date()
@@ -36,7 +36,18 @@ export const donneesActe = z.strictObject({
     adresse: texte(5, 400),
   }),
   locataire: texte(2, 240),
-  coCautions: z.array(texte(2, 240)).max(3).default([]),
+  // Jusqu'a sept autres colocataires, chacun avec deux garants au plus, et le
+  // second garant du colocataire lui-meme.
+  coCautions: z.array(texte(2, 240)).max(15).default([]),
+  // Bail de colocation (ADR 0020) : l'acte nomme alors le colocataire garanti,
+  // comme l'exige l'article 8-1 de la loi du 6 juillet 1989.
+  colocation: z
+    .strictObject({
+      colocataires: z.number().int().min(2).max(8),
+      etendue: z.enum(['part', 'loyer_entier']),
+    })
+    .nullable()
+    .default(null),
   bailleur: z.strictObject({ nom: texte(2, 240), adresse: texte(5, 400) }),
   mandataire: texte(2, 240).nullable().default(null),
   logement: texte(5, 400),
@@ -162,7 +173,11 @@ export function redigerActe(entree: DonneesActe): ActeRedige {
       libelle: 'Caution',
       valeur: `${femme ? 'Madame' : 'Monsieur'} ${identite}, ${ne} le ${dateLongue(c.naissanceLe)} à ${c.naissanceLieu}, ${c.adresse}`,
     },
-    { type: 'champ', libelle: 'Locataire', valeur: d.locataire },
+    {
+      type: 'champ',
+      libelle: d.colocation ? 'Colocataire garanti' : 'Locataire',
+      valeur: d.locataire,
+    },
     { type: 'champ', libelle: 'Bailleur', valeur: `${d.bailleur.nom}, ${d.bailleur.adresse}` },
     ...(d.mandataire
       ? [{ type: 'champ' as const, libelle: 'Mandataire du bailleur', valeur: d.mandataire }]
@@ -177,6 +192,21 @@ export function redigerActe(entree: DonneesActe): ActeRedige {
       type: 'paragraphe',
       texte: `Je ${soussigne} ${identite}, ${ne} le ${dateLongue(c.naissanceLe)} à ${c.naissanceLieu}, résidant à l’adresse suivante : ${c.adresse}, déclare me porter caution ${nature} de ${d.locataire}, pour le bail consenti par ${d.bailleur.nom}, demeurant ${d.bailleur.adresse}, portant sur le logement situé ${d.logement}.`,
     },
+    ...(d.colocation
+      ? [
+          {
+            type: 'paragraphe' as const,
+            texte: `Le bail est une colocation de ${nombreEnLettres(d.colocation.colocataires)} colocataires. Conformément à l’article 8-1 de la loi du 6 juillet 1989, il est précisé que le colocataire pour lequel je me porte caution est ${d.locataire} : l’extinction de la solidarité de ce colocataire met fin à mon engagement.`,
+          },
+          {
+            type: 'paragraphe' as const,
+            texte:
+              d.colocation.etendue === 'part'
+                ? `Mon engagement ne porte que sur les sommes dues par ${d.locataire} au titre de sa part du loyer et des charges, et non sur celles dues par les autres colocataires. Le loyer indiqué ci-dessous est celui du bail entier.`
+                : `Le bail comporte une clause de solidarité entre les colocataires : mon engagement porte sur l’ensemble des sommes dont ${d.locataire} est tenu à ce titre, y compris la part des autres colocataires, dans la limite du montant maximum indiqué ci-dessous.`,
+          },
+        ]
+      : []),
     {
       type: 'paragraphe',
       texte: `J’ai pris connaissance du montant du loyer de ${eurosEnLettres(l.horsChargesCents)}, soit ${euros(l.horsChargesCents)}, hors charges, payable par ${periode}${
@@ -234,6 +264,25 @@ export function redigerActe(entree: DonneesActe): ActeRedige {
       texte:
         'Si la caution est privée des bénéfices de discussion ou de division, elle reconnaît dans cette mention ne pouvoir exiger du créancier qu’il poursuive d’abord le débiteur ou qu’il divise ses poursuites entre les cautions. À défaut, elle conserve le droit de se prévaloir de ces bénéfices. »',
     },
+    ...(d.colocation
+      ? [
+          {
+            type: 'paragraphe' as const,
+            texte:
+              'Je reconnais enfin avoir pris connaissance du VI de l’article 8-1 de la loi du 6 juillet 1989, selon lequel :',
+          },
+          {
+            type: 'citation' as const,
+            texte:
+              '« La solidarité d’un des colocataires et celle de la personne qui s’est portée caution pour lui prennent fin à la date d’effet du congé régulièrement délivré et lorsqu’un nouveau colocataire figure au bail. À défaut, elles s’éteignent au plus tard à l’expiration d’un délai de six mois après la date d’effet du congé.',
+          },
+          {
+            type: 'citation' as const,
+            texte:
+              'L’acte de cautionnement des obligations d’un ou de plusieurs colocataires résultant de la conclusion d’un contrat de bail d’une colocation identifie nécessairement, sous peine de nullité, le colocataire pour lequel l’extinction de la solidarité met fin à l’engagement de la caution. »',
+          },
+        ]
+      : []),
     {
       type: 'paragraphe',
       texte: 'Je reconnais avoir reçu un exemplaire du contrat de location.',

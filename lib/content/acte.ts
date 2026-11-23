@@ -68,6 +68,8 @@ export const acte = {
       'La mention du garant est incomplète pour ces conditions. Il doit la saisir de nouveau.',
     mention_plafond:
       'Le montant de la mention du garant ne correspond pas au plafond de l’engagement. Il doit la saisir de nouveau.',
+    colocation:
+      'Ce dossier fait partie d’une colocation : prenez d’abord les dossiers des autres colocataires, pour que l’acte dise combien ils sont.',
     dates: 'Vérifiez les dates : naissance, date de l’acte et fin de l’engagement.',
     caracteres:
       'Un texte contient un caractère que le PDF ne peut pas reproduire. Corrigez la saisie concernée.',

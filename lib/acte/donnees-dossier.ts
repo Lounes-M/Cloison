@@ -48,7 +48,8 @@ export const complementActe = z.object({
 })
 
 export type LectureModele =
-  { ok: true; donnees: DonneesActe } | { ok: false; motif: 'saisie' | 'dossier' | 'mention' }
+  | { ok: true; donnees: DonneesActe }
+  | { ok: false; motif: 'saisie' | 'dossier' | 'mention' | 'colocation' }
 
 /**
  * Les donnees de l'acte d'un dossier transmis, lues avec les droits de
@@ -70,7 +71,7 @@ export async function donneesDepuisDossier(
   const [{ data: d, error: de }, { data: e, error: ee }] = await Promise.all([
     supabase
       .from('dossiers')
-      .select('id,statut,expire_le,demonstration')
+      .select('id,statut,expire_le,demonstration,dossier_principal,colocation_id')
       .eq('id', dossier)
       .maybeSingle(),
     supabase
@@ -102,7 +103,37 @@ export async function donneesDepuisDossier(
   )
     return { ok: false, motif: 'mention' }
 
+  // La colocation du dossier, ou celle du principal pour un second garant
+  // (ADR 0020). Illisible, l'acte n'est pas redige : mieux vaut un refus qu'un
+  // acte de colocation qui ne nommerait pas le colocataire garanti.
+  let colocation: { colocataires: number; etendue: string } | null = null
+  let idColocation = d.colocation_id ? String(d.colocation_id) : null
+  if (!idColocation && d.dossier_principal) {
+    const { data: p, error } = await supabase
+      .from('dossiers')
+      .select('colocation_id')
+      .eq('id', d.dossier_principal)
+      .maybeSingle()
+    if (error) return { ok: false, motif: 'dossier' }
+    idColocation = p?.colocation_id ? String(p.colocation_id) : null
+  }
+  if (idColocation) {
+    const [{ data: c, error: ce }, { count, error: ne }] = await Promise.all([
+      supabase.from('colocations').select('etendue').eq('id', idColocation).maybeSingle(),
+      supabase
+        .from('dossiers')
+        .select('id', { count: 'exact', head: true })
+        .eq('colocation_id', idColocation)
+        .in('statut', ['transmis', 'signe']),
+    ])
+    // Une colocation dont un seul dossier est pris n'est pas encore un bail
+    // a plusieurs : l'agence prend les autres d'abord.
+    if (ce || ne || !c || (count ?? 0) < 2) return { ok: false, motif: 'colocation' }
+    colocation = { colocataires: count!, etendue: String(c.etendue) }
+  }
+
   const donnees = donneesActe.safeParse({
+    colocation,
     caution: {
       civilite: s.civilite,
       prenom: e.prenom,
