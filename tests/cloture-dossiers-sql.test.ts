@@ -114,7 +114,8 @@ test("le dossier clos disparait aussitot pour l'agence et part a la purge suivan
   expect((await db.query('select id from dossiers where id=$1', [dossier])).rows).toEqual([])
   expect(
     (await db.query("select 1 from objets_a_supprimer where chemin like $1||'/%'", [dossier])).rows,
-  ).toHaveLength(1)
+    // La fixture depose deux pieces : un bulletin et une piece d'identite.
+  ).toHaveLength(2)
 })
 
 test('une reference mal retapee ne clot rien', async () => {
