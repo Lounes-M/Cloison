@@ -27,7 +27,11 @@ export function configurationDiagnostic(valeur) {
   return { ...valeur, locale: ['localhost', '127.0.0.1', '[::1]'].includes(adresse.hostname) }
 }
 
-export async function ecrireDiagnostic(destination, diagnostic) {
+export async function ecrireDiagnostic(
+  destination,
+  diagnostic,
+  format = 'cloison-diagnostic-paiement-v1',
+) {
   // Un repertoire prive existant est obligatoire, y compris pour refuser les ACL
   // non verifiables sur les plateformes sans uid POSIX.
   const parent = await realpath(dirname(resolve(destination)))
@@ -38,7 +42,7 @@ export async function ecrireDiagnostic(destination, diagnostic) {
   const rapport =
     JSON.stringify(
       {
-        format: 'cloison-diagnostic-paiement-v1',
+        format,
         sha256: createHash('sha256').update(contenu).digest('hex'),
         // Chaine exacte pour que le hash soit reproductible sans normalisation JSON.
         contenu,

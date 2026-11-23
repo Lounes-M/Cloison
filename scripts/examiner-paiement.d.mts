@@ -4,5 +4,9 @@ export function configurationDiagnostic(valeur: unknown): {
   reference: string
   locale: boolean
 }
-export function ecrireDiagnostic(destination: string, diagnostic: unknown): Promise<void>
+export function ecrireDiagnostic(
+  destination: string,
+  diagnostic: unknown,
+  format?: string,
+): Promise<void>
 export function examinerPaiement(configuration: unknown): Promise<void>
