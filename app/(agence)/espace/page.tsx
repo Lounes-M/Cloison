@@ -7,7 +7,10 @@ import { FormulaireActivation } from '@/components/forms/FormulaireActivation'
 import { PrioritesAgence } from '@/components/dossiers/PrioritesAgence'
 import { AttributionsGroupees } from '@/components/dossiers/AttributionsGroupees'
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
+import { FormulaireColocation } from '@/components/forms/FormulaireColocation'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
+import { colocation as texteColocationFr } from '@/lib/content/colocation'
+import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
 import { ExportRegistre } from '@/components/agences/ExportRegistre'
 import { ouvrirMaDemonstration } from '@/lib/agences/action-demonstration'
@@ -111,6 +114,7 @@ export default async function PageEspace({
   const statuts = choisir(langue, statutsFr, statutsEn)
   const interfaceEspace = choisir(langue, interfaceEspaceFr, interfaceEspaceEn)
   const tableau = choisir(langue, tableauFr, tableauEn)
+  const texteColocation = choisir(langue, texteColocationFr, texteColocationEn)
   const activation = choisir(langue, activationFr, activationEn)
   const texteResponsables = choisir(langue, texteResponsablesFr, texteResponsablesEn)
 
@@ -736,6 +740,16 @@ export default async function PageEspace({
               {tableau.demoBouton}
             </button>
           </form>
+        </div>
+      </section>
+
+      <section id="nouvelle-colocation" className="panneau-espace mt-8">
+        <h2 className="text-xl font-bold">{texteColocation.formulaire.titre}</h2>
+        <p className="text-muted mt-2 mb-5 max-w-[640px] text-[14px] font-medium">
+          {texteColocation.formulaire.aide}
+        </p>
+        <div className="max-w-[560px]">
+          <FormulaireColocation verifiee={verifiee} />
         </div>
       </section>
 
