@@ -577,7 +577,7 @@ export default async function PageDossier({
                 {configurationOcr() && p.type !== 'piece_identite' ? (
                   <LectureOcr pieceId={String(p.id)} />
                 ) : null}
-                {/* Seul l'avis d'imposition porte un 2D-Doc que nous verifions (0089). */}
+                {/* Seul l'avis d'imposition porte un 2D-Doc que nous verifions (0091). */}
                 {verification2dDocActive() && p.type === 'avis_imposition' ? (
                   <VerificationAvis pieceId={String(p.id)} />
                 ) : null}
