@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { DUREE_JETON_SECONDES } from '@/lib/acces/jeton'
 import { NOM_COOKIE_CAPACITE, resoudreCapacite } from '@/lib/acces/session'
+import { NOMS_AUTRES_DOSSIERS, cookiesDesAutres, rangerLesAutres } from '@/lib/acces/trousseau'
 import { optionsCookieLangue } from '@/lib/langue-espace'
 import { langueDossier } from '@/lib/langue-preferee'
 
@@ -46,6 +47,16 @@ export async function GET(
     path: '/',
     maxAge: DUREE_JETON_SECONDES,
   })
+
+  // Le dossier deja ouvert dans ce navigateur n'est pas perdu : son jeton
+  // passe dans le trousseau, d'ou il se rouvre sans repasser par le courriel.
+  const autres = await rangerLesAutres(
+    capacite,
+    requete.cookies.get(NOM_COOKIE_CAPACITE)?.value,
+    NOMS_AUTRES_DOSSIERS.map((nom) => requete.cookies.get(nom)?.value),
+  )
+  for (const cookie of cookiesDesAutres(autres, origine.startsWith('https://')))
+    reponse.cookies.set(cookie)
 
   // La langue que la personne a choisie, ou qu'on a choisie pour elle a
   // l'ouverture du dossier, la suit sur ce navigateur. Sans preference, le

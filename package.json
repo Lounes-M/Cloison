@@ -25,25 +25,25 @@
     "check:dependencies": "node scripts/verifier-dependances.mjs"
   },
   "dependencies": {
-    "@napi-rs/canvas": "^1.0.13",
+    "@napi-rs/canvas": "^1.1.1",
     "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.118.0",
+    "@supabase/supabase-js": "^2.119.2",
     "clsx": "^2.1.1",
-    "jose": "^6.2.14",
+    "jose": "^6.2.18",
     "next": "^16.4.6",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.4.299",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "resend": "^6.35.0",
+    "resend": "^6.39.0",
     "server-only": "^0.0.1",
     "stripe": "^23.0.1",
-    "tailwind-merge": "^3.7.0",
+    "tailwind-merge": "^3.7.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.13",
-    "@tailwindcss/postcss": "^4.3.3",
+    "@electric-sql/pglite": "^0.5.17",
+    "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -52,12 +52,12 @@
     "eslint-config-next": "^16.4.6",
     "pg": "^8.23.1",
     "playwright": "1.64.1",
-    "postcss": "^8.5.32",
-    "prettier": "^3.9.10",
+    "postcss": "^8.5.33",
+    "prettier": "^3.10.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.1"
   },
   "overrides": {
     "@next/eslint-plugin-next": {

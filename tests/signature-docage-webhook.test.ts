@@ -26,12 +26,10 @@ afterEach(() => {
 test('un appel au bon jeton reveille la lecture, sans donnee personnelle', async () => {
   const r = await POST(requete({ Id: id, GlobalStatus: 5, Email: 'PRIVE@example.test' }))
   expect(r.status).toBe(200)
-  expect(h.rpc).toHaveBeenCalledExactlyOnceWith('enregistrer_evenement_signature', {
+  expect(h.rpc).toHaveBeenCalledExactlyOnceWith('enregistrer_reveil_docage', {
     le_mode: 'sandbox',
-    evenement: expect.stringMatching(/^[0-9a-f-]{36}$/),
     la_reference: id,
     le_statut: 'done',
-    survenu: expect.any(String),
   })
   expect(JSON.stringify(h.rpc.mock.calls)).not.toContain('PRIVE')
 })

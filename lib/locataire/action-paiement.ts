@@ -4,6 +4,7 @@ import { formulaireDuDossier } from '@/lib/acces/formulaire'
 import type { Route } from 'next'
 import { redirect } from 'next/navigation'
 
+import { COLONNES_PAIEMENT, resteARegler } from '@/lib/locataire/paiement-requis'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { adresseDuSite } from '@/lib/courriels/envoi'
 import { versionConditions } from '@/lib/content/juridique'
@@ -29,14 +30,14 @@ export async function payerMonDossier(donnees: FormData): Promise<void> {
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { data: dossier } = await supabase
     .from('dossiers')
-    .select('reference, email_locataire, paye_le, agence_id, demonstration')
+    .select(`reference, email_locataire, ${COLONNES_PAIEMENT}`)
     .eq('id', porteur.capacite.dossierId)
     .maybeSingle()
 
   if (!dossier) redirect('/lien-invalide')
 
   // Rien a regler : deja fait, ou dossier d'agence.
-  if (dossier.paye_le || dossier.agence_id || dossier.demonstration) redirect('/locataire')
+  if (!resteARegler(dossier)) redirect('/locataire')
 
   // Les deux accords se verifient ici, pas dans le navigateur : une case
   // cochee n'est qu'une valeur envoyee. La version des conditions doit etre

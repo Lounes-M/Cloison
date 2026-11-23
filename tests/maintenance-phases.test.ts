@@ -8,12 +8,14 @@ const doubles = vi.hoisted(() => ({
   purge: vi.fn(),
   liens: vi.fn(),
   rappels: vi.fn(),
+  fins: vi.fn(),
   rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
 vi.mock('@/lib/courriels/notifications', () => ({ livrerNotifications: doubles.notifications }))
 vi.mock('@/lib/courriels/livraison-liens', () => ({ livrerLiens: doubles.liens }))
 vi.mock('@/lib/courriels/rappels', () => ({ preparerRappels: doubles.rappels }))
+vi.mock('@/lib/courriels/fin-dossier', () => ({ annoncerFinsDeDossier: doubles.fins }))
 vi.mock('@/lib/courriels/file', () => ({ distribuerCourriels: doubles.courriels }))
 vi.mock('@/lib/exploitation/purge', () => ({ purgerCoffres: doubles.purge }))
 const requete = () =>
@@ -31,6 +33,7 @@ beforeEach(() => {
   doubles.purge.mockResolvedValue({ traites: 3, echecs: 0 })
   doubles.liens.mockResolvedValue({ echecs: 0 })
   doubles.rappels.mockResolvedValue({ echecs: 0 })
+  doubles.fins.mockResolvedValue({ echecs: 0 })
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -193,3 +196,11 @@ test.each(['refus', 'connexion', 'phase', 'succes'])(
     expect(r.status).toBe(cas === 'refus' ? 401 : cas === 'succes' ? 200 : 503)
   },
 )
+
+test('une panne des annonces de fin de dossier se voit sans arreter les courriels', async () => {
+  doubles.fins.mockRejectedValue(new Error('panne'))
+  const resultat = await GET(requete())
+  expect(resultat.status).toBe(503)
+  expect((await resultat.json()).notifications.echecs).toBe(1)
+  expect(doubles.courriels).toHaveBeenCalledOnce()
+})

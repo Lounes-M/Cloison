@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { clientServeur } from '@/lib/acces/serveur'
 import { livrerNotifications } from '@/lib/courriels/notifications'
 import { preparerRappels } from '@/lib/courriels/rappels'
+import { annoncerFinsDeDossier } from '@/lib/courriels/fin-dossier'
 import { livrerLiens } from '@/lib/courriels/livraison-liens'
 import { distribuerCourriels } from '@/lib/courriels/file'
 import { purgerCoffres } from '@/lib/exploitation/purge'
@@ -58,13 +59,23 @@ export async function GET(request: Request) {
     console.error('[maintenance] notifications indisponibles')
   }
   notifications.echecs += echecsLiens
+  // Les rappels et les annonces de fin de dossier partagent un budget : la
+  // somme des budgets de la route doit rester sous sa duree maximale.
+  const budgetRappels = AbortSignal.timeout(6_000)
   try {
-    const budget = AbortSignal.timeout(6_000)
     notifications.echecs += compteur(
-      (await preparerRappels(await clientServeur(budget), budget)).echecs,
+      (await preparerRappels(await clientServeur(budgetRappels), budgetRappels)).echecs,
     )
   } catch {
     console.error('[maintenance] rappels indisponibles')
+    notifications.echecs++
+  }
+  try {
+    notifications.echecs += compteur(
+      (await annoncerFinsDeDossier(await clientServeur(budgetRappels), budgetRappels)).echecs,
+    )
+  } catch {
+    console.error('[maintenance] annonces de fin de dossier indisponibles')
     notifications.echecs++
   }
   const courriels = await executerLot('courriels', async () => {

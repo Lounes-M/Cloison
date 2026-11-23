@@ -2,8 +2,9 @@ import { cookies } from 'next/headers'
 import { connection } from 'next/server'
 
 import { CadreEspace } from '@/components/layout/CadreEspace'
-import { quitterMonDossier } from '@/lib/acces/action-porteur'
+import { ouvrirAutreDossier, quitterMonDossier } from '@/lib/acces/action-porteur'
 import { NOM_COOKIE_CAPACITE } from '@/lib/acces/session'
+import { autresDossiers } from '@/lib/acces/trousseau'
 import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteur'
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
 import { choisir } from '@/lib/i18n'
@@ -28,17 +29,36 @@ export default async function LayoutPorteur({ children }: { children: React.Reac
   // La presence du cookie ne sert qu'a afficher la sortie : sans dossier
   // ouvert (lien refuse, remise de donnees), il n'y a rien a quitter. Les
   // pages verifient toujours le jeton elles-memes.
-  const dossierOuvert = Boolean((await cookies()).get(NOM_COOKIE_CAPACITE)?.value)
+  const magasin = await cookies()
+  const dossierOuvert = Boolean(magasin.get(NOM_COOKIE_CAPACITE)?.value)
+
+  // Les autres dossiers ouverts dans ce navigateur (une personne garante de
+  // deux dossiers, ou locataire de l'un et garante de l'autre). Le cadre ne
+  // montre que leur role ; rouvrir l'un d'eux reverifie son jeton.
+  const autres = dossierOuvert ? await autresDossiers((nom) => magasin.get(nom)?.value) : []
 
   return (
     <CadreEspace
       sortie={
         dossierOuvert ? (
-          <form action={quitterMonDossier}>
-            <button type="submit" className="lien-espace">
-              {sessionPorteur.quitter}
-            </button>
-          </form>
+          <>
+            {autres.map((autre, rang) => (
+              <form action={ouvrirAutreDossier} key={autre.place}>
+                <input type="hidden" name="place" value={autre.place} />
+                <button type="submit" className="lien-espace">
+                  {sessionPorteur.autre[autre.partie]}
+                  {autres.filter((a) => a.partie === autre.partie).length > 1
+                    ? ` (${autres.slice(0, rang + 1).filter((a) => a.partie === autre.partie).length})`
+                    : ''}
+                </button>
+              </form>
+            ))}
+            <form action={quitterMonDossier}>
+              <button type="submit" className="lien-espace">
+                {sessionPorteur.quitter}
+              </button>
+            </form>
+          </>
         ) : null
       }
     >

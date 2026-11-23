@@ -10,7 +10,7 @@ export const continuite: Textes<typeof Fr> = {
     'If these details match a file that is still active, a new link will be sent to its address.',
   agence: 'Send to my agency',
   domaine: 'Your agency’s email domain',
-  aide: 'Ask your agency for its exact work domain. It must be verified on Cloison.',
+  aide: 'Ask your agency for its exact work domain. It must be verified on Cloison. If it gave you an application link, use that instead: your file is then free. If you attach it yourself, you pay for your file before inviting your guarantor.',
   consentement:
     'I authorise this agency to review the information and documents of the file. This link to the agency is permanent.',
   transmettre: 'Link my file',

@@ -43,6 +43,7 @@ import {
 import { mentionTva as mentionTvaEn } from '@/lib/content/en/juridique'
 import { paiementLocataire as paiementLocataireEn, euros as eurosEn } from '@/lib/content/en/tarifs'
 import { choisir, lien, locale } from '@/lib/i18n'
+import { resteARegler } from '@/lib/locataire/paiement-requis'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -91,7 +92,7 @@ export default async function PageLocataire({
   const { data: dossier, error: erreurDossier } = await supabase
     .from('dossiers')
     .select(
-      'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration, loyer_verrouille, garant_verrouille',
+      'reference, statut, email_garant, expire_le, loyer_cents, paye_le, agence_id, demonstration, rattache_par_locataire, loyer_verrouille, garant_verrouille',
     )
     .eq('id', porteur.capacite.dossierId)
     .maybeSingle()
@@ -127,8 +128,8 @@ export default async function PageLocataire({
   }
 
   // Ce que le locataire achete, c'est le lien de son garant. Un dossier ouvert
-  // par une agence, ou une demonstration, n'attend rien de lui.
-  const aRegler = !dossier.paye_le && !dossier.agence_id && !dossier.demonstration
+  // a l'invitation d'une agence, ou une demonstration, n'attend rien de lui.
+  const aRegler = resteARegler(dossier)
   let prixDossier: number = tarifs.locataireCents
   let versionTarif: string = tarifs.versionLocataire
   if (aRegler) {
