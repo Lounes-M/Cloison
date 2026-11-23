@@ -25,7 +25,7 @@ export function PageMentionsLegales({ langue = 'fr' }: { langue?: Langue }) {
   const facultatifs = new Set(['capital', 'rcs', 'tva', 'telephone'])
 
   return (
-    <PageJuridique langue={langue} titre={textes.titre} incomplet={e.manquants.length > 0}>
+    <PageJuridique langue={langue} titre={textes.titre} incomplet={false}>
       <SectionJuridique titre={textes.editeur}>
         <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[max-content_1fr]">
           {lignes
@@ -47,20 +47,7 @@ export function PageMentionsLegales({ langue = 'fr' }: { langue?: Langue }) {
         </dl>
       </SectionJuridique>
 
-      <SectionJuridique titre={textes.hebergement}>
-        <ul className="space-y-4">
-          {textes.hebergeurs.map((h) => (
-            <li key={h.nom}>
-              <p className="font-semibold">{h.nom}</p>
-              <p>{h.role}</p>
-              {h.adresse ? <p>{h.adresse}</p> : null}
-              <a href={h.site} className="underline underline-offset-4" rel="noopener">
-                {h.site.replace('https://', '')}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </SectionJuridique>
+      <SectionJuridique titre={textes.hebergement} paragraphes={[...textes.hebergementTexte]} />
 
       <SectionJuridique titre={textes.donnees} paragraphes={[textes.donneesTexte]} />
 

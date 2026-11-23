@@ -32,11 +32,12 @@ export const juridique = {
  *
  * Cloison est une marque exploitee par LM Services : c'est cette societe qui
  * edite le site et encaisse, et c'est elle que les pages juridiques nomment.
- * Ces valeurs servent de repli ; chaque variable `EDITEUR_*` posee les
- * remplace. La TVA n'a pas de repli : elle depend du regime reel de la
- * societe, et se declare par `EDITEUR_TVA`.
+ * Ces valeurs sont ecrites ici, et traduites dans `en/juridique.ts`, plutot
+ * que lues dans des variables : elles suivent ainsi la langue de la page. La
+ * TVA n'y figure pas : elle depend du regime reel de la societe, et se declare
+ * par `EDITEUR_TVA`.
  */
-export const editeurEnProjet = {
+export const identiteEditeur = {
   denomination: 'LM Services',
   forme: 'SASU, société par actions simplifiée unipersonnelle',
   capital: '1 000 €',
@@ -44,7 +45,7 @@ export const editeurEnProjet = {
   rcs: '994 493 435 R.C.S. Paris',
   adresse: '231 rue Saint-Honoré, 75001 Paris',
   courriel: 'contact@cloison.immo',
-  directeurPublication: 'Lounes Moumou, président',
+  directeurPublication: 'Le président de LM Services',
   sauvegardeJours: 7,
 } as const
 
@@ -56,7 +57,7 @@ export const mentionTva = {
 
 export const mentionsLegales = {
   titre: 'Mentions légales',
-  description: 'Éditeur, directeur de la publication et hébergeurs du site Cloison.',
+  description: 'Éditeur, directeur de la publication et hébergement du site Cloison.',
   editeur: 'Éditeur',
   libelles: {
     denomination: 'Dénomination',
@@ -71,19 +72,10 @@ export const mentionsLegales = {
     directeurPublication: 'Directeur de la publication',
   },
   hebergement: 'Hébergement',
-  hebergeurs: [
-    {
-      nom: 'Vercel Inc.',
-      role: 'Application et fonctions serveur, exécutées dans la région de Francfort (Union européenne).',
-      adresse: '440 N Barranca Ave #4133, Covina, CA 91723, États-Unis',
-      site: 'https://vercel.com',
-    },
-    {
-      nom: 'Supabase, Inc.',
-      role: 'Base de données, authentification et stockage des pièces chiffrées, dans un projet situé dans l’Union européenne.',
-      adresse: null,
-      site: 'https://supabase.com',
-    },
+  hebergementTexte: [
+    'Le site et ses fonctions serveur sont hébergés par un prestataire d’infrastructure cloud, dans la région de Francfort (Union européenne).',
+    'La base de données, l’authentification et les pièces chiffrées sont hébergées par un prestataire distinct, dans l’Union européenne.',
+    'Les coordonnées de ces prestataires sont communiquées sur demande à l’adresse de contact ci-dessus.',
   ],
   donnees: 'Données personnelles et cookies',
   donneesTexte:

@@ -6,10 +6,9 @@ import { choisir, type Langue } from '@/lib/i18n'
 /**
  * Le gabarit commun des pages juridiques : un titre, une date, des sections.
  *
- * `incomplet` pose l'attribut que le controle de production refuse tant que
- * la configuration ne declare pas l'editeur immatricule. Le lecteur, lui, lit
- * le projet de societe et la mention « en cours d'immatriculation » : rien
- * d'invente, rien de vide.
+ * `incomplet` pose l'attribut que le controle de production refuse : seule
+ * la page de confidentialite le porte encore, tant que la duree des
+ * sauvegardes n'est pas declaree.
  */
 export function PageJuridique({
   titre,

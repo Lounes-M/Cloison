@@ -5,8 +5,8 @@ const ORIGINE = 'https://www.cloison.immo'
 const controles = [
   { id: 'accueil', chemin: '/', titre: 'Cloison · Le coffre à trois clés' },
   { id: 'agences', chemin: '/agences', titre: 'Agences · Cloison' },
-  // L'identite de l'editeur doit etre publiee : ces pages restent rouges tant
-  // qu'une variable EDITEUR_* manque en production (lib/juridique/editeur.ts).
+  // La page de confidentialite reste rouge tant que la duree des sauvegardes
+  // n'est pas declaree en production (lib/juridique/editeur.ts).
   {
     id: 'mentions-legales',
     chemin: '/mentions-legales',
