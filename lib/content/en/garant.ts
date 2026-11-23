@@ -88,6 +88,17 @@ export const depot: Textes<typeof Fr.depot> = {
   preparation: 'Preparing the photo…',
   selection: 'File selected:',
   annulerSelection: 'Cancel the selection',
+  ajouterPage: 'Add a page',
+  retirerDernierePage: 'Remove the last page',
+  reunion: 'Combining the pages…',
+  reunies: (pages, taille) => `${pages} pages combined into a single PDF (${taille})`,
+  melange: 'To combine several files, choose photos only. A PDF is uploaded on its own.',
+  tropDePages: 'A document combines at most 12 pages. Beyond that, upload a PDF.',
+  reunionTropLourde:
+    'These combined pages are larger than 4 MB. Remove one, or upload the document as a PDF.',
+  photoIllisible: 'One of these photos cannot be read. Retake it or choose another file.',
+  reunionImpossible:
+    'This browser cannot combine your photos. Upload the document as a single PDF.',
   debit: 'Too many documents have been offered recently. Try again in fifteen minutes.',
   original: 'Download my original',
   titre: 'Your upload',
@@ -96,7 +107,8 @@ export const depot: Textes<typeof Fr.depot> = {
   discretion:
     'Your documents are encrypted by our server before they are stored, and the tenant has no access to them. They only see that the file is moving forward.',
   piecesTitre: 'Your documents',
-  formats: 'PDF, JPEG or PNG, 4 MB per file. A well-framed photo is enough.',
+  formats:
+    'PDF, JPEG or PNG, 4 MB per file. A well-framed photo is enough. Several pages? Photograph them one by one: they are combined into a single PDF.',
   ajouter: 'Add a file',
   deposer: 'Upload the selected file',
   envoi: 'Sending…',
