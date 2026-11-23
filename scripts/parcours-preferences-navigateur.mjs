@@ -3,6 +3,9 @@ import { resolve } from 'node:path'
 export async function parcourirPreferences(page, site, moteur, largeur, conflit) {
   await page.goto(`${site}/espace/notifications`)
   await page.getByRole('link', { name: 'Mes notifications', exact: true }).click()
+  // Le pointeur reste ou le dernier clic l'a laisse : s'il survole le bouton,
+  // la couleur lue est celle du survol, pas celle du repos qu'on verifie ici.
+  await page.mouse.move(0, 0)
   const couleurs = await page
     .getByRole('button', { name: 'Enregistrer mes préférences' })
     .evaluate((el) => {
