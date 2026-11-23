@@ -428,6 +428,7 @@ export async function parcourirInterface(
   await page.keyboard.press('Enter')
   assert.equal(await page.evaluate(() => document.activeElement?.id), 'contenu')
   await visiter('/questions', 'questions', false)
+  await visiter('/intelligence-artificielle', 'intelligence-artificielle', false)
   for (const juridique of ['mentions-legales', 'confidentialite', 'conditions'])
     await visiter('/' + juridique, juridique, false)
   // La version anglaise passe la meme revue que la francaise, page par page.
@@ -435,6 +436,7 @@ export async function parcourirInterface(
     '',
     '/agences',
     '/questions',
+    '/intelligence-artificielle',
     '/demarrer',
     '/connexion',
     '/mentions-legales',
