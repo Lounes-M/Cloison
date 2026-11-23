@@ -84,8 +84,10 @@ test.each([
 test('les mentions affichent l editeur et l hebergeur de l application', () => {
   poser(COMPLET)
   const html = rendre(PageMentionsLegales)
-  for (const attendu of ['Cloison Fixture', '552 100 554', 'Directeur Fixture', 'Vercel Inc.'])
+  for (const attendu of ['Cloison Fixture', '552 100 554', 'Directeur Fixture', 'Francfort'])
     expect(html).toContain(attendu)
+  // L'hebergement est decrit sans nommer les prestataires.
+  for (const absent of ['Vercel', 'Supabase']) expect(html).not.toContain(absent)
   expect(html).toContain('href="mailto:contact@example.fr"')
 })
 

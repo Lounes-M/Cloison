@@ -31,7 +31,7 @@ export const editeurEnProjet = {
   rcs: '994 493 435 R.C.S. Paris',
   adresse: '231 rue Saint-Honoré, 75001 Paris, France',
   courriel: 'contact@cloison.immo',
-  directeurPublication: 'Lounes Moumou, chair (président)',
+  directeurPublication: 'The chair (président) of LM Services',
   sauvegardeJours: 7,
 } as const
 
@@ -42,7 +42,7 @@ export const mentionTva = {
 
 export const mentionsLegales = {
   titre: 'Legal notice',
-  description: 'Publisher, publication director and hosting providers of the Cloison website.',
+  description: 'Publisher, publication director and hosting of the Cloison website.',
   editeur: 'Publisher',
   libelles: {
     denomination: 'Company name',
@@ -57,13 +57,10 @@ export const mentionsLegales = {
     directeurPublication: 'Publication director',
   },
   hebergement: 'Hosting',
-  hebergeurs: [
-    {
-      nom: 'Vercel Inc.',
-      role: 'Application and server functions, run in the Frankfurt region (European Union).',
-      adresse: '440 N Barranca Ave #4133, Covina, CA 91723, United States',
-      site: 'https://vercel.com',
-    },
+  hebergementTexte: [
+    'The site and its server functions are hosted by a cloud infrastructure provider, in the Frankfurt region (European Union).',
+    'The database, authentication and the encrypted documents are hosted by a separate provider, in the European Union.',
+    'The contact details of these providers are available on request at the contact address above.',
   ],
   donnees: 'Personal data and cookies',
   donneesTexte:
