@@ -4,7 +4,7 @@ export async function parcourirRappels(page, site, moteur, largeur, simulation) 
   await page.goto(`${site}/espace/notifications`)
   await page.getByRole('link', { name: 'Relances et échéances', exact: true }).click()
   const relance = page.getByRole('combobox', {
-    name: 'Relancer le garant après une période sans modification',
+    name: 'Relancer le locataire et le garant après une période sans modification',
   })
   const echeance = page.getByRole('combobox', {
     name: 'Prévenir les collaborateurs avant l’échéance du dossier',
