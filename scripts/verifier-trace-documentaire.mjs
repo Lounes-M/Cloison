@@ -13,6 +13,7 @@ document.addPage([200, 200])
 const contenu = Buffer.from(await document.save()).toString('base64')
 for (const route of [
   '(agence)/espace/pieces/[id]/route.js.nft.json',
+  '(agence)/espace/dossiers/[id]/synthese/route.js.nft.json',
   '(porteur)/garant/page.js.nft.json',
   '(agence)/espace/dossiers/[id]/page.js.nft.json',
   '(agence)/espace/dossiers/[id]/signature/page.js.nft.json',
