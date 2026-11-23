@@ -27,6 +27,7 @@ export const journal: Textes<typeof Fr> = {
     dossier_refuse: 'File declined',
     ocr_demande: 'AI transcription of a document requested',
     lecture_ia_garant: 'AI reading of an income document requested',
+    synthese_bailleur: 'Summary for the landlord downloaded',
   },
   acteurs: { agence: 'the agency', garant: 'the guarantor', locataire: 'the tenant' },
 }
