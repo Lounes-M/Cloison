@@ -14,29 +14,37 @@ import { choisir, lien, type Langue } from '@/lib/i18n'
  * L'ecran 404, dans la langue de la personne : celle de l'adresse demandee si
  * elle est sous `/en`, sinon celle que la personne a choisie dans son espace.
  */
-export function EcranIntrouvable({ langueChoisie }: { langueChoisie: Langue }) {
+export function EcranIntrouvable({
+  langueChoisie,
+  integre = false,
+}: {
+  langueChoisie: Langue
+  /** Déjà dans le chrome public : pas de second en-tête. */
+  integre?: boolean
+}) {
   const chemin = usePathname()
   const langue: Langue = chemin === '/en' || chemin.startsWith('/en/') ? 'en' : langueChoisie
   const erreurs = choisir(langue, erreursFr, erreursEn)
 
+  const carte = (
+    <main className="ecran-reprise">
+      <div className="carte-reprise">
+        <p className="font-display text-cobalt text-[clamp(4rem,12vw,7rem)] leading-none">404</p>
+        <h1>{erreurs.titreIntrouvable}</h1>
+        <p className="description-reprise">{erreurs.adresse}</p>
+        <div className="actions-reprise">
+          <Button href={lien(langue, '/')}>{erreurs.accueil}</Button>
+        </div>
+        <NavigationReprise langue={langue} />
+      </div>
+    </main>
+  )
+  if (integre) return carte
+
   return (
     <div className="site-public" lang={langue}>
       <SiteHeader langue={langue} />
-      <div className="sous-entete-fixe">
-        <main className="ecran-reprise">
-          <div className="carte-reprise">
-            <p className="font-display text-cobalt text-[clamp(4rem,12vw,7rem)] leading-none">
-              404
-            </p>
-            <h1>{erreurs.titreIntrouvable}</h1>
-            <p className="description-reprise">{erreurs.adresse}</p>
-            <div className="actions-reprise">
-              <Button href={lien(langue, '/')}>{erreurs.accueil}</Button>
-            </div>
-            <NavigationReprise langue={langue} />
-          </div>
-        </main>
-      </div>
+      <div className="sous-entete-fixe">{carte}</div>
       <SiteFooter langue={langue} />
     </div>
   )

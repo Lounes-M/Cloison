@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { candidature as texteCandidatureFr } from '@/lib/content/candidature'
 import { logements as texteFr } from '@/lib/content/logements'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
-import { montantEnCents } from '@/lib/garant/validation'
+import { lireLoyer, messageLoyer } from '@/lib/garant/validation'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { contexteAgence } from './contexte'
 import { candidature as texteCandidatureEn } from '@/lib/content/en/candidature'
@@ -29,11 +29,12 @@ export async function creerUnLogement(_p: EtatLogement, donnees: FormData): Prom
   const texte = choisir(langue, texteFr, texteEn)
 
   const libelle = String(donnees.get('libelle') ?? '').trim()
-  const loyer = montantEnCents(String(donnees.get('loyer') ?? ''))
+  const lu = lireLoyer(String(donnees.get('loyer') ?? ''))
   if (libelle.length === 0 || libelle.length > 120) {
     return { statut: 'erreur', message: texte.erreurs.libelle }
   }
-  if (loyer === 'invalide') return { statut: 'erreur', message: texte.erreurs.loyer }
+  if (!lu.ok) return { statut: 'erreur', message: messageLoyer(lu.motif, langue) }
+  const loyer = lu.cents
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return { statut: 'erreur', message: texte.erreurs.session }

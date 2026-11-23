@@ -13,6 +13,7 @@ export const frise: Textes<typeof Fr> = {
     etapes: {
       ouverture: 'File opened',
       garant: 'Guarantor named',
+      garantADesigner: 'Guarantor to name',
       depot: 'Your guarantor’s upload',
       decision: 'Agency’s decision',
       signature: 'Deed signed',
