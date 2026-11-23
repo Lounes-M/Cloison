@@ -1,27 +1,30 @@
-import { readdirSync, readFileSync } from 'node:fs'
 import { expect, test } from 'vitest'
 
 import { journal } from '@/lib/content/journal'
 import { actions } from '@/lib/content/espace'
+import { baseDEssai } from './base'
 
-/** Les actions admises par la derniere migration qui redefinit la contrainte du journal. */
-function actionsDuJournal(): string[] {
-  const dossier = 'supabase/migrations'
-  const derniere = readdirSync(dossier)
-    .filter((f) => f.endsWith('.sql'))
-    .sort()
-    .map((f) => readFileSync(`${dossier}/${f}`, 'utf8'))
-    .filter((sql) => sql.includes('add constraint journal_acces_action_check'))
-    .at(-1)!
-  const liste = /journal_acces_action_check check\s*\(\s*action in\s*\(([^)]*)\)/.exec(
-    derniere,
-  )![1]!
-  return [...liste.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]!)
+/**
+ * Les actions admises par la contrainte du journal, lues dans la base une fois
+ * toutes les migrations appliquees. Lire le texte de la derniere migration ne
+ * suffit plus : plusieurs ajoutent leur action a la liste en place (0091).
+ */
+async function actionsDuJournal(): Promise<string[]> {
+  const db = await baseDEssai()
+  try {
+    const { rows } = await db.query<{ definition: string }>(
+      "select pg_get_constraintdef(oid) definition from pg_constraint where conrelid='public.journal_acces'::regclass and conname='journal_acces_action_check'",
+    )
+    return [...rows[0]!.definition.matchAll(/'([a-z0-9_]+)'/g)].map((m) => m[1]!)
+  } finally {
+    await db.close()
+  }
 }
 
-test('chaque action du journal a un libelle pour l agence et pour le garant', () => {
-  const admises = actionsDuJournal()
+test('chaque action du journal a un libelle pour l agence et pour le garant', async () => {
+  const admises = await actionsDuJournal()
   expect(admises).toContain('relances_reprises')
+  expect(admises).toContain('code_2ddoc_verifie')
   for (const action of admises) {
     expect(actions[action], action).toBeTruthy()
     expect(journal.actions[action], action).toBeTruthy()
