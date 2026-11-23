@@ -141,6 +141,8 @@ export const dossier: Textes<typeof Fr.dossier> = {
   ratio: (ratio, seuil) => `${ratio} times the rent, for a threshold of ${seuil}.`,
   piecesTitre: 'Documents',
   piecesAucune: 'No document uploaded yet.',
+  piecesEnAttente:
+    'The guarantor is uploading their documents on their side. They reach you once the file is complete.',
   ouvrir: 'Open',
   ouvrirAide:
     'Every opening is recorded in the log, and the document reaches you watermarked with your name. The guarantor can see that you viewed it.',

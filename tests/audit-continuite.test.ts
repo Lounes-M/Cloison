@@ -61,6 +61,7 @@ test('le rattachement refuse une agence non verifiee et un garant', async () => 
     'indisponible',
   )
 })
+// Trois mois depuis l'ouverture (0087) : c'est ce que disent les conditions et la confidentialite.
 test('le paiement ouvre trois mois sans attendre une piece', async () => {
   await devenir(db, 'serveur')
   await db.query("select public.marquer_dossier_paye($1,'cs_audit_1234')", [id])
@@ -68,7 +69,7 @@ test('le paiement ouvre trois mois sans attendre une piece', async () => {
   expect(
     (
       await db.query<{ ok: boolean }>(
-        "select expire_le >= paye_le + interval '3 months' ok from public.dossiers",
+        "select expire_le = cree_le + interval '3 months' ok from public.dossiers",
       )
     ).rows[0]!.ok,
   ).toBe(true)

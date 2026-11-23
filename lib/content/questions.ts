@@ -23,7 +23,7 @@ export const questions = {
       questions: [
         {
           question: 'Combien ça coûte ?',
-          reponse: `${prixLocataire}, une fois, pour un dossier valable trois mois. Tu peux te rétracter pendant quatorze jours : tu es alors remboursé, moins la part des trois mois déjà écoulée.`,
+          reponse: `${prixLocataire}, une fois, pour un dossier valable trois mois. C’est gratuit quand ton agence t’invite, par un lien ou depuis son annonce. Tu peux te rétracter pendant quatorze jours : tu es alors remboursé, moins la part des trois mois déjà écoulée.`,
         },
         {
           question: 'Est-ce que je vois les pièces de mon garant ?',

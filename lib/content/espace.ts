@@ -156,6 +156,8 @@ export const dossier = {
   ratio: (ratio: string, seuil: string) => `${ratio} fois le loyer, pour un seuil à ${seuil}.`,
   piecesTitre: 'Pièces',
   piecesAucune: 'Aucune pièce déposée pour l’instant.',
+  piecesEnAttente:
+    'Le garant dépose ses pièces de son côté. Elles vous parviennent quand le dossier est complet.',
   ouvrir: 'Ouvrir',
   ouvrirAide:
     'Chaque ouverture est inscrite au journal, et la pièce vous parvient filigranée à votre nom. Le garant peut voir que vous l’avez consultée.',

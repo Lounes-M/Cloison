@@ -17,7 +17,7 @@ export const questions = {
       questions: [
         {
           question: 'How much does it cost?',
-          reponse: `${prixLocataire}, once, for a file valid for three months. You can withdraw within fourteen days: you are then refunded, minus the share of the three months already elapsed.`,
+          reponse: `${prixLocataire}, once, for a file valid for three months. It is free when your agency invites you, with a link or from its listing. You can withdraw within fourteen days: you are then refunded, minus the share of the three months already elapsed.`,
         },
         {
           question: 'Can I see my guarantor’s documents?',

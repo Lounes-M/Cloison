@@ -124,7 +124,7 @@ export const pricing = {
     {
       audience: 'The tenant',
       price: prixLocataire,
-      detail: 'once, for a file valid for three months',
+      detail: 'once, for a file valid for three months. Free when your agency invites you.',
     },
     {
       audience: 'The agency',

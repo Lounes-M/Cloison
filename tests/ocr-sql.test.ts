@@ -105,3 +105,14 @@ test('la panne du journal annule aussi la consommation', async () => {
     (await db.query("select count(*)::int n from debits where cle like 'ocr:%'")).rows[0],
   ).toEqual({ n: 0 })
 })
+test('la piece d identite n est jamais reservee pour une lecture, et rien n est journalise', async () => {
+  await db.query("update pieces set type='piece_identite' where id=$1", [piece])
+  await devenir(db, 'authenticated', membre)
+  expect(await reserver()).toBe(false)
+  await redevenirProprietaire(db)
+  const { rows } = await db.query(
+    "select 1 from journal_acces where piece_id=$1 and action='ocr_demande'",
+    [piece],
+  )
+  expect(rows).toHaveLength(0)
+})

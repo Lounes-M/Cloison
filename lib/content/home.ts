@@ -170,7 +170,7 @@ export const pricing = {
     {
       audience: 'Le locataire',
       price: prixLocataire,
-      detail: 'une fois, pour un dossier valable trois mois',
+      detail: 'une fois, pour un dossier valable trois mois. Gratuit quand ton agence t’invite.',
     },
     {
       audience: "L'agence",
