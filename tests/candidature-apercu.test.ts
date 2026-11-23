@@ -2,8 +2,14 @@ import { beforeEach, expect, test, vi } from 'vitest'
 
 const h = vi.hoisted(() => ({ rpc: vi.fn() }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: async () => ({ rpc: h.rpc }) }))
+vi.mock('next/navigation', () => ({
+  notFound: () => {
+    throw new Error('introuvable')
+  },
+}))
 
 import { generateMetadata } from '@/app/(marketing)/candidater/[code]/page'
+import { PageCandidater } from '@/components/pages/PageCandidater'
 
 const CODE = 'c'.repeat(32)
 const avec = (code: string) => generateMetadata({ params: Promise.resolve({ code }) })
@@ -23,6 +29,16 @@ test('l apercu partage nomme le bien et l agence, sans indexation', async () => 
   expect(String(meta.description)).toContain('Logis Lyon')
   expect(meta.robots).toEqual({ index: false, follow: false })
   expect(h.rpc).toHaveBeenCalledWith('logement_par_code', { le_code: CODE })
+})
+
+test('un code invalide ou ferme repond introuvable', async () => {
+  await expect(
+    PageCandidater({ params: Promise.resolve({ code: 'pas-un-code' }), langue: 'fr' }),
+  ).rejects.toThrow('introuvable')
+  h.rpc.mockResolvedValue({ data: [], error: null })
+  await expect(
+    PageCandidater({ params: Promise.resolve({ code: 'a'.repeat(32) }), langue: 'fr' }),
+  ).rejects.toThrow('introuvable')
 })
 
 test('un lien ferme ou mal forme ne dit rien du bien', async () => {

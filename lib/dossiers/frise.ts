@@ -24,7 +24,13 @@ export function etapesLocataire(
   langue: Langue = 'fr',
 ): Etape[] {
   const e = choisir(langue, friseFr, friseEn).locataire.etapes
-  const titres = [e.ouverture, e.garant, e.depot, e.decision, e.signature]
+  const titres = [
+    e.ouverture,
+    garantDesigne ? e.garant : e.garantADesigner,
+    e.depot,
+    e.decision,
+    e.signature,
+  ]
   switch (statut) {
     case 'ouvert':
       return suite(titres, garantDesigne ? 2 : 1)
@@ -47,17 +53,23 @@ export function etapesLocataire(
 
 /**
  * Le garant ne lit pas de verdict : complet et garant insuffisant donnent la
- * meme frise, qui ne depend que de son propre depot.
+ * meme frise.
+ *
+ * L'etape des pieces n'est terminee que lorsque le serveur a juge le depot
+ * suffisant (`pieces_suffisantes`) : le statut est alors `complet` ou
+ * `garant_insuffisant`. `ouvert` et `depot_en_cours` laissent l'etape en
+ * cours, meme si une piece est deja la. Une piece deposee ne suffit pas.
  */
-export function etapesGarant(statut: string, depotFait: boolean, langue: Langue = 'fr'): Etape[] {
+export function etapesGarant(statut: string, langue: Langue = 'fr'): Etape[] {
   const e = choisir(langue, friseFr, friseEn).garant.etapes
   const titres = [e.invitation, e.depot, e.decision, e.signature]
   switch (statut) {
     case 'ouvert':
     case 'depot_en_cours':
+      return suite(titres, 1)
     case 'complet':
     case 'garant_insuffisant':
-      return suite(titres, depotFait ? 2 : 1)
+      return suite(titres, 2)
     case 'refuse':
       return suite(titres, 2, true)
     case 'transmis':
