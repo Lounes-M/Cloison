@@ -5,7 +5,8 @@ import { useActionState, useId, useRef, useState, useSyncExternalStore } from 'r
 import { depot as depotFr, documentsDeclares as documentsDeclaresFr } from '@/lib/content/garant'
 import { deposerUnePiece, type EtatDepot } from '@/lib/garant/action-depot'
 import { reduireSiPhoto } from './reduire-photo'
-import { TAILLE_MAX_DEPOT } from '@/lib/garant/validation'
+import { estPhoto, reunirPhotos } from './reunir-photos'
+import { TAILLE_MAX_DEPOT, tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 import { depot as depotEn, documentsDeclares as documentsDeclaresEn } from '@/lib/content/en/garant'
 import { choisir, locale } from '@/lib/i18n'
@@ -29,8 +30,11 @@ export function FormulaireDepot({
 
   const [etat, envoyer, enCours] = useActionState(deposerUnePiece, ETAT_INITIAL)
   const idChamp = useId()
-  const [preparation, preparer] = useState(false)
+  const [preparation, preparer] = useState<false | 'photo' | 'pages'>(false)
   const champ = useRef<HTMLInputElement>(null)
+  // Les photos choisies, dans l'ordre des pages. Vide pour un PDF : il se depose seul.
+  const [photos, retenir] = useState<File[]>([])
+  const ajout = useRef<HTMLInputElement>(null)
   const [selection, selectionner] = useState<string | null>(null)
   const [erreurLocale, signaler] = useState<string | null>(null)
   // Sans JavaScript, le champ natif reste visible et le formulaire part tel
@@ -59,37 +63,109 @@ export function FormulaireDepot({
 
   const erreur = etat.statut === 'erreur' && etat.nature === nature ? etat.message : null
 
+  const nomme = (fichier: File) =>
+    `${depot.selection} ${fichier.name} (${(fichier.size / 1024 / 1024).toLocaleString(locale(langue), { maximumFractionDigits: 2 })} Mo)`
+
+  function placer(entree: HTMLInputElement, fichier: File) {
+    try {
+      const transfert = new DataTransfer()
+      transfert.items.add(fichier)
+      entree.files = transfert.files
+      return entree.files.length === 1
+    } catch {
+      return false
+    }
+  }
+
   // Le fichier est remplace dans le champ lui-meme : le formulaire reste natif,
   // et sans JavaScript la photo part telle quelle, ou le serveur la bornera.
+  // Une photo part reduite ; plusieurs partent reunies en un seul PDF, dans
+  // l'ordre ou elles ont ete choisies.
+  async function appliquer(suivantes: File[], depuisLeChamp: boolean) {
+    const entree = champ.current
+    if (!entree) return
+    const seule = suivantes.length === 1 ? suivantes[0] : undefined
+    preparer(seule ? 'photo' : 'pages')
+    try {
+      if (seule) {
+        let reduite = seule
+        try {
+          reduite = await reduireSiPhoto(seule)
+        } catch {
+          // La photo d'origine sera verifiee telle quelle.
+        }
+        // Si le navigateur refuse le remplacement, le champ garde l'original.
+        if (reduite !== seule || !depuisLeChamp) placer(entree, reduite)
+        retenir(suivantes)
+        selectionner(entree.files?.[0] ? nomme(entree.files[0]) : null)
+        verifier(entree)
+        return
+      }
+
+      const reunion = await reunirPhotos(suivantes)
+      const message = !reunion.ok
+        ? {
+            illisible: depot.photoIllisible,
+            trop_lourd: depot.reunionTropLourde,
+            trop_de_pages: depot.tropDePages,
+          }[reunion.raison]
+        : placer(entree, reunion.fichier)
+          ? null
+          : depot.reunionImpossible
+      if (message) {
+        // Un ajout refuse laisse les pages deja reunies en place. Un choix
+        // multiple refuse ne laisse rien : le champ contiendrait des photos
+        // separees, dont le serveur ne lirait que la premiere.
+        if (depuisLeChamp) {
+          entree.value = ''
+          retenir([])
+          selectionner(null)
+        }
+        signaler(message)
+        return
+      }
+      retenir(suivantes)
+      selectionner(
+        depot.reunies(suivantes.length, tailleLisible(entree.files?.[0]?.size ?? 0, langue)),
+      )
+      verifier(entree)
+    } finally {
+      preparer(false)
+    }
+  }
+
   async function auChoix() {
     const entree = champ.current
-    const fichier = entree?.files?.[0]
     if (!entree) return
+    const fichiers = [...(entree.files ?? [])]
     entree.setCustomValidity('')
     signaler(null)
     selectionner(null)
-    if (!fichier) return
-
-    preparer(true)
-    try {
-      const reduit = await reduireSiPhoto(fichier)
-      if (reduit !== fichier) {
-        const transfert = new DataTransfer()
-        transfert.items.add(reduit)
-        entree.files = transfert.files
-      }
-    } catch {
-      // Si le navigateur refuse le remplacement, verifier le fichier original.
-    } finally {
-      const choisi = entree.files?.[0]
-      selectionner(
-        choisi
-          ? `${choisi.name} (${(choisi.size / 1024 / 1024).toLocaleString(locale(langue), { maximumFractionDigits: 2 })} Mo)`
-          : null,
-      )
-      verifier(entree)
-      preparer(false)
+    retenir([])
+    if (fichiers.length === 0) return
+    if (fichiers.length > 1 && !fichiers.every(estPhoto)) {
+      entree.value = ''
+      signaler(depot.melange)
+      return
     }
+    if (!estPhoto(fichiers[0]!)) {
+      selectionner(nomme(fichiers[0]!))
+      verifier(entree)
+      return
+    }
+    await appliquer(fichiers, true)
+  }
+
+  async function auAjout() {
+    const nouvelles = [...(ajout.current?.files ?? [])]
+    if (ajout.current) ajout.current.value = ''
+    if (nouvelles.length === 0) return
+    signaler(null)
+    if (!nouvelles.every(estPhoto)) {
+      signaler(depot.melange)
+      return
+    }
+    await appliquer([...photos, ...nouvelles], false)
   }
 
   return (
@@ -97,6 +173,7 @@ export function FormulaireDepot({
       action={envoyer}
       className="flex flex-col gap-2"
       onReset={() => {
+        retenir([])
         selectionner(null)
         signaler(null)
         champ.current?.setCustomValidity('')
@@ -119,7 +196,7 @@ export function FormulaireDepot({
             id={`${idChamp}-nombre`}
             name="nombre_documents"
             defaultValue="1"
-            disabled={enCours || preparation}
+            disabled={enCours || Boolean(preparation)}
             aria-describedby={`${idChamp}-nombre-aide`}
             className="border-ink bg-paper rounded-xl border-2 px-3 py-2"
           >
@@ -152,7 +229,10 @@ export function FormulaireDepot({
         // moment du choix. Sans cette liste, le serveur le refuserait en le
         // nommant, ce qui est correct mais coute un aller-retour.
         accept="application/pdf,image/jpeg,image/png"
-        disabled={enCours || preparation}
+        // Plusieurs photos d'un coup sont reunies en un PDF. Sans JavaScript,
+        // le serveur n'en lirait qu'une : le choix reste alors unique.
+        multiple={interactif}
+        disabled={enCours || Boolean(preparation)}
         onChange={auChoix}
         className={
           interactif
@@ -183,18 +263,63 @@ export function FormulaireDepot({
         {depot.formats}
       </p>
       <p id={`${idChamp}-selection`} role="status" className="text-sm break-words">
-        {preparation ? depot.preparation : selection ? `${depot.selection} ${selection}` : ''}
+        {preparation === 'pages'
+          ? depot.reunion
+          : preparation
+            ? depot.preparation
+            : (selection ?? '')}
       </p>
+      {interactif && selection && photos.length > 0 ? (
+        <>
+          {/* Hors formulaire : sans nom, ce champ ne part jamais avec l'envoi. */}
+          <input
+            ref={ajout}
+            id={`${idChamp}-ajout`}
+            type="file"
+            accept="image/jpeg,image/png"
+            multiple
+            disabled={enCours || Boolean(preparation)}
+            onChange={auAjout}
+            className="peer/ajout sr-only"
+          />
+          <label
+            htmlFor={`${idChamp}-ajout`}
+            className={cn(
+              'press outlined bg-paper shadow-brut-xs inline-flex cursor-pointer items-center gap-2',
+              'self-start rounded-[10px] px-4 py-2 text-[14px] font-bold',
+              'peer-focus-visible/ajout:outline-2 peer-focus-visible/ajout:outline-offset-4',
+              (enCours || preparation) && 'cursor-wait opacity-70',
+            )}
+          >
+            {depot.ajouterPage}
+            <span className="sr-only"> : {libelle.toLowerCase()}</span>
+          </label>
+        </>
+      ) : null}
+      {photos.length > 1 ? (
+        <button
+          type="button"
+          disabled={enCours || Boolean(preparation)}
+          className="lien-espace self-start"
+          onClick={() => {
+            signaler(null)
+            void appliquer(photos.slice(0, -1), false)
+          }}
+        >
+          {depot.retirerDernierePage}
+        </button>
+      ) : null}
       {selection ? (
         <button
           type="button"
-          disabled={enCours || preparation}
+          disabled={enCours || Boolean(preparation)}
           className="lien-espace self-start"
           onClick={() => {
             if (champ.current) {
               champ.current.value = ''
               champ.current.setCustomValidity('')
             }
+            retenir([])
             selectionner(null)
             signaler(null)
             champ.current?.focus()
@@ -205,7 +330,11 @@ export function FormulaireDepot({
       ) : null}
 
       {choisi ? (
-        <button type="submit" disabled={enCours || preparation} className="btn btn-principal">
+        <button
+          type="submit"
+          disabled={enCours || Boolean(preparation)}
+          className="btn btn-principal"
+        >
           {preparation ? depot.preparation : enCours ? depot.envoi : depot.deposer}
         </button>
       ) : null}
