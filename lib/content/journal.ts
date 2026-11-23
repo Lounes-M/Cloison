@@ -25,6 +25,7 @@ export const journal = {
     ocr_demande: 'Transcription d’une pièce par IA demandée',
     lecture_ia_garant: 'Lecture IA d’un justificatif de revenus demandée',
     code_2ddoc_verifie: 'Vérification du code 2D-Doc d’un avis d’imposition demandée',
+    synthese_bailleur: 'Synthèse pour le bailleur téléchargée',
   } as Record<string, string>,
   acteurs: { agence: 'l’agence', garant: 'le garant', locataire: 'le locataire' } as Record<
     string,

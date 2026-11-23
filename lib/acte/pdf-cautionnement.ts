@@ -28,7 +28,7 @@ export class TexteNonImprimable extends Error {}
  * insecables, ce qui ne change pas le texte lu. Tout autre caractere hors du
  * jeu est refuse plutot que remplace : la mention ne se retouche pas.
  */
-function imprimable(texte: string, police: PDFFont) {
+export function imprimable(texte: string, police: PDFFont) {
   const t = texte.replace(/[   ]/g, ' ').replace(/\r\n?/g, '\n')
   try {
     police.encodeText(t.replace(/\n/g, ' '))
@@ -38,7 +38,7 @@ function imprimable(texte: string, police: PDFFont) {
   return t
 }
 
-function couper(texte: string, police: PDFFont, taille: number, largeur: number) {
+export function couper(texte: string, police: PDFFont, taille: number, largeur: number) {
   const lignes: string[] = []
   for (const paragraphe of texte.split('\n')) {
     let ligne = ''

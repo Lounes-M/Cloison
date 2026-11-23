@@ -249,6 +249,7 @@ export const actions: Textes<typeof Fr.actions> = {
   ocr_demande: 'requested an AI transcription',
   lecture_ia_garant: 'requested an AI reading of their income documents',
   code_2ddoc_verifie: 'checked the 2D-Doc code of a tax notice',
+  synthese_bailleur: 'downloaded the summary for the landlord',
   complement_demande: 'requested the replacement of a document',
   complement_fourni: 'provided a replacement document',
   complement_valide: 'approved a replacement document',
