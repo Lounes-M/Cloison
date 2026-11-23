@@ -636,7 +636,7 @@ export default async function PageDossier({
         ) : null}
       </section>
 
-      {/* La base tranche (0089) ; l'ecran ne propose la synthese que la ou elle peut aboutir. */}
+      {/* La base tranche (0090) ; l'ecran ne propose la synthese que la ou elle peut aboutir. */}
       {['complet', 'garant_insuffisant', 'transmis', 'signe'].includes(String(d.statut)) ? (
         <section className="panneau-espace mt-8">
           <h2 className="text-xl font-bold">{texteSynthese.titre}</h2>

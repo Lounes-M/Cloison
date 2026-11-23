@@ -15,11 +15,30 @@
 -- decision se prend ou s'est prise. Dix syntheses par personne, par dossier et
 -- par heure : chacune coute une rasterisation.
 
-alter table public.journal_acces drop constraint journal_acces_action_check;
-alter table public.journal_acces add constraint journal_acces_action_check check(action in
- ('dossier_consulte','piece_deposee','piece_retiree','piece_ouverte','dossier_transmis',
- 'complement_demande','complement_fourni','complement_valide','complement_refuse','ocr_demande',
- 'relances_reprises','loyer_corrige','dossier_refuse','lecture_ia_garant','synthese_bailleur'));
+-- L'action s'ajoute a la liste en place au lieu de la reecrire : plusieurs
+-- migrations ajoutent une action au journal ces jours-ci, et une liste ecrite
+-- en dur effacerait celle de la migration passee juste avant.
+do $$
+declare
+ definition text;
+ actions text[];
+begin
+ select pg_get_constraintdef(c.oid) into definition from pg_catalog.pg_constraint c
+  where c.conrelid='public.journal_acces'::regclass and c.conname='journal_acces_action_check';
+ if definition is null then raise exception 'Contrainte du journal introuvable.'; end if;
+ select array_agg(m[1]) into actions
+  from regexp_matches(definition, '''([a-z0-9_]+)''::text', 'g') m;
+ if actions is null or not ('dossier_consulte'=any(actions)) then
+  raise exception 'Contrainte du journal illisible.';
+ end if;
+ if 'synthese_bailleur'=any(actions) then return; end if;
+ actions := actions || 'synthese_bailleur'::text;
+ alter table public.journal_acces drop constraint journal_acces_action_check;
+ execute format('alter table public.journal_acces add constraint %I check (action in (%s))',
+  'journal_acces_action_check',
+  (select string_agg(quote_literal(a), ',' order by o) from unnest(actions) with ordinality x(a,o)));
+end;
+$$;
 
 create function public.preparer_synthese_bailleur(le_dossier uuid) returns jsonb
 language plpgsql security definer set search_path='' as $$

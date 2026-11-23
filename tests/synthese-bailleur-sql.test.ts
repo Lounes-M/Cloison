@@ -13,7 +13,7 @@ import {
 } from './base'
 
 /**
- * La synthese pour le bailleur, cote base (0089) : qui peut la demander, ce
+ * La synthese pour le bailleur, cote base (0090) : qui peut la demander, ce
  * qu'elle rend, et ce qu'elle laisse au journal. Les refus d'abord.
  */
 let db: PGlite, dossier: string, agence: string, membre: string, bulletin: string, avis: string
@@ -232,4 +232,14 @@ test('le journal du dossier reste en ecriture seule pour qui a telecharge', asyn
   await expect(
     db.query("delete from journal_acces where action='synthese_bailleur'"),
   ).rejects.toThrow()
+})
+
+test('l action s ajoute a la liste du journal sans retirer les precedentes', async () => {
+  const definition = (
+    await db.query<{ d: string }>(
+      "select pg_get_constraintdef(oid) d from pg_constraint where conname='journal_acces_action_check'",
+    )
+  ).rows[0]!.d
+  for (const action of ['dossier_consulte', 'lecture_ia_garant', 'synthese_bailleur'])
+    expect(definition).toContain(`'${action}'`)
 })

@@ -2,7 +2,7 @@
  * La synthese d'un dossier pour le bailleur : une page A4, dessinee.
  *
  * Ce module ne connait ni la base ni la personne connectee : il prend ce que
- * `preparer_synthese_bailleur` (0089) a rendu et le met en page. Le schema
+ * `preparer_synthese_bailleur` (0090) a rendu et le met en page. Le schema
  * ci-dessous est strict a dessein : il n'a pas de champ pour un revenu, et une
  * cle en trop fait echouer la lecture plutot que de voyager jusqu'au papier.
  *
