@@ -204,7 +204,13 @@ test.each(['demonstration', 'expiration', 'agence', 'activite', 'sans-email'])(
       await db.query('update dossiers set email_garant=null where id=$1', [dossier])
       await vieillir()
     }
-    expect(await programmer()).toBe(0)
+    // Sans garant designe, c'est le locataire qui est relance (0089), jamais le garant.
+    expect(await programmer()).toBe(cas === 'sans-email' ? 1 : 0)
+    await redevenirProprietaire(db)
+    expect(
+      (await db.query("select 1 from rappels_dossiers where nature<>'locataire'")).rows,
+    ).toEqual([])
+    expect(await preparer()).toEqual([])
   },
 )
 test('un rappel obsolete avant preparation ne conserve aucun courriel', async () => {
