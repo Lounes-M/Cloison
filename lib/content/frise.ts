@@ -15,6 +15,7 @@ export const frise = {
     etapes: {
       ouverture: 'Dossier ouvert',
       garant: 'Garant désigné',
+      garantADesigner: 'Garant à désigner',
       depot: 'Dépôt de ton garant',
       decision: 'Décision de l’agence',
       signature: 'Acte signé',

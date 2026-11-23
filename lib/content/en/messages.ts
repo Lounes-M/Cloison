@@ -14,8 +14,6 @@ export const messagesServeur: Record<string, string> = {
   "L'adresse du locataire est requise.": 'The tenant’s address is required.',
   "L'adresse de ton garant est requise.": 'Your guarantor’s address is required.',
   'Cette adresse est trop longue.': 'This address is too long.',
-  'Cette adresse ne ressemble pas a une adresse e-mail.':
-    'This does not look like an email address.',
   'Cette adresse ne ressemble pas à une adresse e-mail.':
     'This does not look like an email address.',
   'Cette adresse est invalide.': 'This address is not valid.',
@@ -83,6 +81,8 @@ export const messagesServeur: Record<string, string> = {
   // Locataire
   'Le loyer ne se lit pas. Exemple : 850 ou 850,50.':
     'This rent cannot be read. Example: 850 or 850.50.',
+  'Le loyer doit être supérieur à zéro.': 'The rent must be greater than zero.',
+  'Le loyer mensuel ne peut pas dépasser 100 000 €.': 'The monthly rent cannot exceed 100,000 €.',
   'Règle d’abord ton dossier, plus haut : le lien de ton garant partira ensuite.':
     'Pay for your file first, above: your guarantor’s link will be sent right after.',
   'Ton garant ne peut pas être toi-même.': 'You cannot be your own guarantor.',

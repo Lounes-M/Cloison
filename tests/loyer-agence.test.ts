@@ -64,17 +64,27 @@ beforeEach(() => {
 })
 afterEach(() => vi.resetAllMocks())
 
-test.each(['abc', '0', '-5', '12,345'])(
-  'un loyer illisible (%s) ne touche pas la base',
-  async (loyer) => {
-    expect(await fixerLeLoyer({ statut: 'inactif' }, form({ dossier: id, loyer }))).toEqual({
-      statut: 'erreur',
-      message: loyerAgence.invalide,
-      valeur: loyer,
-    })
-    expect(d.ecritures).toEqual([])
-  },
-)
+test.each(['abc', '12,345'])('un loyer illisible (%s) ne touche pas la base', async (loyer) => {
+  expect(await fixerLeLoyer({ statut: 'inactif' }, form({ dossier: id, loyer }))).toEqual({
+    statut: 'erreur',
+    message: loyerAgence.invalide,
+    valeur: loyer,
+  })
+  expect(d.ecritures).toEqual([])
+})
+
+test.each([
+  ['0', 'Le loyer doit être supérieur à zéro.'],
+  ['-5', 'Le loyer doit être supérieur à zéro.'],
+  ['99999999', 'Le loyer mensuel ne peut pas dépasser 100 000 €.'],
+])('un loyer %s est refuse avec un motif distinct', async (loyer, message) => {
+  expect(await fixerLeLoyer({ statut: 'inactif' }, form({ dossier: id, loyer }))).toEqual({
+    statut: 'erreur',
+    message,
+    valeur: loyer,
+  })
+  expect(d.ecritures).toEqual([])
+})
 
 test("l'agence fixe le loyer d'un dossier principal encore ouvert", async () => {
   expect(await fixerLeLoyer({ statut: 'inactif' }, form({ dossier: id, loyer: '850,50' }))).toEqual(
