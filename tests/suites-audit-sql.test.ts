@@ -1,7 +1,13 @@
 import { afterAll, afterEach, beforeAll, beforeEach, expect, test } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import type { PGlite } from '@electric-sql/pglite'
-import { baseDEssai, devenir, redevenirProprietaire, refus as refusBrut } from './base'
+import {
+  baseDEssai,
+  devenir,
+  devenirPorteur,
+  redevenirProprietaire,
+  refus as refusBrut,
+} from './base'
 
 /**
  * Suites de l'audit fonctionnel (0085).
@@ -157,4 +163,93 @@ test('un rejeu Docage réveille la lecture sans ajouter d’événement', async 
   await reveiller('done')
   expect((await etat()).n).toBe(2)
   await refus(`select enregistrer_reveil_docage('sandbox','${reference}','inconnu')`)
+})
+
+/** Le lien du garant part-il ? Rejoué comme le serveur, sans garder l'émission. */
+async function lienGarantPossible(id: string) {
+  await devenir(db, 'serveur')
+  await db.exec('savepoint emission')
+  try {
+    await db.query("select * from emettre_jeton($1,'garant','7 days')", [id])
+    return true
+  } catch {
+    return false
+  } finally {
+    await db.exec('rollback to savepoint emission')
+    await redevenirProprietaire(db)
+  }
+}
+
+async function agenceVerifiee() {
+  const id = randomUUID()
+  await db.query(
+    "insert into agences(id,nom,domaine,statut,verifiee_le,siren,carte_pro) values($1,'Invitante','invitante.invalid','verifiee',now(),'552100554','CPI 7501 2024 000 000 001')",
+    [id],
+  )
+  return id
+}
+
+test('se rattacher seul à une agence ne dispense plus du paiement', async () => {
+  await agenceVerifiee()
+  expect(await lienGarantPossible(dossier)).toBe(false)
+  await devenirPorteur(db, dossier, 'locataire')
+  await db.query("select rattacher_mon_dossier('invitante.invalid')")
+  await redevenirProprietaire(db)
+  const { rows } = await db.query<{ agence_id: string | null; seul: boolean; reference: string }>(
+    'select agence_id, rattache_par_locataire seul, reference from dossiers where id=$1',
+    [dossier],
+  )
+  expect(rows[0]!.agence_id).not.toBeNull()
+  expect(rows[0]!.seul).toBe(true)
+  expect(await lienGarantPossible(dossier)).toBe(false)
+  // Le garant ne retrouve pas non plus un lien qui n'a jamais été acheté.
+  await devenir(db, 'serveur')
+  expect(
+    (
+      await db.query("select * from retrouver_lien_garant('garant@example.invalid',$1)", [
+        rows[0]!.reference,
+      ])
+    ).rows,
+  ).toEqual([])
+  await redevenirProprietaire(db)
+  // Une fois réglé, le lien part.
+  await db.query("update dossiers set paye_le=now(),paiement_ref='cs_test_suites' where id=$1", [
+    dossier,
+  ])
+  expect(await lienGarantPossible(dossier)).toBe(true)
+})
+
+test('un dossier ouvert par l’agence reste gratuit, second garant compris', async () => {
+  const agence = await agenceVerifiee()
+  const invite = randomUUID()
+  const second = randomUUID()
+  await db.query(
+    "insert into dossiers(id,agence_id,email_locataire,email_garant) values($1,$2,'invite@example.invalid','g1@example.invalid')",
+    [invite, agence],
+  )
+  await db.query(
+    "insert into dossiers(id,agence_id,email_locataire,email_garant,dossier_principal) values($1,$2,'invite@example.invalid','g2@example.invalid',$3)",
+    [second, agence, invite],
+  )
+  expect(await lienGarantPossible(invite)).toBe(true)
+  expect(await lienGarantPossible(second)).toBe(true)
+  // Le dossier du second garant suit le principal : rattaché seul et impayé, il attend aussi.
+  await db.query('update dossiers set rattache_par_locataire=true where id=$1', [invite])
+  expect(await lienGarantPossible(second)).toBe(false)
+})
+
+test('entrer par le lien de candidature d’un logement rend la dispense', async () => {
+  const agence = await agenceVerifiee()
+  const logement = randomUUID()
+  await db.query('update dossiers set agence_id=$2, rattache_par_locataire=true where id=$1', [
+    dossier,
+    agence,
+  ])
+  await db.query(
+    "insert into logements(id,agence_id,libelle,loyer_cents) values($1,$2,'T2 fictif',80000)",
+    [logement, agence],
+  )
+  expect(await lienGarantPossible(dossier)).toBe(false)
+  await db.query('update dossiers set logement_id=$2 where id=$1', [dossier, logement])
+  expect(await lienGarantPossible(dossier)).toBe(true)
 })

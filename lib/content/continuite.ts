@@ -7,7 +7,7 @@ export const continuite = {
     'Si ces informations correspondent à un dossier encore actif, un nouveau lien sera envoyé à son adresse.',
   agence: 'Transmettre à mon agence',
   domaine: 'Domaine e-mail de ton agence',
-  aide: 'Demande à ton agence son domaine professionnel exact. Elle doit être vérifiée sur Cloison.',
+  aide: 'Demande à ton agence son domaine professionnel exact. Elle doit être vérifiée sur Cloison. Si elle t’a donné un lien de candidature, utilise-le plutôt : ton dossier est alors gratuit. En te rattachant toi-même, tu règles ton dossier avant d’inviter ton garant.',
   consentement:
     'J’autorise cette agence à consulter les informations et les pièces du dossier. Ce rattachement est définitif.',
   transmettre: 'Rattacher mon dossier',

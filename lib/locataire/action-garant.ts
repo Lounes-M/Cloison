@@ -10,6 +10,7 @@ import { z } from 'zod'
 
 import { consommerDebit } from '@/lib/acces/debit'
 import { clientServeur } from '@/lib/acces/serveur'
+import { COLONNES_PAIEMENT, resteARegler } from '@/lib/locataire/paiement-requis'
 import { capaciteDepuisCookies, clientPorteurDeLien, urlDuLien } from '@/lib/acces/session'
 import { signerJeton } from '@/lib/acces/jeton'
 import { envoyerLienGarant } from '@/lib/courriels/liens'
@@ -102,7 +103,7 @@ export async function designerMonGarant(
     // permet, et c'est aussi ce qui donne son adresse pour le courriel.
     const { data: dossier } = await supabase
       .from('dossiers')
-      .select('reference, email_locataire, paye_le, agence_id, demonstration')
+      .select(`reference, email_locataire, ${COLONNES_PAIEMENT}`)
       .eq('id', dossierId)
       .maybeSingle()
 
@@ -112,7 +113,7 @@ export async function designerMonGarant(
 
     // La base refuserait de toute facon d'emettre le lien (migration 0018) ;
     // ici on le dit avant, avec les mots de l'ecran.
-    if (!dossier.paye_le && !dossier.agence_id && !dossier.demonstration) {
+    if (resteARegler(dossier)) {
       return {
         statut: 'erreur',
         message: dire(

@@ -24,11 +24,6 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
   const { cequonapporte, commentCaMarche, douleurs, formulaire, heroAgences, tarifAgence } =
     choisir(langue, fr, en)
   const [lienDebut, ...lienFin] = commentCaMarche.titre[1].split(' ')
-  // La carte sur l'acte suit l'ouverture reelle de la signature en ligne.
-  const cartesApport =
-    process.env.SIGNATURE_PARCOURS_ENABLED === 'true'
-      ? cequonapporte.items
-      : [...cequonapporte.items.slice(0, 2), cequonapporte.acteAVenir]
   return (
     <main>
       <EnTetePage
@@ -128,7 +123,7 @@ export function PageAgences({ langue = 'fr' }: { langue?: Langue }) {
               </h2>
             </Reveal>
             <ul className="mx-auto mt-[3rem] grid max-w-[42rem] gap-[2.5rem]">
-              {[...cartesApport, cequonapporte.garantie].map((item, index) => (
+              {[...cequonapporte.items, cequonapporte.garantie].map((item, index) => (
                 <li key={item.titre}>
                   <Reveal delay={index * 0.06}>
                     <h3 className="texte-32">{item.titre}</h3>
