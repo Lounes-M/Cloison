@@ -135,6 +135,7 @@ export function retentionAffichee(): number {
 export function traitementsFacultatifs() {
   return {
     ocr: process.env.OCR_ACTIVE === 'true',
+    lectureGarant: process.env.LECTURE_IA_GARANT === 'true',
     // Le sous-traitant nomme est celui qui recoit vraiment l'acte : Docage, ou Youtrust en secours.
     signature:
       process.env.SIGNATURE_PARCOURS_ENABLED !== 'true'

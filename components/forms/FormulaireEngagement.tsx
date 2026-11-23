@@ -1,6 +1,7 @@
 'use client'
 
 import { BrouillonEngagement } from './BrouillonEngagement'
+import { LectureRevenus } from './LectureRevenus'
 import { useActionState, useId, useRef, useState } from 'react'
 
 import {
@@ -46,10 +47,13 @@ export function FormulaireEngagement({
   actuel,
   dossierId,
   version,
+  lectureIa = false,
 }: {
   actuel: EngagementAffiche
   dossierId: string
   version: number
+  /** Activee cote serveur et au moins un bulletin ou une pension deposes. */
+  lectureIa?: boolean
 }) {
   const langue = useLangue()
   const conditionsEngagement = choisir(langue, conditionsEngagementFr, conditionsEngagementEn)
@@ -59,6 +63,7 @@ export function FormulaireEngagement({
   const [etat, envoyer, enCours] = useActionState(declarerMonEngagement, ETAT_INITIAL)
   const id = useId()
   const formulaire = useRef<HTMLFormElement>(null)
+  const champRevenu = useRef<HTMLInputElement>(null)
   const [brouillonEnCours, setBrouillonEnCours] = useState(false)
 
   return (
@@ -103,6 +108,7 @@ export function FormulaireEngagement({
           {texte.revenu}
         </label>
         <input
+          ref={champRevenu}
           id={`${id}-revenu`}
           name="revenu"
           type="text"
@@ -115,6 +121,18 @@ export function FormulaireEngagement({
         <p id={`${id}-revenu-aide`} className="text-muted mt-2 text-[13px] font-medium">
           {texte.revenuAide}
         </p>
+        {lectureIa ? (
+          <LectureRevenus
+            dossierId={dossierId}
+            reporterDansLeChamp={(saisie) => {
+              const champ = champRevenu.current
+              if (!champ) return
+              champ.value = saisie
+              champ.dispatchEvent(new Event('input', { bubbles: true }))
+              champ.focus()
+            }}
+          />
+        ) : null}
       </div>
 
       <fieldset>

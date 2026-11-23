@@ -174,6 +174,8 @@ export const confidentialite = {
         'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France, qui reçoit aussi le numéro de téléphone du garant, nécessaire à la signature. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
     },
     ocr: 'À la demande explicite d’une agence, une pièce autre que la pièce d’identité peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
+    lectureGarant:
+      'À votre demande explicite, une IA accessible par OpenRouter peut lire vos bulletins de paie et votre attestation de pension pour vous proposer un revenu net mensuel. Seuls le mois et le montant net payé sont extraits, sans conservation par le fournisseur. La proposition n’est enregistrée que si vous la reportez et l’enregistrez vous-même. La pièce d’identité n’est jamais envoyée.',
   },
   droits: {
     titre: 'Vos droits',

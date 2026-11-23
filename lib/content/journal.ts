@@ -23,6 +23,7 @@ export const journal = {
     loyer_corrige: 'Loyer corrigé par l’agence',
     dossier_refuse: 'Dossier refusé',
     ocr_demande: 'Transcription d’une pièce par IA demandée',
+    lecture_ia_garant: 'Lecture IA d’un justificatif de revenus demandée',
   } as Record<string, string>,
   acteurs: { agence: 'l’agence', garant: 'le garant', locataire: 'le locataire' } as Record<
     string,
