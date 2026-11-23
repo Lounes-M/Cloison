@@ -3,12 +3,12 @@ export const rappels = {
   etiquette: 'Réglages de l’agence',
   retour: 'Retour aux dossiers',
   aide: 'Accompagnez les dépôts en attente et anticipez la suppression des justificatifs à leur échéance.',
-  relance: 'Relancer le garant après une période sans modification',
+  relance: 'Relancer le locataire et le garant après une période sans modification',
   echeance: 'Prévenir les collaborateurs avant l’échéance du dossier',
   desactive: 'Désactivé',
   jours: (n: number) => `${n} jours`,
   limites:
-    'Les relances concernent les dépôts incomplets et les corrections encore attendues. Trois relances maximum par dossier, espacées d’au moins trois jours. Une nouvelle activité reporte le rappel. Aucun nouveau lien n’est créé et aucune échéance n’est prolongée.',
+    'Les relances du garant concernent les dépôts incomplets et les corrections encore attendues. Celles du locataire concernent un dossier à régler, un garant à désigner ou un loyer à déclarer. Trois relances maximum par personne et par étape, espacées d’au moins trois jours. Une nouvelle activité reporte le rappel. Aucun nouveau lien n’est créé et aucune échéance n’est prolongée.',
   preferences:
     'Les rappels d’échéance, et l’alerte envoyée quand les trois relances d’un garant restent sans réponse, respectent les préférences personnelles de vos collaborateurs. Ils s’arrêtent après signature, refus ou expiration. Un courriel déjà transmis au fournisseur ne peut pas être rappelé.',
   cadence:
@@ -40,6 +40,34 @@ export const courrielsRappels = {
     texte:
       'Le garant de ce dossier a reçu ses trois relances automatiques sans reprendre son dépôt. Cloison ne le relancera plus : un contact direct peut débloquer la situation. Le dossier porte la mention « Relances épuisées » dans votre espace.',
   },
+  reference: 'Référence du dossier',
+  expiration: 'Échéance de conservation',
+}
+
+/**
+ * Les relances du locataire (migration 0089), tutoyé. Une par motif : le
+ * dossier à régler, le garant à désigner, le loyer à déclarer. Le bouton mène
+ * à la page publique où il peut redemander son lien, jamais à son dossier.
+ */
+export const courrielsRelanceLocataire = {
+  paiement: {
+    sujet: 'Ton dossier Cloison attend son règlement',
+    texte:
+      'Ton dossier est ouvert mais pas encore réglé : le lien de ton garant ne peut pas partir. Reviens dans ton espace avec ton lien habituel pour régler le dossier, puis désigner ton garant.',
+  },
+  garant: {
+    sujet: 'Ton dossier Cloison attend ton garant',
+    texte:
+      'Tu n’as pas encore désigné ton garant. Reviens dans ton espace avec ton lien habituel et indique son adresse e-mail : il recevra un lien pour déposer ses pièces de son côté.',
+  },
+  loyer: {
+    sujet: 'Ton dossier Cloison attend ton loyer',
+    texte:
+      'Le loyer de ton dossier n’est pas encore déclaré. Sans lui, le dossier reste en attente. Reviens dans ton espace avec ton lien habituel pour l’indiquer.',
+  },
+  lienExpire:
+    'Si ton lien a expiré, demande-en un nouveau depuis « Retrouver mon dossier », avec la référence ci-dessous. Ce message ne prolonge pas la conservation du dossier.',
+  bouton: 'Retrouver mon dossier',
   reference: 'Référence du dossier',
   expiration: 'Échéance de conservation',
 }

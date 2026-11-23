@@ -50,15 +50,17 @@ beforeEach(() => {
         ? 1
         : n === 'rappels_a_preparer'
           ? [rappel]
-          : n === 'mettre_rappel_en_file'
-            ? 'prepare'
-            : n === 'prendre_courriels'
-              ? [{ id, bail: dossier, contenu: 'eA==', rappel_id: id }]
-              : n === 'confirmer_rappel_avant_envoi'
-                ? 'pret'
-                : n === 'acquitter_courriel'
-                  ? true
-                  : 0,
+          : n === 'rappels_locataire_a_preparer'
+            ? []
+            : n === 'mettre_rappel_en_file'
+              ? 'prepare'
+              : n === 'prendre_courriels'
+                ? [{ id, bail: dossier, contenu: 'eA==', rappel_id: id }]
+                : n === 'confirmer_rappel_avant_envoi'
+                  ? 'pret'
+                  : n === 'acquitter_courriel'
+                    ? true
+                    : 0,
     error: null,
   }))
 })
@@ -87,7 +89,9 @@ test.each(['echeance', 'epuise'])(
           ? 1
           : n === 'rappels_a_preparer'
             ? [{ ...rappel, nature, email: 'membre@agence.invalid' }]
-            : 'prepare',
+            : n === 'rappels_locataire_a_preparer'
+              ? []
+              : 'prepare',
       error: null,
     }))
     await preparerRappels(db)
@@ -125,7 +129,14 @@ test.each(['obsolete', 'refuse', null])(
   'la confirmation de preparation %s est interpretee strictement',
   async (etat) => {
     d.rpc.mockImplementation(async (n: string) => ({
-      data: n === 'programmer_rappels' ? 1 : n === 'rappels_a_preparer' ? [rappel] : etat,
+      data:
+        n === 'programmer_rappels'
+          ? 1
+          : n === 'rappels_a_preparer'
+            ? [rappel]
+            : n === 'rappels_locataire_a_preparer'
+              ? []
+              : etat,
       error: null,
     }))
     expect(await preparerRappels(db)).toEqual({ echecs: etat === 'obsolete' ? 0 : 1 })
@@ -175,3 +186,66 @@ test('revalide le bail avant le dechiffrement puis acquitte le seul envoi confir
     d.ouvrir.mock.invocationCallOrder[0]!,
   )
 })
+
+const relance = {
+  id,
+  dossier_id: dossier,
+  reference: 'ABCD1234',
+  motif: 'paiement',
+  email: 'locataire@example.invalid',
+  expiration: '2026-09-15T10:00:00+00:00',
+}
+function avecRelances(relances: unknown, confirmation: unknown = 'prepare') {
+  d.rpc.mockImplementation(async (n: string) => ({
+    data:
+      n === 'programmer_rappels'
+        ? 1
+        : n === 'rappels_a_preparer'
+          ? []
+          : n === 'rappels_locataire_a_preparer'
+            ? relances
+            : n === 'mettre_rappel_en_file'
+              ? confirmation
+              : 0,
+    error: null,
+  }))
+}
+test.each([
+  ['paiement', 'Ton dossier Cloison attend son règlement'],
+  ['garant', 'Ton dossier Cloison attend ton garant'],
+  ['loyer', 'Ton dossier Cloison attend ton loyer'],
+])('la relance du locataire %s le tutoie et ne porte aucune capacite', async (motif, sujet) => {
+  avecRelances([{ ...relance, motif }])
+  expect(await preparerRappels(db)).toEqual({ echecs: 0 })
+  const contenu = JSON.parse(d.sceller.mock.calls[0]![0].toString())
+  expect(contenu.to).toEqual(['locataire@example.invalid'])
+  expect(contenu.subject).toBe(sujet)
+  expect(contenu.text).toContain('ABCD1234')
+  expect(contenu.text).toContain('ton lien habituel')
+  expect(contenu.text).not.toMatch(/\bvous\b|\bvotre\b/i)
+  // Le seul lien est la page publique ou redemander son lien.
+  expect(contenu.text).toContain('https://example.invalid/demarrer')
+  expect(`${contenu.text}${contenu.html}`).not.toMatch(/\/lien\/|\/espace\/|\/locataire/)
+  expect(d.rpc).toHaveBeenCalledWith('mettre_rappel_en_file', {
+    identifiant: id,
+    chiffre: Buffer.from('chiffre').toString('base64'),
+  })
+  expect(d.envoyer).not.toHaveBeenCalled()
+})
+test.each([
+  null,
+  [{ ...relance, motif: 'autre' }],
+  [{ ...relance, email: 'invalide' }],
+  Array.from({ length: 21 }, () => relance),
+])('refuse une projection invalide des relances du locataire %#', async (data) => {
+  avecRelances(data)
+  await expect(preparerRappels(db)).rejects.toThrow('Relances du locataire indisponibles')
+  expect(d.sceller).not.toHaveBeenCalled()
+})
+test.each(['obsolete', 'refuse', null])(
+  'la mise en file %s d une relance du locataire est interpretee strictement',
+  async (etat) => {
+    avecRelances([relance], etat)
+    expect(await preparerRappels(db)).toEqual({ echecs: etat === 'obsolete' ? 0 : 1 })
+  },
+)
