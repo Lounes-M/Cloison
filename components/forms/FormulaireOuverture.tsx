@@ -62,7 +62,7 @@ export function FormulaireOuverture({
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="langue" value={langue} />
-      {etat.statut === 'erreur' ? (
+      {etat.statut === 'erreur' && etat.champ !== 'courriel' && etat.champ !== 'accord' ? (
         <p role="alert" className="message-erreur">
           {etat.message}
         </p>
@@ -80,12 +80,22 @@ export function FormulaireOuverture({
           required
           defaultValue={etat.statut === 'erreur' ? etat.valeur : ''}
           placeholder={porte.exemple}
-          aria-describedby={`${idChamp}-aide`}
+          aria-invalid={etat.statut === 'erreur' && etat.champ === 'courriel' ? true : undefined}
+          aria-describedby={
+            etat.statut === 'erreur' && etat.champ === 'courriel'
+              ? `${idChamp}-erreur ${idChamp}-aide`
+              : `${idChamp}-aide`
+          }
           className={cn(
             'border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[15px] font-medium',
             'placeholder:text-muted placeholder:font-normal',
           )}
         />
+        {etat.statut === 'erreur' && etat.champ === 'courriel' ? (
+          <p id={`${idChamp}-erreur`} role="alert" className="message-erreur mt-2">
+            {etat.message}
+          </p>
+        ) : null}
         <p id={`${idChamp}-aide`} className="text-muted mt-2 text-[13px] font-medium">
           {porte.aide}
         </p>
@@ -105,12 +115,21 @@ export function FormulaireOuverture({
             type="checkbox"
             name="accord"
             required
+            aria-invalid={etat.statut === 'erreur' && etat.champ === 'accord' ? true : undefined}
+            aria-describedby={
+              etat.statut === 'erreur' && etat.champ === 'accord' ? `${idAccord}-erreur` : undefined
+            }
             className="accent-ink mt-1 size-5 shrink-0"
           />
           <label htmlFor={idAccord} className="text-[14px] font-medium">
             {texteCandidature.page.accord(candidature.agence)}
           </label>
         </div>
+      ) : null}
+      {etat.statut === 'erreur' && etat.champ === 'accord' ? (
+        <p id={`${idAccord}-erreur`} role="alert" className="message-erreur">
+          {etat.message}
+        </p>
       ) : null}
 
       <button type="submit" disabled={enCours} className="btn btn-principal btn-grand w-full">

@@ -6,6 +6,8 @@ import {
   type NatureValeur,
 } from '@/lib/content/garant'
 import { engagement as texteEngagementEn } from '@/lib/content/en/garant'
+import { loyerSaisi as loyerSaisiEn } from '@/lib/content/en/loyer'
+import { loyerSaisi as loyerSaisiFr } from '@/lib/content/loyer'
 import { choisir, type Langue } from '@/lib/i18n'
 
 /**
@@ -29,6 +31,16 @@ export const TAILLE_MAX_DEPOT = 4 * 1024 * 1024
 
 /** Cent millions d'euros : au-dela, c'est une faute de frappe, pas un plafond. */
 const MONTANT_MAX_CENTS = 100_000_000 * 100
+
+/**
+ * 100 000 € par mois.
+ *
+ * C'est le plafond deja pose sur `logements.loyer_cents` (migration 0069).
+ * Le loyer d'un dossier n'a, lui, qu'un controle `> 0` : on aligne la saisie
+ * sur le logement, sans migration, pour ne pas bloquer un dossier qui
+ * porterait deja un montant au-dessus.
+ */
+export const LOYER_MENSUEL_MAX_CENTS = 10_000_000
 
 const VALEURS_DE_NATURE = new Set<string>(naturesFr.map((n) => n.valeur))
 
@@ -78,6 +90,54 @@ export function montantEnCents(saisie: string): number | null | 'invalide' {
   if (!Number.isSafeInteger(cents) || cents <= 0 || cents > MONTANT_MAX_CENTS) return 'invalide'
 
   return cents
+}
+
+export type MotifLoyer = 'illisible' | 'negatif' | 'plafond'
+
+/**
+ * Un loyer mensuel saisi par une personne.
+ *
+ * Vide vaut « pas de loyer » : l'appelant decide si c'est une erreur.
+ * Un texte, un montant negatif ou nul, et un depassement du plafond
+ * ne partagent pas le meme motif.
+ */
+export function lireLoyer(
+  saisie: string,
+): { ok: true; cents: number | null } | { ok: false; motif: MotifLoyer } {
+  const nettoye = saisie
+    .replace(/[\s  ]/g, '')
+    .replace(/€/g, '')
+    .replace(',', '.')
+
+  if (nettoye === '') return { ok: true, cents: null }
+  if (!/^-?\d+(\.\d{1,2})?$/.test(nettoye)) return { ok: false, motif: 'illisible' }
+
+  const valeur = Number(nettoye)
+  if (!Number.isFinite(valeur)) return { ok: false, motif: 'illisible' }
+  if (valeur <= 0) return { ok: false, motif: 'negatif' }
+
+  const cents = Math.round(valeur * 100)
+  if (!Number.isSafeInteger(cents)) return { ok: false, motif: 'illisible' }
+  if (cents > LOYER_MENSUEL_MAX_CENTS) return { ok: false, motif: 'plafond' }
+  return { ok: true, cents }
+}
+
+export function messageLoyer(motif: MotifLoyer, langue: Langue = 'fr'): string {
+  return choisir(langue, loyerSaisiFr, loyerSaisiEn)[motif]
+}
+
+/** Vrai quand le plafond d'engagement est sous le loyer mensuel du dossier. */
+export function plafondSousLeLoyer(
+  montantMaxCents: number | null,
+  loyerCents: number | null,
+): boolean {
+  return (
+    montantMaxCents != null &&
+    loyerCents != null &&
+    Number.isSafeInteger(loyerCents) &&
+    loyerCents > 0 &&
+    montantMaxCents < loyerCents
+  )
 }
 
 /** Une date `AAAA-MM-JJ` a venir, ou vide. */

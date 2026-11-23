@@ -50,10 +50,17 @@ export async function ouvrirAutreDossier(donnees: FormData): Promise<void> {
   const actif = magasin.get(NOM_COOKIE_CAPACITE)?.value
   const capacite = await resoudreCapacite(jeton)
   if (!capacite) {
-    magasin.set({ ...cookiesDesAutres([], securise())[place]! })
-    redirect(lien(await langueEspace(), '/lien-invalide'))
+    const langue = await langueEspace()
+    const effacement = cookiesDesAutres([], securise())[place]
+    if (effacement) magasin.set(effacement)
+    redirect(lien(langue, '/lien-invalide'))
   }
 
+  // Lectures d'abord, cookies ensuite, redirect tout de suite. Un await entre
+  // le set et la redirection perd la bascule : le bouton « Mon dossier de
+  // locataire » semblait ne rien faire, la page du garant se reaffichant.
+  const ranges = await rangerLesAutres(capacite, actif, autres)
+  const langue = await langueDossier(capacite.dossierId, capacite.partie)
   magasin.set({
     name: NOM_COOKIE_CAPACITE,
     value: jeton,
@@ -63,9 +70,7 @@ export async function ouvrirAutreDossier(donnees: FormData): Promise<void> {
     path: '/',
     maxAge: DUREE_JETON_SECONDES,
   })
-  for (const cookie of cookiesDesAutres(await rangerLesAutres(capacite, actif, autres), securise()))
-    magasin.set(cookie)
-  const langue = await langueDossier(capacite.dossierId, capacite.partie)
+  for (const cookie of cookiesDesAutres(ranges, securise())) magasin.set(cookie)
   if (langue) magasin.set(optionsCookieLangue(langue))
   redirect(capacite.partie === 'locataire' ? '/locataire' : '/garant')
 }
