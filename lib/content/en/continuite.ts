@@ -11,6 +11,8 @@ export const continuite: Textes<typeof Fr> = {
   agence: 'Send to my agency',
   domaine: 'Your agency’s email domain',
   aide: 'Ask your agency for its exact work domain. It must be verified on Cloison. If it gave you an application link, use that instead: your file is then free. If you attach it yourself, you pay for your file before inviting your guarantor.',
+  aideRegle:
+    'Ask your agency for its exact work domain. It must be verified on Cloison. If it gave you an application link, use that instead. Your file is already paid: linking it here does not charge you again.',
   consentement:
     'I authorise this agency to review the information and documents of the file. This link to the agency is permanent.',
   transmettre: 'Link my file',

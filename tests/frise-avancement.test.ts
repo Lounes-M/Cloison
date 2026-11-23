@@ -17,18 +17,27 @@ test.each([
 })
 
 test.each([
-  ['ouvert', false, 'fait,encours,avenir,avenir'],
-  ['depot_en_cours', true, 'fait,fait,encours,avenir'],
-  ['refuse', true, 'fait,fait,arrete,avenir'],
-  ['transmis', true, 'fait,fait,fait,encours'],
-  ['signe', true, 'fait,fait,fait,fait'],
-])('garant, statut %s (depot %s)', (statut, depot, attendu) => {
-  expect(etats(etapesGarant(statut, depot))).toBe(attendu)
-})
+  ['ouvert', 'fait,encours,avenir,avenir'],
+  ['depot_en_cours', 'fait,encours,avenir,avenir'],
+  ['complet', 'fait,fait,encours,avenir'],
+  ['garant_insuffisant', 'fait,fait,encours,avenir'],
+  ['refuse', 'fait,fait,arrete,avenir'],
+  ['transmis', 'fait,fait,fait,encours'],
+  ['signe', 'fait,fait,fait,fait'],
+])(
+  'garant, statut %s : les pieces ne sont terminees que si le serveur les a jugees',
+  (statut, attendu) => {
+    expect(etats(etapesGarant(statut))).toBe(attendu)
+  },
+)
 
 test('le garant ne lit aucun verdict : complet et garant insuffisant donnent la meme frise', () => {
-  for (const depot of [false, true])
-    expect(etapesGarant('garant_insuffisant', depot)).toEqual(etapesGarant('complet', depot))
+  expect(etapesGarant('garant_insuffisant')).toEqual(etapesGarant('complet'))
+})
+
+test('tant que le garant n est pas designe, l etape ne dit pas qu il l est', () => {
+  expect(etapesLocataire('ouvert', false)[1]?.titre).toBe('Garant à désigner')
+  expect(etapesLocataire('ouvert', true)[1]?.titre).toBe('Garant désigné')
 })
 
 test('une seule etape courante au plus, et toujours dans l’ordre', () => {
@@ -42,7 +51,7 @@ test('une seule etape courante au plus, et toujours dans l’ordre', () => {
     'signe',
     'inconnu',
   ]) {
-    for (const etapes of [etapesLocataire(statut, true), etapesGarant(statut, true)]) {
+    for (const etapes of [etapesLocataire(statut, true), etapesGarant(statut)]) {
       const rangs = etapes.map((e) => ['fait', 'encours', 'arrete', 'avenir'].indexOf(e.etat))
       expect(rangs).toEqual([...rangs].sort((a, b) => a - b))
       expect(

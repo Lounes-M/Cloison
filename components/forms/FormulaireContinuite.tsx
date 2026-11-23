@@ -9,8 +9,11 @@ export function FormulaireContinuite({
   mode,
   dossierId,
   langue: langueChoisie,
+  regle = false,
 }: ({ mode: 'retrouver'; dossierId?: never } | { mode: 'agence'; dossierId: string }) & {
   langue?: Langue
+  /** Le dossier est déjà réglé : ne plus dire qu’il faudra payer pour inviter le garant. */
+  regle?: boolean
 }) {
   const langueDuContexte = useLangue()
   const langue = langueChoisie ?? langueDuContexte
@@ -53,7 +56,9 @@ export function FormulaireContinuite({
           </>
         ) : (
           <>
-            <p className="text-muted text-[14px] leading-relaxed font-medium">{continuite.aide}</p>
+            <p className="text-muted text-[14px] leading-relaxed font-medium">
+              {regle ? continuite.aideRegle : continuite.aide}
+            </p>
             <label htmlFor="domaine-agence" className="text-[14px] font-bold">
               {continuite.domaine}
             </label>

@@ -46,7 +46,7 @@ const schema = z.object({
     .toLowerCase()
     .min(5, "L'adresse de ton garant est requise.")
     .max(180, 'Cette adresse est trop longue.')
-    .pipe(z.email('Cette adresse ne ressemble pas a une adresse e-mail.')),
+    .pipe(z.email('Cette adresse ne ressemble pas à une adresse e-mail.')),
 })
 
 async function empreinteAppelant(): Promise<string> {
