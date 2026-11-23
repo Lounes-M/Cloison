@@ -78,12 +78,6 @@ export const mentionsLegales = {
       adresse: '440 N Barranca Ave #4133, Covina, CA 91723, États-Unis',
       site: 'https://vercel.com',
     },
-    {
-      nom: 'Supabase, Inc.',
-      role: 'Base de données, authentification et stockage des pièces chiffrées, dans un projet situé dans l’Union européenne.',
-      adresse: null,
-      site: 'https://supabase.com',
-    },
   ],
   donnees: 'Données personnelles et cookies',
   donneesTexte:
