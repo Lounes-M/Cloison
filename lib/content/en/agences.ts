@@ -70,7 +70,7 @@ export const commentCaMarche = {
       puce: 'no account',
       titre: 'You send the tenant a link',
       texte:
-        'From the tool you already use. No account to create, for them or for their guarantor.',
+        'From your space, or by pasting a link into your listing. No account to create, for them or for their guarantor.',
     },
     {
       numero: 2,
