@@ -2,6 +2,7 @@ import 'server-only'
 
 import { envoyer } from './envoi'
 
+import { type ControleSiren, lignesControleSiren } from '@/lib/agences/controle-siren'
 import { env } from '@/lib/env'
 
 /**
@@ -12,6 +13,9 @@ import { env } from '@/lib/env'
  * demonstration. Et il porte la ligne SQL a coller pour activer, parce que la
  * verification est manuelle pendant le pilote et qu'une action a un pas ne se
  * rate pas.
+ *
+ * Le controle du SIREN sur l'annuaire y figure quand il a ete fait : il aide a
+ * decider, il ne decide pas, et son absence ne retient pas le courriel.
  *
  * Deux instructions dans le SQL, et pas une : le declencheur de la 0002 remet
  * en decouverte toute agence dont le SIREN change. Ici il ne change pas, mais
@@ -26,6 +30,7 @@ export type DemandeActivation = {
   cartePro: string
   demandeePar: string
   essais: { consultations: number; piecesOuvertes: number; dossiersPris: number }
+  controleSiren?: ControleSiren
 }
 
 export async function notifierDemandeActivation(demande: DemandeActivation): Promise<boolean> {
@@ -43,6 +48,7 @@ export async function notifierDemandeActivation(demande: DemandeActivation): Pro
     `  ${demande.essais.piecesOuvertes} piece(s) ouverte(s)`,
     `  ${demande.essais.dossiersPris} dossier(s) pris`,
     '',
+    ...(demande.controleSiren ? [...lignesControleSiren(demande.controleSiren), ''] : []),
     'Verifier le SIREN : https://annuaire-entreprises.data.gouv.fr/entreprise/' + demande.siren,
     '',
     'Pour activer, dans l’editeur SQL Supabase :',

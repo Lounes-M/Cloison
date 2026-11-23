@@ -110,6 +110,19 @@ export const depot = {
   preparation: 'Préparation de la photo…',
   selection: 'Fichier sélectionné :',
   annulerSelection: 'Annuler la sélection',
+  ajouterPage: 'Ajouter une page',
+  retirerDernierePage: 'Retirer la dernière page',
+  reunion: 'Réunion des pages…',
+  reunies: (pages: number, taille: string) => `${pages} pages réunies en un seul PDF (${taille})`,
+  melange:
+    'Pour réunir plusieurs fichiers, choisissez uniquement des photos. Un PDF se dépose seul.',
+  tropDePages: 'Une pièce réunit au plus 12 pages. Au-delà, déposez un PDF.',
+  reunionTropLourde:
+    'Ces pages réunies dépassent 4 Mo. Retirez-en une, ou déposez le document en PDF.',
+  photoIllisible:
+    'Une de ces photos ne peut pas être lue. Reprenez-la ou choisissez un autre fichier.',
+  reunionImpossible:
+    'Ce navigateur ne peut pas réunir vos photos. Déposez le document en un seul PDF.',
   debit: 'Trop de documents ont été proposés récemment. Réessayez dans un quart d’heure.',
   original: 'Télécharger mon original',
   titre: 'Votre dépôt',
@@ -118,7 +131,8 @@ export const depot = {
   discretion:
     'Vos pièces sont chiffrées par notre serveur avant leur stockage, et le locataire n’y a pas accès. Il voit seulement que le dossier avance.',
   piecesTitre: 'Vos pièces',
-  formats: 'PDF, JPEG ou PNG, 4 Mo par fichier. Une photo bien cadrée suffit.',
+  formats:
+    'PDF, JPEG ou PNG, 4 Mo par fichier. Une photo bien cadrée suffit. Plusieurs pages ? Photographiez-les une à une : elles sont réunies en un seul PDF.',
   ajouter: 'Ajouter un fichier',
   deposer: 'Déposer le fichier sélectionné',
   envoi: 'Envoi…',
