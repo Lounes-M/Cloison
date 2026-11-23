@@ -143,7 +143,8 @@ export const engagement: Textes<typeof Fr.engagement> = {
     'The agency can ask you to pay from the first missed payment, without pursuing the tenant first. This is what almost every agency asks for.',
   bouton: 'Save',
   envoi: 'Saving…',
-  succes: 'Saved.',
+  succes: 'Your commitment has been saved.',
+  avertissementLoyer: 'This amount is below the monthly rent for the file. You can still save it.',
   erreurs: {
     couvre: 'Enter what you cover.',
     montant: 'The amount cannot be read. Example: 1 200 or 1200.50.',

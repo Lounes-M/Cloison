@@ -4,9 +4,12 @@ import { natures } from '@/lib/content/garant'
 import {
   TAILLE_MAX_DEPOT,
   analyserEngagement,
+  lireLoyer,
+  messageLoyer,
   montantEnCents,
   natureDepuis,
   nombreDocumentsDepuis,
+  plafondSousLeLoyer,
   tailleLisible,
 } from '@/lib/garant/validation'
 import { baseDEssai, devenir, redevenirProprietaire, refus } from './base'
@@ -94,6 +97,22 @@ describe('le montant', () => {
   test('vide vaut « pas de plafond », et ce n est pas une erreur', () => {
     expect(montantEnCents('')).toBeNull()
     expect(montantEnCents('   ')).toBeNull()
+  })
+
+  test('le loyer mensuel distingue le texte, le negatif et le plafond', () => {
+    expect(lireLoyer('')).toEqual({ ok: true, cents: null })
+    expect(lireLoyer('850,50')).toEqual({ ok: true, cents: 85_050 })
+    expect(lireLoyer('100 000')).toEqual({ ok: true, cents: 10_000_000 })
+    expect(lireLoyer('abc')).toEqual({ ok: false, motif: 'illisible' })
+    expect(lireLoyer('-1200')).toEqual({ ok: false, motif: 'negatif' })
+    expect(lireLoyer('0')).toEqual({ ok: false, motif: 'negatif' })
+    expect(lireLoyer('99999999')).toEqual({ ok: false, motif: 'plafond' })
+    expect(lireLoyer('100000,01')).toEqual({ ok: false, motif: 'plafond' })
+    expect(messageLoyer('illisible')).not.toBe(messageLoyer('negatif'))
+    expect(messageLoyer('negatif')).not.toBe(messageLoyer('plafond'))
+    expect(plafondSousLeLoyer(120_000, 125_000)).toBe(true)
+    expect(plafondSousLeLoyer(125_000, 125_000)).toBe(false)
+    expect(plafondSousLeLoyer(null, 125_000)).toBe(false)
   })
 
   test('il refuse ce qui ne se lit pas sans deviner', () => {

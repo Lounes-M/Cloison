@@ -8,10 +8,10 @@ import { z } from 'zod'
 import { ouvrirDossierAvecLien } from '@/lib/acces/session'
 import { reprendreLivraisonLiens } from '@/lib/courriels/livraison-liens'
 import { prevenirSiLeStatutAChange } from '@/lib/courriels/notifications'
-import { dossier as dossierFr, tableau as tableauFr } from '@/lib/content/espace'
-import { montantEnCents } from '@/lib/garant/validation'
+import { dossier as dossierFr } from '@/lib/content/espace'
+import { lireLoyer, messageLoyer } from '@/lib/garant/validation'
 import { contexteAgence } from './contexte'
-import { dossier as dossierEn, tableau as tableauEn } from '@/lib/content/en/espace'
+import { dossier as dossierEn } from '@/lib/content/en/espace'
 import { choisir, versLangue } from '@/lib/i18n'
 import { reglerLangueDossier } from '@/lib/langue-preferee'
 import { langueAction, langueEspace } from '@/lib/langue-espace'
@@ -41,7 +41,7 @@ const schemaLocataire = z.object({
     .toLowerCase()
     .min(5, "L'adresse du locataire est requise.")
     .max(180, 'Cette adresse est trop longue.')
-    .pipe(z.email('Cette adresse ne ressemble pas a une adresse e-mail.')),
+    .pipe(z.email('Cette adresse ne ressemble pas à une adresse e-mail.')),
 })
 
 const OUVERTURE_IMPOSSIBLE = "Le dossier n'a pas pu être ouvert. Réessayez dans un instant."
@@ -55,7 +55,6 @@ export async function ouvrirUnDossier(
 ): Promise<EtatNouveauDossier> {
   const langue = await langueEspace()
   const dire = traducteur(langue)
-  const tableau = choisir(langue, tableauFr, tableauEn)
 
   const saisie = String(donnees.get('courriel') ?? '')
   const analyse = schemaLocataire.safeParse({ courriel: saisie })
@@ -69,15 +68,16 @@ export async function ouvrirUnDossier(
 
   // Le loyer est facultatif a l'ouverture : vide, le locataire le saisira.
   const saisieLoyer = String(donnees.get('loyer') ?? '')
-  const loyer = montantEnCents(saisieLoyer)
-  if (loyer === 'invalide') {
+  const lu = lireLoyer(saisieLoyer)
+  if (!lu.ok) {
     return {
       statut: 'erreur',
-      message: tableau.nouveauLoyerInvalide,
+      message: messageLoyer(lu.motif, langue),
       valeur: saisie,
       loyer: saisieLoyer,
     }
   }
+  const loyer = lu.cents
 
   const brutLogement = String(donnees.get('logement') ?? '')
   if (brutLogement !== '' && !estUuidCanonique(brutLogement)) {

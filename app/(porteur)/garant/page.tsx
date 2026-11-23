@@ -265,11 +265,7 @@ export default async function PageGarant({
 
       <FriseAvancement
         titre={frise.garant.titre}
-        etapes={etapesGarant(
-          String(dossier.statut),
-          Boolean(engagement) && deposees.length > 0,
-          langue,
-        )}
+        etapes={etapesGarant(String(dossier.statut), langue)}
       />
 
       {restant ? <ResteAFaireGarant etapes={restant} /> : null}
