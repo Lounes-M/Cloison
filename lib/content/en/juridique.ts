@@ -24,13 +24,14 @@ export const juridique = {
 
 /** L'editeur en projet, tel que la page anglaise le presente. */
 export const editeurEnProjet = {
-  denomination: 'Cloison SAS',
-  forme:
-    'Société par actions simplifiée (SAS, French simplified joint-stock company), being incorporated',
+  denomination: 'LM Services',
+  forme: 'SASU (société par actions simplifiée unipersonnelle, French single-shareholder company)',
   capital: '€1,000',
-  adresse: 'Paris, France',
+  siren: '994 493 435',
+  rcs: '994 493 435 R.C.S. Paris',
+  adresse: '231 rue Saint-Honoré, 75001 Paris, France',
   courriel: 'contact@cloison.immo',
-  directeurPublication: 'The chair (président) of Cloison SAS',
+  directeurPublication: 'Lounes Moumou, chair (président)',
   sauvegardeJours: 7,
 } as const
 

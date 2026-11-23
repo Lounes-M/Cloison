@@ -28,20 +28,23 @@ export const juridique = {
 } as const
 
 /**
- * L'identite de l'editeur tant que la societe n'est pas immatriculee.
+ * L'identite de l'editeur, telle que le registre du commerce l'enregistre.
  *
- * Ce sont les choix du projet, pas des faits enregistres : la societe sera
- * creee d'apres eux. Chaque variable `EDITEUR_*` posee les remplace. Aucun
- * numero n'est invente : SIREN, RCS et TVA n'existent qu'apres
- * l'immatriculation, et la page le dit.
+ * Cloison est une marque exploitee par LM Services : c'est cette societe qui
+ * edite le site et encaisse, et c'est elle que les pages juridiques nomment.
+ * Ces valeurs servent de repli ; chaque variable `EDITEUR_*` posee les
+ * remplace. La TVA n'a pas de repli : elle depend du regime reel de la
+ * societe, et se declare par `EDITEUR_TVA`.
  */
 export const editeurEnProjet = {
-  denomination: 'Cloison SAS',
-  forme: 'Société par actions simplifiée (SAS), en cours de formation',
+  denomination: 'LM Services',
+  forme: 'SASU, société par actions simplifiée unipersonnelle',
   capital: '1 000 €',
-  adresse: 'Paris, France',
+  siren: '994 493 435',
+  rcs: '994 493 435 R.C.S. Paris',
+  adresse: '231 rue Saint-Honoré, 75001 Paris',
   courriel: 'contact@cloison.immo',
-  directeurPublication: 'Le président de Cloison SAS',
+  directeurPublication: 'Lounes Moumou, président',
   sauvegardeJours: 7,
 } as const
 

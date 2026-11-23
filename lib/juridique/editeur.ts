@@ -9,8 +9,8 @@ import { choisir, type Langue } from '@/lib/i18n'
  *
  * Les valeurs declarees viennent des variables `EDITEUR_*`, lues au rendu de
  * chaque page : ce sont des informations publiques par nature, aucune n'est un
- * secret. Tant qu'elles manquent, les pages affichent le projet de societe
- * (`editeurAffiche`), sans jamais inventer de numero d'immatriculation.
+ * secret. Tant qu'elles manquent, les pages affichent l'identite enregistree
+ * de la societe qui exploite la marque (`editeurAffiche`).
  *
  * Une valeur absente ou mal formee ne disparait pas en silence. Elle est
  * listee dans `manquants` et la page porte l'attribut
@@ -96,10 +96,10 @@ export function editeur(): Editeur {
 /**
  * L'editeur tel que les pages l'affichent.
  *
- * Tant que la societe n'est pas immatriculee, les pages presentent le projet
+ * Sans variable posee, les pages presentent l'identite de repli
  * (`editeurEnProjet`) plutot que des lignes vides : denomination, forme,
- * capital, siege, contact. Aucun numero n'est invente : sans `EDITEUR_SIREN`,
- * la page dit « en cours d'immatriculation ».
+ * capital, SIREN, RCS, siege, contact. Ce sont les valeurs du registre du
+ * commerce pour la societe qui exploite la marque, jamais des numeros supposes.
  *
  * `manquants` ne change pas : il liste ce que la configuration ne declare pas
  * encore, et la page garde son attribut `data-editeur-incomplet` tant qu'il
@@ -112,8 +112,11 @@ export function editeurAffiche(langue: Langue = 'fr'): Editeur {
     ...declare,
     denomination: declare.denomination ?? projet.denomination,
     forme: declare.forme ?? projet.forme,
-    // Le capital du projet n'accompagne que la forme du projet.
+    // Le capital de repli n'accompagne que la forme de repli.
     capital: declare.capital ?? (declare.forme ? null : projet.capital),
+    siren: declare.siren ?? projet.siren,
+    // Le RCS de repli n'accompagne que le SIREN de repli.
+    rcs: declare.rcs ?? (declare.siren ? null : projet.rcs),
     adresse: declare.adresse ?? projet.adresse,
     courriel: declare.courriel ?? projet.courriel,
     directeurPublication: declare.directeurPublication ?? projet.directeurPublication,
