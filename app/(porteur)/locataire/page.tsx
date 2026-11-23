@@ -1,6 +1,6 @@
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
-import { resteAFaireLocataire } from '@/lib/locataire/reste-a-faire'
+import { detailDossierOuvert, resteAFaireLocataire } from '@/lib/locataire/reste-a-faire'
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { frise as friseFr } from '@/lib/content/frise'
 import { etapesLocataire } from '@/lib/dossiers/frise'
@@ -17,6 +17,7 @@ import { agenceDuDossier } from '@/lib/acces/agence-du-dossier'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { agenceDuDossier as texteAgenceFr } from '@/lib/content/agence-du-dossier'
 import {
+  bandeauOuvert as bandeauOuvertFr,
   espace as espaceFr,
   secondGarant as texteSecondFr,
   statutsSansAgence as statutsSansAgenceFr,
@@ -35,6 +36,7 @@ import { frise as friseEn } from '@/lib/content/en/frise'
 import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
 import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
 import {
+  bandeauOuvert as bandeauOuvertEn,
   espace as espaceEn,
   secondGarant as texteSecondEn,
   statutsSansAgence as statutsSansAgenceEn,
@@ -104,10 +106,19 @@ export default async function PageLocataire({
   if (!dossier) redirect('/lien-invalide')
 
   const statut = statuts[String(dossier.statut)] ?? statuts.ouvert!
+  const faits = {
+    loyerDeclare: dossier.loyer_cents != null,
+    aRegler: resteARegler(dossier),
+    garantDesigne: Boolean(dossier.email_garant),
+  }
   const explication =
+    (String(dossier.statut) === 'ouvert'
+      ? choisir(langue, bandeauOuvertFr, bandeauOuvertEn)[detailDossierOuvert(faits)]
+      : undefined) ??
     (!dossier.agence_id && !dossier.demonstration
       ? choisir(langue, statutsSansAgenceFr, statutsSansAgenceEn)[String(dossier.statut)]
-      : undefined) ?? statut.explication
+      : undefined) ??
+    statut.explication
   const ouvert = ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
     String(dossier.statut),
   )
@@ -129,7 +140,7 @@ export default async function PageLocataire({
 
   // Ce que le locataire achete, c'est le lien de son garant. Un dossier ouvert
   // a l'invitation d'une agence, ou une demonstration, n'attend rien de lui.
-  const aRegler = resteARegler(dossier)
+  const aRegler = faits.aRegler
   let prixDossier: number = tarifs.locataireCents
   let versionTarif: string = tarifs.versionLocataire
   if (aRegler) {
@@ -222,7 +233,11 @@ export default async function PageLocataire({
         <FormulaireCandidature dossierId={porteur.capacite.dossierId} />
       ) : null}
       {ouvert && !dossier.agence_id ? (
-        <FormulaireContinuite mode="agence" dossierId={porteur.capacite.dossierId} />
+        <FormulaireContinuite
+          mode="agence"
+          dossierId={porteur.capacite.dossierId}
+          regle={Boolean(dossier.paye_le)}
+        />
       ) : null}
 
       {aRegler || dossier.paye_le ? (

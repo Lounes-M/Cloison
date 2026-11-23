@@ -164,7 +164,9 @@ export const engagement = {
     'L’agence peut vous demander de payer dès le premier impayé, sans poursuivre le locataire d’abord. C’est ce que demandent presque toutes les agences.',
   bouton: 'Enregistrer',
   envoi: 'Enregistrement…',
-  succes: 'Enregistré.',
+  succes: 'Votre engagement est enregistré.',
+  avertissementLoyer:
+    'Ce montant est inférieur au loyer mensuel du dossier. Vous pouvez l’enregistrer quand même.',
   erreurs: {
     couvre: 'Indiquez ce que vous couvrez.',
     montant: 'Le montant ne se lit pas. Exemple : 1 200 ou 1200,50.',

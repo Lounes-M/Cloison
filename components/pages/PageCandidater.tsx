@@ -1,15 +1,14 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
 import { FormulaireOuverture } from '@/components/forms/FormulaireOuverture'
-import { Button } from '@/components/ui/Button'
-import { EnTetePage } from '@/components/ui/EnTetePage'
 import { clientServeur } from '@/lib/acces/serveur'
 import { candidature as candidatureFr } from '@/lib/content/candidature'
 import { candidature as candidatureEn } from '@/lib/content/en/candidature'
 import { euros as eurosEn } from '@/lib/content/en/tarifs'
 import { euros as eurosFr } from '@/lib/content/tarifs'
-import { choisir, lien, type Langue } from '@/lib/i18n'
+import { choisir, type Langue } from '@/lib/i18n'
 
 type Logement = {
   libelle: string
@@ -90,7 +89,7 @@ export async function metadonneesCandidater(
  *
  * Elle ne montre que ce que l'agence a choisi de publier : le libelle, le
  * loyer de reference et son nom. Un code faux, ferme ou d'une agence non
- * verifiee donne la meme page, sans dire lequel.
+ * verifiee repond introuvable, sans dire lequel.
  */
 export async function PageCandidater({
   params,
@@ -104,21 +103,7 @@ export async function PageCandidater({
   const { code } = await params
   const logement = await logementDuCode(code)
 
-  if (!logement) {
-    return (
-      <main>
-        <EnTetePage
-          surtitre={t.page.etiquette}
-          titre={t.page.invalideTitre}
-          sousTitre={t.page.invalideTexte}
-        >
-          <Button href={lien(langue, '/demarrer')} className="mt-[2rem]">
-            {t.page.invalideBouton}
-          </Button>
-        </EnTetePage>
-      </main>
-    )
-  }
+  if (!logement) notFound()
 
   return (
     <main>

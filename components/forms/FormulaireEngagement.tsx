@@ -2,7 +2,7 @@
 
 import { BrouillonEngagement } from './BrouillonEngagement'
 import { LectureRevenus } from './LectureRevenus'
-import { useActionState, useId, useRef, useState } from 'react'
+import { useActionState, useEffect, useId, useRef, useState } from 'react'
 
 import {
   engagement as texteFr,
@@ -64,7 +64,12 @@ export function FormulaireEngagement({
   const id = useId()
   const formulaire = useRef<HTMLFormElement>(null)
   const champRevenu = useRef<HTMLInputElement>(null)
+  const annonce = useRef<HTMLDivElement>(null)
   const [brouillonEnCours, setBrouillonEnCours] = useState(false)
+
+  useEffect(() => {
+    if (etat.statut === 'enregistre') annonce.current?.focus()
+  }, [etat])
 
   return (
     <form ref={formulaire} action={envoyer} noValidate className="flex flex-col gap-5">
@@ -92,11 +97,6 @@ export function FormulaireEngagement({
           {texte.profilAide}
         </p>
       </div>
-      {etat.statut === 'enregistre' ? (
-        <p role="status" className="message-succes">
-          {texte.succes}
-        </p>
-      ) : null}
       {etat.statut === 'erreur' ? (
         <p role="alert" className="message-erreur">
           {etat.message}
@@ -205,6 +205,16 @@ export function FormulaireEngagement({
         </span>
       </label>
 
+      {etat.statut === 'enregistre' ? (
+        <div ref={annonce} tabIndex={-1} role="status" className="flex flex-col gap-3">
+          <p className="message-succes">{texte.succes}</p>
+          {etat.avertissement ? (
+            <p className="border-sun bg-sun/15 rounded-r-xl border-l-4 px-4 py-3 text-[14px] leading-relaxed font-medium">
+              {etat.avertissement}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <button
         type="submit"
         disabled={enCours || brouillonEnCours}
