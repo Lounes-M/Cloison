@@ -10,11 +10,27 @@
 -- d'imposition est accepte : la piece d'identite et les autres natures sont
 -- refusees ici, avant tout dechiffrement. Le resultat n'est pas enregistre.
 
-alter table public.journal_acces drop constraint journal_acces_action_check;
-alter table public.journal_acces add constraint journal_acces_action_check check(action in
- ('dossier_consulte','piece_deposee','piece_retiree','piece_ouverte','dossier_transmis',
- 'complement_demande','complement_fourni','complement_valide','complement_refuse','ocr_demande',
- 'relances_reprises','loyer_corrige','dossier_refuse','lecture_ia_garant','code_2ddoc_verifie'));
+-- L'action s'ajoute a la liste en place, quelle qu'elle soit : plusieurs
+-- migrations etendent ce journal en parallele et aucune ne doit effacer
+-- l'action d'une autre.
+do $ajout$
+declare actions text[];
+begin
+ select array_agg(m[1] order by ordre) into actions
+ from regexp_matches(
+  (select pg_get_constraintdef(oid) from pg_constraint
+   where conrelid='public.journal_acces'::regclass and conname='journal_acces_action_check'),
+  '''([a-z0-9_]+)''','g') with ordinality as t(m,ordre);
+ if actions is null or cardinality(actions)<10 then
+  raise exception 'Liste des actions du journal illisible : interrompre et examiner';
+ end if;
+ if not ('code_2ddoc_verifie'=any(actions)) then
+  actions:=actions||'code_2ddoc_verifie'::text;
+ end if;
+ alter table public.journal_acces drop constraint journal_acces_action_check;
+ execute format('alter table public.journal_acces add constraint journal_acces_action_check check(action in (%s))',
+  (select string_agg(quote_literal(a),',' order by o) from unnest(actions) with ordinality as u(a,o)));
+end $ajout$;
 
 create function public.reserver_verification_2ddoc(la_piece uuid) returns boolean
 language plpgsql security definer set search_path='' as $$
