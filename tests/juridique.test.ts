@@ -140,7 +140,7 @@ test('le prix porte la mention fiscale de l editeur', () => {
   expect(html).not.toContain('293 B')
 })
 
-test('sans immatriculation, les pages presentent le projet de societe, sans numero invente', () => {
+test('sans variable posee, les pages nomment la societe qui exploite la marque', () => {
   poser({
     EDITEUR_DENOMINATION: '',
     EDITEUR_FORME: '',
@@ -153,17 +153,25 @@ test('sans immatriculation, les pages presentent le projet de societe, sans nume
     SAUVEGARDE_RETENTION_JOURS: '',
   })
   const mentions = rendre(PageMentionsLegales)
-  for (const attendu of ['Cloison SAS', 'en cours de formation', 'contact@cloison.immo'])
+  // Cloison est une marque : l'editeur nomme est la societe immatriculee qui l'exploite.
+  for (const attendu of [
+    'LM Services',
+    'SASU, société par actions simplifiée unipersonnelle',
+    '994 493 435',
+    '994 493 435 R.C.S. Paris',
+    '231 rue Saint-Honoré, 75001 Paris',
+    'contact@cloison.immo',
+  ])
     expect(mentions).toContain(attendu)
-  expect(mentions).toContain('En cours d’immatriculation')
+  expect(mentions).not.toContain('En cours d’immatriculation')
   expect(mentions).not.toContain('À compléter')
-  // Aucun numero a neuf chiffres n'apparait tant qu'aucun n'est declare.
-  expect(mentions.replace(/<[^>]+>/g, ' ')).not.toMatch(/\b\d{3} ?\d{3} ?\d{3}\b/)
   // La supervision, elle, continue de reclamer les vraies valeurs.
   expect(mentions).toContain('data-editeur-incomplet')
 
   const confidentialite = rendre(PageConfidentialite)
-  expect(confidentialite).toContain('Le responsable du traitement est Cloison SAS')
+  expect(confidentialite).toContain(
+    'Le responsable du traitement est LM Services, éditeur de Cloison',
+  )
   expect(confidentialite).toContain('conservées 7 jours au plus')
   expect(confidentialite).toContain('Cookies et courriels')
   expect(confidentialite).not.toContain('À compléter')
@@ -177,8 +185,9 @@ test('une valeur declaree remplace toujours celle du projet', () => {
   poser(COMPLET)
   const mentions = rendre(PageMentionsLegales)
   expect(mentions).toContain('Cloison Fixture')
-  expect(mentions).not.toContain('Cloison SAS')
+  expect(mentions).not.toContain('LM Services')
   expect(mentions).not.toContain('1 000 €')
+  expect(mentions).not.toContain('994 493 435')
   expect(mentions).not.toContain('En cours d’immatriculation')
   expect(rendre(PageConditions)).not.toContain('article L. 612-1')
 })
