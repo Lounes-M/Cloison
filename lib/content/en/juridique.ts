@@ -11,7 +11,7 @@ import { prixLocataire } from './tarifs'
 export const juridique = {
   aCompleter: 'To be completed',
   immatriculation: 'Registration in progress',
-  miseAJour: 'Last updated: 20 November 2026.',
+  miseAJour: 'Last updated: 23 November 2026.',
   navigation: 'Legal information',
   liens: {
     mentions: { label: 'Legal notice', href: '/mentions-legales' },
@@ -97,6 +97,7 @@ export const confidentialite = {
       paragraphes: [
         'Tenant: email address, name, rent amount, file status and, if you pay for the file, the payment record sent by Stripe. Cloison never receives your card number.',
         'Guarantor: email address, last name, first name, postal address, declared net monthly income, scope of the commitment, the guarantee statement you write yourself, and the supporting documents you upload (payslips, tax notice, identity document, proof of address, employment contract).',
+        'To prepare the guarantee deed, the agency also enters the guarantor’s title, date and place of birth, the tenant’s name, the landlord’s name and address and the address of the home. This information only appears in the deed.',
         'Agency: work email address of each team member, role in the agency and, to verify the agency, its SIREN number and its professional licence number.',
         'For everyone: the language chosen, French or English, to display your space and to write to you in that language.',
         'For everyone: a log of viewings (who opened what, and when) and, against abuse, fingerprints of the IP address and email address calculated with a secret key, without the address itself.',
@@ -129,7 +130,7 @@ export const confidentialite = {
       paragraphes: [
         'A file with no document is deleted 30 days after it is opened. A file with documents is deleted three months after it is opened: documents, encryption keys, commitments and the log of viewings disappear together.',
         'An access link is valid for seven days at most, within the life of the file, and sending it again revokes the previous one. A draft commitment is kept for seven days at most.',
-        'The history of access changes within an agency is kept for 90 days. The fingerprints used against abuse only last for their window, one hour at most.',
+        'The history of access changes within an agency is kept for 90 days. The fingerprints used against abuse only last for their window, one hour at most. A demonstration request sent by an agency is deleted twelve months at most after it is sent.',
         'Accounting entries linked to a payment are kept for ten years, as the law requires.',
       ],
     },
@@ -156,11 +157,11 @@ export const confidentialite = {
   facultatifs: {
     signature: {
       docage:
-        'Electronic signature of the guarantee deed is entrusted to Docage, a French electronic signature provider. The signed deed is kept for the period stated at the time of signing, separate from that of the supporting documents.',
+        'Electronic signature of the guarantee deed is entrusted to Docage, a French electronic signature provider, which also receives the guarantor’s phone number, needed for signing. The signed deed is kept for the period stated at the time of signing, separate from that of the supporting documents.',
       youtrust:
-        'Electronic signature of the guarantee deed is entrusted to Youtrust, an electronic signature provider hosted in France. The signed deed is kept for the period stated at the time of signing, separate from that of the supporting documents.',
+        'Electronic signature of the guarantee deed is entrusted to Youtrust, an electronic signature provider hosted in France, which also receives the guarantor’s phone number, needed for signing. The signed deed is kept for the period stated at the time of signing, separate from that of the supporting documents.',
     },
-    ocr: 'At the explicit request of an agency, a document may be read by a text recognition service (OpenRouter) to make it easier to review. This reading makes no decision and is never triggered automatically.',
+    ocr: 'At the explicit request of an agency, a document other than the identity document may be read by a text recognition service (OpenRouter) to make it easier to review. This reading makes no decision and is never triggered automatically.',
   },
   droits: {
     titre: 'Your rights',
@@ -179,7 +180,7 @@ export const conditions = {
   description:
     'What Cloison provides to the tenant, the guarantor and the agency, and what each of them undertakes to do.',
   introduction:
-    'Cloison prepares a rental guarantee file in three separate spaces. It passes on a file: it does not decide on the application, guarantees neither a home nor a guarantor’s ability to pay, and does not draft the guarantee deed.',
+    'Cloison prepares a rental guarantee file in three separate spaces. It passes on a file: it does not decide on the application, and guarantees neither a home nor a guarantor’s ability to pay. The draft guarantee deed it prepares for the agency follows a public template and the data of the file: the agency reviews it, completes it and remains responsible for it.',
   sections: [
     {
       id: 'locataire',

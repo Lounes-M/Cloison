@@ -13,12 +13,12 @@
 
 import { prixLocataire } from './tarifs'
 
-export const versionConditions = 'conditions-2026-10-21'
+export const versionConditions = 'conditions-2026-11-23'
 
 export const juridique = {
   aCompleter: 'À compléter',
   immatriculation: 'En cours d’immatriculation',
-  miseAJour: 'Dernière mise à jour : 20 novembre 2026.',
+  miseAJour: 'Dernière mise à jour : 23 novembre 2026.',
   navigation: 'Informations légales',
   liens: {
     mentions: { label: 'Mentions légales', href: '/mentions-legales' },
@@ -109,6 +109,7 @@ export const confidentialite = {
       paragraphes: [
         'Locataire : adresse e-mail, nom, montant du loyer, statut du dossier, et, si vous réglez le dossier, la trace du paiement transmise par Stripe. Cloison ne reçoit jamais votre numéro de carte.',
         'Garant : adresse e-mail, nom, prénom, adresse postale, revenu net mensuel déclaré, étendue de l’engagement, mention de cautionnement que vous saisissez vous-même, et les justificatifs que vous déposez (bulletins de paie, avis d’imposition, pièce d’identité, justificatif de domicile, contrat de travail).',
+        'Pour préparer l’acte de cautionnement, l’agence indique aussi la civilité, la date et le lieu de naissance du garant, le nom du locataire, le nom et l’adresse du bailleur et l’adresse du logement. Ces informations ne figurent que dans l’acte.',
         'Agence : adresse e-mail professionnelle de chaque collaborateur, rôle dans l’agence, et pour la vérification de l’agence, son SIREN et son numéro de carte professionnelle.',
         'Pour tous : la langue choisie, français ou anglais, pour afficher votre espace et vous écrire dans cette langue.',
         'Pour tous : un journal des consultations (qui a ouvert quoi, et quand) et, contre les abus, des empreintes d’adresse IP et d’adresse e-mail calculées avec une clé secrète, sans l’adresse elle-même.',
@@ -141,7 +142,7 @@ export const confidentialite = {
       paragraphes: [
         'Un dossier sans pièce est effacé 30 jours après son ouverture. Un dossier avec pièces est effacé trois mois après son ouverture : pièces, clés de chiffrement, engagements et journal des consultations disparaissent ensemble.',
         'Un lien d’accès vaut sept jours au plus, dans la limite de la durée du dossier, et le renvoyer révoque le précédent. Un brouillon d’engagement est conservé sept jours au plus.',
-        'L’historique des changements d’accès dans une agence est conservé 90 jours. Les empreintes utilisées contre les abus ne durent que le temps de leur fenêtre, d’une heure au plus.',
+        'L’historique des changements d’accès dans une agence est conservé 90 jours. Les empreintes utilisées contre les abus ne durent que le temps de leur fenêtre, d’une heure au plus. Une demande de démonstration envoyée par une agence est effacée douze mois au plus après son envoi.',
         'Les écritures comptables liées à un paiement sont conservées dix ans, comme l’exige la loi.',
       ],
     },
@@ -168,11 +169,11 @@ export const confidentialite = {
   facultatifs: {
     signature: {
       docage:
-        'La signature électronique de l’acte de cautionnement est confiée à Docage, prestataire français de signature électronique. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
+        'La signature électronique de l’acte de cautionnement est confiée à Docage, prestataire français de signature électronique, qui reçoit aussi le numéro de téléphone du garant, nécessaire à la signature. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
       youtrust:
-        'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
+        'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France, qui reçoit aussi le numéro de téléphone du garant, nécessaire à la signature. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
     },
-    ocr: 'À la demande explicite d’une agence, une pièce peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
+    ocr: 'À la demande explicite d’une agence, une pièce autre que la pièce d’identité peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
   },
   droits: {
     titre: 'Vos droits',
@@ -191,7 +192,7 @@ export const conditions = {
   description:
     'Ce que Cloison fournit au locataire, au garant et à l’agence, et ce que chacun s’engage à faire.',
   introduction:
-    'Cloison prépare un dossier de garantie locative dans trois espaces séparés. Il transmet un dossier : il ne décide pas de la candidature, ne garantit ni un logement ni la solvabilité d’un garant, et ne rédige pas l’acte de cautionnement.',
+    'Cloison prépare un dossier de garantie locative dans trois espaces séparés. Il transmet un dossier : il ne décide pas de la candidature, et ne garantit ni un logement ni la solvabilité d’un garant. Le projet d’acte de cautionnement qu’il prépare pour l’agence reprend un modèle public et les données du dossier : l’agence le relit, le complète et en reste responsable.',
   sections: [
     {
       id: 'locataire',

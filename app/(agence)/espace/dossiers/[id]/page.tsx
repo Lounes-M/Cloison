@@ -542,7 +542,12 @@ export default async function PageDossier({
           <p>{texte.ouvrirAide}</p>
         </div>
         {!pieces || pieces.length === 0 ? (
-          <p className="text-muted text-[15px] font-medium">{texte.piecesAucune}</p>
+          <p className="text-muted text-[15px] font-medium">
+            {/* Avant un premier dossier complet, la base ne montre aucune piece a l'agence (0087). */}
+            {['ouvert', 'depot_en_cours'].includes(String(d.statut))
+              ? texte.piecesEnAttente
+              : texte.piecesAucune}
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {pieces.map((p) => (
@@ -566,7 +571,10 @@ export default async function PageDossier({
                 >
                   {texte.ouvrir}
                 </a>
-                {configurationOcr() ? <LectureOcr pieceId={String(p.id)} /> : null}
+                {/* La piece d'identite n'est jamais lue par une machine (0087). */}
+                {configurationOcr() && p.type !== 'piece_identite' ? (
+                  <LectureOcr pieceId={String(p.id)} />
+                ) : null}
                 <ExamenPiece
                   dossierId={id}
                   pieceId={String(p.id)}

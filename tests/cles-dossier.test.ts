@@ -77,7 +77,9 @@ describe('cles de dossier', () => {
     await redevenirProprietaire(db)
     await db.query(`
       update public.dossiers
-         set agence_id = (select id from public.agences where domaine = 'agence-lyon3.fr')
+         set agence_id = (select id from public.agences where domaine = 'agence-lyon3.fr'),
+               -- Deja complet une fois : avant, l'agence ne lit aucune piece (0087).
+               complet_le = now()
        where id = '${dossier}'
     `)
 
