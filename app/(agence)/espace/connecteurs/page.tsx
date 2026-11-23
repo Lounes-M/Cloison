@@ -7,6 +7,10 @@ import { contexteAgence } from '@/lib/agences/contexte'
 import { listerConnecteurs } from '@/lib/connecteurs/liste'
 import { connecteurs as tFr } from '@/lib/content/connecteurs'
 import { FormulaireConnecteur } from '@/components/forms/FormulaireConnecteur'
+import { FormulaireApimo } from '@/components/forms/FormulaireApimo'
+import { apimoConfigure } from '@/lib/logiciels/apimo'
+import { logiciels as logicielsFr } from '@/lib/content/logiciels'
+import { logiciels as logicielsEn } from '@/lib/content/en/logiciels'
 import { interfaceEspace as interfaceEspaceEn } from '@/lib/content/en/interface'
 import { connecteurs as tEn } from '@/lib/content/en/connecteurs'
 import { choisir, locale, deuxPoints } from '@/lib/i18n'
@@ -21,6 +25,17 @@ export default async function PageConnecteurs() {
   if (c.etat !== 'rattache') redirect('/connexion')
   if (c.role !== 'admin') notFound()
   const data = await listerConnecteurs(c)
+  // L'import n'apparait qu'une fois les identifiants de prestataire poses.
+  const importOuvert = apimoConfigure()
+  const logiciels = choisir(langue, logicielsFr, logicielsEn)
+  const { data: connexion, error: connexionErreur } = importOuvert
+    ? await c.supabase
+        .from('connexions_logiciels')
+        .select('identifiant, importe_le')
+        .eq('logiciel', 'apimo')
+        .maybeSingle()
+    : { data: null, error: null }
+  if (connexionErreur) throw new Error('Connexion au logiciel indisponible')
   const date = (v: string) =>
     new Date(v).toLocaleDateString(locale(langue), {
       day: 'numeric',
@@ -64,6 +79,21 @@ export default async function PageConnecteurs() {
         })}
       </ul>
       {!data.length ? <p className="mt-4">{t.aucun}</p> : null}
+      {importOuvert ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{logiciels.titre}</h2>
+          <p className="mt-2 text-[15px] font-medium">{logiciels.aide}</p>
+          <p className="text-muted mt-2 text-sm font-medium">{logiciels.prealable}</p>
+          <FormulaireApimo identifiant={connexion ? String(connexion.identifiant) : null} />
+          {connexion ? (
+            <p className="text-muted mt-4 text-sm font-medium">
+              {connexion.importe_le
+                ? `${logiciels.dernier}${deuxPoints(langue)}${date(String(connexion.importe_le))}`
+                : logiciels.jamais}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
     </div>
   )
 }
