@@ -1,3 +1,5 @@
+import { colocation as texteColocationFr } from '@/lib/content/colocation'
+import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
 import Link from 'next/link'
 import { EnteteEspace } from '@/components/ui/EnteteEspace'
 import { notFound, redirect } from 'next/navigation'
@@ -29,7 +31,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const [{ data: d, error }, { data: e }] = await Promise.all([
     c.supabase
       .from('dossiers')
-      .select('id,statut,demonstration,loyer_cents,locataire_nom')
+      .select('id,statut,demonstration,loyer_cents,locataire_nom,colocation_id')
       .eq('id', id)
       .maybeSingle(),
     c.supabase
@@ -89,6 +91,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         {!e?.mention ? <p className="mt-3 font-bold">{t.sansMention}</p> : null}
       </section>
 
+      {d.colocation_id ? (
+        <p className="outlined bg-paper mb-6 rounded-xl p-4 text-[14px] font-medium">
+          {choisir(langue, texteColocationFr, texteColocationEn).acte}
+        </p>
+      ) : null}
       <p className="text-muted mb-6">{t.relecture}</p>
       <section className="panneau-espace">
         <ModeleActe

@@ -75,6 +75,8 @@ export const acte: Textes<typeof Fr> = {
       'The guarantor’s statement is incomplete for these terms. They must enter it again.',
     mention_plafond:
       'The amount in the guarantor’s statement does not match the cap of the commitment. They must enter it again.',
+    colocation:
+      'This file is part of a flat share: accept the other flatmates’ files first, so the deed can state how many they are.',
     dates: 'Check the dates: birth, date of the deed and end of the commitment.',
     caracteres:
       'A text contains a character the PDF cannot reproduce. Correct the entry concerned.',

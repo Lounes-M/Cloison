@@ -5,7 +5,8 @@ import { donneesDepuisDossier } from './donnees-dossier'
 import { ActeIncomplet, type RefusActe } from './modele-cautionnement'
 import { genererActePdf, TexteNonImprimable } from './pdf-cautionnement'
 
-export type MotifRefusProjet = 'saisie' | 'dossier' | 'mention' | 'caracteres' | RefusActe
+export type MotifRefusProjet =
+  'saisie' | 'dossier' | 'mention' | 'colocation' | 'caracteres' | RefusActe
 
 export type ProjetDossier =
   | { ok: true; pdf: Uint8Array; signature: PositionSignature }
