@@ -129,6 +129,7 @@ const nextConfig: NextConfig = {
       './node_modules/pako/**',
       './node_modules/tslib/**',
       './node_modules/@napi-rs/canvas*/**',
+      './node_modules/zxing-wasm/**',
     ],
   },
 

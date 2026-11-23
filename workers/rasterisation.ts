@@ -69,7 +69,7 @@ const PAGES_MAXIMUM = 40
  * pas de lui-meme. La route qui appellera ce module devra les nommer dans
  * `outputFileTracingIncludes`. En attendant, on echoue ici, bruyamment.
  */
-function racineDesPolices(): string {
+export function racineDesPolices(): string {
   const require = createRequire(import.meta.url)
   const racine = require
     .resolve('pdfjs-dist/package.json')
@@ -93,7 +93,7 @@ function racineDesPolices(): string {
  * Le module est volumineux et n'a rien a faire dans le graphe d'un rendu qui
  * n'ouvre aucune piece.
  */
-async function moteurPdf() {
+export async function moteurPdf() {
   return import('pdfjs-dist/legacy/build/pdf.mjs')
 }
 
@@ -216,16 +216,16 @@ export function poserFiligrane(
  * conversions disent que le rapprochement est delibere, et les isolent en un
  * seul endroit plutot que de les eparpiller dans la boucle.
  */
-function enToileDom(toile: Canvas): HTMLCanvasElement {
+export function enToileDom(toile: Canvas): HTMLCanvasElement {
   return toile as unknown as HTMLCanvasElement
 }
 
-function enContexteDom(ctx: SKRSContext2D): CanvasRenderingContext2D {
+export function enContexteDom(ctx: SKRSContext2D): CanvasRenderingContext2D {
   return ctx as unknown as CanvasRenderingContext2D
 }
 
 /** Une toile blanche : un PDF transparent deviendrait noir sans elle. */
-function toileBlanche(largeur: number, hauteur: number) {
+export function toileBlanche(largeur: number, hauteur: number) {
   verifierDimensions(largeur, hauteur)
   const toile = createCanvas(Math.ceil(largeur), Math.ceil(hauteur))
   const ctx = toile.getContext('2d')

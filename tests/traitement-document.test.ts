@@ -151,3 +151,29 @@ test('une sortie invalide ne divulgue pas son contenu dans l erreur journalisabl
     traiterDocument(Buffer.from('test'), 'application/pdf', '', 'verifier'),
   ).rejects.not.toThrow('revenu_12345')
 })
+
+const code = Buffer.from('DC04FR04FPE3FFFF22B32801FR452024\x1fAAAA', 'latin1')
+
+test('la lecture du code rend ses octets, ou un tampon vide', async () => {
+  executer.mockResolvedValueOnce(
+    Buffer.from(JSON.stringify({ ok: true, code: code.toString('base64') })),
+  )
+  expect(await traiterDocument(pdf, 'application/pdf', '', 'lire_code')).toEqual(code)
+  expect(JSON.parse(executer.mock.calls[0]![1].toString()).operation).toBe('lire_code')
+  executer.mockResolvedValueOnce(Buffer.from(JSON.stringify({ ok: true, code: '' })))
+  expect(await traiterDocument(pdf, 'application/pdf', '', 'lire_code')).toEqual(Buffer.alloc(0))
+})
+
+test.each([
+  { ok: true },
+  { ok: true, code: null },
+  { ok: true, code: code.toString('base64'), pdf: pdf.toString('base64') },
+  { ok: true, code: code.toString('base64'), pages: 1 },
+  { ok: true, code: ' ' + code.toString('base64') },
+  // Autre chose qu'un 2D-Doc : du texte du document ne doit pas sortir par ce champ.
+  { ok: true, code: Buffer.from('Bulletin de paie de Mme Dupont').toString('base64') },
+  { ok: true, code: Buffer.concat([code, Buffer.alloc(2100, 0x41)]).toString('base64') },
+])('la lecture du code refuse une sortie inattendue : %j', async (reponse) => {
+  executer.mockResolvedValue(Buffer.from(JSON.stringify(reponse)))
+  await expect(traiterDocument(pdf, 'application/pdf', '', 'lire_code')).rejects.toThrow()
+})

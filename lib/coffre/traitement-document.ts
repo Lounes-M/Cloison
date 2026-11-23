@@ -10,7 +10,7 @@ export async function traiterDocument(
   contenu: Buffer,
   type: TypeAccepte,
   filigrane: string,
-  operation: 'verifier' | 'rasteriser',
+  operation: 'verifier' | 'rasteriser' | 'lire_code',
 ): Promise<Buffer>
 export async function traiterDocument(
   contenu: Buffer,
@@ -23,7 +23,7 @@ export async function traiterDocument(
   contenu: Buffer,
   type: TypeAccepte,
   filigrane: string,
-  operation: 'verifier' | 'rasteriser',
+  operation: 'verifier' | 'rasteriser' | 'lire_code',
   pagination = false,
 ) {
   const demande = Buffer.from(

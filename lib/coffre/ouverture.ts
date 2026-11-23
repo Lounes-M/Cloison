@@ -3,6 +3,7 @@ import 'server-only'
 import { ouvrirMaitresse } from './rotation-maitresse'
 import { ouvrir } from './enveloppe'
 import { rasteriser, rasteriserAvecPages } from './rasterisation'
+import { traiterDocument } from './traitement-document'
 import type { TypeAccepte } from './type-reel'
 
 /**
@@ -121,5 +122,44 @@ export async function ouvrirPiecePourLAgence(
     // donner.
     console.error('[coffre] rasterisation impossible')
     return { ouverte: false, raison: INDISPONIBLE }
+  }
+}
+
+/**
+ * Lit le code 2D-Doc d'une piece, pour l'agence, sans lui rendre la piece.
+ *
+ * Le document d'origine est dechiffre ici et confie au moteur confine, qui ne
+ * rend que les octets du code : aucune page, aucune image, aucun texte ne
+ * revient. L'agence ne recoit donc toujours jamais l'original.
+ *
+ * L'appelant a deja reserve et journalise la tentative en base
+ * (`reserver_verification_2ddoc`), qui est aussi le controle d'acces et de
+ * nature de piece. `piece` repasse par la RLS avant tout dechiffrement.
+ *
+ * Tampon vide : la piece ne porte pas de code lisible. `null` : la piece n'a
+ * pas pu etre lue du tout.
+ */
+export async function lireCodePourLAgence(
+  base: Pick<OuvertureBase, 'piece' | 'cleScellee' | 'telecharger'>,
+  pieceId: string,
+): Promise<Buffer | null> {
+  const piece = await base.piece(pieceId)
+  if (!piece) return null
+  const scellee = await base.cleScellee(piece.dossierId)
+  if (!scellee) return null
+  const scelle = await base.telecharger(piece.chemin)
+  if (!scelle) return null
+  let contenu: Buffer
+  try {
+    contenu = ouvrir(scelle, ouvrirMaitresse(scellee))
+  } catch {
+    console.error('[coffre] dechiffrement impossible')
+    return null
+  }
+  try {
+    return await traiterDocument(contenu, piece.typeReel, '', 'lire_code')
+  } catch {
+    console.error('[coffre] lecture du code impossible')
+    return null
   }
 }

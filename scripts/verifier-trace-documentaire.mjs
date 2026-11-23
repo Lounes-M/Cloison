@@ -26,7 +26,7 @@ for (const route of [
       const source = resolve(dirname(trace), fichier)
       const chemin = relative(racine, source).split(sep).join('/')
       if (
-        !/^(workers\/|lib\/signature\/position\.ts$|node_modules\/(pdfjs-dist|pdf-lib|@pdf-lib|pako|tslib|@napi-rs)\/)/.test(
+        !/^(workers\/|lib\/signature\/position\.ts$|node_modules\/(pdfjs-dist|pdf-lib|@pdf-lib|pako|tslib|@napi-rs|zxing-wasm)\/)/.test(
           chemin,
         )
       )
@@ -37,7 +37,7 @@ for (const route of [
       await copyFile(source, destination)
     }
     assert(moteurPresent, `Moteur absent de la trace ${route}`)
-    for (const operation of ['verifier', 'rasteriser']) {
+    for (const operation of ['verifier', 'rasteriser', 'lire_code']) {
       const resultat = spawnSync(
         process.execPath,
         ['--max-old-space-size=128', 'workers/document.mjs'],
@@ -63,6 +63,9 @@ for (const route of [
       assert.equal(resultat.status, 0, `Moteur inaccessible dans ${route}: ${resultat.stderr}`)
       const sortie = JSON.parse(resultat.stdout)
       assert.equal(sortie.ok, true, `Document refuse dans ${route}`)
+      // Page blanche : le decodeur WebAssembly doit se charger depuis la trace
+      // et ne rien trouver. Un binaire absent ferait echouer l'operation.
+      if (operation === 'lire_code') assert.equal(sortie.code, '', `Code inattendu dans ${route}`)
       if (operation === 'rasteriser') {
         const pdf = await PDFDocument.load(Buffer.from(sortie.pdf, 'base64'))
         assert.equal(pdf.getPageCount(), 1)

@@ -8,6 +8,7 @@ import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
+import { VerificationAvis } from '@/components/dossiers/VerificationAvis'
 import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
 import { ResponsableDossier } from '@/components/dossiers/ResponsableDossier'
 import { HistoriqueResponsables } from '@/components/dossiers/HistoriqueResponsables'
@@ -15,6 +16,7 @@ import { NotesDossier } from '@/components/dossiers/NotesDossier'
 import { notesDossier as texteNotesFr } from '@/lib/content/notes'
 import { examen as texteExamenFr, type ExamenDocumentaire } from '@/lib/content/examen'
 import { configurationOcr } from '@/lib/ocr/openrouter'
+import { verification2dDocActive } from '@/lib/2ddoc/verification-agence'
 import { Complements } from '@/components/dossiers/Complements'
 import { type Complement } from '@/lib/content/complements'
 import Link from 'next/link'
@@ -574,6 +576,10 @@ export default async function PageDossier({
                 {/* La piece d'identite n'est jamais lue par une machine (0087). */}
                 {configurationOcr() && p.type !== 'piece_identite' ? (
                   <LectureOcr pieceId={String(p.id)} />
+                ) : null}
+                {/* Seul l'avis d'imposition porte un 2D-Doc que nous verifions (0089). */}
+                {verification2dDocActive() && p.type === 'avis_imposition' ? (
+                  <VerificationAvis pieceId={String(p.id)} />
                 ) : null}
                 <ExamenPiece
                   dossierId={id}
