@@ -162,3 +162,48 @@ describe('PDF', () => {
     await expect(genererActePdf(d)).rejects.toThrow(TexteNonImprimable)
   })
 })
+
+describe('colocation', () => {
+  const coloc = (etendue: 'part' | 'loyer_entier'): DonneesActe => ({
+    ...base(),
+    colocation: { colocataires: 3, etendue },
+    coCautions: ['Dominique Témoin'],
+  })
+
+  test('l acte nomme le colocataire garanti et reproduit l article 8-1', () => {
+    const t = texteDe(coloc('part'))
+    expect(t).toContain('Colocataire garanti Alex Fictif')
+    expect(t).toContain('Le bail est une colocation de trois colocataires')
+    expect(t).toContain('le colocataire pour lequel je me porte caution est Alex Fictif')
+    expect(t).toContain('au titre de sa part du loyer et des charges')
+    expect(t).not.toContain('clause de solidarité entre les colocataires')
+    expect(t).toContain('VI de l’article 8-1 de la loi du 6 juillet 1989')
+    expect(t).toContain('identifie nécessairement, sous peine de nullité, le colocataire')
+    expect(t).toContain('Autres cautions Dominique Témoin')
+  })
+
+  test('bail solidaire : l engagement couvre la part des autres, dans la limite du plafond', () => {
+    const t = texteDe(coloc('loyer_entier'))
+    expect(t).toContain('clause de solidarité entre les colocataires')
+    expect(t).toContain('y compris la part des autres colocataires')
+    expect(t).not.toContain('au titre de sa part du loyer')
+  })
+
+  test('hors colocation, rien de tout cela', () => {
+    const t = texteDe(base())
+    expect(t).toContain('Locataire Alex Fictif')
+    expect(t).not.toContain('colocation')
+    expect(t).not.toContain('8-1')
+  })
+
+  test('le PDF de colocation passe le controle des actes', async () => {
+    const { pdf } = await genererActePdf(coloc('loyer_entier'))
+    expect((await PDFDocument.load(pdf)).getPageCount()).toBeGreaterThanOrEqual(1)
+  })
+
+  test('une colocation d une seule personne est refusee', () => {
+    expect(() =>
+      redigerActe({ ...base(), colocation: { colocataires: 1, etendue: 'part' } }),
+    ).toThrow()
+  })
+})
