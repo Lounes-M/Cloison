@@ -42,13 +42,13 @@ grant insert (agence_id, logement_id, loyer_total_cents, etendue) on public.colo
 
 create policy "Une agence lit ses colocations"
   on public.colocations for select to authenticated
-  using (agence_id = public.agence_courante());
+  using (agence_id = (select public.agence_courante()));
 create policy "Une agence cree ses colocations"
   on public.colocations for insert to authenticated
-  with check (agence_id = public.agence_courante());
+  with check (agence_id = (select public.agence_courante()));
 create policy "Une agence supprime ses colocations"
   on public.colocations for delete to authenticated
-  using (agence_id = public.agence_courante());
+  using (agence_id = (select public.agence_courante()));
 
 -- Le logement d'une colocation est un logement de la meme agence.
 create function public.verifier_logement_de_la_colocation() returns trigger
