@@ -20,6 +20,7 @@ export const footerLinks = [
   { label: 'Product', href: '/#produit' },
   { label: 'Pricing', href: '/#tarifs' },
   { label: 'Agencies', href: '/agences' },
+  { label: 'How we use AI', href: '/intelligence-artificielle' },
   { label: 'FAQ', href: '/questions' },
   { label: 'Agency sign-in', href: '/connexion' },
   { label: 'Find my file', href: '/lien-invalide' },
