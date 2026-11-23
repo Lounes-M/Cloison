@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { chemin: '/', changeFrequency: 'weekly', priority: 1 },
     { chemin: '/agences', changeFrequency: 'weekly', priority: 0.9 },
     { chemin: '/questions', changeFrequency: 'monthly', priority: 0.6 },
+    { chemin: '/intelligence-artificielle', changeFrequency: 'monthly', priority: 0.6 },
     { chemin: '/mentions-legales', changeFrequency: 'monthly', priority: 0.3 },
     { chemin: '/confidentialite', changeFrequency: 'monthly', priority: 0.3 },
     { chemin: '/conditions', changeFrequency: 'monthly', priority: 0.3 },

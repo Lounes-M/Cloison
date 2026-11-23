@@ -139,6 +139,13 @@ export function traitementsFacultatifs() {
   return {
     ocr: process.env.OCR_ACTIVE === 'true',
     lectureGarant: process.env.LECTURE_IA_GARANT === 'true',
+    // Vrai seulement si l'endpoint impose est europeen : le defaut l'est, un
+    // autre choix ou « aucun » ne permet plus de l'affirmer.
+    lectureEnEurope:
+      process.env.OPENROUTER_REGION?.trim() === 'eu' ||
+      /^(google-vertex\/europe|amazon-bedrock\/eu-|azure\/eu)/.test(
+        process.env.OPENROUTER_EXTRACTION_FOURNISSEUR?.trim() || 'google-vertex/europe',
+      ),
     // Le sous-traitant nomme est celui qui recoit vraiment l'acte : Docage, ou Youtrust en secours.
     signature:
       process.env.SIGNATURE_PARCOURS_ENABLED !== 'true'

@@ -9,6 +9,8 @@ import { site as siteEn } from '@/lib/content/en/site'
 import * as juridiqueFr from '@/lib/content/juridique'
 import { porte as porteFr } from '@/lib/content/locataire'
 import { questions as questionsFr } from '@/lib/content/questions'
+import { heroIa as iaEn } from '@/lib/content/en/ia'
+import { heroIa as iaFr } from '@/lib/content/ia'
 import type { Langue } from '@/lib/i18n'
 import { alternates } from '@/lib/seo/langues'
 import { site as siteFr } from '@/lib/site'
@@ -17,6 +19,7 @@ type Cle =
   | 'accueil'
   | 'agences'
   | 'questions'
+  | 'ia'
   | 'demarrer'
   | 'connexion'
   | 'conditions'
@@ -33,6 +36,11 @@ const FICHES: Record<Langue, Record<Cle, Fiche>> = {
       chemin: '/questions',
       titre: questionsFr.titre,
       description: questionsFr.description,
+    },
+    ia: {
+      chemin: '/intelligence-artificielle',
+      titre: iaFr.eyebrow,
+      description: iaFr.description,
     },
     demarrer: { chemin: '/demarrer', titre: 'Créer mon dossier', description: porteFr.sousTitre },
     connexion: {
@@ -65,6 +73,11 @@ const FICHES: Record<Langue, Record<Cle, Fiche>> = {
       chemin: '/questions',
       titre: questionsEn.titre,
       description: questionsEn.description,
+    },
+    ia: {
+      chemin: '/intelligence-artificielle',
+      titre: iaEn.eyebrow,
+      description: iaEn.description,
     },
     demarrer: { chemin: '/demarrer', titre: 'Create my file', description: porteEn.sousTitre },
     connexion: {
