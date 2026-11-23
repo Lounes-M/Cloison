@@ -84,7 +84,8 @@ export const commentCaMarche = {
       numero: 1,
       puce: 'aucun compte',
       titre: 'Vous envoyez un lien au locataire',
-      texte: 'Depuis votre outil habituel. Aucun compte à créer, ni pour lui, ni pour son garant.',
+      texte:
+        'Depuis votre espace, ou en collant un lien dans votre annonce. Aucun compte à créer, ni pour lui, ni pour son garant.',
     },
     {
       numero: 2,
