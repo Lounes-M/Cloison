@@ -123,3 +123,12 @@ export async function ouvrirPiecePourLAgence(
     return { ouverte: false, raison: INDISPONIBLE }
   }
 }
+
+/**
+ * Filigrane un document que Cloison a lui-meme compose pour l'AGENCE, comme la
+ * synthese remise au bailleur. Meme moteur et meme regle que pour une piece :
+ * ce qui part est une photographie marquee, et un echec ne rend rien.
+ */
+export async function filigranerPourLAgence(pdf: Buffer, filigrane: string): Promise<Buffer> {
+  return rasteriser(pdf, 'application/pdf', filigrane)
+}

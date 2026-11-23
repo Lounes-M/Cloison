@@ -24,6 +24,7 @@ export const journal = {
     dossier_refuse: 'Dossier refusé',
     ocr_demande: 'Transcription d’une pièce par IA demandée',
     lecture_ia_garant: 'Lecture IA d’un justificatif de revenus demandée',
+    synthese_bailleur: 'Synthèse pour le bailleur téléchargée',
   } as Record<string, string>,
   acteurs: { agence: 'l’agence', garant: 'le garant', locataire: 'le locataire' } as Record<
     string,
