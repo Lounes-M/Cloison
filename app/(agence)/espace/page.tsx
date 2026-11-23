@@ -1,3 +1,4 @@
+import { lireRelancesEpuisees } from '@/lib/agences/relances-epuisees'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -229,9 +230,9 @@ export default async function PageEspace({
       .lt('activite_rappel_le', limiteSansNouvelles())
   // La fonction rend au plus 500 identifiants, tous de l'agence (0077). Pour
   // le filtre, une panne arrete la page ; pour les pastilles, elle les tait.
-  const epuises = await supabase.rpc('dossiers_relances_epuisees')
-  if (epuises.error && relancesEpuisees) throw new Error('Chargement du dossier indisponible.')
-  const idsEpuises = !epuises.error && Array.isArray(epuises.data) ? (epuises.data as string[]) : []
+  const epuises = await lireRelancesEpuisees(supabase)
+  if (epuises.panne && relancesEpuisees) throw new Error('Chargement du dossier indisponible.')
+  const idsEpuises = epuises.ids
   if (relancesEpuisees) requete = requete.in('id', idsEpuises.length ? idsEpuises : [AUCUN_DOSSIER])
   const epuisesVus = new Set(idsEpuises)
   if (attribution === 'mes')
