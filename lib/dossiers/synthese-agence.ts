@@ -2,8 +2,7 @@ import 'server-only'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { filigranePour } from '@/lib/coffre/ouverture'
-import { rasteriser } from '@/lib/coffre/rasterisation'
+import { filigranePour, filigranerPourLAgence } from '@/lib/coffre/ouverture'
 import { natures as naturesEn } from '@/lib/content/en/espace'
 import { synthese as tEn } from '@/lib/content/en/synthese'
 import { natures as naturesFr } from '@/lib/content/espace'
@@ -56,11 +55,7 @@ export async function synthesePourLeBailleur(
     })
     return {
       ok: true,
-      pdf: await rasteriser(
-        Buffer.from(clair),
-        'application/pdf',
-        filigranePour(email, maintenant),
-      ),
+      pdf: await filigranerPourLAgence(Buffer.from(clair), filigranePour(email, maintenant)),
       reference: lecture.data.reference,
     }
   } catch {

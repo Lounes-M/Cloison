@@ -66,6 +66,8 @@ beforeEach(async () => {
   )
   bulletin = await piece('bulletin_paie', 2)
   avis = await piece('avis_imposition')
+  // Dans une meme transaction les deux depots portent la meme heure.
+  await db.query("update pieces set depose_le=depose_le+interval '1 minute' where id=$1", [avis])
   await db.query(
     "insert into examens_documentaires(dossier_id,piece_id,etat,acteur_id) values($1,$2,'a_revoir',$3),($1,$2,'examine',$3)",
     [dossier, bulletin, membre],
