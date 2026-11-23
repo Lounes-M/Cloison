@@ -21,7 +21,7 @@ import { contexteAgence } from './contexte'
  * (`ouvrir_dossier_avec_lien`), puis rattache a la colocation. Chaque droit
  * est celui que la base accorde deja a l'agence sur ses propres lignes : la
  * colocation ou le logement d'une autre n'existent pas pour elle, et le
- * declencheur de la 0089 refuse ce que ce code laisserait passer.
+ * declencheur de la 0092 refuse ce que ce code laisserait passer.
  *
  * Tout ce qui peut se refuser sans rien ouvrir l'est d'abord : un dossier
  * ouvert puis refuse par la colocation resterait un dossier isole, avec un

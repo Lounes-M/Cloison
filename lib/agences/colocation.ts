@@ -3,7 +3,7 @@ import { z } from 'zod'
 /**
  * Ce qu'une agence saisit pour ouvrir une colocation, ou y ajouter quelqu'un.
  *
- * Pur : ni base, ni session. La base repete chaque regle (0089) ; ceci sert a
+ * Pur : ni base, ni session. La base repete chaque regle (0092) ; ceci sert a
  * rendre un message propre avant d'ouvrir quoi que ce soit, parce qu'un
  * dossier ouvert puis refuse par la colocation resterait un dossier isole.
  */

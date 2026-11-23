@@ -255,7 +255,7 @@ export default async function PageDossier({
 
   const lie = Array.isArray(groupes) ? groupes[0] : null
 
-  // La colocation du dossier (0089) : son etendue et le nombre de dossiers
+  // La colocation du dossier (0092) : son etendue et le nombre de dossiers
   // ouverts, lus avec les droits de l'agence. Une panne ne bloque pas la fiche.
   let coloc: { id: string; etendue: string; colocataires: number } | null = null
   if (d.colocation_id) {

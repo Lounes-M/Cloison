@@ -4,7 +4,7 @@ import type { PGlite } from '@electric-sql/pglite'
 import { baseDEssai, devenir, devenirPorteur, redevenirProprietaire } from './base'
 
 /**
- * La colocation (0089) : un groupe de dossiers, un par colocataire. Elle ne
+ * La colocation (0092) : un groupe de dossiers, un par colocataire. Elle ne
  * relie que des dossiers principaux de la meme agence, pose leur loyer quand
  * le bail est solidaire, et ne dit a un colocataire rien des autres.
  */
