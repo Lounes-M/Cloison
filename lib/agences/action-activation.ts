@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { notifierDemandeActivation } from '@/lib/courriels/activation'
 import { contexteAgence } from './contexte'
+import { controlerSiren } from './controle-siren'
 
 /**
  * Demander l'activation de son agence.
@@ -90,6 +91,10 @@ export async function demanderLActivation(
   const compte = (action: string) =>
     (journal ?? []).filter((ligne) => ligne.action === action).length
 
+  // Aide a la decision de l'exploitant : jamais une erreur, jamais un refus,
+  // et rien n'en revient a l'agence.
+  const controleSiren = await controlerSiren(analyse.data.siren, agence.nom)
+
   await notifierDemandeActivation({
     agenceId: agence.id,
     nom: agence.nom,
@@ -97,6 +102,7 @@ export async function demanderLActivation(
     siren: analyse.data.siren,
     cartePro: analyse.data.cartePro,
     demandeePar: email,
+    controleSiren,
     essais: {
       consultations: compte('dossier_consulte'),
       piecesOuvertes: compte('piece_ouverte'),
