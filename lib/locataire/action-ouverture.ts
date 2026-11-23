@@ -30,7 +30,7 @@ import { reglerLangueDossier } from '@/lib/langue-preferee'
 export type EtatOuverture =
   | { statut: 'inactif' }
   | { statut: 'envoye'; candidature?: 'rattachee' | 'echouee' }
-  | { statut: 'erreur'; message: string; valeur?: string }
+  | { statut: 'erreur'; message: string; valeur?: string; champ?: 'courriel' | 'accord' }
 
 const schema = z.object({
   courriel: z
@@ -39,7 +39,7 @@ const schema = z.object({
     .toLowerCase()
     .min(5, 'Ton adresse e-mail est requise.')
     .max(180, 'Cette adresse est trop longue.')
-    .pipe(z.email('Cette adresse ne ressemble pas a une adresse e-mail.')),
+    .pipe(z.email('Cette adresse ne ressemble pas à une adresse e-mail.')),
 })
 
 async function empreinteAppelant(): Promise<string> {
@@ -65,6 +65,7 @@ export async function ouvrirMonDossier(
       statut: 'erreur',
       message: dire(analyse.error.issues[0]?.message ?? 'Cette adresse est invalide.'),
       valeur: saisie,
+      champ: 'courriel',
     }
   }
 
@@ -78,7 +79,12 @@ export async function ouvrirMonDossier(
     return { statut: 'erreur', message: texteCandidature.page.invalideTexte, valeur: saisie }
   }
   if (code !== null && donnees.get('accord') !== 'on') {
-    return { statut: 'erreur', message: texteCandidature.erreurs.accord, valeur: saisie }
+    return {
+      statut: 'erreur',
+      message: texteCandidature.erreurs.accord,
+      valeur: saisie,
+      champ: 'accord',
+    }
   }
   let rattachement: 'rattachee' | 'echouee' | undefined
 

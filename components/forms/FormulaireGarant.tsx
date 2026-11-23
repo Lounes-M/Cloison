@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useId } from 'react'
+import { useActionState, useId, useState } from 'react'
 
 import { espace as espaceFr } from '@/lib/content/locataire'
 import { designerMonGarant, type EtatGarant } from '@/lib/locataire/action-garant'
@@ -32,22 +32,22 @@ export function FormulaireGarant({
   const espace = choisir(langue, espaceFr, espaceEn)
 
   const [etat, envoyer, enCours] = useActionState(designerMonGarant, ETAT_INITIAL)
+  const [masqueePour, setMasqueePour] = useState<EtatGarant | null>(null)
   const idChamp = useId()
-
+  const erreur = etat.statut === 'erreur' && masqueePour !== etat && !enCours ? etat.message : null
   const valeurInitiale = etat.statut === 'erreur' ? (etat.valeur ?? '') : (garantActuel ?? '')
 
   return (
-    <form action={envoyer} noValidate className="flex flex-col gap-4">
+    <form
+      action={envoyer}
+      noValidate
+      className="flex flex-col gap-4"
+      onSubmit={() => setMasqueePour(etat)}
+    >
       <input type="hidden" name="dossier" value={dossierId ?? ''} />
       {etat.statut === 'envoye' ? (
         <p role="status" className="message-succes">
           {espace.garantSucces}
-        </p>
-      ) : null}
-
-      {etat.statut === 'erreur' ? (
-        <p role="alert" className="message-erreur">
-          {etat.message}
         </p>
       ) : null}
 
@@ -64,12 +64,19 @@ export function FormulaireGarant({
           defaultValue={valeurInitiale}
           readOnly={verrouille}
           placeholder="garant@exemple.fr"
-          aria-describedby={`${idChamp}-aide`}
+          aria-invalid={erreur ? true : undefined}
+          aria-describedby={erreur ? `${idChamp}-erreur ${idChamp}-aide` : `${idChamp}-aide`}
+          onChange={() => setMasqueePour(etat)}
           className={cn(
             'border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[15px] font-medium',
             'placeholder:text-muted placeholder:font-normal',
           )}
         />
+        {erreur ? (
+          <p id={`${idChamp}-erreur`} role="alert" className="message-erreur mt-2">
+            {erreur}
+          </p>
+        ) : null}
         <p id={`${idChamp}-aide`} className="text-muted mt-2 text-[13px] font-medium">
           {espace.garantAide}
         </p>
