@@ -3,6 +3,8 @@ import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
 import { acte as texteActeFr } from '@/lib/content/acte'
+import { synthese as texteSyntheseFr } from '@/lib/content/synthese'
+import { synthese as texteSyntheseEn } from '@/lib/content/en/synthese'
 import { FormulaireComplement } from '@/components/forms/FormulaireComplement'
 import { CalendrierEcheance } from '@/components/dossiers/CalendrierEcheance'
 import { estUuidCanonique } from '@/lib/validation/uuid'
@@ -150,6 +152,7 @@ export default async function PageDossier({
   const texteJournal = choisir(langue, texteJournalFr, texteJournalEn)
   const actions = choisir(langue, actionsFr, actionsEn)
   const texteActe = choisir(langue, texteActeFr, texteActeEn)
+  const texteSynthese = choisir(langue, texteSyntheseFr, texteSyntheseEn).ecran
 
   const { id } = await params
   if (!estUuidCanonique(id)) notFound()
@@ -677,6 +680,19 @@ export default async function PageDossier({
           </div>
         ) : null}
       </section>
+
+      {/* La base tranche (0090) ; l'ecran ne propose la synthese que la ou elle peut aboutir. */}
+      {['complet', 'garant_insuffisant', 'transmis', 'signe'].includes(String(d.statut)) ? (
+        <section className="panneau-espace mt-8">
+          <h2 className="text-xl font-bold">{texteSynthese.titre}</h2>
+          <p className="text-muted mt-2 text-[14px] leading-relaxed font-medium">
+            {texteSynthese.aide}
+          </p>
+          <a href={`/espace/dossiers/${id}/synthese`} className="btn btn-secondaire mt-4">
+            {texteSynthese.telecharger}
+          </a>
+        </section>
+      ) : null}
 
       {d.statut === 'transmis' && !d.demonstration ? (
         <section className="panneau-espace mt-8">
