@@ -17,13 +17,11 @@ import { choisir, type Langue } from '@/lib/i18n'
  * reel), `EDITEUR_TELEPHONE` (facultatif) et le mediateur de la consommation
  * (`MEDIATEUR_NOM`, `MEDIATEUR_SITE`).
  *
- * Un mediateur absent ou mal forme ne disparait pas en silence : il est liste
- * dans `manquants` et la page porte l'attribut `data-editeur-incomplet`, que
- * le controle de production (`scripts/verifier-production.mjs`) refuse. Le
- * site reste servi : c'est une alerte, pas une panne.
+ * Le mediateur est facultatif pour le rendu : tant qu'il n'est pas declare,
+ * les conditions gardent leur texte generique sur la mediation, et aucun
+ * controle ne le reclame. Seule la duree des sauvegardes marque encore la
+ * page de confidentialite (`data-editeur-incomplet`) quand elle manque.
  */
-
-export type ChampEditeur = 'mediateur'
 
 export type Editeur = {
   denomination: string
@@ -37,7 +35,6 @@ export type Editeur = {
   courriel: string
   directeurPublication: string
   mediateur: { nom: string; site: string } | null
-  manquants: ChampEditeur[]
 }
 
 function lire(nom: string): string | null {
@@ -73,9 +70,6 @@ export function editeur(langue: Langue = 'fr'): Editeur {
     courriel: identite.courriel,
     directeurPublication: identite.directeurPublication,
     mediateur,
-    // Le mediateur n'est obligatoire que si le locataire paie : un dossier
-    // d'agence ne lui coute rien, mais le paiement en ligne existe bien.
-    manquants: mediateur ? [] : ['mediateur'],
   }
 }
 

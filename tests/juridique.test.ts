@@ -22,21 +22,9 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-test('sans mediateur declare, il est signale manquant', () => {
-  poser({ MEDIATEUR_NOM: '', MEDIATEUR_SITE: '' })
-  expect(editeur().manquants).toEqual(['mediateur'])
-})
-
 test('un site de mediateur qui n est pas en https vaut absent', () => {
   poser({ ...COMPLET, MEDIATEUR_SITE: 'http://mediateur.example.fr' })
-  const e = editeur()
-  expect(e.mediateur).toBeNull()
-  expect(e.manquants).toEqual(['mediateur'])
-})
-
-test('une configuration complete ne laisse rien a completer', () => {
-  poser(COMPLET)
-  expect(editeur().manquants).toEqual([])
+  expect(editeur().mediateur).toBeNull()
 })
 
 test('l identite de l editeur vient du contenu et suit la langue, pas les variables', () => {
@@ -58,14 +46,11 @@ test('l identite de l editeur vient du contenu et suit la langue, pas les variab
 test.each([
   ['mentions', PageMentionsLegales],
   ['conditions', PageConditions],
-])('la page %s porte le marqueur tant que le mediateur manque', (_nom, page) => {
-  poser({ ...COMPLET, MEDIATEUR_NOM: '' })
+])('la page %s ne reclame pas le mediateur', (_nom, page) => {
+  poser({ ...COMPLET, MEDIATEUR_NOM: '', MEDIATEUR_SITE: '' })
   const html = rendre(page)
-  expect(html).toContain('data-editeur-incomplet')
+  expect(html).not.toContain('data-editeur-incomplet')
   expect(html).toContain('<h1')
-
-  poser(COMPLET)
-  expect(rendre(page)).not.toContain('data-editeur-incomplet')
 })
 
 test('les mentions affichent l editeur et l hebergeur de l application', () => {
@@ -145,8 +130,7 @@ test('sans variable posee, les pages nomment la societe qui exploite la marque',
     expect(mentions).toContain(attendu)
   expect(mentions).not.toContain('En cours d’immatriculation')
   expect(mentions).not.toContain('À compléter')
-  // La supervision, elle, continue de reclamer le mediateur.
-  expect(mentions).toContain('data-editeur-incomplet')
+  expect(mentions).not.toContain('data-editeur-incomplet')
 
   const confidentialite = rendre(PageConfidentialite)
   expect(confidentialite).toContain(

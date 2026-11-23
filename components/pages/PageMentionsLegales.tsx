@@ -25,7 +25,7 @@ export function PageMentionsLegales({ langue = 'fr' }: { langue?: Langue }) {
   const facultatifs = new Set(['capital', 'rcs', 'tva', 'telephone'])
 
   return (
-    <PageJuridique langue={langue} titre={textes.titre} incomplet={e.manquants.length > 0}>
+    <PageJuridique langue={langue} titre={textes.titre} incomplet={false}>
       <SectionJuridique titre={textes.editeur}>
         <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[max-content_1fr]">
           {lignes

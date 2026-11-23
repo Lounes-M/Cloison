@@ -11,7 +11,7 @@ export function PageConditions({ langue = 'fr' }: { langue?: Langue }) {
   const e = editeurAffiche(langue)
 
   return (
-    <PageJuridique langue={langue} titre={textes.titre} incomplet={e.manquants.length > 0}>
+    <PageJuridique langue={langue} titre={textes.titre} incomplet={false}>
       <p>{textes.introduction}</p>
       {textes.sections.map((section) => (
         <SectionJuridique key={section.id} titre={section.titre} paragraphes={section.paragraphes}>
