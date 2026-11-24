@@ -193,6 +193,27 @@ test('une erreur HTTP, un réseau coupé ou un corps invalide sont illisibles', 
     ).rejects.toThrow('Planificateur illisible')
 })
 
+test('un jeton GitHub Actions au format long de 2026 est accepté', async () => {
+  // Un JWT préfixé d'environ 520 caractères : l'ancienne borne de 255 le refusait
+  // avant tout appel, et l'étape de supervision échouait à chaque passage.
+  const long = `ghs_${'a'.repeat(170)}.${'B'.repeat(170)}.${'c-_'.repeat(58)}`
+  expect(long.length).toBeGreaterThan(500)
+  const appeler = vi.fn(async () => json({ workflow_runs: [] }))
+  await observerTache('maintenance', {
+    jeton: long,
+    maintenant: MAINTENANT,
+    appeler: appeler as unknown as typeof fetch,
+  }).catch(() => {})
+  expect(appeler).toHaveBeenCalled()
+  await expect(
+    observerTache('maintenance', {
+      jeton: 'a'.repeat(2049),
+      maintenant: MAINTENANT,
+      appeler: vi.fn() as unknown as typeof fetch,
+    }),
+  ).rejects.toThrow('Planificateur illisible')
+})
+
 test('un dépôt, une tâche ou un jeton mal formés ne déclenchent aucun appel', async () => {
   const appeler = vi.fn()
   const options = { maintenant: MAINTENANT, appeler: appeler as unknown as typeof fetch }

@@ -37,6 +37,7 @@ import { FormulaireRattachementLogement } from '@/components/forms/FormulaireRat
 import { logements as texteLogementsFr } from '@/lib/content/logements'
 import { Icone } from '@/components/ui/Icone'
 import { contexteAgence } from '@/lib/agences/contexte'
+import { LienApimoDuDossier } from '@/components/dossiers/RepereApimo'
 import {
   acteurs as acteursFr,
   actions as actionsFr,
@@ -509,6 +510,9 @@ export default async function PageDossier({
             </Link>
           ) : null}
         </section>
+      ) : null}
+      {!d.demonstration && !d.dossier_principal ? (
+        <LienApimoDuDossier contexte={contexte} dossier={id} />
       ) : null}
 
       {coloc ? (
