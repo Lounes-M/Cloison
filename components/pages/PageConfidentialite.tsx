@@ -20,6 +20,12 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
   const e = editeurAffiche(langue)
   const facultatifs = traitementsFacultatifs()
   const incomplet = retentionSauvegardes() === null
+  const lecture = facultatifs.ocr || facultatifs.lectureGarant
+  const openRouter = lecture
+    ? facultatifs.lectureEnEurope
+      ? textes.openRouter.actifEurope
+      : textes.openRouter.actifHorsEurope
+    : textes.openRouter.inactif
 
   return (
     <PageJuridique langue={langue} titre={textes.titre} incomplet={incomplet}>
@@ -35,6 +41,7 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
             ...(section.id === 'durees' ? [textes.sauvegardes(retentionAffichee())] : []),
             ...(section.id === 'prestataires'
               ? [
+                  openRouter,
                   ...(facultatifs.signature
                     ? [textes.facultatifs.signature[facultatifs.signature]]
                     : []),
