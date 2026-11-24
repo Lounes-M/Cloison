@@ -34,6 +34,13 @@ import { estPageNoncePublique, nouveauNonce, politiqueAvecNonce } from '@/lib/se
  *   Fabriquer une reponse neuve apres coup perdrait les cookies rafraichis, et
  *   la session serait renouvelee sans que personne ne le sache.
  */
+/** Une page, pas un telechargement : le navigateur, ou la navigation RSC. */
+function demandeUnePage(requete: NextRequest): boolean {
+  if ((requete.headers.get('accept') ?? '').includes('text/html')) return true
+  if (requete.headers.get('rsc') === '1') return true
+  return requete.headers.get('sec-fetch-mode') === 'navigate'
+}
+
 export async function proxy(requete: NextRequest) {
   const nonce = nouveauNonce()
   const chemin = requete.nextUrl.pathname
@@ -78,11 +85,13 @@ export async function proxy(requete: NextRequest) {
     })
 
     const { data } = await supabase.auth.getUser()
-    // Sans session, toute adresse sous `/espace` renvoie a la connexion, y
-    // compris une adresse qui n'a pas de page (`/espace/dossiers`). Il n'y a
-    // pas de parametre de retour : le lien magique arrive toujours sur
-    // `/espace`, et en inventer un ouvrirait une redirection.
-    if (chemin.startsWith('/espace') && !data.user) {
+    // Sans session agence, une navigation de page sous `/espace` renvoie a la
+    // connexion, y compris une adresse qui n'a pas de page
+    // (`/espace/dossiers`). Un appel qui n'est pas une page (le calendrier
+    // d'echeance, par exemple) atteint la route : un lien porteur y recoit
+    // 401, pas une page de connexion. Il n'y a pas de parametre de retour :
+    // le lien magique arrive toujours sur `/espace`.
+    if (chemin.startsWith('/espace') && !data.user && demandeUnePage(requete)) {
       const redirection = NextResponse.redirect(new URL('/connexion', requete.url), 307)
       for (const { name, value, options } of cookiesPoses) {
         redirection.cookies.set(name, value, options)

@@ -101,12 +101,30 @@ test.each(['/espace/dossiers', '/espace/nulle-part', '/espace/dossiers/abc/acte'
         async () => new Response(JSON.stringify({ message: 'pas de session' }), { status: 401 }),
       ),
     )
-    const reponse = await proxy(new NextRequest(`https://cloison.example.invalid${chemin}`))
+    const reponse = await proxy(
+      new NextRequest(`https://cloison.example.invalid${chemin}`, {
+        headers: { Accept: 'text/html' },
+      }),
+    )
     expect(reponse.status).toBe(307)
     expect(reponse.headers.get('location')).toBe('https://cloison.example.invalid/connexion')
     expect(reponse.headers.get('x-robots-tag')).toBe('noindex, nofollow')
   },
 )
+
+test('un appel au calendrier sans page atteint la route', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => new Response(JSON.stringify({ message: 'pas de session' }), { status: 401 })),
+  )
+  const reponse = await proxy(
+    new NextRequest('https://cloison.example.invalid/espace/dossiers/abc/echeance', {
+      headers: { Cookie: 'cloison-porteur=lien-fictif' },
+    }),
+  )
+  expect(reponse.status).not.toBe(307)
+  expect(reponse.headers.get('location')).toBeNull()
+})
 
 test('le parcours garant ne renouvelle pas une session agence incidente', async () => {
   const fetchFictif = vi.fn()
