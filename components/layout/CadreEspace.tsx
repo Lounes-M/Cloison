@@ -76,7 +76,11 @@ export async function CadreEspace({
                 liens={[
                   { href: '/espace', libelle: t.tableau },
                   { href: '/espace/logements', libelle: logements.lien },
-                  { href: '/espace/activite', libelle: t.navActivite },
+                  {
+                    href: '/espace/pilotage',
+                    libelle: t.navPilotage,
+                    aussi: ['/espace/activite'],
+                  },
                   { href: '/espace/archives', libelle: signature.lienArchives },
                   { href: '/espace/facturation', libelle: facturation.lien },
                   {

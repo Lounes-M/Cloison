@@ -9,6 +9,7 @@ import { AttributionsGroupees } from '@/components/dossiers/AttributionsGroupees
 import { FormulaireNomAgence } from '@/components/forms/FormulaireNomAgence'
 import { FormulaireColocation } from '@/components/forms/FormulaireColocation'
 import { FormulaireNouveauDossier } from '@/components/forms/FormulaireNouveauDossier'
+import { RaccourciApimo } from '@/components/dossiers/RepereApimo'
 import { colocation as texteColocationFr } from '@/lib/content/colocation'
 import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
 import { FormulaireSeuil } from '@/components/forms/FormulaireSeuil'
@@ -732,6 +733,7 @@ export default async function PageEspace({
           <div className="mt-6">
             <FormulaireNouveauDossier verifiee={verifiee} />
           </div>
+          <RaccourciApimo contexte={contexte} />
         </div>
         <div className="bg-sky outlined self-start rounded-[18px] p-6">
           <p className="font-display text-lg">{tableau.demoTitre}</p>

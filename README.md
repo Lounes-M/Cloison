@@ -17,6 +17,7 @@ Cloison est une application de gestion de la garantie locative qui sépare les a
 - Comparaison facultative du revenu déclaré aux bulletins de paie et à la pension, à la demande de l'agence : un écart à vérifier, jamais un score ni une décision.
 - Préférences de notifications, rappels facultatifs et suivi des courriels.
 - API de statuts pour les intégrateurs, avec clés d'agence révocables.
+- Connecteur Apimo facultatif : ouverture d'un dossier depuis un bien à louer de l'agence, avec ses propres identifiants chiffrés. Non éprouvé avec un compte Apimo réel.
 - Paiement locataire, rapprochement et outils de suivi opérationnel.
 
 Le produit est en préparation de pilote. La chaîne contractuelle (signature Docage, Youtrust en secours) et la facturation agence après signature ne sont pas ouvertes de bout en bout. L'OCR ne certifie pas l'authenticité des pièces et ne prend aucune décision sur un dossier.

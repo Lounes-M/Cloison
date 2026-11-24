@@ -128,6 +128,13 @@ test('les compteurs survivent a la purge et ne portent aucune donnee de dossier'
     'signes',
     'clos',
     'delai_prise_secondes',
+    // Delais et relances du tableau de bord (0099) : toujours des compteurs.
+    'complets',
+    'delai_complet_secondes',
+    'signatures_mesurees',
+    'delai_signature_secondes',
+    'relances_garant',
+    'relances_locataire',
   ])
 })
 

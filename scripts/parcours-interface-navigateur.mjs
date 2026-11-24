@@ -247,6 +247,13 @@ export async function parcourirInterface(
     await verifierSurface(page)
     console.log('OK : retour du defilement anime detecte par contre-preuve navigateur')
   }
+  await visiter('/espace/pilotage', 'pilotage')
+  await page.getByText('Délai moyen jusqu’au dossier complet', { exact: true }).waitFor()
+  await page.getByText('4,5 j', { exact: true }).first().waitFor()
+  await page.locator('#pilotage-blocages').waitFor()
+  await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
+  // La page doit rester en vie apres son rendu complet, dans les trois moteurs.
+  assert.equal(await page.evaluate(() => document.querySelectorAll('h2').length), 5)
   await visiter('/espace/activite', 'activite')
   await page.getByText('Taux d’acceptation', { exact: true }).waitFor()
   await visiter('/espace/logements', 'logements')
@@ -262,6 +269,8 @@ export async function parcourirInterface(
   await page.getByText('Les parts font', { exact: false }).waitFor()
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
+  await page.getByRole('heading', { name: 'Apimo', exact: true }).waitFor()
+  await visiter('/espace/apimo', 'apimo')
   await visiter('/espace/notifications', 'notifications')
   if (largeur < 768) {
     const navigation = page.getByRole('navigation', { name: 'Réglages', exact: true })
@@ -357,6 +366,7 @@ export async function parcourirInterface(
     ['/espace/collaborateurs', 'en-collaborateurs'],
     ['/espace/notifications', 'en-notifications'],
     ['/espace/activite', 'en-activite'],
+    ['/espace/pilotage', 'en-pilotage'],
     ['/garant', 'en-garant'],
     ['/lien-invalide', 'en-lien-invalide'],
   ]) {
