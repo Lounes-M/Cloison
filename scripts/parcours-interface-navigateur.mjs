@@ -254,6 +254,8 @@ export async function parcourirInterface(
   await page.getByText('Les parts font', { exact: false }).waitFor()
   await visiter('/espace/collaborateurs', 'collaborateurs')
   await visiter('/espace/connecteurs', 'connecteurs')
+  await page.getByRole('heading', { name: 'Apimo', exact: true }).waitFor()
+  await visiter('/espace/apimo', 'apimo')
   await visiter('/espace/notifications', 'notifications')
   if (largeur < 768) {
     const navigation = page.getByRole('navigation', { name: 'Réglages', exact: true })
