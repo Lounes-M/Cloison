@@ -53,7 +53,7 @@ export function SiteFooter({ langue = 'fr' }: { langue?: Langue }) {
               <a
                 key={link.href}
                 href={lien(langue, link.href)}
-                className="focus-visible:outline-sun inline-flex min-h-[44px] items-center underline-offset-4 hover:underline"
+                className="focus-visible:outline-sun inline-flex min-h-[44px] min-w-[24px] items-center underline-offset-4 hover:underline"
               >
                 {link.label}
               </a>

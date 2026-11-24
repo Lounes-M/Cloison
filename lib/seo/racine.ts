@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { site } from '@/lib/site'
-import { fontVariables } from './fonts'
-import './globals.css'
 
-export const metadata: Metadata = {
+import { site } from '@/lib/site'
+
+/**
+ * Les metadonnees par defaut du site, reprises par chaque layout racine.
+ * Une page les complete ou les remplace par les siennes.
+ */
+export const metadonneesRacine: Metadata = {
   metadataBase: new URL(site.url),
   title: {
     default: `${site.name} · ${site.tagline}`,
@@ -39,20 +42,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const viewport: Viewport = {
+export const vueRacine: Viewport = {
   themeColor: '#faf4ec',
   colorScheme: 'light',
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="fr" className={fontVariables}>
-      <body>
-        {/* Le chrome marketing vit dans `(marketing)/layout.tsx`, pas ici :
-            l'applicatif aura le sien. Ce layout ne garde que ce qui vaut pour
-            tout le site, polices comprises. */}
-        {children}
-      </body>
-    </html>
-  )
 }

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-/** Un code de candidature inconnu, entre autres adresses du site public. */
+/** Une adresse inconnue du site public, ou un code de candidature inconnu. */
 export default function Introuvable() {
-  return <EcranIntrouvable langueChoisie="fr" integre />
+  return <EcranIntrouvable langue="fr" />
 }

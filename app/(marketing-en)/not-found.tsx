@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function Introuvable() {
-  return <EcranIntrouvable langueChoisie="en" integre />
+  return <EcranIntrouvable langue="en" />
 }

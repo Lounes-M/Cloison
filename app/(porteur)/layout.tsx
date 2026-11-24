@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import { connection } from 'next/server'
 
 import { CadreEspace } from '@/components/layout/CadreEspace'
+import { DocumentRacine } from '@/components/layout/DocumentRacine'
+import { metadonneesRacine, vueRacine } from '@/lib/seo/racine'
 import { ouvrirAutreDossier, quitterMonDossier } from '@/lib/acces/action-porteur'
 import { NOM_COOKIE_CAPACITE } from '@/lib/acces/session'
 import { autresDossiers } from '@/lib/acces/trousseau'
@@ -9,6 +11,9 @@ import { sessionPorteur as sessionPorteurFr } from '@/lib/content/session-porteu
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
 import { choisir } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
+
+export const metadata = metadonneesRacine
+export const viewport = vueRacine
 
 /**
  * L'espace des porteurs de lien : le locataire et le garant.
@@ -38,31 +43,33 @@ export default async function LayoutPorteur({ children }: { children: React.Reac
   const autres = dossierOuvert ? await autresDossiers((nom) => magasin.get(nom)?.value) : []
 
   return (
-    <CadreEspace
-      sortie={
-        dossierOuvert ? (
-          <>
-            {autres.map((autre, rang) => (
-              <form action={ouvrirAutreDossier} key={autre.place}>
-                <input type="hidden" name="place" value={autre.place} />
+    <DocumentRacine langue={langue}>
+      <CadreEspace
+        sortie={
+          dossierOuvert ? (
+            <>
+              {autres.map((autre, rang) => (
+                <form action={ouvrirAutreDossier} key={autre.place}>
+                  <input type="hidden" name="place" value={autre.place} />
+                  <button type="submit" className="lien-espace">
+                    {sessionPorteur.autre[autre.partie]}
+                    {autres.filter((a) => a.partie === autre.partie).length > 1
+                      ? ` (${autres.slice(0, rang + 1).filter((a) => a.partie === autre.partie).length})`
+                      : ''}
+                  </button>
+                </form>
+              ))}
+              <form action={quitterMonDossier}>
                 <button type="submit" className="lien-espace">
-                  {sessionPorteur.autre[autre.partie]}
-                  {autres.filter((a) => a.partie === autre.partie).length > 1
-                    ? ` (${autres.slice(0, rang + 1).filter((a) => a.partie === autre.partie).length})`
-                    : ''}
+                  {sessionPorteur.quitter}
                 </button>
               </form>
-            ))}
-            <form action={quitterMonDossier}>
-              <button type="submit" className="lien-espace">
-                {sessionPorteur.quitter}
-              </button>
-            </form>
-          </>
-        ) : null
-      }
-    >
-      {children}
-    </CadreEspace>
+            </>
+          ) : null
+        }
+      >
+        {children}
+      </CadreEspace>
+    </DocumentRacine>
   )
 }

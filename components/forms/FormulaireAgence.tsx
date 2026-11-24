@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useId, useRef } from 'react'
 import { envoyerDemandeAgence, type EtatFormulaire } from '@/lib/agences/action'
-import { VOLUMES } from '@/lib/agences/schema'
+import { VOLUMES } from '@/lib/agences/volumes'
 import { cn } from '@/lib/utils'
 import { demande as demandeFr } from '@/lib/content/agences'
 import * as en from '@/lib/content/en/formulaires'

@@ -39,4 +39,6 @@ export const chrome = {
   principeTexte:
     'One shared file, three separate spaces. The tenant follows, the guarantor uploads, the agency reviews.',
   principeNote: 'The guarantor never pays anything.',
+  pauseAnimations: 'Pause animations',
+  relancerAnimations: 'Resume animations',
 } as const

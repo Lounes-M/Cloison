@@ -144,6 +144,7 @@ export const dossier: Textes<typeof Fr.dossier> = {
   piecesEnAttente:
     'The guarantor is uploading their documents on their side. They reach you once the file is complete.',
   ouvrir: 'Open',
+  nouvelOnglet: 'new tab',
   ouvrirAide:
     'Every opening is recorded in the log, and the document reaches you watermarked with your name. The guarantor can see that you viewed it.',
   journalTitre: 'Access log',

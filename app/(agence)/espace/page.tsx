@@ -356,6 +356,9 @@ export default async function PageEspace({
             {tableau.rechercheEmail}
             <input
               name="email"
+              // Une recherche sur l'adresse d'un tiers : le navigateur n'a
+              // pas a proposer celle de la personne connectee.
+              autoComplete="off"
               defaultValue={emailRecherche}
               maxLength={120}
               className="outlined mt-2 w-full rounded-lg px-3 py-2"

@@ -35,7 +35,10 @@ export function PageMentionsLegales({ langue = 'fr' }: { langue?: Langue }) {
                 <dt className="font-semibold">{textes.libelles[cle]}</dt>
                 <dd className="break-words">
                   {cle === 'courriel' && valeur ? (
-                    <a href={`mailto:${valeur}`} className="underline underline-offset-4">
+                    <a
+                      href={`mailto:${valeur}`}
+                      className="inline-flex min-h-[44px] items-center underline underline-offset-4"
+                    >
                       {valeur}
                     </a>
                   ) : (

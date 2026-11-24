@@ -12,21 +12,25 @@ const NOMS: Record<Langue, string> = { fr: 'Français', en: 'English' }
  */
 export function BasculeLangue({ langue, libelle }: { langue: Langue; libelle: string }) {
   return (
-    <form action={changerLangue} role="group" aria-label={libelle} className="bascule-langue">
-      {LANGUES.map((code) => (
-        <button
-          key={code}
-          type="submit"
-          name="langue"
-          value={code}
-          lang={code}
-          aria-pressed={code === langue}
-          className={cn('bascule-langue-choix', code === langue && 'bascule-langue-actif')}
-        >
-          {code}
-          <span className="sr-only">, {NOMS[code]}</span>
-        </button>
-      ))}
+    // Le groupe nomme est un element a part : un formulaire n'accepte pas le
+    // role `group`, et un lecteur d'ecran ignorerait alors le nom du groupe.
+    <form action={changerLangue} className="inline-flex">
+      <div role="group" aria-label={libelle} className="bascule-langue">
+        {LANGUES.map((code) => (
+          <button
+            key={code}
+            type="submit"
+            name="langue"
+            value={code}
+            lang={code}
+            aria-pressed={code === langue}
+            className={cn('bascule-langue-choix', code === langue && 'bascule-langue-actif')}
+          >
+            {code}
+            <span className="sr-only">, {NOMS[code]}</span>
+          </button>
+        ))}
+      </div>
     </form>
   )
 }

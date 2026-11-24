@@ -42,4 +42,6 @@ export const chrome = {
   principeTexte:
     'Un dossier commun, trois espaces séparés. Le locataire suit, le garant dépose, l’agence examine.',
   principeNote: 'Le garant ne paie jamais rien.',
+  pauseAnimations: 'Mettre les animations en pause',
+  relancerAnimations: 'Relancer les animations',
 } as const

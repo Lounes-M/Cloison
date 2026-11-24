@@ -137,7 +137,7 @@ export default async function PageLogement({ params }: { params: Promise<{ id: s
                     <th scope="row" className="py-2 pr-4 font-semibold">
                       <Link
                         href={`/espace/dossiers/${d.id}`}
-                        className="text-cobalt underline underline-offset-2"
+                        className="text-cobalt inline-flex min-h-[44px] items-center underline underline-offset-2"
                       >
                         {d.reference}
                       </Link>

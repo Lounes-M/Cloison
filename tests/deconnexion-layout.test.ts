@@ -3,6 +3,8 @@ import { beforeEach, expect, test, vi } from 'vitest'
 const { cookies } = vi.hoisted(() => ({ cookies: vi.fn() }))
 vi.mock('next/server', () => ({ connection: async () => {} }))
 vi.mock('next/headers', () => ({ cookies: async () => ({ getAll: cookies }) }))
+// La police du document passe par un chargeur de Next, absent ici.
+vi.mock('@/app/fonts', () => ({ fontVariables: '' }))
 vi.mock('@/lib/agences/action-securite', () => ({ seDeconnecter: vi.fn() }))
 vi.mock('@/lib/env', () => ({
   env: { emailSupport: null, supabaseUrl: 'https://fixture.supabase.co' },
@@ -10,6 +12,7 @@ vi.mock('@/lib/env', () => ({
 import { deplier } from './doublures/deplier'
 import LayoutAgence from '@/app/(agence)/layout'
 import { CadreEspace } from '@/components/layout/CadreEspace'
+import { DocumentRacine } from '@/components/layout/DocumentRacine'
 import { NavigationAgence } from '@/components/layout/NavigationAgence'
 import { seDeconnecter } from '@/lib/agences/action-securite'
 // Le cadre reel est deplie avant la lecture : lire simplement la prop passee
@@ -31,8 +34,12 @@ beforeEach(() => vi.resetAllMocks())
 test('une session agence a un vrai formulaire de deconnexion dans le layout commun', async () => {
   cookies.mockReturnValue([{ name: 'sb-fixture-auth-token.0', value: 'session-fictive' }])
   const rendu = await LayoutAgence({ children: createElement('p', null, 'Espace fictif') })
+  // Le layout de l'espace est un layout racine : il annonce la langue choisie.
+  expect(isValidElement(rendu) && rendu.type).toBe(DocumentRacine)
   expect(
-    formulaires(await deplier(rendu, [CadreEspace])).filter((f) => f.action === seDeconnecter),
+    formulaires(await deplier(rendu, [DocumentRacine, CadreEspace])).filter(
+      (f) => f.action === seDeconnecter,
+    ),
   ).toHaveLength(1)
 })
 test('un visiteur anonyme ne voit pas de deconnexion', async () => {
@@ -42,6 +49,8 @@ test('un visiteur anonyme ne voit pas de deconnexion', async () => {
   ])
   const rendu = await LayoutAgence({ children: createElement('p', null, 'Connexion') })
   expect(
-    formulaires(await deplier(rendu, [CadreEspace])).filter((f) => f.action === seDeconnecter),
+    formulaires(await deplier(rendu, [DocumentRacine, CadreEspace])).filter(
+      (f) => f.action === seDeconnecter,
+    ),
   ).toHaveLength(0)
 })

@@ -22,6 +22,8 @@ export function FormulaireActe({ dossier }: { dossier: string }) {
           className="border-ink bg-paper mt-2 w-full rounded-xl border-2 px-4 py-3 font-normal"
           name="telephone"
           type="tel"
+          // Le numero d'un tiers, saisi par l'agence : pas celui du poste.
+          autoComplete="off"
           placeholder="+33600000000"
           required
           pattern="\+[1-9][0-9]{7,14}"

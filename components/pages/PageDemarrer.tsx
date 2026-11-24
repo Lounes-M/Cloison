@@ -1,5 +1,6 @@
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { FormulaireOuverture } from '@/components/forms/FormulaireOuverture'
+import { BandeauDefilant } from '@/components/ui/BandeauDefilant'
 import { Photo } from '@/components/ui/Photo'
 import { Reveal } from '@/components/ui/Reveal'
 import { avantOuverture as avantFr } from '@/lib/content/avant-ouverture'
@@ -24,7 +25,6 @@ export function PageDemarrer({ langue = 'fr' }: { langue?: Langue }) {
   const marqueeItems = choisir(langue, defilantFr, defilantEn)
   const porte = choisir(langue, porteFr, formulairesEn.porte)
   const avantOuverture = choisir(langue, avantFr, formulairesEn.avantOuverture)
-  const items = [...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems]
   return (
     <main>
       <section
@@ -65,19 +65,7 @@ export function PageDemarrer({ langue = 'fr' }: { langue?: Langue }) {
             </div>
           </div>
         </div>
-        <div
-          aria-hidden
-          className="bg-cobalt relative flex h-[3.9rem] items-center overflow-hidden whitespace-nowrap text-white"
-        >
-          <div className="animate-marquee texte-16 flex w-max">
-            {items.map((item, index) => (
-              <span key={`${item}-${index}`} className="flex items-center gap-[2rem] pr-[2rem]">
-                <span className="border-y-[5px] border-r-[8px] border-y-transparent border-r-white" />
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
+        <BandeauDefilant items={marqueeItems} langue={langue} />
       </section>
 
       <section className="bg-cream gouttiere section-espace">

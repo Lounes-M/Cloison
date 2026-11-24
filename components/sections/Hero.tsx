@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BandeauDefilant } from '@/components/ui/BandeauDefilant'
 import { Icone } from '@/components/ui/Icone'
 import { VideoFond } from '@/components/ui/VideoFond'
 import * as en from '@/lib/content/en/home'
@@ -16,7 +17,6 @@ import { site } from '@/lib/site'
  */
 export function Hero({ langue = 'fr' }: { langue?: Langue }) {
   const { hero, marqueeItems } = choisir(langue, fr, en)
-  const items = [...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems]
   return (
     <section
       data-premiere-section="sombre"
@@ -96,20 +96,7 @@ export function Hero({ langue = 'fr' }: { langue?: Langue }) {
         </div>
       </div>
 
-      {/* Bandeau defilant : liste quadruplee, translation de -50 %, boucle continue. */}
-      <div
-        aria-hidden
-        className="bg-cobalt relative flex h-[3.9rem] items-center overflow-hidden whitespace-nowrap"
-      >
-        <div className="animate-marquee texte-16 flex w-max">
-          {items.map((item, index) => (
-            <span key={`${item}-${index}`} className="flex items-center gap-[2rem] pr-[2rem]">
-              <span className="border-y-[5px] border-r-[8px] border-y-transparent border-r-white" />
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
+      <BandeauDefilant items={marqueeItems} langue={langue} />
     </section>
   )
 }

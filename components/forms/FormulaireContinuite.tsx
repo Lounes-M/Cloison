@@ -40,6 +40,7 @@ export function FormulaireContinuite({
               id="email-retour"
               name="email"
               type="email"
+              autoComplete="email"
               required
               maxLength={180}
             />

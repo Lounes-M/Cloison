@@ -141,7 +141,7 @@ export function FormulaireEngagement({
           {texte.couvreOptions.map((option) => (
             <label
               key={option.valeur}
-              className="flex cursor-pointer items-center gap-3 text-[15px] font-medium"
+              className="flex min-h-[44px] cursor-pointer items-center gap-3 text-[15px] font-medium"
             >
               <input
                 type="radio"
