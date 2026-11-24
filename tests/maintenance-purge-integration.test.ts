@@ -18,6 +18,9 @@ vi.mock('@/lib/courriels/rappels', () => ({ preparerRappels: async () => ({ eche
 vi.mock('@/lib/courriels/fin-dossier', () => ({
   annoncerFinsDeDossier: async () => ({ echecs: 0 }),
 }))
+vi.mock('@/lib/courriels/delais-agence', () => ({
+  alerterDelaisAgence: async () => ({ echecs: 0 }),
+}))
 vi.mock('@/lib/courriels/file', () => ({
   distribuerCourriels: async () => ({ traites: 0, echecs: 0 }),
 }))
