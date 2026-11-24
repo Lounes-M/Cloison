@@ -18,7 +18,11 @@ vi.mock('resend', () => ({
     emails = { send: d.envoyer }
   },
 }))
-import { preparerRappels } from '@/lib/courriels/rappels'
+import { preparerRappels as preparer } from '@/lib/courriels/rappels'
+// Un mardi ordinaire : le resultat ne depend pas du jour ou la suite tourne.
+const OUVRE = new Date('2026-11-24T11:00:00Z')
+const preparerRappels = (base: SupabaseClient, signal?: AbortSignal, maintenant = OUVRE) =>
+  preparer(base, signal, maintenant)
 import { distribuerCourriels } from '@/lib/courriels/file'
 const id = '11111111-1111-4111-8111-111111111111'
 const dossier = '22222222-2222-4222-8222-222222222222'
@@ -249,3 +253,25 @@ test.each(['obsolete', 'refuse', null])(
     expect(await preparerRappels(db)).toEqual({ echecs: etat === 'obsolete' ? 0 : 1 })
   },
 )
+
+test.each([
+  ['2026-12-25T11:00:00Z', 'Noel'],
+  ['2026-05-14T09:00:00Z', 'Ascension'],
+  ['2026-07-13T22:30:00Z', '14 juillet, deja commence a Paris'],
+])('un jour ferie (%s, %s), rien n est programme', async (instant) => {
+  expect(await preparerRappels(db, undefined, new Date(instant))).toEqual({ echecs: 0 })
+  expect(d.rpc).not.toHaveBeenCalledWith('programmer_rappels')
+  // Ce qui a ete programme la veille est prepare quand meme : il expire en 24 h.
+  expect(d.rpc).toHaveBeenCalledWith('rappels_a_preparer')
+  expect(d.rpc).toHaveBeenCalledWith('rappels_locataire_a_preparer')
+  expect(d.rpc).toHaveBeenCalledWith('mettre_rappel_en_file', expect.anything())
+})
+test.each([
+  ['2026-12-26T11:00:00Z', 'samedi'],
+  ['2026-12-27T11:00:00Z', 'dimanche'],
+  ['2026-12-24T22:30:00Z', 'veille de Noel a Paris'],
+  ['2026-12-28T11:00:00Z', 'lundi suivant'],
+])('hors jour ferie (%s, %s), la programmation a lieu', async (instant) => {
+  await preparerRappels(db, undefined, new Date(instant))
+  expect(d.rpc).toHaveBeenCalledWith('programmer_rappels')
+})

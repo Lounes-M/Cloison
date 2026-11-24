@@ -44,6 +44,11 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: node scripts/verifier-cadence-actes.mjs
+      - name: Planificateurs GitHub de la maintenance et des actes
+        if: ${{ !cancelled() }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/verifier-planificateurs.mjs
       - name: Verification fournisseur des paiements
         if: ${{ !cancelled() }}
         env:
