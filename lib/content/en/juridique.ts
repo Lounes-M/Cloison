@@ -6,12 +6,12 @@
  * doit l'etre ici dans la meme PR.
  */
 
-import { prixLocataire } from './tarifs'
+import { prixActe, prixLocataire } from './tarifs'
 
 export const juridique = {
   aCompleter: 'To be completed',
   immatriculation: 'Registration in progress',
-  miseAJour: 'Last updated: 23 November 2026.',
+  miseAJour: 'Last updated: 24 November 2026.',
   navigation: 'Legal information',
   liens: {
     mentions: { label: 'Legal notice', href: '/mentions-legales' },
@@ -58,9 +58,8 @@ export const mentionsLegales = {
   },
   hebergement: 'Hosting',
   hebergementTexte: [
-    'The site and its server functions are hosted by a cloud infrastructure provider, in the Frankfurt region (European Union).',
-    'The database, authentication and the encrypted documents are hosted by a separate provider, in the European Union.',
-    'The contact details of these providers are available on request at the contact address above.',
+    'The site and its server functions are hosted by Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, United States. The application runs in the Frankfurt region (European Union).',
+    'The database, authentication and the encrypted documents are hosted by a separate provider, in the European Union. Its contact details are available on request at the contact address above.',
   ],
   donnees: 'Personal data and cookies',
   donneesTexte:
@@ -159,6 +158,14 @@ export const confidentialite = {
     comparaisonAgence:
       'At the explicit request of an agency, an AI reached through OpenRouter may read the guarantor’s payslips and pension statement, on a watermarked copy, to compare the declared income with the documents. Only the month and the net amount paid are extracted, with no retention by the provider. The result is not saved and makes no decision. The identity document is never sent.',
   },
+  openRouter: {
+    inactif:
+      'No document is sent to OpenRouter, Inc., a US company, while automatic reading is switched off. When that sending exists, it is not hosting in Europe.',
+    actifEurope:
+      'When a reading is requested, a copy of the document concerned is sent to OpenRouter, Inc., a US company: this is not European hosting. The reading server is forced to Europe, with no fallback. The identity document is not sent for the income reading.',
+    actifHorsEurope:
+      'When a reading is requested, a copy of the document concerned is sent to OpenRouter, Inc., a US company: this is not European hosting, and the reading server is not limited to the European Union. The transfer is covered by standard contractual clauses. The identity document is not sent for the income reading.',
+  },
   droits: {
     titre: 'Your rights',
     paragraphes: [
@@ -209,7 +216,7 @@ export const conditions = {
       id: 'agence',
       titre: 'The agency',
       paragraphes: [
-        'Viewing a file is free, and team members are unlimited. A team member joins the agency space with an address on its domain, after approval by an administrator. Real files can be opened once the agency’s SIREN number and professional licence have been verified.',
+        `Viewing a file is free. Each signed and archived deed costs ${prixActe}. Team members are unlimited. A team member joins the agency space with an address on its domain, after approval by an administrator. Real files can be opened once the agency’s SIREN number and professional licence have been verified.`,
         'The agency only views the files sent to it, as part of a real letting, and does not pass the documents on. The ratio shown is calculated from a declared income: checking the documents is up to the agency.',
         'Cloison may suspend an agency’s access in the event of abnormal viewing, documents being passed on, or an inaccurate declaration.',
       ],

@@ -84,9 +84,9 @@ export function retentionAffichee(): number {
 /**
  * Les traitements facultatifs, tels qu'ils sont reellement configures.
  *
- * La politique ne cite un sous-traitant que s'il recoit vraiment des donnees :
- * annoncer OpenRouter alors que l'OCR est coupe, ou le taire alors qu'il est
- * actif, serait faux dans les deux cas.
+ * La page Confidentialite dit toujours si une piece part chez OpenRouter.
+ * Le detail (OCR, lecture du garant, signature) n'apparait que si le
+ * traitement tourne vraiment dans cet environnement.
  */
 export function traitementsFacultatifs() {
   return {

@@ -64,7 +64,7 @@ export function FormulaireEngagement({
   const id = useId()
   const formulaire = useRef<HTMLFormElement>(null)
   const champRevenu = useRef<HTMLInputElement>(null)
-  const annonce = useRef<HTMLDivElement>(null)
+  const annonce = useRef<HTMLParagraphElement>(null)
   const [brouillonEnCours, setBrouillonEnCours] = useState(false)
 
   useEffect(() => {
@@ -167,12 +167,21 @@ export function FormulaireEngagement({
           inputMode="decimal"
           defaultValue={actuel?.montant ?? ''}
           placeholder="1 200"
-          aria-describedby={`${id}-montant-aide`}
+          aria-describedby={
+            etat.statut === 'enregistre' && etat.avertissement
+              ? `${id}-montant-aide ${id}-montant-avertissement`
+              : `${id}-montant-aide`
+          }
           className={cn(champBase)}
         />
         <p id={`${id}-montant-aide`} className="text-muted mt-2 text-[13px] font-medium">
           {texte.montantAide}
         </p>
+        {etat.statut === 'enregistre' && etat.avertissement ? (
+          <p id={`${id}-montant-avertissement`} className="message-info mt-3">
+            {etat.avertissement}
+          </p>
+        ) : null}
       </div>
 
       <div>
@@ -206,14 +215,9 @@ export function FormulaireEngagement({
       </label>
 
       {etat.statut === 'enregistre' ? (
-        <div ref={annonce} tabIndex={-1} role="status" className="flex flex-col gap-3">
-          <p className="message-succes">{texte.succes}</p>
-          {etat.avertissement ? (
-            <p className="border-sun bg-sun/15 rounded-r-xl border-l-4 px-4 py-3 text-[14px] leading-relaxed font-medium">
-              {etat.avertissement}
-            </p>
-          ) : null}
-        </div>
+        <p ref={annonce} tabIndex={-1} role="status" className="message-succes">
+          {texte.succes}
+        </p>
       ) : null}
       <button
         type="submit"
