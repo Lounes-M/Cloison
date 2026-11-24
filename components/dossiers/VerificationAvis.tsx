@@ -86,7 +86,11 @@ function Verification({ pieceId }: { pieceId: string }) {
           [
             texte.revenuFiscalDeReference,
             valeurs.revenuFiscalDeReference &&
-              `${Number(valeurs.revenuFiscalDeReference).toLocaleString(locale(langue))} €`,
+              Number(valeurs.revenuFiscalDeReference).toLocaleString(locale(langue), {
+                style: 'currency',
+                currency: 'EUR',
+                maximumFractionDigits: 0,
+              }),
           ],
           [texte.parts, valeurs.parts],
           [texte.reference, valeurs.reference],

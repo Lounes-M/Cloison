@@ -271,7 +271,9 @@ export default async function PageLocataire({
           <FormulaireLoyer dossierId={porteur.capacite.dossierId} loyerActuel={loyer} />
         ) : (
           <div className="mt-4">
-            {loyer ? <p className="text-sm font-semibold">{loyer} €</p> : null}
+            {dossier.loyer_cents != null ? (
+              <p className="text-sm font-semibold">{euros(Number(dossier.loyer_cents))}</p>
+            ) : null}
             <p className="text-muted mt-2 text-sm font-medium">{espace.loyerFigePhrase}</p>
           </div>
         )}
