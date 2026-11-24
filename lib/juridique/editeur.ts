@@ -19,8 +19,10 @@ import { choisir, type Langue } from '@/lib/i18n'
  *
  * Le mediateur est facultatif pour le rendu : tant qu'il n'est pas declare,
  * les conditions gardent leur texte generique sur la mediation, et aucun
- * controle ne le reclame. Seule la duree des sauvegardes marque encore la
- * page de confidentialite (`data-editeur-incomplet`) quand elle manque.
+ * controle ne le reclame. La page de confidentialite reste marquee
+ * (`data-editeur-incomplet`) tant que la duree des sauvegardes manque, ou que
+ * le moteur documentaire distant est branche sans hebergeur declare : dans les
+ * deux cas elle n'affirme rien qu'on ne lui a pas dit.
  */
 
 export type Editeur = {
@@ -76,11 +78,6 @@ export function editeur(langue: Langue = 'fr'): Editeur {
 /** L'editeur tel que les pages l'affichent, dans la langue de la page. */
 export const editeurAffiche = editeur
 
-/** La duree affichee des sauvegardes : celle qui est declaree, sinon celle du projet. */
-export function retentionAffichee(): number {
-  return retentionSauvegardes() ?? identiteFr.sauvegardeJours
-}
-
 /**
  * Les traitements facultatifs, tels qu'ils sont reellement configures.
  *
@@ -106,6 +103,11 @@ export function traitementsFacultatifs() {
         : process.env.SIGNATURE_PRESTATAIRE?.trim() === 'youtrust'
           ? ('youtrust' as const)
           : ('docage' as const),
+    // Branche par DOCUMENTAIRE_DISTANT_URL : les pieces en clair passent alors
+    // par un hebergeur de plus, que la politique doit citer.
+    moteurDocumentaire: process.env.DOCUMENTAIRE_DISTANT_URL?.trim()
+      ? { hebergeur: lire('DOCUMENTAIRE_DISTANT_HEBERGEUR') }
+      : null,
   }
 }
 
@@ -113,8 +115,8 @@ export function traitementsFacultatifs() {
  * La duree de conservation des sauvegardes, en jours, telle que configuree
  * chez Supabase (sauvegardes quotidiennes et PITR). La politique doit la
  * dire : detruire la cle d'un dossier ne neutralise pas une sauvegarde qui la
- * contient encore. Absente ou hors bornes, elle vaut inconnue et la page de
- * confidentialite reste marquee incomplete.
+ * contient encore. Absente ou hors bornes, elle vaut inconnue : la page de
+ * confidentialite ne donne alors aucune duree et reste marquee incomplete.
  */
 export function retentionSauvegardes(): number | null {
   const valeur = lire('SAUVEGARDE_RETENTION_JOURS')

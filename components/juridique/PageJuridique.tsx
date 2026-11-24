@@ -8,7 +8,7 @@ import { choisir, type Langue } from '@/lib/i18n'
  *
  * `incomplet` pose l'attribut que le controle de production refuse : seule
  * la page de confidentialite le porte encore, tant que la duree des
- * sauvegardes n'est pas declaree.
+ * sauvegardes ou l'hebergeur du moteur documentaire distant n'est pas declare.
  */
 export function PageJuridique({
   titre,

@@ -32,7 +32,6 @@ export const identiteEditeur = {
   adresse: '231 rue Saint-Honoré, 75001 Paris, France',
   courriel: 'contact@cloison.immo',
   directeurPublication: 'The chair (président) of LM Services',
-  sauvegardeJours: 7,
 } as const
 
 export const mentionTva = {
@@ -153,6 +152,8 @@ export const confidentialite = {
         'Electronic signature of the guarantee deed is entrusted to Youtrust, an electronic signature provider hosted in France, which also receives the guarantor’s phone number, needed for signing. The signed deed is kept for the period stated at the time of signing, separate from that of the supporting documents.',
     },
     ocr: 'At the explicit request of an agency, a document other than the identity document may be read by a text recognition service (OpenRouter) to make it easier to review. This reading makes no decision and is never triggered automatically.',
+    moteurDocumentaire: (hebergeur: string | null) =>
+      `When they are uploaded, and each time they are viewed, documents are checked and converted into images on a server dedicated to this processing alone, ${hebergeur ? `hosted by ${hebergeur}` : 'with a hosting provider other than those named above'}. They pass through it unencrypted for the time of the processing and are not kept there.`,
     lectureGarant:
       'At your explicit request, an AI reached through OpenRouter may read your payslips and pension statement to suggest a net monthly income. Only the month and the net amount paid are extracted, with no retention by the provider. The suggestion is saved only if you copy it and save it yourself. The identity document is never sent.',
   },

@@ -59,6 +59,12 @@ export const questions = {
           question: 'Qui voit mes pièces ?',
           reponse:
             'L’agence seulement, sur des copies filigranées, et chaque consultation est enregistrée à son nom. Le locataire ne voit ni vos pièces ni vos montants.',
+          // Ajoutes a la reponse seulement quand la lecture correspondante est activee.
+          complements: {
+            lectureGarant:
+              'Si vous le demandez vous-même, une IA lit vos bulletins de paie ou votre attestation de pension pour vous proposer un revenu, sans les conserver.',
+            ocr: 'Si l’agence le demande, une pièce autre que la pièce d’identité peut être lue par un service de reconnaissance de texte pour faciliter sa relecture.',
+          },
         },
         {
           question: 'Combien de temps sont-elles conservées ?',
@@ -104,3 +110,33 @@ export const questions = {
     },
   ],
 } as const
+
+type Question = {
+  question: string
+  reponse: string
+  complements?: { lectureGarant: string; ocr: string }
+}
+
+/**
+ * Les questions telles que la page les affiche, selon ce qui tourne vraiment.
+ *
+ * « L'agence seulement » ne suffit plus des qu'une lecture automatique est
+ * activee : la reponse le dit alors, comme la politique de confidentialite.
+ * Une lecture coupee n'ajoute rien.
+ */
+export function groupesAffiches(
+  groupes: readonly { id: string; titre: string; questions: readonly Question[] }[],
+  actifs: { lectureGarant: boolean; ocr: boolean },
+) {
+  return groupes.map((g) => ({
+    ...g,
+    questions: g.questions.map(({ question, reponse, complements }) => ({
+      question,
+      reponse: [
+        reponse,
+        ...(complements && actifs.lectureGarant ? [complements.lectureGarant] : []),
+        ...(complements && actifs.ocr ? [complements.ocr] : []),
+      ].join(' '),
+    })),
+  }))
+}
