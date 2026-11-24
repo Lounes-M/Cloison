@@ -65,12 +65,17 @@ const autorites: Record<string, Autorite> = {
   ZZ01: {
     nom: 'Autorite fictive',
     adresse: 'http://zz01.invalid/pki-2ddoc.der',
-    parNom: true,
+    recherches: ['http://zz01.invalid/pki-2ddoc.der?name={id}'],
     empreinte: '',
     certificat: fixture.autorites.ZZ01,
   },
 }
-const telecharger = vi.fn(async () => Buffer.from(fixture.certificats.AV01, 'base64'))
+const telecharger = vi.fn(async (adresse: string) =>
+  Buffer.from(
+    adresse.endsWith('.crl') ? fixture.listes.valide : fixture.certificats.AV01,
+    'base64',
+  ),
+)
 
 test('le code d un avis PDF sort du moteur a l octet pres, puis se verifie', async () => {
   const lu = await traiterDocument(await avis(), 'application/pdf', '', 'lire_code')

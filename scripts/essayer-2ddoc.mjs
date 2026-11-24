@@ -1,6 +1,11 @@
 // Essaie la verification 2D-Doc sur un fichier local, hors application.
 //
 // Usage : node scripts/essayer-2ddoc.mjs chemin/vers/avis.pdf
+//         node scripts/essayer-2ddoc.mjs --emetteur FR03 AV01 [AAAA-MM-JJ]
+//
+// La seconde forme n'a besoin d'aucun document : elle cherche le certificat
+// d'un emetteur chez son autorite et consulte sa revocation. Elle sert a
+// confirmer les adresses de `lib/2ddoc/autorites.ts` pour une autorite.
 //
 // Sert a la recette sur un vrai avis d'imposition, depuis un poste qui joint
 // les autorites de certification. Le fichier est lu par le meme moteur que
@@ -12,7 +17,9 @@ import { spawnSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { extname } from 'node:path'
 
+import { emetteursDeConfiance, telecharger } from '../lib/2ddoc/confiance.ts'
 import { analyserCode } from '../lib/2ddoc/format.ts'
+import { consulterRevocation } from '../lib/2ddoc/revocation.ts'
 import { verifierCode2dDoc } from '../lib/2ddoc/verification.ts'
 
 const TYPES = {
@@ -22,7 +29,32 @@ const TYPES = {
   '.jpeg': 'image/jpeg',
 }
 
+const journal = (ligne) => console.log(`  ${ligne}`)
+
+async function essayerEmetteur(
+  autorite,
+  identifiant,
+  jour = new Date().toISOString().slice(0, 10),
+) {
+  if (!autorite || !identifiant || Number.isNaN(Date.parse(jour)))
+    throw new Error('Attendu : --emetteur <autorite> <identifiant> [AAAA-MM-JJ]')
+  console.log(`Emetteur ${identifiant} de ${autorite}, au ${jour}`)
+  const emetteurs = await emetteursDeConfiance(autorite, identifiant, new Date(jour), { journal })
+  if (!emetteurs.length) console.log('Aucun certificat retenu')
+  for (const { certificat, autorite: racine, organisation } of emetteurs) {
+    console.log(
+      `Certificat retenu : ${organisation}, valide du ${certificat.validFrom} au ${certificat.validTo}`,
+    )
+    const etat = await consulterRevocation(certificat, racine, { telecharger, journal })
+    console.log(`Revocation : ${etat}`)
+  }
+}
+
 try {
+  if (process.argv[2] === '--emetteur') {
+    await essayerEmetteur(...process.argv.slice(3, 6))
+    process.exit()
+  }
   const chemin = process.argv[2]
   const type = TYPES[extname(chemin ?? '').toLowerCase()]
   if (!chemin || !type) throw new Error('Fichier PDF, PNG ou JPEG attendu')
@@ -48,7 +80,7 @@ try {
         ? 'Code lu, mais sa forme n est pas reconnue'
         : 'Aucun code 2D-Doc lisible',
   )
-  console.log(JSON.stringify(await verifierCode2dDoc(code), null, 2))
+  console.log(JSON.stringify(await verifierCode2dDoc(code, { journal }), null, 2))
 } catch (erreur) {
   console.error(`Essai impossible : ${erreur instanceof Error ? erreur.message : 'erreur'}`)
   process.exitCode = 1
