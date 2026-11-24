@@ -3,6 +3,7 @@ import 'server-only'
 import { clientServeur } from '@/lib/acces/serveur'
 import { envoyer } from '@/lib/courriels/envoi'
 import { env } from '@/lib/env'
+import { enCitation, surUneLigne } from '@/lib/validation/ligne'
 import { VOLUMES, type DemandeAgence } from './schema'
 
 /**
@@ -53,14 +54,16 @@ export async function enregistrerDemande(
  */
 export async function notifierDemande(demande: DemandeAgence): Promise<void> {
   const volume = VOLUMES.find((v) => v.valeur === demande.dossiersParAn)?.libelle
-  const sujet = `Nouvelle agence : ${demande.nomAgence} (${demande.ville})`
+  const sujet = `Nouvelle agence : ${surUneLigne(demande.nomAgence)} (${surUneLigne(demande.ville)})`
 
   const corps = [
-    `Agence   : ${demande.nomAgence}`,
-    `Ville    : ${demande.ville}`,
-    `E-mail   : ${demande.email}`,
+    `Agence   : ${surUneLigne(demande.nomAgence)}`,
+    `Ville    : ${surUneLigne(demande.ville)}`,
+    `E-mail   : ${surUneLigne(demande.email)}`,
     `Dossiers : ${volume ?? demande.dossiersParAn} par an`,
-    demande.message ? `\nMessage :\n${demande.message}` : null,
+    // Texte libre d'un inconnu : cite, pour qu'aucune ligne ne se lise comme
+    // une consigne du courriel.
+    demande.message ? `\nMessage :\n${enCitation(demande.message)}` : null,
   ]
     .filter(Boolean)
     .join('\n')
