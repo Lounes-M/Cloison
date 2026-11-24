@@ -250,7 +250,6 @@ export default async function PagePilotage() {
               aria-label={t.blocages.legende}
             >
               <table className="w-full min-w-[640px] text-left text-[14px]">
-                <caption className="sr-only">{t.blocages.legende}</caption>
                 <thead>
                   <tr className="border-ink/15 border-b">
                     {(['reference', 'etape', 'motif', 'attend'] as const).map((k) => (
