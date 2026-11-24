@@ -27,6 +27,7 @@ export const journal: Textes<typeof Fr> = {
     dossier_refuse: 'File declined',
     ocr_demande: 'AI transcription of a document requested',
     lecture_ia_garant: 'AI reading of an income document requested',
+    comparaison_revenus: 'AI comparison of the declared income with a document requested',
     code_2ddoc_verifie: '2D-Doc code check of a tax notice requested',
     synthese_bailleur: 'Summary for the landlord downloaded',
   },

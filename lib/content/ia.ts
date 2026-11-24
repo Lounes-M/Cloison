@@ -4,7 +4,7 @@
  * Chaque phrase decrit un comportement que le code ou la base imposent. Une
  * promesse ajoutee ici sans son garde-fou technique est une promesse fausse :
  * voir `lib/ocr/`, `lib/garant/lecture-revenus.ts` et les migrations 0047,
- * 0087 et 0088.
+ * 0087, 0088 et 0095.
  */
 
 export const heroIa = {
@@ -19,7 +19,7 @@ export const heroIa = {
 } as const
 
 export const usages = {
-  titre: ['Deux usages,', 'pas un de plus.'],
+  titre: ['Trois usages,', 'pas un de plus.'],
   etat: { actif: 'Disponible', inactif: 'Pas encore activé' },
   items: [
     {
@@ -43,6 +43,18 @@ export const usages = {
       points: [
         'Une copie filigranée, jamais l’original',
         'Un texte à comparer au document, pas une vérification',
+        'Rien n’est ajouté au dossier',
+      ],
+    },
+    {
+      cle: 'comparaison',
+      pour: 'Pour l’agence',
+      titre: 'Comparer la déclaration aux pièces',
+      texte:
+        'Le garant déclare un revenu, ses justificatifs en sont la preuve. Sur demande, une IA relève le mois et le montant net payé sur ses bulletins de paie et son attestation de pension, puis Cloison affiche l’écart avec la déclaration. L’agence ouvre les pièces et conclut elle-même.',
+      points: [
+        'Une copie filigranée, jamais l’original',
+        'Un écart à vérifier, pas un score',
         'Rien n’est ajouté au dossier',
       ],
     },

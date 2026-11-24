@@ -40,6 +40,7 @@ export function PageIa({ langue = 'fr' }: { langue?: Langue }) {
   const actif: Record<string, boolean> = {
     garant: facultatifs.lectureGarant,
     agence: facultatifs.ocr,
+    comparaison: facultatifs.comparaisonAgence,
   }
   const garantiesAffichees = garanties.items.filter(
     (item) => item.cle !== 'europe' || facultatifs.lectureEnEurope,
@@ -62,7 +63,7 @@ export function PageIa({ langue = 'fr' }: { langue?: Langue }) {
         </div>
       </EnTetePage>
 
-      {/* DEUX USAGES : deux grandes cartes blanches */}
+      {/* TROIS USAGES : trois grandes cartes blanches */}
       <section
         id="usages"
         className="bg-cream gouttiere scroll-mt-[var(--entete-total)] pt-[6.9rem] pb-[11.25rem] max-[767px]:py-[3.75rem]"
@@ -73,7 +74,7 @@ export function PageIa({ langue = 'fr' }: { langue?: Langue }) {
               {usages.titre[0]} <Accent>{usages.titre[1]}</Accent>
             </h2>
           </Reveal>
-          <ul className="mt-[5.7rem] grid gap-[1.66rem] max-[767px]:mt-10 md:grid-cols-2">
+          <ul className="mt-[5.7rem] grid gap-[1.66rem] max-[767px]:mt-10 md:grid-cols-2 lg:grid-cols-3">
             {usages.items.map((item, index) => (
               <li key={item.cle}>
                 <Reveal delay={index * 0.08} className="h-full">

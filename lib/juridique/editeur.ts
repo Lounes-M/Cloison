@@ -89,6 +89,7 @@ export function traitementsFacultatifs() {
   return {
     ocr: process.env.OCR_ACTIVE === 'true',
     lectureGarant: process.env.LECTURE_IA_GARANT === 'true',
+    comparaisonAgence: process.env.COMPARAISON_IA_AGENCE === 'true',
     // Vrai seulement si l'endpoint impose est europeen : le defaut l'est, un
     // autre choix ou « aucun » ne permet plus de l'affirmer.
     lectureEnEurope:

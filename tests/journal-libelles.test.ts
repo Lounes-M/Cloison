@@ -25,6 +25,7 @@ test('chaque action du journal a un libelle pour l agence et pour le garant', as
   const admises = await actionsDuJournal()
   expect(admises).toContain('relances_reprises')
   expect(admises).toContain('code_2ddoc_verifie')
+  expect(admises).toContain('comparaison_revenus')
   for (const action of admises) {
     expect(actions[action], action).toBeTruthy()
     expect(journal.actions[action], action).toBeTruthy()

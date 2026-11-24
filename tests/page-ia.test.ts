@@ -14,6 +14,8 @@ test('les deux langues decrivent les memes usages, interdits et garanties', () =
   expect(en.usages.items.map((i) => i.cle)).toEqual(fr.usages.items.map((i) => i.cle))
   expect(en.jamais.cartes).toHaveLength(fr.jamais.cartes.length)
   expect(en.garanties.items.map((i) => i.cle)).toEqual(fr.garanties.items.map((i) => i.cle))
+  // Chaque usage annonce a son activation : aucun n'est « disponible » par defaut.
+  expect(fr.usages.items.map((i) => i.cle)).toEqual(['garant', 'agence', 'comparaison'])
 })
 
 test.each([
@@ -31,6 +33,9 @@ test.each([
 test('un usage desactive n est pas annonce comme disponible', () => {
   vi.stubEnv('LECTURE_IA_GARANT', '')
   vi.stubEnv('OCR_ACTIVE', '')
+  vi.stubEnv('COMPARAISON_IA_AGENCE', '')
   const f = traitementsFacultatifs()
-  expect([f.lectureGarant, f.ocr]).toEqual([false, false])
+  expect([f.lectureGarant, f.ocr, f.comparaisonAgence]).toEqual([false, false, false])
+  vi.stubEnv('COMPARAISON_IA_AGENCE', 'true')
+  expect(traitementsFacultatifs().comparaisonAgence).toBe(true)
 })

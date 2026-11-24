@@ -156,6 +156,8 @@ export const confidentialite = {
       `When they are uploaded, and each time they are viewed, documents are checked and converted into images on a server dedicated to this processing alone, ${hebergeur ? `hosted by ${hebergeur}` : 'with a hosting provider other than those named above'}. They pass through it unencrypted for the time of the processing and are not kept there.`,
     lectureGarant:
       'At your explicit request, an AI reached through OpenRouter may read your payslips and pension statement to suggest a net monthly income. Only the month and the net amount paid are extracted, with no retention by the provider. The suggestion is saved only if you copy it and save it yourself. The identity document is never sent.',
+    comparaisonAgence:
+      'At the explicit request of an agency, an AI reached through OpenRouter may read the guarantor’s payslips and pension statement, on a watermarked copy, to compare the declared income with the documents. Only the month and the net amount paid are extracted, with no retention by the provider. The result is not saved and makes no decision. The identity document is never sent.',
   },
   openRouter: {
     inactif:
