@@ -185,6 +185,42 @@ jobs:
         if: failure()
         run: docker logs cloison-postgrest || true
 
+  parcours-complets:
+    name: Parcours complets sur Supabase local
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Postgres, Auth, PostgREST, Storage et la boite aux lettres locale. Les
+      # migrations de supabase/migrations sont appliquees au demarrage.
+      - name: Demarrer le Supabase local
+        run: |
+          npx --yes supabase@3.3.0 start \
+            -x studio,realtime,edge-runtime,logflare,vector,imgproxy,postgres-meta,supavisor
+          npx --yes supabase@3.3.0 status -o env \
+            | grep -E '^(PUBLISHABLE_KEY|JWT_SECRET)=' | tr -d '"' >> "$GITHUB_ENV"
+      - name: Build a l'adresse du harnais
+        env:
+          NEXT_PUBLIC_SITE_URL: https://localhost:3443
+        run: npm run build
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Agence, locataire, garant, acte, en francais et en anglais
+        env:
+          PARCOURS_CLE_PUBLIABLE: ${{ env.PUBLISHABLE_KEY }}
+          PARCOURS_SECRET_JWT: ${{ env.JWT_SECRET }}
+        run: node scripts/parcours-complets/parcours.mjs
+      - name: Diagnostic Supabase
+        if: failure()
+        run: docker ps -a || true
+
   restauration:
     name: Restauration PostgreSQL native
     runs-on: ubuntu-latest

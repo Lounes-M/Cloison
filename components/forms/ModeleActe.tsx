@@ -174,7 +174,7 @@ export function ModeleActe({
               <option value="" disabled />
               {[1, 2, 3, 4].map((n) => (
                 <option key={n} value={n}>
-                  {n === 1 ? '1er' : `${n}e`}
+                  {langue === 'en' ? `Q${n}` : n === 1 ? '1er' : `${n}e`}
                 </option>
               ))}
             </select>
