@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { clientServeur } from '@/lib/acces/serveur'
 import { lireCorpsWebhook } from '@/lib/http/corps-webhook'
 import { etatDocage } from '@/lib/signature/client-docage'
-import { verifierJetonDocage } from '@/lib/signature/configuration-docage'
+import { jetonDocageAccepte } from '@/lib/signature/configuration-docage'
 import {
   modeSignature,
   prestataireActif,
@@ -22,16 +22,17 @@ const notification = z.looseObject({
 })
 
 /**
- * Webhook Docage. Docage ne signe pas ses appels : l'URL enregistree porte un
- * jeton secret, et la notification ne fait que reveiller la lecture de la
- * transaction. L'etat du registre ne change qu'au rapprochement, apres une
- * relecture authentifiee par la cle API.
+ * Webhook Docage. Docage ne signe pas ses appels (`WebhookDTO.url` seulement) :
+ * le jeton reste dans la query pour ne pas casser la production, et
+ * `Authorization: Bearer` est accepte en plus. La notification ne fait que
+ * reveiller la lecture de la transaction. L'etat du registre ne change qu'au
+ * rapprochement, apres une relecture authentifiee par la cle API.
  */
 export async function POST(requete: Request) {
   if (!registreSignatureActif() || prestataireActif() !== 'docage')
     return NextResponse.json({ recu: false }, { status: 503, headers })
   try {
-    if (!verifierJetonDocage(new URL(requete.url).searchParams.get('jeton')))
+    if (!jetonDocageAccepte(requete))
       return NextResponse.json({ recu: false }, { status: 401, headers })
     const mode = modeSignature()
     const corps = await lireCorpsWebhook(requete)
@@ -55,6 +56,8 @@ export async function POST(requete: Request) {
     if (error || !resultat.safeParse(data).success) throw new Error('Registre indisponible')
     return NextResponse.json({ recu: true }, { headers })
   } catch {
+    // Phrase fixe : le message d'erreur peut contenir l'URL, donc le jeton.
+    // Un journal applicatif n'accepte qu'un libelle constant.
     console.error('[signature] notification Docage a rejouer')
     return NextResponse.json({ recu: false }, { status: 503, headers })
   }
