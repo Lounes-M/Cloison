@@ -9,6 +9,7 @@ const doubles = vi.hoisted(() => ({
   liens: vi.fn(),
   rappels: vi.fn(),
   fins: vi.fn(),
+  delais: vi.fn(),
   rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
@@ -16,6 +17,7 @@ vi.mock('@/lib/courriels/notifications', () => ({ livrerNotifications: doubles.n
 vi.mock('@/lib/courriels/livraison-liens', () => ({ livrerLiens: doubles.liens }))
 vi.mock('@/lib/courriels/rappels', () => ({ preparerRappels: doubles.rappels }))
 vi.mock('@/lib/courriels/fin-dossier', () => ({ annoncerFinsDeDossier: doubles.fins }))
+vi.mock('@/lib/courriels/delais-agence', () => ({ alerterDelaisAgence: doubles.delais }))
 vi.mock('@/lib/courriels/file', () => ({ distribuerCourriels: doubles.courriels }))
 vi.mock('@/lib/exploitation/purge', () => ({ purgerCoffres: doubles.purge }))
 const requete = () =>
@@ -34,6 +36,7 @@ beforeEach(() => {
   doubles.liens.mockResolvedValue({ echecs: 0 })
   doubles.rappels.mockResolvedValue({ echecs: 0 })
   doubles.fins.mockResolvedValue({ echecs: 0 })
+  doubles.delais.mockResolvedValue({ echecs: 0 })
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -203,4 +206,13 @@ test('une panne des annonces de fin de dossier se voit sans arreter les courriel
   expect(resultat.status).toBe(503)
   expect((await resultat.json()).notifications.echecs).toBe(1)
   expect(doubles.courriels).toHaveBeenCalledOnce()
+})
+
+test('une panne des alertes de délai se voit sans arrêter les courriels', async () => {
+  doubles.delais.mockRejectedValue(new Error('ADRESSE_PRIVEE'))
+  const resultat = await GET(requete())
+  expect(resultat.status).toBe(503)
+  expect((await resultat.json()).notifications.echecs).toBe(1)
+  expect(doubles.courriels).toHaveBeenCalledOnce()
+  expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toMatch(/ADRESSE_PRIVEE/)
 })

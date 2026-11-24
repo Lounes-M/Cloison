@@ -53,6 +53,11 @@ export const questions = {
           question: 'Who sees my documents?',
           reponse:
             'Only the agency, on watermarked copies, and every viewing is recorded under its name. The tenant sees neither your documents nor your amounts.',
+          complements: {
+            lectureGarant:
+              'If you ask for it yourself, an AI reads your payslips or pension statement to suggest an income, without keeping them.',
+            ocr: 'If the agency asks for it, a document other than your identity document can be read by a text recognition service to make it easier to review.',
+          },
         },
         {
           question: 'How long are they kept?',
