@@ -84,8 +84,29 @@ for (const chemin of ['/espace/dossiers', '/connexion/securite']) {
     expect(signaux.length).toBeGreaterThan(0)
     for (const signal of signaux) expect(signal).toBeInstanceOf(AbortSignal)
     expect(reponse.headers.get('content-security-policy')).toContain("'nonce-")
+    expect(reponse.cookies.get(COOKIE)).toMatchObject({
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+    })
   })
 }
+
+test.each(['/espace/dossiers', '/espace/nulle-part', '/espace/dossiers/abc/acte'])(
+  '%s sans session redirige vers la connexion',
+  async (chemin) => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () => new Response(JSON.stringify({ message: 'pas de session' }), { status: 401 }),
+      ),
+    )
+    const reponse = await proxy(new NextRequest(`https://cloison.example.invalid${chemin}`))
+    expect(reponse.status).toBe(307)
+    expect(reponse.headers.get('location')).toBe('https://cloison.example.invalid/connexion')
+    expect(reponse.headers.get('x-robots-tag')).toBe('noindex, nofollow')
+  },
+)
 
 test('le parcours garant ne renouvelle pas une session agence incidente', async () => {
   const fetchFictif = vi.fn()
@@ -106,12 +127,24 @@ test.each([
   '/garant',
   '/lien/abc',
   '/lien-invalide',
+  '/demarrer',
+  '/en/demarrer',
 ])('Next applique le proxy a %s', (url) => {
   expect(unstable_doesMiddlewareMatch({ config, nextConfig: {}, url })).toBe(true)
 })
+test.each(['/demarrer', '/en/demarrer', '/demarrer/suite'])(
+  'Next applique le nonce a %s sans le retirer des moteurs',
+  async (chemin) => {
+    const reponse = await proxy(new NextRequest(`https://cloison.example.invalid${chemin}`))
+    expect(reponse.headers.get('content-security-policy')).toContain("'strict-dynamic'")
+    expect(reponse.headers.get('x-robots-tag')).toBeNull()
+  },
+)
 test.each([
   '/',
-  '/demarrer',
+  '/en',
+  '/agences',
+  '/en/agences',
   '/espace-public',
   '/api/paiement/webhook',
   '/_next/static/app.js',
