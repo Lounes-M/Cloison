@@ -1,9 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { optionsCookieSessionAgence } from '@/lib/acces/cookies-agence'
 import { env } from '@/lib/env'
 import { fetchAgence } from '@/lib/http/fetch-agence'
-import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
+import { estPageNoncePublique, nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
 
 /**
  * Deux choses, pour l'applicatif seulement (plus un en-tete qui l'ecarte des
@@ -33,9 +34,18 @@ import { nouveauNonce, politiqueAvecNonce } from '@/lib/securite/csp'
  *   Fabriquer une reponse neuve apres coup perdrait les cookies rafraichis, et
  *   la session serait renouvelee sans que personne ne le sache.
  */
+/** Une page, pas un telechargement : le navigateur, ou la navigation RSC. */
+function demandeUnePage(requete: NextRequest): boolean {
+  if ((requete.headers.get('accept') ?? '').includes('text/html')) return true
+  if (requete.headers.get('rsc') === '1') return true
+  return requete.headers.get('sec-fetch-mode') === 'navigate'
+}
+
 export async function proxy(requete: NextRequest) {
   const nonce = nouveauNonce()
-  const remise = requete.nextUrl.pathname === '/remise-donnees'
+  const chemin = requete.nextUrl.pathname
+  const remise = chemin === '/remise-donnees'
+  const ouverture = estPageNoncePublique(chemin)
   const politique = politiqueAvecNonce(nonce)
 
   // La requete transmise a Next porte la politique, donc le nonce. `x-nonce`
@@ -48,19 +58,25 @@ export async function proxy(requete: NextRequest) {
   }
 
   let reponse = suivant()
+  // Le dernier lot ecrit par le SDK : une redirection doit le reporter, sinon
+  // un cookie rafraichi ou efface resterait sur la reponse qu'on jette.
+  let cookiesPoses: {
+    name: string
+    value: string
+    options?: Parameters<NextResponse['cookies']['set']>[2]
+  }[] = []
 
-  if (
-    requete.nextUrl.pathname.startsWith('/espace') ||
-    requete.nextUrl.pathname === '/connexion/securite'
-  ) {
+  if (chemin.startsWith('/espace') || chemin === '/connexion/securite') {
     // Les memes accesseurs que partout ailleurs : une variable absente doit
     // echouer bruyamment, pas se replier sur une chaine vide qui produirait
     // une erreur reseau incomprehensible trois appels plus loin.
     const supabase = createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+      cookieOptions: optionsCookieSessionAgence(),
       global: { fetch: fetchAgence },
       cookies: {
         getAll: () => requete.cookies.getAll(),
         setAll: (aPoser) => {
+          cookiesPoses = aPoser
           for (const { name, value } of aPoser) requete.cookies.set(name, value)
           reponse = suivant()
           for (const { name, value, options } of aPoser) reponse.cookies.set(name, value, options)
@@ -68,13 +84,29 @@ export async function proxy(requete: NextRequest) {
       },
     })
 
-    await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    // Sans session agence, une navigation de page sous `/espace` renvoie a la
+    // connexion, y compris une adresse qui n'a pas de page
+    // (`/espace/dossiers`). Un appel qui n'est pas une page (le calendrier
+    // d'echeance, par exemple) atteint la route : un lien porteur y recoit
+    // 401, pas une page de connexion. Il n'y a pas de parametre de retour :
+    // le lien magique arrive toujours sur `/espace`.
+    if (chemin.startsWith('/espace') && !data.user && demandeUnePage(requete)) {
+      const redirection = NextResponse.redirect(new URL('/connexion', requete.url), 307)
+      for (const { name, value, options } of cookiesPoses) {
+        redirection.cookies.set(name, value, options)
+      }
+      redirection.headers.set('Content-Security-Policy', politique)
+      redirection.headers.set('X-Robots-Tag', 'noindex, nofollow')
+      return redirection
+    }
   }
 
   reponse.headers.set('Content-Security-Policy', politique)
   // Rien de l'applicatif ne doit finir dans un moteur de recherche : ni un
   // lien porteur de jeton, ni une redirection, ni une route sans metadonnees.
-  reponse.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  // `/demarrer` reste indexable : c'est une page publique, pas un espace.
+  if (!ouverture) reponse.headers.set('X-Robots-Tag', 'noindex, nofollow')
   if (remise) {
     reponse.headers.set('Cache-Control', 'no-store')
     reponse.headers.set('Referrer-Policy', 'no-referrer')
@@ -86,14 +118,15 @@ export const config = {
   /**
    * L'applicatif, et rien d'autre.
    *
-   * Le site public est entierement statique et garde sa propre politique,
-   * declaree dans `next.config.ts` : le faire passer par ici lui couterait un
-   * rendu dynamique par page vue, pour un nonce qu'une page prerendue ne
-   * peut pas porter.
+   * Le site public est statique et garde sa propre politique, declaree dans
+   * `next.config.ts`, sauf `/demarrer` et `/en/demarrer` : le formulaire
+   * d'ouverture porte un nonce, le reste du marketing non. Le faire passer
+   * entierement par ici lui couterait un rendu dynamique par page vue.
    *
-   * Cette liste est le miroir de `SEGMENTS_APPLICATIFS` dans
-   * `lib/securite/csp.ts`. Next exige qu'elle soit ecrite en clair ici, sans
-   * variable ; un test verifie que les deux ne divergent pas.
+   * Les sept premiers motifs sont le miroir de `SEGMENTS_APPLICATIFS`, les
+   * deux derniers celui de `PAGES_NONCE_PUBLIQUES`, dans `lib/securite/csp.ts`.
+   * Next exige que cette liste soit ecrite en clair, sans variable ; un test
+   * verifie qu'elle ne diverge pas.
    */
   matcher: [
     '/espace/:path*',
@@ -103,5 +136,7 @@ export const config = {
     '/lien/:path*',
     '/lien-invalide/:path*',
     '/remise-donnees/:path*',
+    '/demarrer/:path*',
+    '/en/demarrer/:path*',
   ],
 }

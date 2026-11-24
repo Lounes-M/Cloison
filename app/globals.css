@@ -1505,7 +1505,8 @@ html:has(.site-public) {
 /* Retour d'un formulaire : l'erreur est rouge, jamais orange, pour ne pas
    se confondre avec une action ; la reussite reprend le vert de la marque. */
 .message-erreur,
-.message-succes {
+.message-succes,
+.message-info {
   border: 1px solid;
   border-left-width: 4px;
   border-radius: 0.75rem;
@@ -1524,6 +1525,13 @@ html:has(.site-public) {
   border-color: color-mix(in srgb, var(--color-cobalt) 30%, transparent);
   border-left-color: var(--color-cobalt);
   background: color-mix(in srgb, var(--color-mint) 45%, var(--color-paper));
+}
+/* Information, pas une erreur : encre sur papier, jamais le rose d'un avertissement. */
+.message-info {
+  border-color: color-mix(in srgb, var(--color-ink) 22%, transparent);
+  border-left-color: var(--color-ink);
+  background: var(--color-paper);
+  font-weight: 500;
 }
 
 /* ------------------------------------------------------------------ */

@@ -184,6 +184,27 @@ export default async function PageLocataire({
         garantDesigne: garant !== null,
       })
     : null
+  const saisieLoyer = ouvert && !dossier.loyer_verrouille && !coloc
+  // Une fois paye et en depot, candidater ou transmettre n'est plus le geste
+  // du moment. Les blocs restent, plus bas et replies.
+  const rattachementSecondaire =
+    Boolean(dossier.paye_le) && String(dossier.statut) === 'depot_en_cours'
+  const proposerCandidature = ouvert && !dossier.agence_id && !dossier.demonstration
+  const proposerContinuite = ouvert && !dossier.agence_id
+  const rattachement = (
+    <>
+      {proposerCandidature ? (
+        <FormulaireCandidature dossierId={porteur.capacite.dossierId} />
+      ) : null}
+      {proposerContinuite ? (
+        <FormulaireContinuite
+          mode="agence"
+          dossierId={porteur.capacite.dossierId}
+          regle={Boolean(dossier.paye_le)}
+        />
+      ) : null}
+    </>
+  )
 
   return (
     <div className="page-espace w-full max-w-[640px]">
@@ -223,11 +244,13 @@ export default async function PageLocataire({
       />
       <section id="logement" className="panneau-espace mt-6">
         <h2 className="text-xl font-bold">{espace.loyerTitre}</h2>
-        <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
-          {espace.loyerAide}
-        </p>
+        {saisieLoyer ? (
+          <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
+            {espace.loyerAide}
+          </p>
+        ) : null}
         {coloc ? (
-          <div className="text-sm leading-relaxed font-medium">
+          <div className="mt-4 text-sm leading-relaxed font-medium">
             <p>
               {texteColocation.locataire.texte(coloc.colocataires, euros(coloc.loyerTotalCents))}
             </p>
@@ -244,24 +267,16 @@ export default async function PageLocataire({
             ) : null}
             {coloc.commune ? <p className="mt-2">{texteColocation.locataire.commune}</p> : null}
           </div>
-        ) : ouvert && !dossier.loyer_verrouille ? (
+        ) : saisieLoyer ? (
           <FormulaireLoyer dossierId={porteur.capacite.dossierId} loyerActuel={loyer} />
         ) : (
-          <p className="text-sm">
-            {espace.loyerFige} {loyer} {espace.loyerFigeSuite}
-          </p>
+          <div className="mt-4">
+            {loyer ? <p className="text-sm font-semibold">{loyer} €</p> : null}
+            <p className="text-muted mt-2 text-sm font-medium">{espace.loyerFigePhrase}</p>
+          </div>
         )}
       </section>
-      {ouvert && !dossier.agence_id && !dossier.demonstration ? (
-        <FormulaireCandidature dossierId={porteur.capacite.dossierId} />
-      ) : null}
-      {ouvert && !dossier.agence_id ? (
-        <FormulaireContinuite
-          mode="agence"
-          dossierId={porteur.capacite.dossierId}
-          regle={Boolean(dossier.paye_le)}
-        />
-      ) : null}
+      {rattachementSecondaire ? null : rattachement}
 
       {aRegler || dossier.paye_le ? (
         <section id="paiement" className="panneau-espace mt-6">
@@ -393,6 +408,13 @@ export default async function PageLocataire({
             />
           ) : null}
         </section>
+      ) : null}
+
+      {rattachementSecondaire && (proposerCandidature || proposerContinuite) ? (
+        <details className="aide-espace mt-10">
+          <summary>{espace.rattachementPlusTard}</summary>
+          {rattachement}
+        </details>
       ) : null}
 
       <p className="text-muted mt-10 text-[13px] font-medium">{espace.expire(expire)}</p>
