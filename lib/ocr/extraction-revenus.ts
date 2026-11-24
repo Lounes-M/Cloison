@@ -3,7 +3,9 @@ import { z } from 'zod'
 import { normaliserLecture, schemaFournisseur, type DocumentLu } from './revenus'
 
 /**
- * Lecture IA d'un justificatif de revenus, a la demande du garant.
+ * Lecture IA d'un justificatif de revenus : a la demande du garant, pour lui
+ * proposer un revenu, ou a celle de l'agence, pour comparer la declaration aux
+ * pieces (`comparaison-agence.ts`).
  *
  * Distincte de la transcription agence (`openrouter.ts`) : autre activation,
  * autre modele, et une sortie fermee de trois champs par document au lieu
@@ -24,13 +26,14 @@ export type ConfigurationLecture = {
   base: string
 }
 
-export function configurationLectureGarant(): ConfigurationLecture | null {
+/** Meme modele, meme endpoint impose : seule l'activation differe selon l'usage. */
+function configurationExtraction(activation: string | undefined): ConfigurationLecture | null {
   const cle = process.env.OPENROUTER_API_KEY?.trim()
   const modele = process.env.OPENROUTER_EXTRACTION_MODEL?.trim() || MODELE_DEFAUT
   const choix = process.env.OPENROUTER_EXTRACTION_FOURNISSEUR?.trim() || FOURNISSEUR_DEFAUT
   const fournisseur = choix === 'aucun' ? null : choix
   if (
-    process.env.LECTURE_IA_GARANT !== 'true' ||
+    activation !== 'true' ||
     !cle ||
     !/^[a-z0-9.-]+\/[a-z0-9._-]+$/.test(modele) ||
     (fournisseur !== null && !/^[a-z0-9-]+(\/[a-z0-9-]+)?$/.test(fournisseur))
@@ -44,7 +47,19 @@ export function configurationLectureGarant(): ConfigurationLecture | null {
   return { cle, modele, fournisseur, base }
 }
 
-const CONSIGNE = `Tu lis un justificatif de revenus francais pour aider son titulaire a remplir un formulaire.
+export function configurationLectureGarant(): ConfigurationLecture | null {
+  return configurationExtraction(process.env.LECTURE_IA_GARANT)
+}
+
+/**
+ * La comparaison cote agence s'active a part : elle envoie une copie
+ * filigranee a la demande de l'agence, pas un original a la demande du garant.
+ */
+export function configurationComparaisonAgence(): ConfigurationLecture | null {
+  return configurationExtraction(process.env.COMPARAISON_IA_AGENCE)
+}
+
+const CONSIGNE = `Tu lis un justificatif de revenus francais pour en relever le montant net paye.
 Pour chaque bulletin de paie ou attestation de pension de retraite present dans le fichier, rends un element :
 - nature : "bulletin_paie", "pension", ou "autre" pour tout autre document ;
 - periode : le mois concerne, au format AAAA-MM, ou une chaine vide s'il n'est pas lisible ;

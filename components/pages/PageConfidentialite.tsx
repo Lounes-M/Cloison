@@ -40,6 +40,7 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
                     : []),
                   ...(facultatifs.ocr ? [textes.facultatifs.ocr] : []),
                   ...(facultatifs.lectureGarant ? [textes.facultatifs.lectureGarant] : []),
+                  ...(facultatifs.comparaisonAgence ? [textes.facultatifs.comparaisonAgence] : []),
                 ]
               : []),
           ]}

@@ -14,6 +14,7 @@ Cloison est une application de gestion de la garantie locative qui sépare les a
 - Gestion des collaborateurs, affectation des dossiers et historique des changements.
 - Demandes de compléments, examen documentaire humain et gestion des modifications concurrentes.
 - OCR facultatif via OpenRouter, déclenché explicitement et soumis à des quotas ; les résultats sont à relire.
+- Comparaison facultative du revenu déclaré aux bulletins de paie et à la pension, à la demande de l'agence : un écart à vérifier, jamais un score ni une décision.
 - Préférences de notifications, rappels facultatifs et suivi des courriels.
 - API de statuts pour les intégrateurs, avec clés d'agence révocables.
 - Paiement locataire, rapprochement et outils de suivi opérationnel.

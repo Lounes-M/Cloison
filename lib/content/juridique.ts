@@ -171,6 +171,8 @@ export const confidentialite = {
     ocr: 'À la demande explicite d’une agence, une pièce autre que la pièce d’identité peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
     lectureGarant:
       'À votre demande explicite, une IA accessible par OpenRouter peut lire vos bulletins de paie et votre attestation de pension pour vous proposer un revenu net mensuel. Seuls le mois et le montant net payé sont extraits, sans conservation par le fournisseur. La proposition n’est enregistrée que si vous la reportez et l’enregistrez vous-même. La pièce d’identité n’est jamais envoyée.',
+    comparaisonAgence:
+      'À la demande explicite d’une agence, une IA accessible par OpenRouter peut lire les bulletins de paie et l’attestation de pension du garant, sur une copie filigranée, pour comparer le revenu déclaré aux pièces. Seuls le mois et le montant net payé sont extraits, sans conservation par le fournisseur. Le résultat n’est pas enregistré et ne prend aucune décision. La pièce d’identité n’est jamais envoyée.',
   },
   droits: {
     titre: 'Vos droits',

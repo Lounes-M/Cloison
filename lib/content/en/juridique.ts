@@ -156,6 +156,8 @@ export const confidentialite = {
     ocr: 'At the explicit request of an agency, a document other than the identity document may be read by a text recognition service (OpenRouter) to make it easier to review. This reading makes no decision and is never triggered automatically.',
     lectureGarant:
       'At your explicit request, an AI reached through OpenRouter may read your payslips and pension statement to suggest a net monthly income. Only the month and the net amount paid are extracted, with no retention by the provider. The suggestion is saved only if you copy it and save it yourself. The identity document is never sent.',
+    comparaisonAgence:
+      'At the explicit request of an agency, an AI reached through OpenRouter may read the guarantor’s payslips and pension statement, on a watermarked copy, to compare the declared income with the documents. Only the month and the net amount paid are extracted, with no retention by the provider. The result is not saved and makes no decision. The identity document is never sent.',
   },
   droits: {
     titre: 'Your rights',

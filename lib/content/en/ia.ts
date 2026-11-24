@@ -14,7 +14,7 @@ export const heroIa: Textes<typeof Fr.heroIa> = {
 }
 
 export const usages: Textes<typeof Fr.usages> = {
-  titre: ['Two uses,', 'not one more.'],
+  titre: ['Three uses,', 'not one more.'],
   etat: { actif: 'Available', inactif: 'Not enabled yet' },
   items: [
     {
@@ -38,6 +38,18 @@ export const usages: Textes<typeof Fr.usages> = {
       points: [
         'A watermarked copy, never the original',
         'A text to compare with the document, not a verification',
+        'Nothing is added to the file',
+      ],
+    },
+    {
+      cle: 'comparaison',
+      pour: 'For the agency',
+      titre: 'Comparing the declaration with the documents',
+      texte:
+        'The guarantor declares an income, and their supporting documents are the proof. On request, an AI picks out the month and the net amount paid on their payslips and pension statement, then Cloison shows the gap with the declaration. The agency opens the documents and draws its own conclusion.',
+      points: [
+        'A watermarked copy, never the original',
+        'A gap to check, not a score',
         'Nothing is added to the file',
       ],
     },

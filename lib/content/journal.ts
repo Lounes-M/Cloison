@@ -24,6 +24,7 @@ export const journal = {
     dossier_refuse: 'Dossier refusé',
     ocr_demande: 'Transcription d’une pièce par IA demandée',
     lecture_ia_garant: 'Lecture IA d’un justificatif de revenus demandée',
+    comparaison_revenus: 'Comparaison du revenu déclaré à un justificatif par IA demandée',
     code_2ddoc_verifie: 'Vérification du code 2D-Doc d’un avis d’imposition demandée',
     synthese_bailleur: 'Synthèse pour le bailleur téléchargée',
   } as Record<string, string>,

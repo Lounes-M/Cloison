@@ -248,6 +248,7 @@ export const actions: Textes<typeof Fr.actions> = {
   piece_ouverte: 'opened a document',
   ocr_demande: 'requested an AI transcription',
   lecture_ia_garant: 'requested an AI reading of their income documents',
+  comparaison_revenus: 'compared the declared income with a document using AI',
   code_2ddoc_verifie: 'checked the 2D-Doc code of a tax notice',
   synthese_bailleur: 'downloaded the summary for the landlord',
   complement_demande: 'requested the replacement of a document',

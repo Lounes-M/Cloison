@@ -11,6 +11,7 @@ import { estUuidCanonique } from '@/lib/validation/uuid'
 import { SupportDossier } from '@/components/dossiers/SupportDossier'
 import { LectureOcr } from '@/components/dossiers/LectureOcr'
 import { VerificationAvis } from '@/components/dossiers/VerificationAvis'
+import { ComparaisonRevenus } from '@/components/dossiers/ComparaisonRevenus'
 import { ExamenPiece } from '@/components/dossiers/ExamenPiece'
 import { ResponsableDossier } from '@/components/dossiers/ResponsableDossier'
 import { HistoriqueResponsables } from '@/components/dossiers/HistoriqueResponsables'
@@ -18,6 +19,8 @@ import { NotesDossier } from '@/components/dossiers/NotesDossier'
 import { notesDossier as texteNotesFr } from '@/lib/content/notes'
 import { examen as texteExamenFr, type ExamenDocumentaire } from '@/lib/content/examen'
 import { configurationOcr } from '@/lib/ocr/openrouter'
+import { configurationComparaisonAgence } from '@/lib/ocr/extraction-revenus'
+import { estNatureLisible } from '@/lib/ocr/revenus'
 import { verification2dDocActive } from '@/lib/2ddoc/verification-agence'
 import { Complements } from '@/components/dossiers/Complements'
 import { type Complement } from '@/lib/content/complements'
@@ -578,6 +581,12 @@ export default async function PageDossier({
         ) : (
           <p className="text-muted mt-4 text-[15px] font-medium">{texte.engagementAucun}</p>
         )}
+        {/* La base tranche (0095) ; le panneau n'apparait que la ou il y a de quoi comparer. */}
+        {e?.revenu_net_mensuel_cents != null &&
+        pieces?.some((p) => estNatureLisible(p.type)) &&
+        configurationComparaisonAgence() ? (
+          <ComparaisonRevenus dossierId={id} />
+        ) : null}
       </section>
 
       <section id="pieces" className="panneau-espace mt-8">
