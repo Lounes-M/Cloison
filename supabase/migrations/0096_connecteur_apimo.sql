@@ -20,8 +20,10 @@ create table public.connexions_apimo (
   fournisseur text not null check (fournisseur ~ '^[0-9]{1,10}$'),
   agence_apimo text not null check (agence_apimo ~ '^[0-9]{1,10}$'),
   -- Base64 du scelle AES-256-GCM. Sans la cle maitresse, il ne dit rien.
-  jeton_scelle text not null check (char_length(jeton_scelle) between 60 and 1402
-    and jeton_scelle ~ '^[A-Za-z0-9+/]+={0,2}$'),
+  -- Ecrit sans `between` : melange a un autre `and`, il change de forme apres
+  -- une sauvegarde et fausse la comparaison de restauration.
+  jeton_scelle text not null check (char_length(jeton_scelle) >= 60
+    and char_length(jeton_scelle) <= 1402 and jeton_scelle ~ '^[A-Za-z0-9+/]+={0,2}$'),
   -- L'agence choisit si l'etat du dossier est inscrit sur la fiche du bien.
   retour_statut boolean not null default false,
   configure_par uuid references auth.users(id) on delete set null,
