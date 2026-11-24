@@ -31,6 +31,7 @@ const AGENCE = [
   'preferences',
   'rattachement',
   'responsables',
+  'tableau-de-bord',
 ]
 const TUTOIEMENT = /(?<![\p{L}_’'-])(tu|ton|ta|tes|toi|te)(?![\p{L}_])/giu
 /**
