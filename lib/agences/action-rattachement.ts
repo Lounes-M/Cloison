@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { rattachement as textesFr } from '@/lib/content/rattachement'
 
 import { clientAgence } from '@/lib/acces/agence'
+import { surUneLigne } from '@/lib/validation/ligne'
 import { rattacher } from './rattachement'
 import { rattachement as textesEn } from '@/lib/content/en/rattachement'
 import { choisir } from '@/lib/i18n'
@@ -29,7 +30,8 @@ export async function nommerAgence(
   const dire = traducteur(langue)
   const textes = choisir(langue, textesFr, textesEn)
 
-  const saisie = String(donnees.get('nom') ?? '').trim()
+  // Sur une ligne : le nom est recopie dans les courriels internes.
+  const saisie = surUneLigne(String(donnees.get('nom') ?? ''))
 
   // La base exige deux caracteres au minimum. On le verifie aussi ici, pour
   // rendre un message tout de suite plutot qu'un aller-retour.
