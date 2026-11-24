@@ -4,6 +4,7 @@ import { clientServeur } from '@/lib/acces/serveur'
 import { livrerNotifications } from '@/lib/courriels/notifications'
 import { preparerRappels } from '@/lib/courriels/rappels'
 import { annoncerFinsDeDossier } from '@/lib/courriels/fin-dossier'
+import { alerterDelaisAgence } from '@/lib/courriels/delais-agence'
 import { livrerLiens } from '@/lib/courriels/livraison-liens'
 import { distribuerCourriels } from '@/lib/courriels/file'
 import { purgerCoffres } from '@/lib/exploitation/purge'
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
     console.error('[maintenance] notifications indisponibles')
   }
   notifications.echecs += echecsLiens
-  // Les rappels et les annonces de fin de dossier partagent un budget : la
+  // Les rappels, les annonces de fin de dossier et les alertes de delai partagent un budget : la
   // somme des budgets de la route doit rester sous sa duree maximale.
   const budgetRappels = AbortSignal.timeout(6_000)
   try {
@@ -76,6 +77,15 @@ export async function GET(request: Request) {
     )
   } catch {
     console.error('[maintenance] annonces de fin de dossier indisponibles')
+    notifications.echecs++
+  }
+  // L'alerte sur les 48 heures promises aux agences (0093) : meme budget.
+  try {
+    notifications.echecs += compteur(
+      (await alerterDelaisAgence(await clientServeur(budgetRappels), budgetRappels)).echecs,
+    )
+  } catch {
+    console.error('[maintenance] alertes de delai indisponibles')
     notifications.echecs++
   }
   const courriels = await executerLot('courriels', async () => {
