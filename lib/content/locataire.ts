@@ -57,9 +57,8 @@ export const statutsSansAgence: Record<string, string> = {
 }
 
 export const espace = {
-  loyerFige: 'Loyer :',
-  loyerFigeSuite:
-    '€. Ce montant est figé pour préserver la confidentialité de la déclaration du garant.',
+  loyerFigePhrase: 'Ce montant est figé.',
+  rattachementPlusTard: 'Rattacher ce dossier à une agence',
   garantAssocie:
     'Ton garant a commencé son dossier : il y reste associé. Pour désigner une autre personne, ouvre un nouveau dossier.',
   garantCorrigeable:

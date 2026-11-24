@@ -2,10 +2,12 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, test } from 'vitest'
 import {
+  PAGES_NONCE_PUBLIQUES,
   SEGMENTS_APPLICATIFS,
   nouveauNonce,
   politiqueAvecNonce,
   politiqueStatique,
+  sourcePolitiqueStatique,
 } from '@/lib/securite/csp'
 
 /**
@@ -108,27 +110,39 @@ describe('aucune page de l applicatif ne tombe sous la politique du site public'
   }
 
   /** Le `matcher` du proxy, tel que Next le lit : ecrit en clair. */
-  function segmentsDuMiddleware(): string[] {
+  function motifsDuMiddleware(): string[] {
     const source = readFileSync(join(racine, 'proxy.ts'), 'utf8')
     const bloc = /matcher:\s*\[([^\]]*)\]/.exec(source)
     expect(bloc, 'le matcher du proxy doit etre un tableau litteral').not.toBeNull()
-    return [...bloc![1]!.matchAll(/'\/([^/']+)\/:path\*'/g)].map((m) => m[1]!).sort()
+    return [...bloc![1]!.matchAll(/'([^']+)'/g)].map((m) => m[1]!)
   }
 
   test('la liste, le proxy et les dossiers disent la meme chose', () => {
     const attendus = [...SEGMENTS_APPLICATIFS].sort()
+    const motifs = motifsDuMiddleware()
+    const pages = [...PAGES_NONCE_PUBLIQUES].map((page) => `${page}/:path*`)
+    const segments = motifs
+      .filter((motif) => !pages.includes(motif))
+      .map((motif) => motif.slice(1, motif.indexOf('/:path*')))
+      .sort()
     expect(segmentsSurLeDisque()).toEqual(attendus)
-    expect(segmentsDuMiddleware()).toEqual(attendus)
+    expect(segments).toEqual(attendus)
+    expect(motifs.filter((motif) => pages.includes(motif)).sort()).toEqual([...pages].sort())
   })
 
-  test('l exclusion du site public couvre exactement ces segments', () => {
-    // La meme expression que `next.config.ts`, qui refuse les groupes capturants.
-    const exclusion = new RegExp(`^/(?!(?:${SEGMENTS_APPLICATIFS.join('|')})(?:/|$)).*`)
+  test('l exclusion du site public couvre l applicatif et l ouverture', () => {
+    const config = readFileSync(join(racine, 'next.config.ts'), 'utf8')
+    expect(config).toContain('sourcePolitiqueStatique()')
+    const exclusion = new RegExp(`^${sourcePolitiqueStatique()}`)
     for (const segment of SEGMENTS_APPLICATIFS) {
       expect(exclusion.test(`/${segment}`), segment).toBe(false)
       expect(exclusion.test(`/${segment}/quelque-chose`), segment).toBe(false)
     }
-    for (const publique of ['/', '/agences', '/demarrer', '/garanties', '/lienvers']) {
+    for (const page of PAGES_NONCE_PUBLIQUES) {
+      expect(exclusion.test(page), page).toBe(false)
+      expect(exclusion.test(`${page}/suite`), page).toBe(false)
+    }
+    for (const publique of ['/', '/agences', '/en', '/en/agences', '/garanties', '/lienvers']) {
       expect(exclusion.test(publique), publique).toBe(true)
     }
   })
