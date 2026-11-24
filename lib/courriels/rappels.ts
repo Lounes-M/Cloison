@@ -9,6 +9,7 @@ import { courrielsRappels as tEn, courrielsRelanceLocataire as lEn } from '@/lib
 import { choisir, lien, locale, type Langue } from '@/lib/i18n'
 import { languesCourriels } from '@/lib/langue-preferee'
 import { composerCourriel, type Corps } from './gabarit'
+import { jourDeParis, estJourFerie } from '@/lib/exploitation/jours-feries.mjs'
 const rappel = z.object({
   id: z.uuid(),
   dossier_id: z.uuid(),
@@ -21,10 +22,24 @@ const rappel = z.object({
 const relanceLocataire = rappel
   .omit({ nature: true })
   .extend({ motif: z.enum(['paiement', 'garant', 'loyer']) })
-export async function preparerRappels(db: SupabaseClient, signal?: AbortSignal) {
-  const { data: compte, error: planification } = await db.rpc('programmer_rappels')
-  if (planification || !Number.isInteger(compte) || compte < 0 || compte > 20)
-    throw new Error('Planification des rappels indisponible')
+/**
+ * Un jour férié, aucune relance ni alerte d'échéance n'est programmée : elle
+ * le sera au premier passage du lendemain, les conditions de la base restant
+ * vraies. Rien n'est consommé ce jour-là, ni plafond ni relance. Les rappels
+ * déjà programmés la veille sont préparés quand même : ils expirent en 24 h.
+ * Le week-end ne change rien. Ni la purge ni l'annonce de fin de dossier ne
+ * passent par ici : une échéance de conservation ne se reporte pas.
+ */
+export async function preparerRappels(
+  db: SupabaseClient,
+  signal?: AbortSignal,
+  maintenant: Date = new Date(),
+) {
+  if (!estJourFerie(jourDeParis(maintenant))) {
+    const { data: compte, error: planification } = await db.rpc('programmer_rappels')
+    if (planification || !Number.isInteger(compte) || compte < 0 || compte > 20)
+      throw new Error('Planification des rappels indisponible')
+  }
   const { data, error } = await db.rpc('rappels_a_preparer')
   const resultat = z.array(rappel).max(20).safeParse(data)
   if (error || !resultat.success) throw new Error('Rappels indisponibles')

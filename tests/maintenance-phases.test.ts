@@ -10,6 +10,7 @@ const doubles = vi.hoisted(() => ({
   rappels: vi.fn(),
   fins: vi.fn(),
   delais: vi.fn(),
+  veille: vi.fn(),
   rpc: vi.fn(),
 }))
 vi.mock('@/lib/acces/serveur', () => ({ clientServeur: doubles.client }))
@@ -20,6 +21,9 @@ vi.mock('@/lib/courriels/fin-dossier', () => ({ annoncerFinsDeDossier: doubles.f
 vi.mock('@/lib/courriels/delais-agence', () => ({ alerterDelaisAgence: doubles.delais }))
 vi.mock('@/lib/courriels/file', () => ({ distribuerCourriels: doubles.courriels }))
 vi.mock('@/lib/exploitation/purge', () => ({ purgerCoffres: doubles.purge }))
+vi.mock('@/lib/exploitation/veille-planificateurs', () => ({
+  veillerPlanificateurs: doubles.veille,
+}))
 const requete = () =>
   new Request('https://example.test/api/maintenance', {
     headers: { authorization: 'Bearer secret-fictif' },
@@ -37,6 +41,7 @@ beforeEach(() => {
   doubles.rappels.mockResolvedValue({ echecs: 0 })
   doubles.fins.mockResolvedValue({ echecs: 0 })
   doubles.delais.mockResolvedValue({ echecs: 0 })
+  doubles.veille.mockResolvedValue({ echecs: 0 })
 })
 afterEach(() => {
   vi.restoreAllMocks()
@@ -215,4 +220,55 @@ test('une panne des alertes de délai se voit sans arrêter les courriels', asyn
   expect((await resultat.json()).notifications.echecs).toBe(1)
   expect(doubles.courriels).toHaveBeenCalledOnce()
   expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toMatch(/ADRESSE_PRIVEE/)
+})
+
+test('la veille des planificateurs lit avant la purge et ses alertes partent avec les courriels', async () => {
+  const resultat = await GET(requete())
+  expect(resultat.status).toBe(200)
+  expect(doubles.veille).toHaveBeenCalledExactlyOnceWith('github-ou-vercel')
+  // Lancee avant la purge : elle lit la reussite precedente, pas celle de ce passage.
+  expect(doubles.veille.mock.invocationCallOrder[0]).toBeLessThan(
+    doubles.purge.mock.invocationCallOrder[0]!,
+  )
+  expect(doubles.veille.mock.invocationCallOrder[0]).toBeLessThan(
+    doubles.courriels.mock.invocationCallOrder[0]!,
+  )
+})
+
+test.each([
+  ['un echec', () => doubles.veille.mockResolvedValue({ echecs: 1 })],
+  ['une exception', () => doubles.veille.mockRejectedValue(new Error('ADRESSE_PRIVEE'))],
+  ['un compteur invalide', () => doubles.veille.mockResolvedValue({ echecs: -1 })],
+])('%s de la veille rend la maintenance en echec sans bloquer aucune phase', async (_, casser) => {
+  casser()
+  const resultat = await GET(requete())
+  expect(resultat.status).toBe(503)
+  const bilan = await resultat.json()
+  expect(bilan).toEqual({
+    notifications: { echecs: 1 },
+    courriels: { traites: 2, echecs: 0 },
+    purge: { traites: 3, echecs: 0 },
+  })
+  expect(doubles.purge).toHaveBeenCalledOnce()
+  expect(doubles.courriels).toHaveBeenCalledOnce()
+  // Aucune confirmation : la supervision verra le retard.
+  expect(doubles.rpc).not.toHaveBeenCalled()
+  expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain('ADRESSE_PRIVEE')
+})
+
+test('la veille sait quel planificateur lance le passage', async () => {
+  vi.stubEnv('CRON_SUPABASE_SECRET', 'second-secret-fictif')
+  await GET(
+    new Request('https://example.test/api/maintenance', {
+      headers: { authorization: 'Bearer second-secret-fictif' },
+    }),
+  )
+  expect(doubles.veille).toHaveBeenCalledExactlyOnceWith('supabase')
+  doubles.veille.mockClear()
+  await GET(requete())
+  expect(doubles.veille).toHaveBeenCalledExactlyOnceWith('github-ou-vercel')
+  // Un refus ne lance rien.
+  doubles.veille.mockClear()
+  await GET(new Request('https://example.test/api/maintenance'))
+  expect(doubles.veille).not.toHaveBeenCalled()
 })
