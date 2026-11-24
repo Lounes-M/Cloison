@@ -24,7 +24,6 @@ export const tableauDeBord: Textes<typeof Fr> = {
   etapes: {
     titre: 'Files by stage',
     aide: 'Files whose vault has not expired. Demonstration files and second-guarantor files are not counted.',
-    colonnes: { etape: 'Stage', nombre: 'Files', part: 'Share' },
     voir: (etape: string) => `See files at the "${etape}" stage`,
     aucun: 'No file in progress yet.',
   },

@@ -23,7 +23,6 @@ export const tableauDeBord = {
   etapes: {
     titre: 'Dossiers par étape',
     aide: 'Les dossiers dont le coffre n’est pas échu. Les dossiers de démonstration et ceux d’un second garant ne sont pas comptés.',
-    colonnes: { etape: 'Étape', nombre: 'Dossiers', part: 'Part' },
     voir: (etape: string) => `Voir les dossiers à l’étape « ${etape} »`,
     aucun: 'Aucun dossier en cours pour l’instant.',
   },

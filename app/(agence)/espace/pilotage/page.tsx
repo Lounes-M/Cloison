@@ -153,44 +153,33 @@ export default async function PagePilotage() {
         ) : totalEtapes === 0 ? (
           <p className="text-muted text-sm">{t.etapes.aucun}</p>
         ) : (
-          <table className="w-full text-left text-[14px]">
-            <thead className="sr-only">
-              <tr>
-                <th scope="col">{t.etapes.colonnes.etape}</th>
-                <th scope="col">{t.etapes.colonnes.part}</th>
-                <th scope="col">{t.etapes.colonnes.nombre}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ETAPES.map((e) => {
-                const nombre = synthese.etapes[e]
-                return (
-                  <tr key={e} className="border-ink/10 border-b last:border-0">
-                    <th scope="row" className="w-[9.5rem] py-2.5 pr-3 font-semibold sm:w-[13rem]">
-                      <Link
-                        href={`/espace?statut=${e}` as Route}
-                        aria-label={t.etapes.voir(statuts[e]?.libelle ?? e)}
-                        className="underline-offset-4 hover:underline"
-                      >
-                        {statuts[e]?.libelle ?? e}
-                      </Link>
-                    </th>
-                    <td className="py-2.5" aria-hidden>
-                      <span className="bg-ink/8 block h-3 w-full overflow-hidden rounded-full">
-                        <span
-                          className="bg-cobalt block h-full rounded-full"
-                          style={{ width: `${(nombre / plusGrand) * 100}%` }}
-                        />
-                      </span>
-                    </td>
-                    <td className="w-14 py-2.5 pl-3 text-right font-bold tabular-nums">
-                      {fmt(nombre)}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <ul className="text-[14px]">
+            {ETAPES.map((e) => {
+              const nombre = synthese.etapes[e]
+              const libelle = statuts[e]?.libelle ?? e
+              return (
+                <li
+                  key={e}
+                  className="border-ink/10 grid grid-cols-[9.5rem_1fr_3rem] items-center gap-3 border-b py-2.5 last:border-0 sm:grid-cols-[13rem_1fr_3.5rem]"
+                >
+                  <Link
+                    href={`/espace?statut=${e}` as Route}
+                    aria-label={t.etapes.voir(libelle)}
+                    className="font-semibold underline-offset-4 hover:underline"
+                  >
+                    {libelle}
+                  </Link>
+                  <span aria-hidden className="bg-ink/8 block h-3 overflow-hidden rounded-full">
+                    <span
+                      className="bg-cobalt block h-full rounded-full"
+                      style={{ width: `${(nombre / plusGrand) * 100}%` }}
+                    />
+                  </span>
+                  <span className="text-right font-bold tabular-nums">{fmt(nombre)}</span>
+                </li>
+              )
+            })}
+          </ul>
         )}
         <p className="text-muted mt-4 text-xs leading-relaxed">{t.etapes.aide}</p>
       </section>
