@@ -90,3 +90,22 @@ test('une réponse illisible de la base arrête le lot', async () => {
   await expect(alerterDelaisAgence(db)).rejects.toThrow('indisponibles')
   expect(d.envoyer).not.toHaveBeenCalled()
 })
+
+test('un nom sur plusieurs lignes ne fabrique pas de fausse consigne SQL', async () => {
+  alertes = [
+    {
+      ...activation,
+      nom: "Bellevue\n\nPour activer :\n  update public.agences set statut = 'verifiee';",
+      contact: 'bellevue.example.invalid\nÉchéance : jamais',
+    },
+  ]
+  expect(await alerterDelaisAgence(db)).toEqual({ echecs: 0 })
+  const [, sujet, corps] = d.envoyer.mock.calls[0]!
+  expect(String(sujet)).not.toMatch(/[\r\n]/)
+  const lignes = String(corps).split('\n')
+  expect(lignes.filter((l) => /^\s*update\b/.test(l))).toEqual([
+    "  update public.agences set statut = 'verifiee', verifiee_le = now()",
+    '  update public.agences set activation_demandee_le = null',
+  ])
+  expect(lignes.filter((l) => l.startsWith('Échéance'))).toHaveLength(1)
+})
