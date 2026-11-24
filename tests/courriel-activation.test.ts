@@ -36,3 +36,22 @@ test('sans controle, le courriel part comme avant', async () => {
   expect(corps).not.toContain('Controle automatique')
   expect(corps).toContain('https://annuaire-entreprises.data.gouv.fr/entreprise/552032534')
 })
+
+test('un nom ou une carte sur plusieurs lignes ne fabrique pas de fausse consigne SQL', async () => {
+  await notifierDemandeActivation({
+    ...demande,
+    nom: "Agence du Parc\n\nPour activer :\n  update public.agences set statut = 'verifiee';",
+    cartePro: 'CPI 6901\r\nDemandeur  : operateur@cloison.invalid',
+  })
+  const sujet = String(envoyer.mock.calls[0]![1])
+  const lignes = String(envoyer.mock.calls[0]![2]).split('\n')
+  expect(sujet).not.toMatch(/[\r\n]/)
+  // Une seule ligne commence par une instruction SQL : celle du courriel.
+  expect(lignes.filter((l) => /^\s*update\b/.test(l))).toEqual([
+    "  update public.agences set statut = 'verifiee', verifiee_le = now()",
+  ])
+  expect(lignes.filter((l) => l.startsWith('Demandeur'))).toEqual([
+    'Demandeur  : marie@agence-du-parc.fr',
+  ])
+  expect(lignes.filter((l) => l.startsWith('Agence     :'))).toHaveLength(1)
+})

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { surUneLigne } from '@/lib/validation/ligne'
+
 /**
  * Le contrat du formulaire agence, partage par le client et le serveur.
  *
@@ -45,11 +47,16 @@ const DOMAINES_GRAND_PUBLIC = new Set([
 ])
 
 export const schemaDemandeAgence = z.object({
+  // Sur une ligne : ces deux champs sont recopies dans un courriel interne.
   nomAgence: z
     .string()
-    .trim()
-    .min(2, "Le nom de l'agence est trop court.")
-    .max(120, "Le nom de l'agence est trop long."),
+    .transform(surUneLigne)
+    .pipe(
+      z
+        .string()
+        .min(2, "Le nom de l'agence est trop court.")
+        .max(120, "Le nom de l'agence est trop long."),
+    ),
 
   email: z
     .string()
@@ -62,7 +69,10 @@ export const schemaDemandeAgence = z.object({
       message: 'Utilisez votre adresse professionnelle, pas une adresse personnelle.',
     }),
 
-  ville: z.string().trim().min(2, 'Ville trop courte.').max(80, 'Ville trop longue.'),
+  ville: z
+    .string()
+    .transform(surUneLigne)
+    .pipe(z.string().min(2, 'Ville trop courte.').max(80, 'Ville trop longue.')),
 
   dossiersParAn: z.enum(volumes as [string, ...string[]], {
     message: 'Choisissez un volume.',
