@@ -333,6 +333,59 @@ const api = createServer(async (req, res) => {
       clos: 0,
       delai_prise_moyen_jours: i === 0 ? '2.5' : null,
     }))
+  else if (path.endsWith('/rpc/pilotage_de_mon_agence'))
+    valeur = {
+      genere_le: '2026-11-24T14:00:00+00:00',
+      etapes: {
+        ouvert: 2,
+        depot_en_cours: 4,
+        complet: 1,
+        garant_insuffisant: 0,
+        transmis: 1,
+        signe: 3,
+        refuse: 0,
+      },
+      en_cours: 8,
+      echeances_proches: 1,
+      bloques: 2,
+      blocages: {
+        remplacement_a_examiner: 0,
+        decision_attendue: 1,
+        paiement: 0,
+        garant_non_designe: 0,
+        loyer_non_declare: 0,
+        relances_epuisees: 1,
+        complement_attendu: 0,
+        depot_inacheve: 0,
+        signature_attendue: 0,
+      },
+      attendus: { agence: 1, locataire: 0, garant: 1, signataires: 0 },
+      seuils: { agence: 2, locataire: 3, garant: 7, signataires: 7 },
+    }
+  else if (path.endsWith('/rpc/dossiers_bloques_de_mon_agence'))
+    valeur = [
+      {
+        id,
+        reference: 'OCRFICTIF',
+        statut: 'depot_en_cours',
+        motif: 'relances_epuisees',
+        attend: 'garant',
+        depuis: '2026-11-10T09:00:00+00:00',
+        echeance_proche: true,
+      },
+    ]
+  else if (path.endsWith('/rpc/pilotage_mensuel_de_mon_agence'))
+    valeur = Array.from({ length: 12 }, (_, i) => ({
+      mois: `2026-${String(12 - i).padStart(2, '0')}-01`,
+      ouverts: i === 0 ? 3 : 0,
+      complets: i === 0 ? 2 : 0,
+      delai_complet_moyen_jours: i === 0 ? '4.5' : null,
+      signes: i === 0 ? 1 : 0,
+      signatures_mesurees: i === 0 ? 1 : 0,
+      delai_signature_moyen_jours: i === 0 ? 9 : null,
+      relances_garant: i === 0 ? 5 : 0,
+      relances_locataire: i === 0 ? 1 : 0,
+    }))
   else if (path.endsWith('/rpc/examens_du_dossier')) valeur = examensDocumentaires
   else if (path.endsWith('/rpc/enregistrer_examen_documentaire')) {
     assert.equal(entree.le_dossier, id)
