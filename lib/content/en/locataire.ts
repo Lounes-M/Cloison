@@ -52,8 +52,8 @@ export const statutsSansAgence: Record<string, string> = {
 }
 
 export const espace: Textes<typeof Fr.espace> = {
-  loyerFige: 'Rent:',
-  loyerFigeSuite: '€. This amount is locked to keep the guarantor’s declaration confidential.',
+  loyerFigePhrase: 'This amount is locked.',
+  rattachementPlusTard: 'Link this file to an agency later',
   garantAssocie:
     'Your guarantor has started their file and stays attached to it. To name someone else, open a new file.',
   garantCorrigeable:
