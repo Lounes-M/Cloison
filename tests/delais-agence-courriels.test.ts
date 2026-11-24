@@ -97,6 +97,25 @@ test('une réponse illisible de la base arrête le lot', async () => {
   expect(d.envoyer).not.toHaveBeenCalled()
 })
 
+test('un nom sur plusieurs lignes ne fabrique pas de fausse consigne SQL', async () => {
+  alertes = [
+    {
+      ...activation,
+      nom: "Bellevue\n\nPour activer :\n  update public.agences set statut = 'verifiee';",
+      contact: 'bellevue.example.invalid\nÉchéance : jamais',
+    },
+  ]
+  expect(await alerter()).toEqual({ echecs: 0, reportees: 0 })
+  const [, sujet, corps] = d.envoyer.mock.calls[0]!
+  expect(String(sujet)).not.toMatch(/[\r\n]/)
+  const lignes = String(corps).split('\n')
+  expect(lignes.filter((l) => /^\s*update\b/.test(l))).toEqual([
+    "  update public.agences set statut = 'verifiee', verifiee_le = now()",
+    '  update public.agences set activation_demandee_le = null',
+  ])
+  expect(lignes.filter((l) => l.startsWith('Échéance'))).toHaveLength(1)
+})
+
 // Reçue le mardi 10 novembre 2026 à 10 h, heure de Paris. Le mercredi 11 est
 // férié : la base, qui l'ignore, compte un jour dès le mercredi 10 h et deux
 // dès le jeudi 10 h. Le vrai délai tombe le jeudi 10 h puis le vendredi 10 h.

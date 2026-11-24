@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { notifierDemandeActivation } from '@/lib/courriels/activation'
+import { surUneLigne } from '@/lib/validation/ligne'
 import { contexteAgence } from './contexte'
 import { controlerSiren } from './controle-siren'
 
@@ -32,11 +33,16 @@ const schema = z.object({
     .string()
     .transform((valeur) => valeur.replace(/\s/g, ''))
     .pipe(z.string().regex(/^\d{9}$/, 'Le SIREN fait neuf chiffres.')),
+  // Sur une ligne : le numero est recopie dans le courriel d'activation.
   cartePro: z
     .string()
-    .trim()
-    .min(4, 'Le numéro de carte professionnelle est trop court.')
-    .max(60, 'Le numéro de carte professionnelle est trop long.'),
+    .transform(surUneLigne)
+    .pipe(
+      z
+        .string()
+        .min(4, 'Le numéro de carte professionnelle est trop court.')
+        .max(60, 'Le numéro de carte professionnelle est trop long.'),
+    ),
 })
 
 export async function demanderLActivation(

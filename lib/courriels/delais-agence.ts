@@ -8,6 +8,7 @@ import {
   joursFeriesDecomptes,
   type JourFerie,
 } from '@/lib/exploitation/jours-feries.mjs'
+import { surUneLigne } from '@/lib/validation/ligne'
 import { envoyer } from './envoi'
 
 /**
@@ -109,8 +110,8 @@ export async function alerterDelaisAgence(
 function sujet(a: Alerte) {
   const quoi = a.nature === 'demande' ? 'Demande de démonstration' : 'Demande d’activation'
   return a.palier === 'depasse'
-    ? `48 h dépassées : ${quoi}, ${a.nom}`
-    : `48 h, il reste un jour ouvré : ${quoi}, ${a.nom}`
+    ? `48 h dépassées : ${quoi}, ${surUneLigne(a.nom)}`
+    : `48 h, il reste un jour ouvré : ${quoi}, ${surUneLigne(a.nom)}`
 }
 
 function corps(a: Alerte) {
@@ -151,8 +152,9 @@ function corps(a: Alerte) {
       ? 'Le site promet une réponse sous 48 heures ouvrées. Ce délai est dépassé et la demande est toujours sans réponse.'
       : 'Le site promet une réponse sous 48 heures ouvrées. Il reste un jour ouvré pour répondre à cette demande.',
     '',
-    `Agence   : ${a.nom}`,
-    `${a.nature === 'demande' ? 'E-mail   ' : 'Domaine  '}: ${a.contact}`,
+    // Saisis par l'agence, au-dessus d'une ligne SQL a coller : une ligne chacun.
+    `Agence   : ${surUneLigne(a.nom)}`,
+    `${a.nature === 'demande' ? 'E-mail   ' : 'Domaine  '}: ${surUneLigne(a.contact)}`,
     `Reçue    : ${date(a.depuis)}`,
     `Échéance : ${date(a.echeance)}`,
     ...a.feries.map((f) => `Férié    : ${jour(f.jour)} (${f.nom}), non compté`),

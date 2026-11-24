@@ -1,6 +1,6 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeEach, describe, expect, test } from 'vitest'
-import { baseDEssai, compter, devenir, lignesTouchees, redevenirProprietaire, refus } from './base'
+import { baseDEssai, compter, devenir, redevenirProprietaire, refus } from './base'
 
 /**
  * La table du formulaire agence (migration 0001).
@@ -37,21 +37,26 @@ describe('demandes_agence', () => {
 
     await devenir(db, 'anon')
     // Le cas qui compte : la cle publiable est cote serveur aujourd'hui, mais
-    // sa divulgation ne doit donner aucune lecture.
-    expect(await compter(db, 'public.demandes_agence')).toBe(0)
+    // sa divulgation ne doit donner aucune lecture. Depuis la 0097, le refus
+    // vient des droits et non plus de la seule RLS.
+    expect(await refus(db, 'select * from public.demandes_agence')).toContain('permission denied')
   })
 
-  test('anon ne modifie ni ne supprime, en silence', async () => {
+  test('anon ne modifie ni ne supprime : le droit de table lui-meme manque', async () => {
     await devenir(db, 'serveur')
     await db.query(DEMANDE)
 
-    await devenir(db, 'anon')
-    // Ces deux requetes ne levent pas : le droit de table existe, c'est la RLS
-    // qui filtre. Elles reussissent donc en ne touchant rien, et un test qui
-    // n'observerait que l'absence d'exception passerait alors meme que la
-    // ligne aurait ete supprimee.
-    expect(await lignesTouchees(db, `update public.demandes_agence set statut = 'perdue'`)).toBe(0)
-    expect(await lignesTouchees(db, 'delete from public.demandes_agence')).toBe(0)
+    // Jusqu'a la 0097, les droits par defaut de Supabase restaient sur cette
+    // table et seule la RLS filtrait, en silence. Le refus est desormais
+    // bruyant, pour `anon` comme pour un compte connecte.
+    for (const role of ['anon', 'authenticated'] as const) {
+      await devenir(db, role)
+      expect(await refus(db, `update public.demandes_agence set statut = 'perdue'`)).toContain(
+        'permission denied',
+      )
+      expect(await refus(db, 'delete from public.demandes_agence')).toContain('permission denied')
+      expect(await refus(db, 'truncate public.demandes_agence')).toContain('permission denied')
+    }
 
     await redevenirProprietaire(db)
     expect(await compter(db, 'public.demandes_agence')).toBe(1)
