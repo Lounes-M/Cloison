@@ -44,6 +44,7 @@ export const acte = {
     irlTrimestre: 'Trimestre de référence de l’IRL',
     irlAnnee: 'Année de référence de l’IRL',
     coCautions: 'Autres cautions du même bail (une par ligne, facultatif)',
+    autresGarantis: 'Autres colocataires garantis par cette caution (un par ligne)',
     faitLieu: 'Fait à',
     faitLe: 'Le',
   },
@@ -70,6 +71,8 @@ export const acte = {
       'Le montant de la mention du garant ne correspond pas au plafond de l’engagement. Il doit la saisir de nouveau.',
     colocation:
       'Ce dossier fait partie d’une colocation : prenez d’abord les dossiers des autres colocataires, pour que l’acte dise combien ils sont.',
+    garantis:
+      'Le garant de ce dossier couvre plusieurs colocataires : nommez chacun des autres, un par ligne, ni plus ni moins.',
     dates: 'Vérifiez les dates : naissance, date de l’acte et fin de l’engagement.',
     caracteres:
       'Un texte contient un caractère que le PDF ne peut pas reproduire. Corrigez la saisie concernée.',

@@ -10,6 +10,32 @@ export const colocation: Textes<typeof Fr> = {
     part: 'Each guarantor commits to their flatmate’s share',
     loyer_entier: 'Each guarantor commits to the whole rent (joint tenancy)',
   },
+  solvabilites: {
+    individuelle: 'Each flatmate is assessed with their own guarantors',
+    commune: 'All guarantors are assessed together, against the total rent',
+  },
+  commune: {
+    ratio: (ratio) => `Pooled affordability: ${ratio}× the total rent.`,
+    attente: 'Pooled affordability: waiting for every guarantor’s income.',
+    aide: 'The result is the same for every file, and only comes once each guarantor has uploaded everything.',
+  },
+  reglages: {
+    solvabilite: 'Affordability',
+    communIndisponible:
+      'Assessing guarantors together requires each of them to commit to the whole rent.',
+    garantTitre: 'Shared guarantor',
+    garantAide:
+      'Do several flatmates have the same guarantor? Keep a single file for them and say how many it covers: the guarantor uploads and signs once, and their deed names them all. Then decline or close the files no longer needed.',
+    dossier: 'File',
+    garantis: 'Flatmates covered by its guarantor',
+    bouton: 'Save',
+    envoi: 'Saving…',
+    fait: 'Saved.',
+    impossible: 'The setting could not be saved. Try again in a moment.',
+    fige: 'A file has already been accepted: affordability can no longer be changed.',
+    garantFige:
+      'This file has been accepted, or its guarantor has already written their statement: the shared guarantor can no longer be changed.',
+  },
   entete: (total, n) => `${euros(total)} total rent, ${n} flatmate${n > 1 ? 's' : ''}`,
   logement: 'Property',
   etat: {
@@ -29,6 +55,7 @@ export const colocation: Textes<typeof Fr> = {
     attente: 'Pending',
     sansLoyer: 'To be entered',
     partis: 'Declined or closed files',
+    garantis: (n) => `Guarantor shared by ${n} flatmates`,
   },
   parts: {
     ecart: (somme, total) =>
@@ -46,6 +73,15 @@ export const colocation: Textes<typeof Fr> = {
     loyerAide:
       'When guarantors commit to a share, the rent is split equally. You can correct each share on the flatmate’s file.',
     etendue: 'Commitment of each guarantor',
+    solvabilite: 'Affordability',
+    solvabiliteAide: 'Guarantors can only be assessed together if each commits to the whole rent.',
+    garantCommun: 'Guarantor shared by several flatmates',
+    garantCommunAide:
+      'If several flatmates have the same guarantor, they share one file and one deed: enter a single address for them, first, and say how many they are.',
+    garantCommunChoix: (n) =>
+      n === 1
+        ? 'No: each flatmate has their own guarantor'
+        : `The guarantor of the first address covers ${n} flatmates`,
     bouton: 'Send the links',
     boutonAjout: 'Add to the flat share',
     envoi: 'Sending…',
@@ -58,7 +94,8 @@ export const colocation: Textes<typeof Fr> = {
       `These addresses could not be added: ${adresses}. Try again from the flat share page.`,
   },
   erreurs: {
-    adresses: 'Enter two to eight valid email addresses, one per line.',
+    adresses:
+      'Enter two to eight valid email addresses, one per line. One is enough if its guarantor covers several flatmates.',
     adresse: 'Enter at least one valid email address.',
     doublon: 'Each flatmate has their own address: one address appears twice.',
     dejaPresente: 'One of these addresses is already in the flat share.',
@@ -71,7 +108,12 @@ export const colocation: Textes<typeof Fr> = {
   fiche: {
     lien: (n) => `This file is part of a flat share of ${n} people.`,
     ouvrir: 'View the flat share',
+    garantCommun: (n) =>
+      `Its guarantor covers ${n} flatmates of this lease: a single deed will name them.`,
+    commune: 'Affordability is assessed across the whole flat share.',
   },
+  acteCommun: (n) =>
+    `The guarantor of this file covers ${n} flatmates. Name the others under “Other guaranteed flatmates”: the flatmate entered under “Tenant’s first and last name” is the one whose departure ends the commitment.`,
   acte: 'This file is part of a flat share. The deed will name the guaranteed flatmate and reproduce article 8-1 of the 1989 act. Enter the rent of the whole lease, and name the other flatmates’ guarantors under “Other guarantors”.',
   locataire: {
     titre: 'Flat share',
@@ -81,11 +123,21 @@ export const colocation: Textes<typeof Fr> = {
     loyerPart: 'Your share of the rent is set by the agency. If it is wrong, write to them.',
     loyerEntier:
       'The tenancy is joint: your guarantor commits to the whole rent. This amount is set by the agency.',
+    garantCommun: (n) =>
+      `Your guarantor is shared by ${n} flatmates: this file covers all of you, and they upload and sign only once.`,
+    commune:
+      'The agency assesses all the guarantors of the flat share together: the result comes once each of them has finished.',
   },
   garant: {
     part: (n, total) =>
       `This lease is a flat share of ${n} people, for a total rent of ${total}. You guarantee one flatmate only, for their share of the rent.`,
     loyerEntier: (n, total) =>
       `This lease is a joint flat share of ${n} people, for a total rent of ${total}. You guarantee one flatmate only, but for the whole rent.`,
+    communPart: (k, n, total) =>
+      `This lease is a flat share of ${n} people, for a total rent of ${total}. You guarantee ${k} flatmates, for their shares of the rent, in a single deed.`,
+    communEntier: (k, n, total) =>
+      `This lease is a joint flat share of ${n} people, for a total rent of ${total}. You guarantee ${k} flatmates, for the whole rent, in a single deed.`,
+    commune:
+      'The agency assesses all the guarantors of the flat share together: the result comes once each of them has finished.',
   },
 }

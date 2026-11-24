@@ -31,7 +31,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const [{ data: d, error }, { data: e }] = await Promise.all([
     c.supabase
       .from('dossiers')
-      .select('id,statut,demonstration,loyer_cents,locataire_nom,colocation_id')
+      .select(
+        'id,statut,demonstration,loyer_cents,locataire_nom,colocation_id,colocataires_garantis,dossier_principal',
+      )
       .eq('id', id)
       .maybeSingle(),
     c.supabase
@@ -41,6 +43,21 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       .maybeSingle(),
   ])
   if (error || !d || d.statut !== 'transmis' || d.demonstration) notFound()
+
+  // Garant commun (0094) : le second garant couvre les memes colocataires que
+  // le premier, et son dossier lit le nombre sur le principal.
+  let garantis = Number(d.colocataires_garantis) || 1
+  let enColocation = Boolean(d.colocation_id)
+  if (d.dossier_principal) {
+    const { data: p } = await c.supabase
+      .from('dossiers')
+      .select('colocation_id,colocataires_garantis')
+      .eq('id', d.dossier_principal)
+      .maybeSingle()
+    garantis = Number(p?.colocataires_garantis) || 1
+    enColocation = Boolean(p?.colocation_id)
+  }
+  const texteColocation = choisir(langue, texteColocationFr, texteColocationEn)
 
   const aujourdHui = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(
     new Date(),
@@ -91,9 +108,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         {!e?.mention ? <p className="mt-3 font-bold">{t.sansMention}</p> : null}
       </section>
 
-      {d.colocation_id ? (
+      {enColocation ? (
         <p className="outlined bg-paper mb-6 rounded-xl p-4 text-[14px] font-medium">
-          {choisir(langue, texteColocationFr, texteColocationEn).acte}
+          {texteColocation.acte}
+          {garantis > 1 ? ` ${texteColocation.acteCommun(garantis)}` : ''}
         </p>
       ) : null}
       <p className="text-muted mb-6">{t.relecture}</p>
@@ -103,6 +121,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           locataire={d.locataire_nom ? String(d.locataire_nom) : ''}
           aujourdHui={aujourdHui}
           signatureOuverte={configurationParcours() !== null}
+          autresGarantis={enColocation ? garantis - 1 : 0}
         />
       </section>
     </div>

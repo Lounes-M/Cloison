@@ -245,9 +245,18 @@ export default async function PageGarant({
       ) : null}
       {coloc ? (
         <p className="mt-2 text-[14px] leading-relaxed font-medium">
-          {(coloc.etendue === 'loyer_entier'
-            ? texteColocation.garant.loyerEntier
-            : texteColocation.garant.part)(coloc.colocataires, euros(coloc.loyerTotalCents))}
+          {coloc.garantis > 1
+            ? (coloc.etendue === 'loyer_entier'
+                ? texteColocation.garant.communEntier
+                : texteColocation.garant.communPart)(
+                coloc.garantis,
+                coloc.colocataires,
+                euros(coloc.loyerTotalCents),
+              )
+            : (coloc.etendue === 'loyer_entier'
+                ? texteColocation.garant.loyerEntier
+                : texteColocation.garant.part)(coloc.colocataires, euros(coloc.loyerTotalCents))}
+          {coloc.commune ? ` ${texteColocation.garant.commune}` : ''}
         </p>
       ) : null}
 

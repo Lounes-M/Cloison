@@ -12,7 +12,8 @@
  * de rediger l'acte si elle manque ou ne couvre pas le plafond de l'acte.
  *
  * Un acte par caution : deux garants donnent deux actes, chacun avec sa propre
- * mention. `coCautions` nomme les autres, parce que la renonciation au
+ * mention. A l'inverse, le garant commun a plusieurs colocataires signe un
+ * seul acte, qui les nomme tous et designe celui dont le depart y met fin. `coCautions` nomme les autres, parce que la renonciation au
  * benefice de division n'a de sens que s'il y en a.
  *
  * Pur : ni base, ni environnement, ni date courante. Tout se teste.
@@ -45,7 +46,13 @@ export const donneesActe = z.strictObject({
     .strictObject({
       colocataires: z.number().int().min(2).max(8),
       etendue: z.enum(['part', 'loyer_entier']),
+      // Garant commun (0094) : les autres colocataires que cette caution
+      // garantit par le meme acte. `locataire` reste le colocataire designe,
+      // celui dont l'extinction de la solidarite met fin a l'engagement.
+      autresGarantis: z.array(texte(2, 240)).max(7).default([]),
     })
+    // Une caution ne garantit pas plus de colocataires que le bail n'en compte.
+    .refine((c) => c.autresGarantis.length < c.colocataires)
     .nullable()
     .default(null),
   bailleur: z.strictObject({ nom: texte(2, 240), adresse: texte(5, 400) }),
@@ -160,6 +167,11 @@ export function redigerActe(entree: DonneesActe): ActeRedige {
   const nature = e.solidaire ? 'solidaire' : 'simple'
   const periode = PERIODE[l.periodicite]
   const charges = e.couvre === 'loyer_charges'
+  // Garant commun : tous les colocataires garantis, le designe en premier.
+  const autres = d.colocation?.autresGarantis ?? []
+  const liste = (noms: string[]) =>
+    noms.length < 2 ? noms.join('') : `${noms.slice(0, -1).join(', ')} et ${noms.at(-1)}`
+  const garantis = liste([d.locataire, ...autres])
 
   const blocs: Bloc[] = [
     { type: 'titre', texte: 'Acte de cautionnement' },
@@ -175,9 +187,22 @@ export function redigerActe(entree: DonneesActe): ActeRedige {
     },
     {
       type: 'champ',
-      libelle: d.colocation ? 'Colocataire garanti' : 'Locataire',
+      libelle: d.colocation
+        ? autres.length
+          ? 'Colocataire désigné'
+          : 'Colocataire garanti'
+        : 'Locataire',
       valeur: d.locataire,
     },
+    ...(autres.length
+      ? [
+          {
+            type: 'champ' as const,
+            libelle: 'Autres colocataires garantis',
+            valeur: autres.join(' ; '),
+          },
+        ]
+      : []),
     { type: 'champ', libelle: 'Bailleur', valeur: `${d.bailleur.nom}, ${d.bailleur.adresse}` },
     ...(d.mandataire
       ? [{ type: 'champ' as const, libelle: 'Mandataire du bailleur', valeur: d.mandataire }]
@@ -190,20 +215,26 @@ export function redigerActe(entree: DonneesActe): ActeRedige {
     { type: 'rubrique', texte: 'Engagement' },
     {
       type: 'paragraphe',
-      texte: `Je ${soussigne} ${identite}, ${ne} le ${dateLongue(c.naissanceLe)} à ${c.naissanceLieu}, résidant à l’adresse suivante : ${c.adresse}, déclare me porter caution ${nature} de ${d.locataire}, pour le bail consenti par ${d.bailleur.nom}, demeurant ${d.bailleur.adresse}, portant sur le logement situé ${d.logement}.`,
+      texte: `Je ${soussigne} ${identite}, ${ne} le ${dateLongue(c.naissanceLe)} à ${c.naissanceLieu}, résidant à l’adresse suivante : ${c.adresse}, déclare me porter caution ${nature} de ${garantis}, pour le bail consenti par ${d.bailleur.nom}, demeurant ${d.bailleur.adresse}, portant sur le logement situé ${d.logement}.`,
     },
     ...(d.colocation
       ? [
           {
             type: 'paragraphe' as const,
-            texte: `Le bail est une colocation de ${nombreEnLettres(d.colocation.colocataires)} colocataires. Conformément à l’article 8-1 de la loi du 6 juillet 1989, il est précisé que le colocataire pour lequel je me porte caution est ${d.locataire} : l’extinction de la solidarité de ce colocataire met fin à mon engagement.`,
+            texte: autres.length
+              ? `Le bail est une colocation de ${nombreEnLettres(d.colocation.colocataires)} colocataires, dont je garantis ${nombreEnLettres(autres.length + 1)} par le présent acte : ${garantis}. Conformément à l’article 8-1 de la loi du 6 juillet 1989, il est précisé que le colocataire pour lequel l’extinction de la solidarité met fin à mon engagement est ${d.locataire} : cette extinction met fin à mon engagement tout entier, y compris à l’égard des autres colocataires garantis.`
+              : `Le bail est une colocation de ${nombreEnLettres(d.colocation.colocataires)} colocataires. Conformément à l’article 8-1 de la loi du 6 juillet 1989, il est précisé que le colocataire pour lequel je me porte caution est ${d.locataire} : l’extinction de la solidarité de ce colocataire met fin à mon engagement.`,
           },
           {
             type: 'paragraphe' as const,
             texte:
               d.colocation.etendue === 'part'
-                ? `Mon engagement ne porte que sur les sommes dues par ${d.locataire} au titre de sa part du loyer et des charges, et non sur celles dues par les autres colocataires. Le loyer indiqué ci-dessous est celui du bail entier.`
-                : `Le bail comporte une clause de solidarité entre les colocataires : mon engagement porte sur l’ensemble des sommes dont ${d.locataire} est tenu à ce titre, y compris la part des autres colocataires, dans la limite du montant maximum indiqué ci-dessous.`,
+                ? autres.length
+                  ? `Mon engagement ne porte que sur les sommes dues par ${garantis} au titre de leurs parts du loyer et des charges, et non sur celles dues par les autres colocataires. Le loyer indiqué ci-dessous est celui du bail entier.`
+                  : `Mon engagement ne porte que sur les sommes dues par ${d.locataire} au titre de sa part du loyer et des charges, et non sur celles dues par les autres colocataires. Le loyer indiqué ci-dessous est celui du bail entier.`
+                : autres.length
+                  ? `Le bail comporte une clause de solidarité entre les colocataires : mon engagement porte sur l’ensemble des sommes dont ${garantis} sont tenus à ce titre, y compris la part des autres colocataires, dans la limite du montant maximum indiqué ci-dessous.`
+                  : `Le bail comporte une clause de solidarité entre les colocataires : mon engagement porte sur l’ensemble des sommes dont ${d.locataire} est tenu à ce titre, y compris la part des autres colocataires, dans la limite du montant maximum indiqué ci-dessous.`,
           },
         ]
       : []),

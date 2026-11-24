@@ -239,6 +239,10 @@ export default async function PageLocataire({
                 ? ` ${texteColocation.locataire.montant(euros(Number(dossier.loyer_cents)))}`
                 : ''}
             </p>
+            {coloc.garantis > 1 ? (
+              <p className="mt-2">{texteColocation.locataire.garantCommun(coloc.garantis)}</p>
+            ) : null}
+            {coloc.commune ? <p className="mt-2">{texteColocation.locataire.commune}</p> : null}
           </div>
         ) : ouvert && !dossier.loyer_verrouille ? (
           <FormulaireLoyer dossierId={porteur.capacite.dossierId} loyerActuel={loyer} />
