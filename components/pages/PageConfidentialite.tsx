@@ -4,7 +4,6 @@ import * as fr from '@/lib/content/juridique'
 import { choisir, type Langue } from '@/lib/i18n'
 import {
   editeurAffiche,
-  retentionAffichee,
   retentionSauvegardes,
   traitementsFacultatifs,
 } from '@/lib/juridique/editeur'
@@ -12,14 +11,19 @@ import {
 /**
  * L'information des articles 13 et 14 du RGPD, pour les trois espaces.
  *
- * Les traitements facultatifs (signature, OCR) n'apparaissent que s'ils sont
+ * Les traitements facultatifs (moteur documentaire distant, signature, OCR,
+ * lecture IA) n'apparaissent que s'ils sont
  * actives dans cet environnement : la page decrit ce qui tourne vraiment.
  */
 export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
   const textes = choisir(langue, fr.confidentialite, en.confidentialite)
   const e = editeurAffiche(langue)
   const facultatifs = traitementsFacultatifs()
-  const incomplet = retentionSauvegardes() === null
+  // Sans duree declaree, la page ne dit rien des sauvegardes : mieux vaut un
+  // silence signale qu'un chiffre par defaut.
+  const retention = retentionSauvegardes()
+  const moteur = facultatifs.moteurDocumentaire
+  const incomplet = retention === null || (moteur !== null && moteur.hebergeur === null)
   const lecture = facultatifs.ocr || facultatifs.lectureGarant
   const openRouter = lecture
     ? facultatifs.lectureEnEurope
@@ -38,9 +42,12 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
           titre={section.titre}
           paragraphes={[
             ...section.paragraphes,
-            ...(section.id === 'durees' ? [textes.sauvegardes(retentionAffichee())] : []),
+            ...(section.id === 'durees' && retention !== null
+              ? [textes.sauvegardes(retention)]
+              : []),
             ...(section.id === 'prestataires'
               ? [
+                  ...(moteur ? [textes.facultatifs.moteurDocumentaire(moteur.hebergeur)] : []),
                   openRouter,
                   ...(facultatifs.signature
                     ? [textes.facultatifs.signature[facultatifs.signature]]

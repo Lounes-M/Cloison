@@ -126,9 +126,9 @@ export const tarifAgence = {
 
 export const formulaire = {
   eyebrow: 'Démonstration',
-  titre: ['Voyez-le sur', 'un dossier réel.'],
+  titre: ['Voyez-le sur', 'un dossier complet.'],
   sousTitre:
-    'Nous vous montrons le parcours complet sur un dossier réel, puis nous vous accompagnons sur vos premiers dossiers.',
+    'Nous vous montrons tout le parcours sur un dossier de démonstration, puis nous vous accompagnons sur vos premiers dossiers.',
   metriques: [
     { valeur: '3', libelle: 'espaces séparés' },
     { valeur: '7', libelle: 'jours de validité par lien' },
@@ -136,7 +136,7 @@ export const formulaire = {
   ],
   merci: 'C’est noté.',
   suite:
-    'Nous revenons vers vous sous 48 heures ouvrées, avec une démonstration sur un dossier réel : pas une plaquette.',
+    'Nous revenons vers vous sous 48 heures ouvrées, avec une démonstration sur un dossier complet : pas une plaquette.',
 } as const
 
 /** Les libelles du formulaire de demande de demonstration. */

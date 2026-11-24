@@ -18,7 +18,7 @@ const lire = (nom) => readFileSync(join(dossier, nom))
 
 writeFileSync(
   join(dossier, 'ca.cnf'),
-  `[ca]\ndefault_ca=a\n[a]\ndatabase=index.txt\nnew_certs_dir=.\nserial=serial\ndefault_md=sha256\npolicy=p\nunique_subject=no\n[p]\ncommonName=supplied\norganizationName=optional\ncountryName=optional\n[v3_ca]\nbasicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign\n[v3_feuille]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature\n`,
+  `[ca]\ndefault_ca=a\n[a]\ndatabase=index.txt\nnew_certs_dir=.\nserial=serial\ndefault_md=sha256\ndefault_crl_days=30\npolicy=p\nunique_subject=no\n[p]\ncommonName=supplied\norganizationName=optional\ncountryName=optional\n[v3_ca]\nbasicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign\n[v3_feuille]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature\ncrlDistributionPoints=URI:http://crl.zz01.invalid/zz01.crl\n[v3_sans_liste]\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature\n[crl_autorites]\nissuingDistributionPoint=critical,@idp\n[idp]\nonlyCA=TRUE\n`,
 )
 writeFileSync(join(dossier, 'index.txt'), '')
 writeFileSync(join(dossier, 'serial'), '1000\n')
@@ -58,7 +58,7 @@ function creerAutorite(code, nom = code) {
   return new X509Certificate(lire(`${code}.pem`)).toString()
 }
 
-function creerFeuille(nom, autoriteCode, cle, debut, fin, organisation) {
+function creerFeuille(nom, autoriteCode, cle, debut, fin, organisation, extensions = 'v3_feuille') {
   if (cle === 'rsa') ssl('genrsa', '-out', `${nom}.key`, '2048')
   else ssl('ecparam', '-name', cle, '-genkey', '-noout', '-out', `${nom}.key`)
   ssl(
@@ -83,7 +83,7 @@ function creerFeuille(nom, autoriteCode, cle, debut, fin, organisation) {
     '-in',
     `${nom}.csr`,
     '-extensions',
-    'v3_feuille',
+    extensions,
     '-startdate',
     debut,
     '-enddate',
@@ -93,6 +93,43 @@ function creerFeuille(nom, autoriteCode, cle, debut, fin, organisation) {
     '-notext',
   )
   return new X509Certificate(lire(`${nom}.pem`)).raw.toString('base64')
+}
+
+/** Liste de revocation de l'autorite, en DER. Les dates sont fixees : les essais figent l'horloge. */
+function creerListe(nom, autoriteCode, debut, fin, extensions) {
+  ssl(
+    'ca',
+    '-config',
+    'ca.cnf',
+    '-gencrl',
+    '-cert',
+    `${autoriteCode}.pem`,
+    '-keyfile',
+    `${autoriteCode}.key`,
+    '-crl_lastupdate',
+    debut,
+    '-crl_nextupdate',
+    fin,
+    ...(extensions ? ['-crlexts', extensions] : []),
+    '-out',
+    `${nom}.crl.pem`,
+  )
+  ssl('crl', '-in', `${nom}.crl.pem`, '-outform', 'DER', '-out', `${nom}.crl`)
+  return lire(`${nom}.crl`).toString('base64')
+}
+
+function revoquer(nom, autoriteCode) {
+  ssl(
+    'ca',
+    '-config',
+    'ca.cnf',
+    '-revoke',
+    `${nom}.pem`,
+    '-cert',
+    `${autoriteCode}.pem`,
+    '-keyfile',
+    `${autoriteCode}.key`,
+  )
 }
 
 const BASE32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -188,8 +225,41 @@ try {
         '20270101000000Z',
         'Emetteur fictif RSA',
       ),
+      AV06: creerFeuille(
+        'AV06',
+        'ZZ01',
+        'prime256v1',
+        '20240101000000Z',
+        '20270101000000Z',
+        'Emetteur fictif revoque',
+      ),
+      AV07: creerFeuille(
+        'AV07',
+        'ZZ01',
+        'prime256v1',
+        '20240101000000Z',
+        '20270101000000Z',
+        'Emetteur fictif sans liste',
+        'v3_sans_liste',
+      ),
     },
+    listes: {},
     codes: {},
+  }
+  revoquer('AV06', 'ZZ01')
+  // Toutes citent AV06. Seule `valide` est retenue : les autres sont perimee,
+  // signee par l'homonyme, ou limitee aux certificats d'autorites.
+  sortie.listes = {
+    valide: creerListe('valide', 'ZZ01', '20250801000000Z', '20350101000000Z'),
+    perimee: creerListe('perimee', 'ZZ01', '20250701000000Z', '20250801000000Z'),
+    homonyme: creerListe('homonyme', 'HOMONYME', '20250801000000Z', '20350101000000Z'),
+    autorites: creerListe(
+      'autorites',
+      'ZZ01',
+      '20250801000000Z',
+      '20350101000000Z',
+      'crl_autorites',
+    ),
   }
   sortie.codes = {
     avis: signer('AV01', 'sha256', 'ZZ01', 'AV01', '28', AVIS),
@@ -206,6 +276,8 @@ try {
     perime: signer('AV02', 'sha256', 'ZZ01', 'AV02', '28', AVIS),
     // Signe par un emetteur d'une autre autorite, mais presente sous ZZ01.
     etranger: signer('AV03', 'sha256', 'ZZ01', 'AV03', '28', AVIS),
+    revoque: signer('AV06', 'sha256', 'ZZ01', 'AV06', '28', AVIS),
+    sansListe: signer('AV07', 'sha256', 'ZZ01', 'AV07', '28', AVIS),
     futur: signer('AV01', 'sha256', 'ZZ01', 'AV01', '28', AVIS, '2026-12-31'),
   }
   writeFileSync('tests/fixtures/2ddoc.json', JSON.stringify(sortie, null, 2) + '\n')

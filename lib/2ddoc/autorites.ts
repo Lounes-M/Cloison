@@ -11,14 +11,29 @@
  * ajouter une autorite a la main.
  *
  * `adresse` est l'adresse de publication declaree par l'autorite dans la
- * liste. `parNom` vaut vrai quand le certificat d'un emetteur s'y obtient en
- * ajoutant `?name=<identifiant>` ; sinon les certificats de cette autorite ne
- * se recuperent pas automatiquement.
+ * liste. `recherches` donne, dans l'ordre, les adresses ou chercher le
+ * certificat d'un emetteur ; `{id}` y est remplace par son identifiant. Une
+ * adresse sans `{id}` est un annuaire : elle rend tous les certificats de
+ * l'autorite, et celui de l'emetteur y est retrouve par son nom.
+ *
+ * Ces adresses ne portent aucune confiance : un certificat n'est retenu que
+ * s'il est signe par l'autorite epinglee (voir `confiance.ts`). Une adresse
+ * fausse donne « non verifiable », jamais « authentique ».
+ *
+ * - FR01, FR04, FR06 (IDnow) : `?name=<identifiant>` sur l'adresse publiee.
+ * - FR03 (Certigna) : `name=<identifiant>` sur l'adresse publiee puis sur
+ *   `search.php` seul, enfin l'adresse publiee, qui rend l'annuaire complet.
+ *   Les deux dernieres formes sont attestees par des verificateurs publics
+ *   (sanipasse, PyTac_verif), pas par un essai reel.
+ * - FR05 (ANTS) et FR07 (Goodflag) : l'adresse publiee designe le certificat
+ *   de l'autorite elle-meme. Faute de convention documentee, la forme
+ *   `?name=` y est tentee. A confirmer en recette avec
+ *   `node scripts/essayer-2ddoc.mjs --emetteur FR05 <identifiant>`.
  */
 export type Autorite = {
   nom: string
   adresse: string
-  parNom: boolean
+  recherches: readonly string[]
   empreinte: string
   certificat: string
 }
@@ -27,7 +42,7 @@ export const AUTORITES: Readonly<Record<string, Autorite>> = {
   FR01: {
     nom: 'IDnow SAS',
     adresse: 'http://cert.pki-2ddoc.ariadnext.fr/pki-2ddoc.der',
-    parNom: true,
+    recherches: ['http://cert.pki-2ddoc.ariadnext.fr/pki-2ddoc.der?name={id}'],
     empreinte: 'c326441c23adb828e115f80583d95270a88a92968255ad7bb87b49386b5cafe4',
     certificat: `-----BEGIN CERTIFICATE-----
 MIIFnzCCA4egAwIBAgIIWGqMmtUG62gwDQYJKoZIhvcNAQENBQAwTjENMAsGA1UE
@@ -67,7 +82,11 @@ TOgo
   FR03: {
     nom: 'Dhimyotis',
     adresse: 'http://certificates.certigna.fr/search.php?iHash=xvNLC1KMs03t%2FgxzdBYParPnf%2BM',
-    parNom: false,
+    recherches: [
+      'http://certificates.certigna.fr/search.php?iHash=xvNLC1KMs03t%2FgxzdBYParPnf%2BM&name={id}',
+      'http://certificates.certigna.fr/search.php?name={id}',
+      'http://certificates.certigna.fr/search.php?iHash=xvNLC1KMs03t%2FgxzdBYParPnf%2BM',
+    ],
     empreinte: '080e7e36b3c7fa96ecc67db7f4d41cece1d194401af196a4a47b79bdc4970574',
     certificat: `-----BEGIN CERTIFICATE-----
 MIIGozCCBIugAwIBAgIRAIicQfC+tDE/Mw+eLtuCcewwDQYJKoZIhvcNAQELBQAw
@@ -112,7 +131,7 @@ w3rLYbfDs/1vtVFI3h5/p4jkfCIPGnP/p0qNcu7XAxGwoipmmPBdOQ9UbsFTYAY1
   FR04: {
     nom: 'IDnow SAS',
     adresse: 'http://pki-g2.ariadnext.fr/pki-2ddoc.der',
-    parNom: true,
+    recherches: ['http://pki-g2.ariadnext.fr/pki-2ddoc.der?name={id}'],
     empreinte: '2d9055d8708513df6df6d130ebd62d9bd1d6b74b165d11ffed90630e1424bd05',
     certificat: `-----BEGIN CERTIFICATE-----
 MIIGIjCCBAqgAwIBAgIILFcKAyci3nwwDQYJKoZIhvcNAQENBQAwXjEdMBsGA1UE
@@ -154,7 +173,7 @@ s/biHLMCU9mrsLR8mAmx4w6q/0XrxeivzlxSOwRh711HKAloqDM=
   FR05: {
     nom: 'ANTS',
     adresse: 'http://sp.ants.gouv.fr/cev/FR05_cert.der',
-    parNom: false,
+    recherches: ['http://sp.ants.gouv.fr/cev/FR05_cert.der?name={id}'],
     empreinte: 'b21d27c020674a9b160e617dfc800e549cc33054f60b55ecb8f8c1710cf29940',
     certificat: `-----BEGIN CERTIFICATE-----
 MIIGujCCBKKgAwIBAgISESBToYjUAj848Nhp+xOagSvSMA0GCSqGSIb3DQEBDQUA
@@ -199,7 +218,7 @@ zY9JtZat2+RnM5930PnfmR9SpyjOeM2+0hmVCVUIKW+ebV0q+KlZ7BjQPAv4ng==
   FR06: {
     nom: 'IDnow SAS',
     adresse: 'http://pki-g3.ariadnext.fr/pki-2ddoc.der',
-    parNom: true,
+    recherches: ['http://pki-g3.ariadnext.fr/pki-2ddoc.der?name={id}'],
     empreinte: 'bef36e53cf6356c42767f3b640cf5eafab09cab2f60b1cfb67fb138bb933a393',
     certificat: `-----BEGIN CERTIFICATE-----
 MIIGGDCCBACgAwIBAgIIVbBD0GR7a28wDQYJKoZIhvcNAQENBQAwWTEdMBsGA1UE
@@ -241,7 +260,7 @@ JfGeQJkyhxQINuCqhayeDh/3Oeg15xQwsm4rlNgXh5EN5fY5jyH8h32Zq8/4cYNJ
   FR07: {
     nom: 'Goodflag',
     adresse: 'https://pki2.sunnystamp.com/certs/fr07.der',
-    parNom: false,
+    recherches: ['https://pki2.sunnystamp.com/certs/fr07.der?name={id}'],
     empreinte: '3118fecb1bc8c5347b560860d54a12a137ae7e0a2ebe81576ec05fc86781dda3',
     certificat: `-----BEGIN CERTIFICATE-----
 MIIGwzCCBKugAwIBAgIIO3bWUuXihYMwDQYJKoZIhvcNAQENBQAwdjEeMBwGA1UE
