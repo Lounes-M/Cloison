@@ -47,7 +47,10 @@ export function ModeleActe({
   locataire,
   aujourdHui,
   signatureOuverte,
+  autresGarantis = 0,
 }: {
+  /** Garant commun (0094) : combien d'autres colocataires l'acte doit nommer. */
+  autresGarantis?: number
   dossier: string
   locataire: string
   aujourdHui: string
@@ -117,6 +120,18 @@ export function ModeleActe({
       <fieldset disabled={occupe} className="grid min-w-0 gap-4">
         <legend className="font-display mb-2 text-xl">{t.sections.bail}</legend>
         <Texte nom="locataire" libelle={t.champs.locataire} defaut={locataire} maxLength={240} />
+        {autresGarantis > 0 ? (
+          <label className="text-[14px] font-bold">
+            {t.champs.autresGarantis}
+            <textarea
+              className={champ}
+              name="autres_garantis"
+              rows={Math.max(2, autresGarantis)}
+              maxLength={1700}
+              required
+            />
+          </label>
+        ) : null}
         <Texte nom="bailleur_nom" libelle={t.champs.bailleurNom} maxLength={240} />
         <Texte nom="bailleur_adresse" libelle={t.champs.bailleurAdresse} maxLength={400} />
         <Texte nom="logement" libelle={t.champs.logement} maxLength={400} />

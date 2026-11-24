@@ -6,7 +6,7 @@ import { ActeIncomplet, type RefusActe } from './modele-cautionnement'
 import { genererActePdf, TexteNonImprimable } from './pdf-cautionnement'
 
 export type MotifRefusProjet =
-  'saisie' | 'dossier' | 'mention' | 'colocation' | 'caracteres' | RefusActe
+  'saisie' | 'dossier' | 'mention' | 'colocation' | 'garantis' | 'caracteres' | RefusActe
 
 export type ProjetDossier =
   | { ok: true; pdf: Uint8Array; signature: PositionSignature }

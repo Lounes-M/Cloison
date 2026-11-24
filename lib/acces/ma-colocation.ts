@@ -6,12 +6,17 @@ export type MaColocation = {
   colocataires: number
   loyerTotalCents: number
   etendue: 'part' | 'loyer_entier'
+  /** Colocataires que couvre le garant de ce dossier : plus de un, garant commun (0094). */
+  garantis: number
+  /** Les garants de la colocation sont juges ensemble (0094). */
+  commune: boolean
 }
 
 /**
  * La colocation du dossier du porteur de lien (0092) : combien de
- * colocataires, le loyer total du bail et l'etendue de l'engagement. Rien des
- * autres dossiers. Une panne ne bloque pas l'espace : la mention disparait.
+ * colocataires, le loyer total du bail, l'etendue de l'engagement, le nombre de
+ * colocataires que couvre le garant du dossier et le mode de solvabilite. Rien
+ * des autres dossiers. Une panne ne bloque pas l'espace : la mention disparait.
  */
 export async function maColocation(supabase: SupabaseClient): Promise<MaColocation | null> {
   const { data, error } = await supabase.rpc('ma_colocation')
@@ -27,5 +32,9 @@ export async function maColocation(supabase: SupabaseClient): Promise<MaColocati
     colocataires: n,
     loyerTotalCents: total,
     etendue: ligne.etendue === 'loyer_entier' ? 'loyer_entier' : 'part',
+    garantis: Number.isSafeInteger(Number(ligne.garantis))
+      ? Math.max(1, Number(ligne.garantis))
+      : 1,
+    commune: ligne.solvabilite === 'commune',
   }
 }

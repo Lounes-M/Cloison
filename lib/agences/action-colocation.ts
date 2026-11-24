@@ -11,7 +11,7 @@ import { choisir, versLangue } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
 import { reglerLangueDossier } from '@/lib/langue-preferee'
 import { estUuidCanonique } from '@/lib/validation/uuid'
-import { COLOCATAIRES_MAX, lireAdresses, repartirLoyer } from './colocation'
+import { COLOCATAIRES_MAX, lireAdresses, lireGarantis, repartirLoyer } from './colocation'
 import { contexteAgence } from './contexte'
 
 /**
@@ -60,7 +60,14 @@ export async function ouvrirUneColocation(
   }
   const ajout = existante !== ''
 
-  const lues = lireAdresses(courriels, ajout ? 1 : 2)
+  // Le garant de la premiere adresse peut couvrir plusieurs colocataires
+  // (0094) : une colocation de deux s'ouvre alors avec une seule adresse.
+  const garantCommun = lireGarantis(donnees.get('garantCommun'))
+  if (garantCommun === null) return refuser(t.erreurs.impossible)
+  const lues = lireAdresses(courriels, 1)
+  if (lues.ok && !ajout && lues.adresses.length + garantCommun - 1 < 2) {
+    return refuser(t.erreurs.adresses)
+  }
   if (!lues.ok) {
     return refuser(
       lues.motif === 'doublon'
@@ -73,6 +80,9 @@ export async function ouvrirUneColocation(
     )
   }
   const { adresses } = lues
+  const garantis = adresses.map((_, i) => (i === 0 ? garantCommun : 1))
+  const arrivants = adresses.length + garantCommun - 1
+  if (arrivants > COLOCATAIRES_MAX) return refuser(t.erreurs.trop)
 
   let total: number | null = null
   let etendue: 'part' | 'loyer_entier' =
@@ -82,6 +92,12 @@ export async function ouvrirUneColocation(
     if (lu === null || lu === 'invalide') return refuser(t.erreurs.loyer)
     total = lu
   }
+  // Juger les garants ensemble n'a de sens que s'ils repondent tous du loyer
+  // entier ; la base le refuse autrement.
+  const solvabilite =
+    etendue === 'loyer_entier' && donnees.get('solvabilite') === 'commune'
+      ? 'commune'
+      : 'individuelle'
 
   const contexte = await contexteAgence()
   if (contexte.etat !== 'rattache') return refuser(t.erreurs.session)
@@ -102,7 +118,7 @@ export async function ouvrirUneColocation(
         .maybeSingle(),
       supabase
         .from('dossiers')
-        .select('email_locataire, email_garant, statut, expire_le')
+        .select('email_locataire, email_garant, statut, expire_le, colocataires_garantis')
         .eq('colocation_id', existante)
         .limit(200),
     ])
@@ -119,12 +135,12 @@ export async function ouvrirUneColocation(
     ) {
       return refuser(t.erreurs.dejaPresente)
     }
-    if (presents.length + adresses.length > COLOCATAIRES_MAX) return refuser(t.erreurs.trop)
+    dejaPresents = presents.reduce((s, m) => s + (Number(m.colocataires_garantis) || 1), 0)
+    if (dejaPresents + arrivants > COLOCATAIRES_MAX) return refuser(t.erreurs.trop)
     colocation = String(c.id)
     logement = c.logement_id == null ? null : String(c.logement_id)
     total = Number(c.loyer_total_cents)
     etendue = c.etendue === 'loyer_entier' ? 'loyer_entier' : 'part'
-    dejaPresents = presents.length
   } else {
     const { data, error } = await supabase
       .from('colocations')
@@ -133,6 +149,7 @@ export async function ouvrirUneColocation(
         logement_id: brutLogement === '' ? null : brutLogement,
         loyer_total_cents: total,
         etendue,
+        solvabilite,
       })
       .select('id')
       .maybeSingle()
@@ -146,10 +163,11 @@ export async function ouvrirUneColocation(
 
   // A l'ajout, le nouveau venu recoit une part egale du total ; les parts des
   // autres ne bougent pas seules, l'agence les corrige et la fiche le lui dit.
-  const parts = repartirLoyer(total!, etendue, dejaPresents + adresses.length).slice(
-    0,
-    adresses.length,
-  )
+  const parts = repartirLoyer(
+    total!,
+    etendue,
+    dejaPresents > 0 ? [dejaPresents, ...garantis] : garantis,
+  ).slice(dejaPresents > 0 ? 1 : 0)
   const langueLocataire = versLangue(donnees.get('langueLocataire') ?? langue)
 
   let ouverts = 0
@@ -165,6 +183,7 @@ export async function ouvrirUneColocation(
         colocation_id: colocation,
         loyer_cents: parts[i],
       }
+      if (garantis[i]! > 1) complement.colocataires_garantis = garantis[i]
       if (logement) complement.logement_id = logement
       const { data: rattache, error } = await supabase
         .from('dossiers')
@@ -196,4 +215,108 @@ export async function ouvrirUneColocation(
   revalidatePath('/espace')
   revalidatePath(`/espace/colocations/${colocation}`)
   return { statut: 'ouverte', colocation, ouverts, echecs }
+}
+
+export type EtatReglage =
+  { statut: 'inactif' } | { statut: 'fait' } | { statut: 'erreur'; message: string }
+
+/**
+ * L'agence choisit de juger les garants ensemble ou chacun seul (0094). La
+ * base refuse le mode commun hors bail solidaire, et tout changement une fois
+ * un dossier pris ; elle rejuge tous les dossiers dans la meme transaction.
+ */
+export async function reglerSolvabilite(
+  _precedent: EtatReglage,
+  donnees: FormData,
+): Promise<EtatReglage> {
+  const t = choisir(await langueEspace(), texteFr, texteEn)
+  const colocation = String(donnees.get('colocation') ?? '')
+  const mode = donnees.get('solvabilite') === 'commune' ? 'commune' : 'individuelle'
+  if (!estUuidCanonique(colocation)) return { statut: 'erreur', message: t.reglages.impossible }
+
+  const contexte = await contexteAgence()
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: t.erreurs.session }
+  const { data, error } = await contexte.supabase
+    .from('colocations')
+    .update({ solvabilite: mode })
+    .eq('id', colocation)
+    .select('id')
+  if (error || !Array.isArray(data) || data.length === 0) {
+    return {
+      statut: 'erreur',
+      message: /deja pris/.test(error?.message ?? '') ? t.reglages.fige : t.reglages.impossible,
+    }
+  }
+  revalidatePath('/espace')
+  revalidatePath(`/espace/colocations/${colocation}`)
+  return { statut: 'fait' }
+}
+
+/**
+ * L'agence dit combien de colocataires couvre le garant d'un dossier (0094).
+ *
+ * En engagement sur la part, le loyer du dossier suit : deux colocataires,
+ * deux parts. C'est une proposition, que l'agence corrige sur la fiche ; la
+ * fiche de la colocation dit si les parts ne font plus le loyer du bail.
+ */
+export async function reglerGarantCommun(
+  _precedent: EtatReglage,
+  donnees: FormData,
+): Promise<EtatReglage> {
+  const t = choisir(await langueEspace(), texteFr, texteEn)
+  const colocation = String(donnees.get('colocation') ?? '')
+  const dossier = String(donnees.get('dossier') ?? '')
+  const garantis = lireGarantis(donnees.get('garantis'))
+  if (!estUuidCanonique(colocation) || !estUuidCanonique(dossier) || garantis === null) {
+    return { statut: 'erreur', message: t.reglages.impossible }
+  }
+
+  const contexte = await contexteAgence()
+  if (contexte.etat !== 'rattache') return { statut: 'erreur', message: t.erreurs.session }
+  const { supabase } = contexte
+
+  const [{ data: c }, { data: avant }] = await Promise.all([
+    supabase.from('colocations').select('etendue').eq('id', colocation).maybeSingle(),
+    supabase
+      .from('dossiers')
+      .select('loyer_cents, colocataires_garantis')
+      .eq('id', dossier)
+      .eq('colocation_id', colocation)
+      .maybeSingle(),
+  ])
+  if (!c || !avant) return { statut: 'erreur', message: t.reglages.impossible }
+  const ancien = Number(avant.colocataires_garantis) || 1
+  if (ancien === garantis) return { statut: 'fait' }
+
+  const { data, error } = await supabase
+    .from('dossiers')
+    .update({ colocataires_garantis: garantis })
+    .eq('id', dossier)
+    .eq('colocation_id', colocation)
+    .select('id')
+  if (error || !Array.isArray(data) || data.length === 0) {
+    const refus = error?.message ?? ''
+    return {
+      statut: 'erreur',
+      message: /au plus huit/.test(refus)
+        ? t.erreurs.trop
+        : /ne se modifie plus/.test(refus)
+          ? t.reglages.garantFige
+          : t.reglages.impossible,
+    }
+  }
+
+  if (c.etendue === 'part' && avant.loyer_cents != null) {
+    const loyer = Math.round((Number(avant.loyer_cents) * garantis) / ancien)
+    const { error: refusLoyer } = await supabase
+      .from('dossiers')
+      .update({ loyer_cents: loyer })
+      .eq('id', dossier)
+    // Un loyer que la base ne laisse plus bouger reste a corriger sur la fiche.
+    if (refusLoyer) console.error('[agence] loyer du garant commun inchange')
+  }
+
+  revalidatePath(`/espace/colocations/${colocation}`)
+  revalidatePath(`/espace/dossiers/${dossier}`)
+  return { statut: 'fait' }
 }

@@ -182,7 +182,7 @@ export default async function PageDossier({
     supabase
       .from('dossiers')
       .select(
-        'id, reference, statut, email_locataire, locataire_nom, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, colocation_id, activite_rappel_le',
+        'id, reference, statut, email_locataire, locataire_nom, email_garant, loyer_cents, cree_le, expire_le, demonstration, loyer_verrouille, dossier_principal, logement_id, colocation_id, colocataires_garantis, activite_rappel_le',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -265,13 +265,17 @@ export default async function PageDossier({
 
   // La colocation du dossier (0092) : son etendue et le nombre de dossiers
   // ouverts, lus avec les droits de l'agence. Une panne ne bloque pas la fiche.
-  let coloc: { id: string; etendue: string; colocataires: number } | null = null
+  let coloc: { id: string; etendue: string; colocataires: number; commune: boolean } | null = null
   if (d.colocation_id) {
-    const [{ data: laColoc }, { count }] = await Promise.all([
-      supabase.from('colocations').select('id, etendue').eq('id', d.colocation_id).maybeSingle(),
+    const [{ data: laColoc }, { data: membres }] = await Promise.all([
+      supabase
+        .from('colocations')
+        .select('id, etendue, solvabilite')
+        .eq('id', d.colocation_id)
+        .maybeSingle(),
       supabase
         .from('dossiers')
-        .select('id', { count: 'exact', head: true })
+        .select('colocataires_garantis')
         .eq('colocation_id', d.colocation_id)
         .in('statut', [
           'ouvert',
@@ -281,10 +285,20 @@ export default async function PageDossier({
           'transmis',
           'signe',
         ])
-        .gt('expire_le', new Date().toISOString()),
+        .gt('expire_le', new Date().toISOString())
+        .limit(200),
     ])
     if (laColoc) {
-      coloc = { id: String(laColoc.id), etendue: String(laColoc.etendue), colocataires: count ?? 0 }
+      coloc = {
+        id: String(laColoc.id),
+        etendue: String(laColoc.etendue),
+        // Le dossier d'un garant commun compte pour autant de colocataires (0094).
+        colocataires: (membres ?? []).reduce(
+          (n, m) => n + (Number(m.colocataires_garantis) || 1),
+          0,
+        ),
+        commune: laColoc.solvabilite === 'commune',
+      }
     }
   }
   const ratioGroupe = lie?.ratio_groupe == null ? null : Number(lie.ratio_groupe)
@@ -503,6 +517,14 @@ export default async function PageDossier({
           <p className="mt-1 font-medium">
             {texteColocation.etendues[coloc.etendue === 'loyer_entier' ? 'loyer_entier' : 'part']}
           </p>
+          {Number(d.colocataires_garantis) > 1 ? (
+            <p className="mt-1 font-medium">
+              {texteColocation.fiche.garantCommun(Number(d.colocataires_garantis))}
+            </p>
+          ) : null}
+          {coloc.commune ? (
+            <p className="mt-1 font-medium">{texteColocation.fiche.commune}</p>
+          ) : null}
           <Link
             href={`/espace/colocations/${coloc.id}`}
             className="text-cobalt mt-2 inline-block text-[14px] font-bold underline underline-offset-2"

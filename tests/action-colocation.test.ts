@@ -10,6 +10,8 @@ const d = vi.hoisted(() => ({
   colocation: null as unknown,
   membres: [] as unknown[],
   rattachementRefuse: [] as string[],
+  dossier: null as unknown,
+  refusEcriture: null as string | null,
 }))
 vi.mock('@/lib/agences/contexte', () => ({ contexteAgence: d.contexte }))
 vi.mock('next/cache', () => ({ revalidatePath: d.revalider }))
@@ -18,7 +20,11 @@ vi.mock('@/lib/courriels/livraison-liens', () => ({ reprendreLivraisonLiens: d.l
 vi.mock('@/lib/langue-preferee', () => ({ reglerLangueDossier: d.langue }))
 vi.mock('@/lib/langue-espace', () => ({ langueEspace: async () => 'fr' }))
 
-import { ouvrirUneColocation } from '@/lib/agences/action-colocation'
+import {
+  ouvrirUneColocation,
+  reglerGarantCommun,
+  reglerSolvabilite,
+} from '@/lib/agences/action-colocation'
 import { lireAdresses, repartirLoyer } from '@/lib/agences/colocation'
 import { colocation as t } from '@/lib/content/colocation'
 
@@ -41,7 +47,12 @@ function client() {
           return { data: { id: COLOC }, error: null }
         if (table === 'colocations' && appel.op === 'select')
           return { data: d.colocation, error: null }
-        if (table === 'dossiers' && appel.op === 'select') return { data: d.membres, error: null }
+        if (table === 'dossiers' && appel.op === 'select')
+          return { data: d.dossier ?? d.membres, error: null }
+        if (d.refusEcriture && appel.op === 'update')
+          return { data: null, error: { message: d.refusEcriture } }
+        if (table === 'colocations' && appel.op === 'update')
+          return { data: [{ id: COLOC }], error: null }
         if (table === 'dossiers' && appel.op === 'update') {
           const id = String(appel.filtres.find((f) => f[1] === 'id')?.[2])
           return d.rattachementRefuse.includes(id)
@@ -78,6 +89,8 @@ beforeEach(() => {
   d.colocation = null
   d.membres = []
   d.rattachementRefuse = []
+  d.dossier = null
+  d.refusEcriture = null
   d.contexte.mockResolvedValue({
     etat: 'rattache',
     agence: { id: 'agence', statut: 'verifiee' },
@@ -102,9 +115,9 @@ test('les adresses se lisent une par ligne, sans doublon, de deux a huit', () =>
 })
 
 test('les parts font exactement le total ; un bail solidaire porte le loyer entier', () => {
-  expect(repartirLoyer(120000, 'part', 3)).toEqual([40000, 40000, 40000])
-  expect(repartirLoyer(100000, 'part', 3)).toEqual([33334, 33333, 33333])
-  expect(repartirLoyer(100000, 'loyer_entier', 3)).toEqual([100000, 100000, 100000])
+  expect(repartirLoyer(120000, 'part', [1, 1, 1])).toEqual([40000, 40000, 40000])
+  expect(repartirLoyer(100000, 'part', [1, 1, 1])).toEqual([33334, 33333, 33333])
+  expect(repartirLoyer(100000, 'loyer_entier', [1, 1, 1])).toEqual([100000, 100000, 100000])
 })
 
 test.each([
@@ -145,6 +158,7 @@ test('une colocation neuve ouvre un dossier par colocataire, a parts egales', as
     logement_id: LOGEMENT,
     loyer_total_cents: 100000,
     etendue: 'part',
+    solvabilite: 'individuelle',
   })
   expect(ecritures('dossiers', 'update').map((e) => e.valeurs)).toEqual([
     { colocation_id: COLOC, loyer_cents: 33334, logement_id: LOGEMENT },
@@ -244,4 +258,131 @@ test('la colocation d une autre agence n existe pas : rien ne s ouvre', async ()
   )
   expect(etat).toMatchObject({ statut: 'erreur', message: t.erreurs.impossible })
   expect(d.ouvrir).not.toHaveBeenCalled()
+})
+
+test('un garant commun : une adresse suffit, et son dossier porte autant de parts', async () => {
+  const etat = await ouvrirUneColocation(
+    { statut: 'inactif' },
+    form({ courriels: 'a@x.fr\nc@x.fr', loyerTotal: '1000', garantCommun: '2' }),
+  )
+  expect(etat).toMatchObject({ statut: 'ouverte', ouverts: 2 })
+  expect(ecritures('dossiers', 'update').map((e) => e.valeurs)).toEqual([
+    { colocation_id: COLOC, loyer_cents: 66667, colocataires_garantis: 2 },
+    { colocation_id: COLOC, loyer_cents: 33333 },
+  ])
+
+  d.appels.length = 0
+  const couple = await ouvrirUneColocation(
+    { statut: 'inactif' },
+    form({ courriels: 'a@x.fr', loyerTotal: '1000', garantCommun: '2' }),
+  )
+  expect(couple).toMatchObject({ statut: 'ouverte', ouverts: 1 })
+  expect(ecritures('dossiers', 'update').map((e) => e.valeurs)).toEqual([
+    { colocation_id: COLOC, loyer_cents: 100000, colocataires_garantis: 2 },
+  ])
+})
+
+test.each([
+  [{ courriels: 'a@x.fr\nb@x.fr', loyerTotal: '1000', garantCommun: '8' }, t.erreurs.trop],
+  [{ courriels: 'a@x.fr\nb@x.fr', loyerTotal: '1000', garantCommun: '0' }, t.erreurs.impossible],
+])('un garant commun hors bornes n ouvre rien (%#)', async (saisie, message) => {
+  const etat = await ouvrirUneColocation({ statut: 'inactif' }, form(saisie))
+  expect(etat).toMatchObject({ statut: 'erreur', message })
+  expect(d.ouvrir).not.toHaveBeenCalled()
+})
+
+test('a l ajout, le plafond compte les colocataires d un garant commun', async () => {
+  d.colocation = { id: COLOC, logement_id: null, loyer_total_cents: 120000, etendue: 'part' }
+  const demain = new Date(Date.now() + 86_400_000).toISOString()
+  d.membres = [
+    { email_locataire: 'a@x.fr', statut: 'ouvert', expire_le: demain, colocataires_garantis: 7 },
+  ]
+  const trop = await ouvrirUneColocation(
+    { statut: 'inactif' },
+    form({ colocation: COLOC, courriels: 'b@x.fr\nc@x.fr' }),
+  )
+  expect(trop).toMatchObject({ statut: 'erreur', message: t.erreurs.trop })
+  const ok = await ouvrirUneColocation(
+    { statut: 'inactif' },
+    form({ colocation: COLOC, courriels: 'b@x.fr' }),
+  )
+  expect(ok).toMatchObject({ statut: 'ouverte', ouverts: 1 })
+  // Une part sur huit pour le nouveau venu.
+  expect(ecritures('dossiers', 'update').at(-1)!.valeurs).toEqual({
+    colocation_id: COLOC,
+    loyer_cents: 15000,
+  })
+})
+
+test('la solvabilite commune ne se demande que sur un bail solidaire', async () => {
+  await ouvrirUneColocation(
+    { statut: 'inactif' },
+    form({ courriels: 'a@x.fr\nb@x.fr', loyerTotal: '1000', solvabilite: 'commune' }),
+  )
+  expect(ecritures('colocations', 'insert')[0]!.valeurs).toMatchObject({
+    etendue: 'part',
+    solvabilite: 'individuelle',
+  })
+  d.appels.length = 0
+  await ouvrirUneColocation(
+    { statut: 'inactif' },
+    form({
+      courriels: 'a@x.fr\nb@x.fr',
+      loyerTotal: '1000',
+      etendue: 'loyer_entier',
+      solvabilite: 'commune',
+    }),
+  )
+  expect(ecritures('colocations', 'insert')[0]!.valeurs).toMatchObject({
+    etendue: 'loyer_entier',
+    solvabilite: 'commune',
+  })
+})
+
+test('l agence regle la solvabilite, et lit le refus de la base', async () => {
+  const fait = await reglerSolvabilite(
+    { statut: 'inactif' },
+    form({ colocation: COLOC, solvabilite: 'commune' }),
+  )
+  expect(fait).toEqual({ statut: 'fait' })
+  expect(ecritures('colocations', 'update')[0]!.valeurs).toEqual({ solvabilite: 'commune' })
+
+  d.refusEcriture = 'La solvabilite ne se regle plus : un dossier est deja pris.'
+  expect(
+    await reglerSolvabilite({ statut: 'inactif' }, form({ colocation: COLOC, solvabilite: 'x' })),
+  ).toEqual({ statut: 'erreur', message: t.reglages.fige })
+  expect(await reglerSolvabilite({ statut: 'inactif' }, form({ colocation: 'x' }))).toEqual({
+    statut: 'erreur',
+    message: t.reglages.impossible,
+  })
+})
+
+test('le garant commun se regle sur un dossier, et sa part suit', async () => {
+  const DOSSIER = '44444444-4444-4444-8444-444444444444'
+  d.colocation = { etendue: 'part' }
+  d.dossier = { loyer_cents: 40000, colocataires_garantis: 1 }
+  const fait = await reglerGarantCommun(
+    { statut: 'inactif' },
+    form({ colocation: COLOC, dossier: DOSSIER, garantis: '2' }),
+  )
+  expect(fait).toEqual({ statut: 'fait' })
+  expect(ecritures('dossiers', 'update').map((e) => e.valeurs)).toEqual([
+    { colocataires_garantis: 2 },
+    { loyer_cents: 80000 },
+  ])
+
+  d.appels.length = 0
+  d.refusEcriture = 'Le garant commun ne se modifie plus sur ce dossier.'
+  expect(
+    await reglerGarantCommun(
+      { statut: 'inactif' },
+      form({ colocation: COLOC, dossier: DOSSIER, garantis: '3' }),
+    ),
+  ).toEqual({ statut: 'erreur', message: t.reglages.garantFige })
+  expect(
+    await reglerGarantCommun(
+      { statut: 'inactif' },
+      form({ colocation: COLOC, dossier: DOSSIER, garantis: '9' }),
+    ),
+  ).toEqual({ statut: 'erreur', message: t.reglages.impossible })
 })

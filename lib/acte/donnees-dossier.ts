@@ -43,13 +43,23 @@ export const complementActe = z.object({
         .map((n) => n.trim())
         .filter(Boolean),
     ),
+  autres_garantis: z
+    .string()
+    .trim()
+    .max(1700)
+    .transform((v) =>
+      v
+        .split(/[\n;]/)
+        .map((n) => n.trim())
+        .filter(Boolean),
+    ),
   fait_lieu: z.string().trim().min(2).max(120),
   fait_le: z.iso.date(),
 })
 
 export type LectureModele =
   | { ok: true; donnees: DonneesActe }
-  | { ok: false; motif: 'saisie' | 'dossier' | 'mention' | 'colocation' }
+  | { ok: false; motif: 'saisie' | 'dossier' | 'mention' | 'colocation' | 'garantis' }
 
 /**
  * Les donnees de l'acte d'un dossier transmis, lues avec les droits de
@@ -71,7 +81,9 @@ export async function donneesDepuisDossier(
   const [{ data: d, error: de }, { data: e, error: ee }] = await Promise.all([
     supabase
       .from('dossiers')
-      .select('id,statut,expire_le,demonstration,dossier_principal,colocation_id')
+      .select(
+        'id,statut,expire_le,demonstration,dossier_principal,colocation_id,colocataires_garantis',
+      )
       .eq('id', dossier)
       .maybeSingle(),
     supabase
@@ -106,30 +118,44 @@ export async function donneesDepuisDossier(
   // La colocation du dossier, ou celle du principal pour un second garant
   // (ADR 0020). Illisible, l'acte n'est pas redige : mieux vaut un refus qu'un
   // acte de colocation qui ne nommerait pas le colocataire garanti.
-  let colocation: { colocataires: number; etendue: string } | null = null
+  let colocation: { colocataires: number; etendue: string; autresGarantis: string[] } | null = null
   let idColocation = d.colocation_id ? String(d.colocation_id) : null
+  // Combien de colocataires couvre cette caution (0094) : le second garant
+  // d'un dossier a garant commun les couvre tous, comme le premier.
+  let garantis = Number(d.colocataires_garantis) || 1
   if (!idColocation && d.dossier_principal) {
     const { data: p, error } = await supabase
       .from('dossiers')
-      .select('colocation_id')
+      .select('colocation_id,colocataires_garantis')
       .eq('id', d.dossier_principal)
       .maybeSingle()
     if (error) return { ok: false, motif: 'dossier' }
     idColocation = p?.colocation_id ? String(p.colocation_id) : null
+    garantis = Number(p?.colocataires_garantis) || 1
   }
   if (idColocation) {
-    const [{ data: c, error: ce }, { count, error: ne }] = await Promise.all([
+    const [{ data: c, error: ce }, { data: pris, error: ne }] = await Promise.all([
       supabase.from('colocations').select('etendue').eq('id', idColocation).maybeSingle(),
       supabase
         .from('dossiers')
-        .select('id', { count: 'exact', head: true })
+        .select('colocataires_garantis')
         .eq('colocation_id', idColocation)
-        .in('statut', ['transmis', 'signe']),
+        .in('statut', ['transmis', 'signe'])
+        .limit(200),
     ])
-    // Une colocation dont un seul dossier est pris n'est pas encore un bail
-    // a plusieurs : l'agence prend les autres d'abord.
-    if (ce || ne || !c || (count ?? 0) < 2) return { ok: false, motif: 'colocation' }
-    colocation = { colocataires: count!, etendue: String(c.etendue) }
+    // Le dossier d'un garant commun compte pour autant de colocataires.
+    const colocataires = (pris ?? []).reduce(
+      (n, p) => n + (Number(p.colocataires_garantis) || 1),
+      0,
+    )
+    // Une colocation dont un seul colocataire est pris n'est pas encore un
+    // bail a plusieurs : l'agence prend les autres dossiers d'abord.
+    if (ce || ne || !c || colocataires < 2) return { ok: false, motif: 'colocation' }
+    // Garant commun : l'acte nomme chaque colocataire garanti, ni plus ni moins.
+    if (s.autres_garantis.length !== garantis - 1) return { ok: false, motif: 'garantis' }
+    colocation = { colocataires, etendue: String(c.etendue), autresGarantis: s.autres_garantis }
+  } else if (s.autres_garantis.length > 0) {
+    return { ok: false, motif: 'garantis' }
   }
 
   const donnees = donneesActe.safeParse({
