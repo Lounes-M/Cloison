@@ -51,6 +51,7 @@ export const acte: Textes<typeof Fr> = {
     irlTrimestre: 'Reference quarter of the IRL index',
     irlAnnee: 'Reference year of the IRL index',
     coCautions: 'Other guarantors of the same lease (one per line, optional)',
+    autresGarantis: 'Other flatmates guaranteed by this guarantor (one per line)',
     faitLieu: 'Signed in',
     faitLe: 'On',
   },
@@ -77,6 +78,8 @@ export const acte: Textes<typeof Fr> = {
       'The amount in the guarantor’s statement does not match the cap of the commitment. They must enter it again.',
     colocation:
       'This file is part of a flat share: accept the other flatmates’ files first, so the deed can state how many they are.',
+    garantis:
+      'The guarantor of this file covers several flatmates: name each of the others, one per line, no more and no fewer.',
     dates: 'Check the dates: birth, date of the deed and end of the commitment.',
     caracteres:
       'A text contains a character the PDF cannot reproduce. Correct the entry concerned.',

@@ -249,7 +249,15 @@ test('le colocataire et les garants lisent le bail, rien des autres dossiers', a
     dossier_principal: a,
     email_garant: 'gb@example.invalid',
   })
-  const attendu = [{ colocataires: 2, loyer_total_cents: 120000, etendue: 'part' }]
+  const attendu = [
+    {
+      colocataires: 2,
+      loyer_total_cents: 120000,
+      etendue: 'part',
+      garantis: 1,
+      solvabilite: 'individuelle',
+    },
+  ]
   const lire = async (id: string, partie: string) => {
     await devenirPorteur(db, id, partie)
     const { rows } = await db.query<{ loyer_total_cents: string }>('select * from ma_colocation()')

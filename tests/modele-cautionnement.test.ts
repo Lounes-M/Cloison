@@ -201,6 +201,39 @@ describe('colocation', () => {
     expect((await PDFDocument.load(pdf)).getPageCount()).toBeGreaterThanOrEqual(1)
   })
 
+  test('garant commun : un seul acte nomme chacun et designe celui dont le depart y met fin', () => {
+    const commun = (etendue: 'part' | 'loyer_entier'): DonneesActe => ({
+      ...base(),
+      colocation: { colocataires: 3, etendue, autresGarantis: ['Bob Essai', 'Chloé Essai'] },
+    })
+    const t = texteDe(commun('part'))
+    expect(t).toContain('Colocataire désigné Alex Fictif')
+    expect(t).toContain('Autres colocataires garantis Bob Essai ; Chloé Essai')
+    expect(t).toContain('de Alex Fictif, Bob Essai et Chloé Essai, pour le bail')
+    expect(t).toContain('dont je garantis trois par le présent acte')
+    expect(t).toContain(
+      'le colocataire pour lequel l’extinction de la solidarité met fin à mon engagement est Alex Fictif',
+    )
+    expect(t).toContain('y compris à l’égard des autres colocataires garantis')
+    expect(t).toContain('au titre de leurs parts du loyer et des charges')
+    expect(texteDe(commun('loyer_entier'))).toContain(
+      'dont Alex Fictif, Bob Essai et Chloé Essai sont tenus à ce titre',
+    )
+  })
+
+  test('une caution ne garantit pas plus de colocataires que le bail n en compte', () => {
+    expect(() =>
+      redigerActe({
+        ...base(),
+        colocation: {
+          colocataires: 2,
+          etendue: 'part',
+          autresGarantis: ['Bob Essai', 'Chloé Essai'],
+        },
+      }),
+    ).toThrow()
+  })
+
   test('une colocation d une seule personne est refusee', () => {
     expect(() =>
       redigerActe({ ...base(), colocation: { colocataires: 1, etendue: 'part' } }),

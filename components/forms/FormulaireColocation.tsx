@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useId } from 'react'
+import { useActionState, useId, useState } from 'react'
 
 import { ChoixLangueDestinataire } from '@/components/langue/ChoixLangueDestinataire'
 import { useLangue } from '@/components/langue/LangueContexte'
@@ -17,9 +17,11 @@ const CHAMP =
   'border-ink bg-paper w-full rounded-xl border-2 px-4 py-3 text-[15px] font-medium placeholder:text-muted placeholder:font-normal disabled:opacity-50'
 
 /**
- * L'agence ouvre une colocation (plusieurs adresses, le loyer total et
- * l'etendue de l'engagement), ou ajoute un colocataire a une colocation
- * existante : seules les adresses sont alors demandees.
+ * L'agence ouvre une colocation (plusieurs adresses, le loyer total,
+ * l'etendue de l'engagement et la facon de juger la solvabilite), ou ajoute un
+ * colocataire a une colocation existante : seules les adresses sont alors
+ * demandees. Dans les deux cas, le garant de la premiere adresse peut couvrir
+ * plusieurs colocataires (0094).
  */
 export function FormulaireColocation({
   verifiee,
@@ -41,6 +43,9 @@ export function FormulaireColocation({
   const idCourriels = useId()
   const idLoyer = useId()
   const idAide = useId()
+  const idCommun = useId()
+  const idAideCommun = useId()
+  const [etendue, setEtendue] = useState<'part' | 'loyer_entier'>('part')
 
   return (
     <form action={envoyer} noValidate className="flex flex-col gap-4">
@@ -91,6 +96,29 @@ export function FormulaireColocation({
         </p>
       </div>
 
+      <div>
+        <label htmlFor={idCommun} className="mb-2 block text-[14px] font-bold">
+          {f.garantCommun}
+        </label>
+        <select
+          id={idCommun}
+          name="garantCommun"
+          defaultValue="1"
+          disabled={!verifiee}
+          aria-describedby={idAideCommun}
+          className={CHAMP}
+        >
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            <option key={n} value={n}>
+              {f.garantCommunChoix(n)}
+            </option>
+          ))}
+        </select>
+        <p id={idAideCommun} className="text-muted mt-2 text-[13px] font-medium">
+          {f.garantCommunAide}
+        </p>
+      </div>
+
       <ChoixLangueDestinataire
         name="langueLocataire"
         destinataire="locataire"
@@ -126,12 +154,33 @@ export function FormulaireColocation({
                   type="radio"
                   name="etendue"
                   value={valeur}
-                  defaultChecked={valeur === 'part'}
+                  checked={valeur === etendue}
+                  onChange={() => setEtendue(valeur)}
                   className="mt-1"
                 />
                 <span>{t.etendues[valeur]}</span>
               </label>
             ))}
+          </fieldset>
+
+          <fieldset
+            disabled={!verifiee || etendue !== 'loyer_entier'}
+            className="flex flex-col gap-2"
+          >
+            <legend className="mb-2 text-[14px] font-bold">{f.solvabilite}</legend>
+            {(['individuelle', 'commune'] as const).map((valeur) => (
+              <label key={valeur} className="flex items-start gap-3 text-[14px] font-medium">
+                <input
+                  type="radio"
+                  name="solvabilite"
+                  value={valeur}
+                  defaultChecked={valeur === 'individuelle'}
+                  className="mt-1"
+                />
+                <span>{t.solvabilites[valeur]}</span>
+              </label>
+            ))}
+            <p className="text-muted text-[13px] font-medium">{f.solvabiliteAide}</p>
           </fieldset>
         </>
       )}

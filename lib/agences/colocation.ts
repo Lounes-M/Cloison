@@ -33,19 +33,37 @@ export function lireAdresses(saisie: string, minimum: number): AdressesLues {
 }
 
 /**
- * Le loyer que porte le dossier de chaque colocataire.
+ * Combien de colocataires couvre le garant d'un dossier (0094). Un : chacun
+ * son garant. Plus : un garant commun, un seul dossier et un seul acte.
+ */
+export function lireGarantis(saisie: unknown): number | null {
+  const brut = String(saisie ?? '').trim()
+  if (brut === '') return 1
+  if (!/^[1-8]$/.test(brut)) return null
+  return Number(brut)
+}
+
+/**
+ * Le loyer que porte chaque dossier.
  *
- * Bail solidaire : le loyer entier pour chacun. Sinon, des parts egales dont
- * la somme vaut exactement le total : les centimes qui restent vont aux
- * premiers, un par un.
+ * Bail solidaire : le loyer entier pour chacun. Sinon, des parts egales par
+ * colocataire, dont la somme vaut exactement le total : les centimes qui
+ * restent vont aux premiers, un par un. `garantis` dit combien de
+ * colocataires couvre chaque dossier : celui d'un garant commun porte autant
+ * de parts.
  */
 export function repartirLoyer(
   totalCents: number,
   etendue: 'part' | 'loyer_entier',
-  colocataires: number,
+  garantis: number[],
 ): number[] {
-  if (etendue === 'loyer_entier') return Array.from({ length: colocataires }, () => totalCents)
+  if (etendue === 'loyer_entier') return garantis.map(() => totalCents)
+  const colocataires = garantis.reduce((s, n) => s + n, 0)
   const base = Math.floor(totalCents / colocataires)
-  const reste = totalCents - base * colocataires
-  return Array.from({ length: colocataires }, (_, i) => base + (i < reste ? 1 : 0))
+  let reste = totalCents - base * colocataires
+  return garantis.map((n) => {
+    const centimes = Math.min(reste, n)
+    reste -= centimes
+    return base * n + centimes
+  })
 }
