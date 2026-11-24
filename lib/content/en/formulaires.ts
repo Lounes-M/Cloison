@@ -61,5 +61,5 @@ export const demande = {
     'These details are only used to get back to you about Cloison. They are neither sold nor used for third-party marketing, and they are kept for as long as it takes to handle your request. To access, correct or delete them, simply reply to the email you will receive.',
   merci: 'Noted.',
   suite:
-    'We will get back to you within 48 business hours, with a demo on a real file: not a brochure.',
+    'We will get back to you within 48 business hours, with a demo on a complete file: not a brochure.',
 } as const
