@@ -111,6 +111,8 @@ export const depot: Textes<typeof Fr.depot> = {
     'PDF, JPEG or PNG, 4 MB per file. A well-framed photo is enough. Several pages? Photograph them one by one: they are combined into a single PDF.',
   ajouter: 'Add a file',
   deposer: 'Upload the selected file',
+  depose: 'Document uploaded.',
+  rappelSelection: 'This file is not uploaded yet. Finish with “Upload the selected file”.',
   envoi: 'Sending…',
   retirer: 'Remove',
   retraitEnCours: 'Removing…',
