@@ -9,7 +9,7 @@ import { estPhoto, reunirPhotos } from './reunir-photos'
 import { TAILLE_MAX_DEPOT, tailleLisible } from '@/lib/garant/validation'
 import { cn } from '@/lib/utils'
 import { depot as depotEn, documentsDeclares as documentsDeclaresEn } from '@/lib/content/en/garant'
-import { choisir, locale } from '@/lib/i18n'
+import { choisir } from '@/lib/i18n'
 import { useLangue } from '@/components/langue/LangueContexte'
 
 const ETAT_INITIAL: EtatDepot = { statut: 'inactif' }
@@ -67,7 +67,7 @@ export function FormulaireDepot({
   const depose = etat.statut === 'depose' && etat.nature === nature && masquePour !== etat
 
   const nomme = (fichier: File) =>
-    `${depot.selection} ${fichier.name} (${(fichier.size / 1024 / 1024).toLocaleString(locale(langue), { maximumFractionDigits: 2 })} Mo)`
+    `${depot.selection} ${fichier.name} (${tailleLisible(fichier.size, langue)})`
 
   function placer(entree: HTMLInputElement, fichier: File) {
     try {

@@ -1,0 +1,83 @@
+# Supabase local, pour les parcours complets (scripts/parcours-complets).
+#
+# Rien ici ne decrit la production : le projet heberge se regle dans le tableau
+# de bord. Ce fichier ne sert qu'a `supabase start`, qui monte Postgres, Auth,
+# PostgREST, Storage et une boite aux lettres locale, puis applique
+# supabase/migrations dans l'ordre. Voir docs/parcours-complets.md.
+project_id = "cloison-parcours"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[db.migrations]
+enabled = true
+
+[db.seed]
+enabled = false
+
+[realtime]
+enabled = false
+
+[studio]
+enabled = false
+
+[edge_runtime]
+enabled = false
+
+[analytics]
+enabled = false
+
+# La boite aux lettres locale : le lien de connexion de l'agence y arrive.
+[local_smtp]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+# Le relais HTTPS du harnais : les cookies de session sont `secure` en build
+# de production, et la CSP porte upgrade-insecure-requests.
+site_url = "https://localhost:3443"
+additional_redirect_urls = ["https://localhost:3443/connexion/verifie"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.rate_limit]
+email_sent = 1000
+sign_in_sign_ups = 1000
+token_verifications = 1000
+token_refresh = 1000
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+max_frequency = "1s"
+otp_expiry = 3600
+
+# Le vrai gabarit, celui que la production colle dans le tableau de bord.
+[auth.email.template.magic_link]
+subject = "{{ if eq .Data.langue \"en\" }}Your Cloison sign-in link{{ else }}Votre lien de connexion Cloison{{ end }}"
+content_path = "./supabase/gabarits/lien-de-connexion.html"
+
+[auth.email.template.confirmation]
+subject = "{{ if eq .Data.langue \"en\" }}Your Cloison sign-in link{{ else }}Votre lien de connexion Cloison{{ end }}"
+content_path = "./supabase/gabarits/lien-de-connexion.html"
+
+# L'espace agence exige un second facteur (aal2) : TOTP, comme en production.
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
