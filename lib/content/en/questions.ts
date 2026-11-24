@@ -17,7 +17,7 @@ export const questions = {
       questions: [
         {
           question: 'How much does it cost?',
-          reponse: `${prixLocataire}, once, for a file valid for three months. It is free when your agency invites you, with a link or from its listing. You can withdraw within fourteen days: you are then refunded, minus the share of the three months already elapsed.`,
+          reponse: `${prixLocataire}, once, for a file you open yourself, valid for three months. It is free when your agency invites you, with a link or from its listing. The agency pays ${prixActe} per signed and archived deed. The guarantor pays nothing. You can withdraw within fourteen days: you are then refunded, minus the share of the three months already elapsed.`,
         },
         {
           question: 'Can I see my guarantor’s documents?',
@@ -47,7 +47,7 @@ export const questions = {
       questions: [
         {
           question: 'Do I pay anything?',
-          reponse: 'Never. The guarantor pays nothing, at any stage.',
+          reponse: `Never. The guarantor pays nothing, at any stage. The tenant pays ${prixLocataire} when they open the file themselves, and the agency pays ${prixActe} per signed and archived deed.`,
         },
         {
           question: 'Who sees my documents?',
@@ -82,7 +82,7 @@ export const questions = {
       questions: [
         {
           question: 'How much does it cost?',
-          reponse: `Viewing files is free. ${prixActe} per signed and archived deed.`,
+          reponse: `Viewing files is free. ${prixActe} per signed and archived deed. The tenant pays ${prixLocataire} only if they open the file themselves; the guarantor pays nothing.`,
         },
         {
           question: 'How do my colleagues join the space?',

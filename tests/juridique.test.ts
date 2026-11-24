@@ -57,25 +57,42 @@ test.each([
 test('les mentions affichent l editeur et l hebergeur de l application', () => {
   poser(COMPLET)
   const html = rendre(PageMentionsLegales)
-  for (const attendu of ['LM Services', '994 493 435', 'Le président de LM Services', 'Francfort'])
+  for (const attendu of [
+    'LM Services',
+    '994 493 435',
+    'Le président de LM Services',
+    'Francfort',
+    'Vercel Inc.',
+    'Covina',
+  ])
     expect(html).toContain(attendu)
-  // L'hebergement est decrit sans nommer les prestataires.
-  for (const absent of ['Vercel', 'Supabase']) expect(html).not.toContain(absent)
+  // La base reste un prestataire distinct : son nom n'est pas dans les mentions.
+  expect(html).not.toContain('Supabase')
   expect(html).toContain('href="mailto:contact@cloison.immo"')
 })
 
-test('la politique ne cite OpenRouter et le prestataire de signature que s ils sont actives', () => {
-  poser({ ...COMPLET, OCR_ACTIVE: '', SIGNATURE_PARCOURS_ENABLED: '' })
+test('la politique dit toujours qu OpenRouter n est pas un hebergement europeen', () => {
+  poser({ ...COMPLET, OCR_ACTIVE: '', LECTURE_IA_GARANT: '', SIGNATURE_PARCOURS_ENABLED: '' })
   const coupe = rendre(PageConfidentialite)
-  expect(coupe).not.toContain('OpenRouter')
+  expect(coupe).toContain('OpenRouter, Inc.')
+  expect(coupe).toContain('n’est pas un hébergement en Europe')
+  expect(coupe).toContain('Aucune pièce n’est envoyée')
   expect(coupe).not.toContain('Docage')
   expect(coupe).not.toContain('Youtrust')
 
   poser({ OCR_ACTIVE: 'true', SIGNATURE_PARCOURS_ENABLED: 'true' })
   const actif = rendre(PageConfidentialite)
-  expect(actif).toContain('OpenRouter')
+  expect(actif).toContain('ce n’est pas un hébergement européen')
+  expect(actif).toContain('imposé en Europe')
   expect(actif).toContain('Docage')
   expect(actif).not.toContain('Youtrust')
+
+  poser({
+    OCR_ACTIVE: 'true',
+    OPENROUTER_REGION: 'us',
+    OPENROUTER_EXTRACTION_FOURNISSEUR: 'openai',
+  })
+  expect(rendre(PageConfidentialite)).toContain('n’est pas limité à l’Union européenne')
 
   poser({ SIGNATURE_PARCOURS_ENABLED: 'true', SIGNATURE_PRESTATAIRE: 'youtrust' })
   const secours = rendre(PageConfidentialite)
@@ -83,9 +100,11 @@ test('la politique ne cite OpenRouter et le prestataire de signature que s ils s
   expect(secours).not.toContain('Docage')
 })
 
-test('les conditions annoncent la retractation au prorata et le mediateur configure', () => {
+test('les conditions annoncent la retractation au prorata, le tarif agence et le mediateur', () => {
   poser(COMPLET)
   const html = rendre(PageConditions)
+  expect(html).toContain('Chaque acte signé et archivé coûte')
+  expect(html).toContain('29')
   expect(html).toContain('quatorze jours')
   expect(html).toContain('déduction faite de la part')
   expect(html).toContain('Mediateur Fixture')

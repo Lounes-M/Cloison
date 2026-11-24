@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next'
 
-import { SEGMENTS_APPLICATIFS, politiqueStatique } from './lib/securite/csp'
+import { politiqueStatique, sourcePolitiqueStatique } from './lib/securite/csp'
 
 /**
  * En-tetes de securite appliques a toutes les reponses.
@@ -188,11 +188,11 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
-        // Le site public seulement : l'applicatif recoit sa politique, avec
-        // nonce, du proxy. Deux en-tetes CSP sur la meme reponse
-        // s'appliqueraient tous les deux, et le site public n'a pas de nonce a
-        // offrir ; on exclut donc ici exactement ce que le proxy couvre.
-        source: `/((?!(?:${SEGMENTS_APPLICATIFS.join('|')})(?:/|$)).*)`,
+        // Le site public seulement : l'applicatif et `/demarrer` recoivent leur
+        // politique, avec nonce, du proxy. Deux en-tetes CSP sur la meme
+        // reponse s'appliqueraient tous les deux. Le reste du marketing reste
+        // prerendu, donc avec `'unsafe-inline'` : voir `lib/securite/csp.ts`.
+        source: sourcePolitiqueStatique(),
         headers: [{ key: 'Content-Security-Policy', value: politiqueStatique() }],
       },
     ]

@@ -24,6 +24,12 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
   const retention = retentionSauvegardes()
   const moteur = facultatifs.moteurDocumentaire
   const incomplet = retention === null || (moteur !== null && moteur.hebergeur === null)
+  const lecture = facultatifs.ocr || facultatifs.lectureGarant
+  const openRouter = lecture
+    ? facultatifs.lectureEnEurope
+      ? textes.openRouter.actifEurope
+      : textes.openRouter.actifHorsEurope
+    : textes.openRouter.inactif
 
   return (
     <PageJuridique langue={langue} titre={textes.titre} incomplet={incomplet}>
@@ -42,6 +48,7 @@ export function PageConfidentialite({ langue = 'fr' }: { langue?: Langue }) {
             ...(section.id === 'prestataires'
               ? [
                   ...(moteur ? [textes.facultatifs.moteurDocumentaire(moteur.hebergeur)] : []),
+                  openRouter,
                   ...(facultatifs.signature
                     ? [textes.facultatifs.signature[facultatifs.signature]]
                     : []),

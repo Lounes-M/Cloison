@@ -11,14 +11,14 @@
  * au locataire, au garant et a l'agence.
  */
 
-import { prixLocataire } from './tarifs'
+import { prixActe, prixLocataire } from './tarifs'
 
 export const versionConditions = 'conditions-2026-11-23'
 
 export const juridique = {
   aCompleter: 'À compléter',
   immatriculation: 'En cours d’immatriculation',
-  miseAJour: 'Dernière mise à jour : 23 novembre 2026.',
+  miseAJour: 'Dernière mise à jour : 24 novembre 2026.',
   navigation: 'Informations légales',
   liens: {
     mentions: { label: 'Mentions légales', href: '/mentions-legales' },
@@ -72,9 +72,8 @@ export const mentionsLegales = {
   },
   hebergement: 'Hébergement',
   hebergementTexte: [
-    'Le site et ses fonctions serveur sont hébergés par un prestataire d’infrastructure cloud, dans la région de Francfort (Union européenne).',
-    'La base de données, l’authentification et les pièces chiffrées sont hébergées par un prestataire distinct, dans l’Union européenne.',
-    'Les coordonnées de ces prestataires sont communiquées sur demande à l’adresse de contact ci-dessus.',
+    'Le site et ses fonctions serveur sont hébergés par Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis. L’application s’exécute dans la région de Francfort (Union européenne).',
+    'La base de données, l’authentification et les pièces chiffrées sont hébergées par un prestataire distinct, dans l’Union européenne. Ses coordonnées sont communiquées sur demande à l’adresse de contact ci-dessus.',
   ],
   donnees: 'Données personnelles et cookies',
   donneesTexte:
@@ -174,6 +173,14 @@ export const confidentialite = {
     lectureGarant:
       'À votre demande explicite, une IA accessible par OpenRouter peut lire vos bulletins de paie et votre attestation de pension pour vous proposer un revenu net mensuel. Seuls le mois et le montant net payé sont extraits, sans conservation par le fournisseur. La proposition n’est enregistrée que si vous la reportez et l’enregistrez vous-même. La pièce d’identité n’est jamais envoyée.',
   },
+  openRouter: {
+    inactif:
+      'Aucune pièce n’est envoyée à OpenRouter, Inc., société américaine, tant que la lecture automatique est désactivée. Cet envoi, lorsqu’il existe, n’est pas un hébergement en Europe.',
+    actifEurope:
+      'Lorsqu’une lecture est demandée, une copie de la pièce concernée est envoyée à OpenRouter, Inc., société américaine : ce n’est pas un hébergement européen. Le serveur de lecture est imposé en Europe, sans repli. La pièce d’identité n’est pas envoyée pour la lecture du revenu.',
+    actifHorsEurope:
+      'Lorsqu’une lecture est demandée, une copie de la pièce concernée est envoyée à OpenRouter, Inc., société américaine : ce n’est pas un hébergement européen, et le serveur de lecture n’est pas limité à l’Union européenne. Le transfert est encadré par les clauses contractuelles types. La pièce d’identité n’est pas envoyée pour la lecture du revenu.',
+  },
   droits: {
     titre: 'Vos droits',
     paragraphes: [
@@ -224,7 +231,7 @@ export const conditions = {
       id: 'agence',
       titre: 'L’agence',
       paragraphes: [
-        'Consulter un dossier est gratuit, et les collaborateurs sont illimités. Un collaborateur rejoint l’espace de l’agence avec une adresse de son domaine, après accord d’un administrateur. L’ouverture de dossiers réels suit la vérification du SIREN et de la carte professionnelle de l’agence.',
+        `Consulter un dossier est gratuit. Chaque acte signé et archivé coûte ${prixActe}. Les collaborateurs sont illimités. Un collaborateur rejoint l’espace de l’agence avec une adresse de son domaine, après accord d’un administrateur. L’ouverture de dossiers réels suit la vérification du SIREN et de la carte professionnelle de l’agence.`,
         'L’agence ne consulte que les dossiers qui lui sont transmis, dans le cadre d’une location réelle, et ne diffuse pas les pièces. Le ratio affiché est calculé sur un revenu déclaré : la vérification des pièces lui revient.',
         'Cloison peut suspendre l’accès d’une agence en cas de consultation anormale, de diffusion de pièces ou de déclaration inexacte.',
       ],
