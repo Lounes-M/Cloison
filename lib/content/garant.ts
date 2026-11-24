@@ -135,6 +135,9 @@ export const depot = {
     'PDF, JPEG ou PNG, 4 Mo par fichier. Une photo bien cadrée suffit. Plusieurs pages ? Photographiez-les une à une : elles sont réunies en un seul PDF.',
   ajouter: 'Ajouter un fichier',
   deposer: 'Déposer le fichier sélectionné',
+  depose: 'Pièce déposée.',
+  rappelSelection:
+    'Ce fichier n’est pas encore déposé. Terminez avec « Déposer le fichier sélectionné ».',
   envoi: 'Envoi…',
   retirer: 'Retirer',
   retraitEnCours: 'Retrait…',

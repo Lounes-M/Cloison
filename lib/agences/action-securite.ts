@@ -1,7 +1,7 @@
 'use server'
 import { estUuidCanonique } from '@/lib/validation/uuid'
 import { cookies } from 'next/headers'
-import { estCookieAgence } from '@/lib/acces/cookies-agence'
+import { estCookieAgence, optionsCookieSessionAgence } from '@/lib/acces/cookies-agence'
 import { redirect } from 'next/navigation'
 import { clientAgence, utilisateurCourant } from '@/lib/acces/agence'
 import { securite as securiteFr } from '@/lib/content/securite'
@@ -57,7 +57,7 @@ export async function seDeconnecter() {
   // Les autres projets et la capacite locataire/garant ne sont pas concernes.
   const magasin = await cookies()
   for (const { name } of magasin.getAll()) {
-    if (estCookieAgence(name)) magasin.set(name, '', { path: '/', maxAge: 0, sameSite: 'lax' })
+    if (estCookieAgence(name)) magasin.set(name, '', { ...optionsCookieSessionAgence(), maxAge: 0 })
   }
   redirect('/connexion')
 }

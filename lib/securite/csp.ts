@@ -10,11 +10,11 @@
  *
  * Deux politiques, parce que le site a deux natures.
  *
- * 1. Le site public est entierement statique, prerendu au build. Il n'y a
- *    donc pas de nonce par requete a y glisser, et les scripts en ligne que
- *    Next y pose pour hydrater la page doivent passer par `'unsafe-inline'`.
- *    C'est une protection partielle, et elle est honnete : ce site n'affiche
- *    rien qu'un tiers ait saisi.
+ * 1. Le site public est prerendu au build, sauf `/demarrer` et `/en/demarrer`,
+ *    qui portent un nonce. Les autres pages n'ont pas de nonce par requete,
+ *    et les scripts en ligne que Next y pose pour hydrater doivent passer
+ *    par `'unsafe-inline'`. C'est une protection partielle, et elle est
+ *    honnete : ces pages n'affichent rien qu'un tiers ait saisi.
  *
  * 2. L'applicatif, agence et porteurs de lien, est rendu a chaque requete. Le
  *    proxy y tire un nonce, et seuls les scripts qui le portent, ou que
@@ -45,6 +45,38 @@ export const SEGMENTS_APPLICATIFS = [
   'lien-invalide',
   'remise-donnees',
 ] as const
+
+/**
+ * Pages publiques rendues a chaque requete pour porter un nonce.
+ *
+ * Seulement le formulaire d'ouverture. Le reste du site (`/`, `/agences`,
+ * le marketing) est prerendu au build : un nonce par visite le rendrait
+ * dynamique, et le cout n'est pas celui d'un formulaire. Ces pages gardent
+ * donc `'unsafe-inline'`.
+ *
+ * `/en/demarrer` est la meme page. Le segment `en` ne peut pas etre exclu en
+ * bloc : le reste de l'anglais resterait sans politique.
+ */
+export const PAGES_NONCE_PUBLIQUES = ['/demarrer', '/en/demarrer'] as const
+
+/** Chemins exclus de la politique statique : l'applicatif, plus l'ouverture. */
+export function segmentsSansPolitiqueStatique(): readonly string[] {
+  return [...SEGMENTS_APPLICATIFS, 'demarrer', 'en/demarrer']
+}
+
+/**
+ * Source Next des en-tetes de la politique statique.
+ *
+ * Tout ce qui n'est pas liste ici recoit `'unsafe-inline'`. Le proxy couvre
+ * exactement le complement, avec un nonce.
+ */
+export function sourcePolitiqueStatique(): string {
+  return `/((?!(?:${segmentsSansPolitiqueStatique().join('|')})(?:/|$)).*)`
+}
+
+export function estPageNoncePublique(chemin: string): boolean {
+  return PAGES_NONCE_PUBLIQUES.some((page) => chemin === page || chemin.startsWith(`${page}/`))
+}
 
 /**
  * Ce que les deux politiques ont en commun.

@@ -37,6 +37,8 @@ export function FormulaireDepot({
   const ajout = useRef<HTMLInputElement>(null)
   const [selection, selectionner] = useState<string | null>(null)
   const [erreurLocale, signaler] = useState<string | null>(null)
+  // Un nouveau choix masque la confirmation du fichier precedent.
+  const [masquePour, masquer] = useState<EtatDepot | null>(null)
   // Sans JavaScript, le champ natif reste visible et le formulaire part tel
   // quel. Avec, le bouton « Ajouter » ouvre le choix, et le nombre comme l'envoi
   // n'apparaissent qu'une fois un fichier choisi : une page de cinq pieces ne
@@ -62,6 +64,7 @@ export function FormulaireDepot({
   }
 
   const erreur = etat.statut === 'erreur' && etat.nature === nature ? etat.message : null
+  const depose = etat.statut === 'depose' && etat.nature === nature && masquePour !== etat
 
   const nomme = (fichier: File) =>
     `${depot.selection} ${fichier.name} (${(fichier.size / 1024 / 1024).toLocaleString(locale(langue), { maximumFractionDigits: 2 })} Mo)`
@@ -135,6 +138,7 @@ export function FormulaireDepot({
   }
 
   async function auChoix() {
+    masquer(etat)
     const entree = champ.current
     if (!entree) return
     const fichiers = [...(entree.files ?? [])]
@@ -157,6 +161,7 @@ export function FormulaireDepot({
   }
 
   async function auAjout() {
+    masquer(etat)
     const nouvelles = [...(ajout.current?.files ?? [])]
     if (ajout.current) ajout.current.value = ''
     if (nouvelles.length === 0) return
@@ -223,7 +228,11 @@ export function FormulaireDepot({
           verifier(evenement.currentTarget)
           evenement.currentTarget.focus()
         }}
-        aria-describedby={`${idChamp}-aide ${idChamp}-selection`}
+        aria-describedby={
+          selection && !depose
+            ? `${idChamp}-aide ${idChamp}-selection ${idChamp}-rappel`
+            : `${idChamp}-aide ${idChamp}-selection`
+        }
         aria-invalid={erreurLocale ? true : undefined}
         // Lister JPEG ici fait que iOS convertit lui-meme ses HEIC en JPEG au
         // moment du choix. Sans cette liste, le serveur le refuserait en le
@@ -329,6 +338,16 @@ export function FormulaireDepot({
         </button>
       ) : null}
 
+      {depose ? (
+        <p role="status" className="message-succes">
+          {depot.depose}
+        </p>
+      ) : null}
+      {selection && !depose && !preparation ? (
+        <p id={`${idChamp}-rappel`} role="status" className="message-info">
+          {depot.rappelSelection}
+        </p>
+      ) : null}
       {choisi ? (
         <button
           type="submit"
