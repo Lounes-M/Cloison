@@ -185,6 +185,8 @@ const api = createServer(async (req, res) => {
   else if (path.endsWith('/rpc/regler_ma_langue') || path.endsWith('/rpc/regler_langue_dossier'))
     valeur = true
   else if (path.endsWith('/rpc/ma_langue') || path.endsWith('/rpc/langue_dossier')) valeur = null
+  // Connecteur Apimo ouvert sur le serveur, agence sans identifiants : rien ne part chez Apimo.
+  else if (path.endsWith('/rpc/acces_apimo')) valeur = null
   else if (path.endsWith('/dossiers'))
     valeur = [
       {
@@ -432,6 +434,9 @@ const api = createServer(async (req, res) => {
       '/rest/v1/rpc/dossiers_relances_epuisees',
       '/rest/v1/rpc/journal_de_mon_agence',
       '/rest/v1/rpc/mon_tarif_paiement',
+      // Agence sans connexion Apimo ni dossier relie : les deux lectures rendent vide.
+      '/rest/v1/connexions_apimo',
+      '/rest/v1/liens_apimo',
     ].includes(path)
   ) {
     res.writeHead(404).end('{}')
@@ -495,6 +500,7 @@ const next = spawn(
       SUPABASE_JWT_SECRET: 'fixture',
       CLE_MAITRESSE: cleFictive.toString('base64'),
       OCR_ACTIVE: 'true',
+      CONNECTEUR_APIMO: 'true',
       SIGNATURE_PARCOURS_ENABLED: 'true',
       // Reglement ouvert sans cle Stripe : la reservation aboutit au refus prudent.
       FACTURATION_ACTES_ENABLED: 'true',
