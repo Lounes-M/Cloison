@@ -165,7 +165,7 @@ export default async function PagePilotage() {
                   <Link
                     href={`/espace?statut=${e}` as Route}
                     aria-label={t.etapes.voir(libelle)}
-                    className="font-semibold underline-offset-4 hover:underline"
+                    className="inline-flex min-h-[44px] items-center font-semibold underline-offset-4 hover:underline"
                   >
                     {libelle}
                   </Link>
@@ -268,7 +268,7 @@ export default async function PagePilotage() {
                       <th scope="row" className="py-2.5 pr-4 font-mono text-[13px] font-semibold">
                         <Link
                           href={`/espace/dossiers/${d.id}`}
-                          className="underline underline-offset-4"
+                          className="inline-flex min-h-[44px] items-center underline underline-offset-4"
                         >
                           {d.reference}
                         </Link>
@@ -342,7 +342,10 @@ export default async function PagePilotage() {
         )}
         {synthese && synthese.blocages.relances_epuisees > 0 ? (
           <p className="mt-4 text-sm font-semibold">
-            <Link href="/espace?relances_epuisees=1" className="underline underline-offset-4">
+            <Link
+              href="/espace?relances_epuisees=1"
+              className="inline-flex min-h-[44px] items-center underline underline-offset-4"
+            >
               {t.relances.epuisees(synthese.blocages.relances_epuisees)}
             </Link>
           </p>
