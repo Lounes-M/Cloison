@@ -46,7 +46,6 @@ export const identiteEditeur = {
   adresse: '231 rue Saint-Honoré, 75001 Paris',
   courriel: 'contact@cloison.immo',
   directeurPublication: 'Le président de LM Services',
-  sauvegardeJours: 7,
 } as const
 
 /** La mention fiscale du prix, selon que l'editeur facture la TVA ou non. */
@@ -168,6 +167,9 @@ export const confidentialite = {
         'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France, qui reçoit aussi le numéro de téléphone du garant, nécessaire à la signature. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
     },
     ocr: 'À la demande explicite d’une agence, une pièce autre que la pièce d’identité peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
+    // Le moteur documentaire distant : nomme si l'hebergeur est declare.
+    moteurDocumentaire: (hebergeur: string | null) =>
+      `À leur dépôt, puis à chaque consultation, les pièces sont vérifiées et converties en images sur un serveur dédié à ce seul traitement, ${hebergeur ? `hébergé par ${hebergeur}` : 'chez un hébergeur distinct de ceux cités plus haut'}. Elles y passent en clair le temps du traitement et n’y sont pas conservées.`,
     lectureGarant:
       'À votre demande explicite, une IA accessible par OpenRouter peut lire vos bulletins de paie et votre attestation de pension pour vous proposer un revenu net mensuel. Seuls le mois et le montant net payé sont extraits, sans conservation par le fournisseur. La proposition n’est enregistrée que si vous la reportez et l’enregistrez vous-même. La pièce d’identité n’est jamais envoyée.',
     comparaisonAgence:

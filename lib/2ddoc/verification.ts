@@ -1,7 +1,8 @@
 import { verify } from 'node:crypto'
 
 import { analyserCode, lireValeursAvis, TYPES_AVIS } from './format.ts'
-import { emetteurDeConfiance, type Telechargement } from './confiance.ts'
+import { emetteursDeConfiance, telecharger, type Telechargement } from './confiance.ts'
+import { consulterRevocation } from './revocation.ts'
 import type { Autorite } from './autorites.ts'
 import type { Verification2dDoc } from './resultat.ts'
 
@@ -9,7 +10,8 @@ import type { Verification2dDoc } from './resultat.ts'
  * Ce que l'agence apprend du code 2D-Doc d'un avis d'imposition.
  *
  * Deux reponses seulement. « authentique » : le code a ete signe par un
- * emetteur reconnu par l'ANTS, et voici les valeurs qu'il a signees.
+ * emetteur reconnu par l'ANTS dont le certificat n'est pas revoque, et voici
+ * les valeurs qu'il a signees.
  * « non verifiable » : nous n'avons pas pu l'etablir. Il n'existe pas de
  * troisieme reponse : une photo floue, un avis ancien, un certificat
  * injoignable et un code altere se ressemblent trop pour qu'un programme
@@ -38,6 +40,8 @@ export async function verifierCode2dDoc(
     telecharger?: Telechargement
     autorites?: Readonly<Record<string, Autorite>>
     maintenant?: Date
+    /** Detail des etapes, pour la recette en ligne de commande uniquement. */
+    journal?: (ligne: string) => void
   } = {},
 ): Promise<Verification2dDoc> {
   if (!octets.length) return { etat: 'non_verifiable', motif: 'aucun_code' }
@@ -46,29 +50,31 @@ export async function verifierCode2dDoc(
   // Un document date de demain n'a pas pu etre signe.
   if (code.date.getTime() > (options.maintenant ?? new Date()).getTime() + 86_400_000)
     return NON_ETABLI
-  const emetteur = await emetteurDeConfiance(
-    code.autorite,
-    code.certificat,
-    code.date,
-    options.telecharger,
-    options.autorites,
-  )
+  const emetteurs = await emetteursDeConfiance(code.autorite, code.certificat, code.date, options)
+  const emetteur = emetteurs.find(({ certificat }) => {
+    const cle = certificat.publicKey
+    const courbe = COURBES[cle.asymmetricKeyDetails?.namedCurve ?? '']
+    if (!courbe || code.signature.length !== 2 * courbe.taille) return false
+    try {
+      return verify(
+        courbe.condensat,
+        code.signe,
+        { key: cle, dsaEncoding: 'ieee-p1363' },
+        code.signature,
+      )
+    } catch {
+      return false
+    }
+  })
   if (!emetteur) return NON_ETABLI
-  const cle = emetteur.certificat.publicKey
-  const courbe = COURBES[cle.asymmetricKeyDetails?.namedCurve ?? '']
-  if (!courbe || code.signature.length !== 2 * courbe.taille) return NON_ETABLI
-  let valide = false
-  try {
-    valide = verify(
-      courbe.condensat,
-      code.signe,
-      { key: cle, dsaEncoding: 'ieee-p1363' },
-      code.signature,
-    )
-  } catch {
-    valide = false
-  }
-  if (!valide) return NON_ETABLI
+  // Une signature juste ne vaut que si le certificat n'a pas ete revoque, et
+  // cela doit avoir ete lu : une liste injoignable n'etablit rien.
+  const revocation = await consulterRevocation(emetteur.certificat, emetteur.autorite, {
+    telecharger: options.telecharger ?? telecharger,
+    maintenant: options.maintenant,
+    journal: options.journal,
+  })
+  if (revocation !== 'non_revoque') return NON_ETABLI
   return {
     etat: 'authentique',
     emetteur: emetteur.organisation,

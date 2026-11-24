@@ -1,6 +1,7 @@
 import { beforeEach, expect, test, vi } from 'vitest'
 
-import { oublierCertificats } from '@/lib/2ddoc/confiance'
+import { certificatsDans, emetteursDeConfiance, oublierCertificats } from '@/lib/2ddoc/confiance'
+import { oublierListes, pointsDeDistribution } from '@/lib/2ddoc/revocation'
 import { verifierCode2dDoc } from '@/lib/2ddoc/verification'
 import { verification2dDoc } from '@/lib/2ddoc/resultat'
 import { AUTORITES, type Autorite } from '@/lib/2ddoc/autorites'
@@ -16,19 +17,24 @@ const autorites: Record<string, Autorite> = Object.fromEntries(
     {
       nom: 'Autorite fictive',
       adresse: `http://${code.toLowerCase()}.invalid/pki-2ddoc.der`,
-      parNom: true,
+      recherches: [`http://${code.toLowerCase()}.invalid/pki-2ddoc.der?name={id}`],
       empreinte: '',
       certificat,
     },
   ]),
 )
 const certificats: Record<string, string> = fixture.certificats
-const telecharger = vi.fn(async (adresse: string) => {
-  const identifiant = new URL(adresse).searchParams.get('name') ?? ''
-  return Object.hasOwn(certificats, identifiant)
-    ? Buffer.from(certificats[identifiant]!, 'base64')
-    : null
-})
+const LISTE = 'http://crl.zz01.invalid/zz01.crl'
+const liste = (nom: keyof typeof fixture.listes) => Buffer.from(fixture.listes[nom], 'base64')
+const certificat = (nom: string) => Buffer.from(certificats[nom]!, 'base64')
+/** L'autorite fictive : un certificat par identifiant, et sa liste de revocation. */
+const publier = (revocation: Buffer | null = liste('valide')) =>
+  async function (adresse: string) {
+    if (adresse === LISTE) return revocation
+    const identifiant = new URL(adresse).searchParams.get('name') ?? ''
+    return Object.hasOwn(certificats, identifiant) ? certificat(identifiant) : null
+  }
+const telecharger = vi.fn(publier())
 const maintenant = new Date('2025-08-15T12:00:00Z')
 const verifier = (code: Buffer, options = {}) =>
   verifierCode2dDoc(code, { telecharger, autorites, maintenant, ...options })
@@ -37,6 +43,7 @@ const NON_ETABLI = { etat: 'non_verifiable', motif: 'non_etabli' }
 
 beforeEach(() => {
   oublierCertificats()
+  oublierListes()
   telecharger.mockClear()
 })
 
@@ -55,7 +62,10 @@ test('un avis signe par un emetteur de l autorite est authentique, valeurs a l a
     },
   })
   expect(verification2dDoc.parse(resultat)).toEqual(resultat)
-  expect(telecharger).toHaveBeenCalledExactlyOnceWith('http://zz01.invalid/pki-2ddoc.der?name=AV01')
+  expect(telecharger.mock.calls.map(([adresse]) => adresse)).toEqual([
+    'http://zz01.invalid/pki-2ddoc.der?name=AV01',
+    LISTE,
+  ])
 })
 
 test('une courbe P-384 est verifiee avec SHA-384', async () => {
@@ -115,10 +125,10 @@ test.each([
 })
 
 test('une cle RSA d emetteur, une reponse illisible ou une panne ne valident rien', async () => {
-  const pourAv01 = (octets: Buffer | null) => ({ telecharger: async () => octets })
-  expect(
-    await verifier(code('avis'), pourAv01(Buffer.from(fixture.certificats.AV05, 'base64'))),
-  ).toEqual(NON_ETABLI)
+  const pourAv01 = (octets: Buffer | null) => ({
+    telecharger: async (adresse: string) => (adresse === LISTE ? liste('valide') : octets),
+  })
+  expect(await verifier(code('avis'), pourAv01(certificat('AV05')))).toEqual(NON_ETABLI)
   oublierCertificats()
   expect(await verifier(code('avis'), pourAv01(Buffer.from('<html>erreur</html>')))).toEqual(
     NON_ETABLI,
@@ -127,8 +137,8 @@ test('une cle RSA d emetteur, une reponse illisible ou une panne ne valident rie
   expect(await verifier(code('avis'), pourAv01(null))).toEqual(NON_ETABLI)
 })
 
-test('une autorite sans publication par identifiant n est jamais interrogee', async () => {
-  const sansNom = { ZZ01: { ...autorites.ZZ01!, parNom: false } }
+test('une autorite sans adresse de recherche n est jamais interrogee', async () => {
+  const sansNom = { ZZ01: { ...autorites.ZZ01!, recherches: [] } }
   expect(await verifier(code('avis'), { autorites: sansNom })).toEqual(NON_ETABLI)
   expect(telecharger).not.toHaveBeenCalled()
 })
@@ -138,7 +148,8 @@ test('le certificat est garde en memoire, un echec seulement dix minutes', async
   try {
     await verifier(code('avis'))
     await verifier(code('avis'))
-    expect(telecharger).toHaveBeenCalledTimes(1)
+    // Une fois le certificat, une fois la liste de revocation.
+    expect(telecharger).toHaveBeenCalledTimes(2)
     oublierCertificats()
     const panne = vi.fn(async () => null)
     await verifier(code('avis'), { telecharger: panne })
@@ -159,6 +170,161 @@ test('les autorites epinglees sont celles de la liste, empreintes comprises', as
     expect(certificat.fingerprint256.replaceAll(':', '').toLowerCase()).toBe(autorite.empreinte)
     expect(certificat.subject).toContain(`CN=${code}`)
     expect(certificat.ca).toBe(true)
-    expect(autorite.parNom).toBe(autorite.adresse.endsWith('/pki-2ddoc.der'))
+    // Chaque autorite se cherche chez elle, et d'abord par identifiant.
+    expect(autorite.recherches[0]).toContain('{id}')
+    for (const recherche of autorite.recherches)
+      expect(new URL(recherche).host).toBe(new URL(autorite.adresse).host)
   }
+})
+
+/** Un annuaire a la maniere de Certigna : un message en plusieurs parties, un certificat par partie. */
+const annuaire = (...noms: string[]) =>
+  Buffer.concat(
+    noms.flatMap((nom) => [
+      Buffer.from('--End\r\nContent-Type: application/pkix-cert\r\n\r\n', 'latin1'),
+      certificat(nom),
+      Buffer.from('\r\n', 'latin1'),
+    ]),
+  )
+const ANNUAIRE = 'http://zz01.invalid/annuaire'
+const avecAnnuaire = {
+  ZZ01: {
+    ...autorites.ZZ01!,
+    recherches: ['http://zz01.invalid/recherche?name={id}', ANNUAIRE],
+  },
+}
+
+test('sans reponse par identifiant, le certificat est retrouve par son nom dans l annuaire', async () => {
+  const servir = vi.fn(async (adresse: string) =>
+    adresse === ANNUAIRE
+      ? annuaire('AV04', 'AV02', 'AV01', 'AV06')
+      : adresse === LISTE
+        ? liste('valide')
+        : null,
+  )
+  const options = { autorites: avecAnnuaire, telecharger: servir }
+  expect(await verifier(code('avis'), options)).toMatchObject({
+    etat: 'authentique',
+    emetteur: 'Emetteur fictif des impots',
+  })
+  expect(servir.mock.calls.map(([adresse]) => adresse)).toEqual([
+    'http://zz01.invalid/recherche?name=AV01',
+    ANNUAIRE,
+    LISTE,
+  ])
+  // Le certificat revoque de l'annuaire reste revoque.
+  expect(await verifier(code('revoque'), options)).toEqual(NON_ETABLI)
+})
+
+test('un annuaire qui ne contient pas l emetteur nomme ne valide rien', async () => {
+  // AV04 a signe `avisP384` ; presente sous un autre nom, il n'est pas retenu.
+  const sousUnAutreNom = Buffer.from(code('avisP384'))
+  sousUnAutreNom.write('AV01', 8, 'latin1')
+  for (const contenu of [annuaire('AV04', 'AV02'), annuaire('AV04'), Buffer.from('--End\r\n')]) {
+    oublierCertificats()
+    const servir = async (adresse: string) =>
+      adresse === ANNUAIRE ? contenu : adresse === LISTE ? liste('valide') : null
+    const options = { autorites: avecAnnuaire, telecharger: servir }
+    expect(await verifier(code('avis'), options)).toEqual(NON_ETABLI)
+    expect(await verifier(sousUnAutreNom, options)).toEqual(NON_ETABLI)
+  }
+})
+
+test('dans un annuaire, seul le certificat qui porte l identifiant est retenu', async () => {
+  const jour = new Date('2025-07-31')
+  const chercher = (identifiant: string, ...noms: string[]) =>
+    emetteursDeConfiance('ZZ01', identifiant, jour, {
+      autorites: avecAnnuaire,
+      telecharger: async (adresse) => (adresse === ANNUAIRE ? annuaire(...noms) : null),
+    })
+  const trouves = await chercher('AV01', 'AV04', 'AV01', 'AV06')
+  expect(trouves.map((e) => e.organisation)).toEqual(['Emetteur fictif des impots'])
+  oublierCertificats()
+  // Un seul certificat dans l'annuaire, valide mais d'un autre emetteur.
+  expect(await chercher('AV01', 'AV04')).toEqual([])
+  // AV03 porte le bon nom mais vient d'une autre autorite.
+  expect(await chercher('AV03', 'AV03', 'AV01')).toEqual([])
+})
+
+test('une reponse par identifiant a plusieurs certificats est triee par nom, PEM compris', async () => {
+  const { X509Certificate } = await import('node:crypto')
+  const pem = ['AV04', 'AV01']
+    .map((nom) => new X509Certificate(certificat(nom)).toString())
+    .join('\n')
+  expect(certificatsDans(Buffer.from(pem))).toHaveLength(2)
+  const servir = async (adresse: string) => (adresse === LISTE ? liste('valide') : Buffer.from(pem))
+  expect((await verifier(code('avis'), { telecharger: servir })).etat).toBe('authentique')
+})
+
+test('le certificat de l autorite elle-meme n est jamais pris pour celui d un emetteur', async () => {
+  const servir = async (adresse: string) =>
+    adresse === LISTE ? liste('valide') : Buffer.from(fixture.autorites.ZZ01)
+  expect(await verifier(code('avis'), { telecharger: servir })).toEqual(NON_ETABLI)
+})
+
+test('un certificat revoque n est plus authentique, meme pour un document anterieur', async () => {
+  expect(await verifier(code('revoque'))).toEqual(NON_ETABLI)
+  // Le meme certificat sans consultation de la liste aurait suffi : la signature est juste.
+  expect(telecharger).toHaveBeenCalledWith(LISTE, expect.any(Number))
+})
+
+test.each([
+  ['injoignable', null],
+  ['illisible', Buffer.from('<html>erreur</html>')],
+  ['perimee', liste('perimee')],
+  ['signee par une autorite homonyme', liste('homonyme')],
+  ['limitee aux certificats d autorites', liste('autorites')],
+  ['tronquee', liste('valide').subarray(0, 200)],
+])('une liste de revocation %s n etablit rien', async (_nom, contenu) => {
+  expect(await verifier(code('avis'), { telecharger: publier(contenu) })).toEqual(NON_ETABLI)
+})
+
+test('une liste dont un octet a change n est pas retenue', async () => {
+  const modifiee = Buffer.from(liste('valide'))
+  // Le numero du certificat revoque, dans le corps signe.
+  const position = modifiee.indexOf(Buffer.from('02021008', 'hex'))
+  expect(position).toBeGreaterThan(0)
+  modifiee[position + 3] = 0x09
+  expect(await verifier(code('revoque'), { telecharger: publier(modifiee) })).toEqual(NON_ETABLI)
+  expect(await verifier(code('avis'), { telecharger: publier(modifiee) })).toEqual(NON_ETABLI)
+})
+
+test('sans liste nommee par le certificat, ou une fois le certificat echu, rien n est etabli', async () => {
+  expect(await verifier(code('sansListe'))).toEqual(NON_ETABLI)
+  // En 2028, le certificat de 2024-2026 est sorti des listes.
+  expect(await verifier(code('avis'), { maintenant: new Date('2028-01-01') })).toEqual(NON_ETABLI)
+})
+
+test('la liste de revocation est relue au bout d une heure, un echec au bout de dix minutes', async () => {
+  vi.useFakeTimers({ now: maintenant })
+  try {
+    const servir = vi.fn(publier())
+    await verifier(code('avis'), { telecharger: servir })
+    await verifier(code('avisChampInconnu'), { telecharger: servir })
+    expect(servir.mock.calls.filter(([adresse]) => adresse === LISTE)).toHaveLength(1)
+    vi.advanceTimersByTime(3_600_000 + 1)
+    const panne = vi.fn(publier(null))
+    expect(await verifier(code('avis'), { telecharger: panne })).toEqual(NON_ETABLI)
+    expect(await verifier(code('avis'), { telecharger: servir })).toEqual(NON_ETABLI)
+    vi.advanceTimersByTime(10 * 60_000 + 1)
+    expect((await verifier(code('avis'), { telecharger: servir })).etat).toBe('authentique')
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+test('les points de distribution se lisent sur de vrais certificats', async () => {
+  const { X509Certificate } = await import('node:crypto')
+  const points = (code: string) =>
+    pointsDeDistribution(new X509Certificate(AUTORITES[code]!.certificat))
+  expect(points('FR01')).toEqual([])
+  expect(points('FR03')).toEqual([
+    'http://crl.certigna.fr/certignarootca.crl',
+    'http://crl.dhimyotis.com/certignarootca.crl',
+  ])
+  expect(points('FR06')).toEqual(['http://pki-g3.ariadnext.fr/arl-g3-root.crl'])
+  expect(points('FR07')).toEqual([
+    'http://pki2.sunnystamp.com/crls/sunnystamp-root-ca-g2.crl',
+    'http://pki3.sunnystamp.com/crls/sunnystamp-root-ca-g2.crl',
+  ])
 })

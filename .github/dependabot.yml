@@ -15,17 +15,17 @@ updates:
       prefix: deps
       prefix-development: deps-dev
     ignore:
-      # Majeures mises en pause : `eslint-config-next` ne les supporte pas
-      # encore, et il n'existe aucune version de repli intermediaire.
+      # Majeure mise en pause : typescript-eslint refuse explicitement TS 7.0
+      # (la prise en charge vise TS 7.1, encore en beta), et le paquet
+      # `typescript` 7.0 n'expose plus l'API du compilateur dont se sert
+      # tests/journaux-confidentialite.test.ts. Dernier essai le 24 novembre
+      # 2026 avec typescript 7.0.2 et typescript-eslint 8.74.0.
       #
-      #   eslint 10    -> eslint-plugin-react appelle context.getFilename(),
-      #                   supprimee dans ESLint 10
-      #   typescript 7 -> typescript-eslint refuse explicitement TS 7.0
+      # A lever des que typescript-eslint accepte une version stable de TS 7.
+      # Sans cette pause, Dependabot rouvre la meme PR chaque lundi.
       #
-      # A lever des que `eslint-config-next` les prend en charge. Sans cette
-      # pause, Dependabot rouvre les memes PR chaque lundi.
-      - dependency-name: eslint
-        update-types: [version-update:semver-major]
+      # ESLint 10 n'est plus en pause : eslint-config-next 16.4.6 le prend en
+      # charge et adapte lui-meme eslint-plugin-react et eslint-plugin-import.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
 
