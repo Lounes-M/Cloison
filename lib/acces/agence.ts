@@ -3,6 +3,7 @@ import 'server-only'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+import { optionsCookieSessionAgence } from '@/lib/acces/cookies-agence'
 import { env } from '@/lib/env'
 import { fetchAgence } from '@/lib/http/fetch-agence'
 
@@ -42,6 +43,7 @@ export async function clientAgence() {
   const magasin = await cookies()
 
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
+    cookieOptions: optionsCookieSessionAgence(),
     global: { fetch: fetchAgence },
     cookies: {
       getAll: () => magasin.getAll(),

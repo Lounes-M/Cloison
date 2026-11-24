@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { deplier } from './doublures/deplier'
 import { isValidElement, type ReactNode } from 'react'
+import { FormulaireCandidature } from '@/components/forms/FormulaireCandidature'
+import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
 import { FormulaireGarant } from '@/components/forms/FormulaireGarant'
 import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
@@ -856,4 +858,46 @@ test('le garant voit la date d expiration du dossier, a l heure de Paris', async
     capacite: { partie: 'locataire', dossierId: ID },
   })
   expect(texteVisible(await locataire())).toContain('Ce dossier expire le 1 décembre 2026.')
+})
+
+function dansDetails(noeud: ReactNode, type: unknown, ouvert = false): boolean | null {
+  if (Array.isArray(noeud)) {
+    for (const enfant of noeud) {
+      const trouve = dansDetails(enfant, type, ouvert)
+      if (trouve !== null) return trouve
+    }
+    return null
+  }
+  if (!isValidElement<{ children?: ReactNode }>(noeud)) return null
+  const ici = ouvert || noeud.type === 'details'
+  if (noeud.type === type) return ici
+  return dansDetails(noeud.props.children, type, ici)
+}
+
+test('un dossier regle en depot replie le rattachement et fige le loyer', async () => {
+  doublures.capacite.mockResolvedValue({
+    jeton: 'fictif',
+    capacite: { partie: 'locataire', dossierId: ID },
+  })
+  const ouvert = await locataire()
+  expect(dansDetails(ouvert, FormulaireCandidature)).toBe(false)
+  expect(texteVisible(ouvert)).toContain('Charges comprises, par mois.')
+
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'depot_en_cours',
+      paye_le: '2026-11-24T10:00:00Z',
+      loyer_cents: 85000,
+      loyer_verrouille: true,
+    },
+    error: null,
+  }
+  const enDepot = await locataire()
+  expect(dansDetails(enDepot, FormulaireCandidature)).toBe(true)
+  expect(dansDetails(enDepot, FormulaireContinuite)).toBe(true)
+  expect(texteVisible(enDepot)).toContain('Rattacher ce dossier à une agence')
+  expect(texteVisible(enDepot)).toMatch(/850\s+€/)
+  expect(texteVisible(enDepot)).toContain('Ce montant est figé.')
+  expect(texteVisible(enDepot)).not.toContain('Charges comprises, par mois.')
 })

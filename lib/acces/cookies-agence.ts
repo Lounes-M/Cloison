@@ -1,6 +1,22 @@
 import 'server-only'
 import { env } from '@/lib/env'
 
+/**
+ * Options du cookie de session agence, et du verificateur PKCE qui l accompagne.
+ *
+ * HttpOnly : aucun script de la page ne lit ce cookie. Le parcours est entierement
+ * serveur (lien magique, echange du code, TOTP). `secure` seulement en production,
+ * sinon le cookie ne partirait pas depuis `http://localhost`.
+ */
+export function optionsCookieSessionAgence() {
+  return {
+    path: '/',
+    sameSite: 'lax' as const,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+  }
+}
+
 /** Meme nom par defaut que supabase-js ; ne constitue pas une preuve d identite. */
 export function nomCookieSessionAgence(): string {
   return `sb-${new URL(env.supabaseUrl).hostname.split('.')[0]}-auth-token`
