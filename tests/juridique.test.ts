@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import PageConditions from '@/app/(marketing)/conditions/page'
 import PageConfidentialite from '@/app/(marketing)/confidentialite/page'
 import PageMentionsLegales from '@/app/(marketing)/mentions-legales/page'
+import { PageConfidentialite as PageConfidentialiteEn } from '@/components/pages/PageConfidentialite'
 import { editeur, retentionSauvegardes } from '@/lib/juridique/editeur'
 
 const COMPLET = {
@@ -91,9 +92,13 @@ test('les conditions annoncent la retractation au prorata et le mediateur config
   expect(html).toContain('href="https://mediateur.example.fr/"')
 })
 
-test('la politique dit la duree des sauvegardes, ou reste incomplete', () => {
+test('la politique dit la duree des sauvegardes, ou se tait et reste incomplete', () => {
   poser({ ...COMPLET, SAUVEGARDE_RETENTION_JOURS: '' })
-  expect(rendre(PageConfidentialite)).toContain('data-editeur-incomplet')
+  const muette = rendre(PageConfidentialite)
+  expect(muette).toContain('data-editeur-incomplet')
+  // Aucune duree par defaut : rien n'est affirme sans valeur declaree.
+  expect(muette).not.toContain('sauvegardes techniques')
+  expect(rendre(() => PageConfidentialiteEn({ langue: 'en' }))).not.toContain('Technical backups')
   for (const invalide of ['0', '400', '7j']) {
     poser({ SAUVEGARDE_RETENTION_JOURS: invalide })
     expect(retentionSauvegardes()).toBeNull()
@@ -103,6 +108,26 @@ test('la politique dit la duree des sauvegardes, ou reste incomplete', () => {
   const html = rendre(PageConfidentialite)
   expect(html).not.toContain('data-editeur-incomplet')
   expect(html).toContain('conservées 7 jours au plus')
+})
+
+test('la politique cite l hebergeur du moteur documentaire seulement s il est branche', () => {
+  poser({ ...COMPLET, DOCUMENTAIRE_DISTANT_URL: '', DOCUMENTAIRE_DISTANT_HEBERGEUR: 'Scaleway' })
+  const local = rendre(PageConfidentialite)
+  expect(local).not.toContain('serveur dédié')
+  expect(local).not.toContain('Scaleway')
+  expect(local).not.toContain('data-editeur-incomplet')
+
+  poser({ DOCUMENTAIRE_DISTANT_URL: 'https://documentaire.example.fr' })
+  const nomme = rendre(PageConfidentialite)
+  expect(nomme).toContain('serveur dédié à ce seul traitement, hébergé par Scaleway.')
+  expect(nomme).not.toContain('data-editeur-incomplet')
+  expect(rendre(() => PageConfidentialiteEn({ langue: 'en' }))).toContain('hosted by Scaleway.')
+
+  // Branche sans hebergeur declare : la page le dit sans nom et reste a completer.
+  poser({ DOCUMENTAIRE_DISTANT_HEBERGEUR: '' })
+  const anonyme = rendre(PageConfidentialite)
+  expect(anonyme).toContain('chez un hébergeur distinct de ceux cités plus haut')
+  expect(anonyme).toContain('data-editeur-incomplet')
 })
 
 test('le prix porte la mention fiscale de l editeur', () => {
@@ -136,7 +161,7 @@ test('sans variable posee, les pages nomment la societe qui exploite la marque',
   expect(confidentialite).toContain(
     'Le responsable du traitement est LM Services, éditeur de Cloison',
   )
-  expect(confidentialite).toContain('conservées 7 jours au plus')
+  expect(confidentialite).not.toContain('jours au plus, puis écrasées')
   expect(confidentialite).toContain('Cookies et courriels')
   expect(confidentialite).not.toContain('À compléter')
 

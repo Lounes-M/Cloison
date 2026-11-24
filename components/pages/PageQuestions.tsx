@@ -3,10 +3,11 @@ import { Photo } from '@/components/ui/Photo'
 import { Reveal } from '@/components/ui/Reveal'
 import { questions as questionsEn } from '@/lib/content/en/questions'
 import { footerLinks as liensEn } from '@/lib/content/en/site'
-import { questions as questionsFr } from '@/lib/content/questions'
+import { groupesAffiches, questions as questionsFr } from '@/lib/content/questions'
 import { choisir, lien, type Langue } from '@/lib/i18n'
 import { footerLinks as liensFr } from '@/lib/site'
 import { DonneesStructurees } from '@/components/seo/DonneesStructurees'
+import { traitementsFacultatifs } from '@/lib/juridique/editeur'
 import { faqStructuree } from '@/lib/seo/faq'
 import { cn } from '@/lib/utils'
 
@@ -32,13 +33,15 @@ function insecable(texte: string) {
 
 export function PageQuestions({ langue = 'fr' }: { langue?: Langue }) {
   const t = choisir(langue, questionsFr, questionsEn)
+  // La reponse sur les pieces du garant suit les lectures reellement activees.
+  const groupes = groupesAffiches(t.groupes, traitementsFacultatifs())
   const liens = choisir(langue, liensFr, liensEn)
   const juridiques = ['/conditions', '/confidentialite'].map((href) =>
     liens.find((l) => l.href === href)!,
   )
   return (
     <main>
-      <DonneesStructurees donnees={faqStructuree(t.groupes)} />
+      <DonneesStructurees donnees={faqStructuree(groupes)} />
       <EnTetePage
         titre={t.titre}
         sousTitre={<p>{t.introduction}</p>}
@@ -59,7 +62,7 @@ export function PageQuestions({ langue = 'fr' }: { langue?: Langue }) {
           aria-label={t.sommaire}
           className="flex flex-wrap justify-center gap-[0.375rem] max-[767px]:pb-[2.5rem]"
         >
-          {t.groupes.map((g) => (
+          {groupes.map((g) => (
             <a
               key={g.id}
               href={`#${g.id}`}
@@ -79,7 +82,7 @@ export function PageQuestions({ langue = 'fr' }: { langue?: Langue }) {
             </h2>
           </Reveal>
           <div className="mt-[4rem] max-[767px]:mt-8">
-            {t.groupes.map((g) => (
+            {groupes.map((g) => (
               <section
                 key={g.id}
                 id={g.id}

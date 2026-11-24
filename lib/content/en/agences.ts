@@ -103,9 +103,9 @@ export const tarifAgence = {
 
 export const formulaire = {
   eyebrow: 'Demo',
-  titre: ['See it on', 'a real file.'],
+  titre: ['See it on', 'a complete file.'],
   sousTitre:
-    'We walk you through the full journey on a real file, then support you on your first files.',
+    'We walk you through the full journey on a demonstration file, then support you on your first files.',
   metriques: [
     { valeur: '3', libelle: 'separate spaces' },
     { valeur: '7', libelle: 'days of validity per link' },
