@@ -1,5 +1,9 @@
 import { z } from 'zod'
 
+import { VOLUMES } from './volumes'
+
+export { VOLUMES }
+
 /**
  * Le contrat du formulaire agence, partage par le client et le serveur.
  *
@@ -14,13 +18,6 @@ import { z } from 'zod'
 // le signale, meme si zod rattrape l'erreur. `jitless` supprime la sonde. Le
 // cout est nul a l'echelle d'un formulaire.
 z.config({ jitless: true })
-
-export const VOLUMES = [
-  { valeur: 'moins-de-10', libelle: 'Moins de 10' },
-  { valeur: '10-50', libelle: 'Entre 10 et 50' },
-  { valeur: '50-200', libelle: 'Entre 50 et 200' },
-  { valeur: 'plus-de-200', libelle: 'Plus de 200' },
-] as const
 
 export const volumes = VOLUMES.map((v) => v.valeur)
 

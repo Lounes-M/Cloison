@@ -281,6 +281,12 @@
     outline-offset: 3px;
     border-radius: 4px;
   }
+
+  /* Une case ou un bouton radio se vise par son etiquette : elle garde 24 px
+     de haut au moins, meme sur une seule ligne de petit texte (WCAG 2.5.8). */
+  label:has(> input:is([type='checkbox'], [type='radio'])) {
+    min-height: 24px;
+  }
 }
 
 /* Personne ne doit subir les animations. */
@@ -672,7 +678,20 @@
   }
 }
 
+/* La commande de pause du site public fige le bandeau defilant ; la video
+   d'ambiance s'arrete de son cote (`components/ui/VideoFond.tsx`). */
+[data-mouvement='pause'] .animate-marquee {
+  animation-play-state: paused;
+}
+.commande-mouvement {
+  outline-offset: -4px;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Rien ne bouge deja : la commande de pause n'aurait rien a arreter. */
+  .commande-mouvement {
+    display: none;
+  }
   /* Aucune apparition progressive : le contenu est la, point. */
   .reveal {
     opacity: 1;

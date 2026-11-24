@@ -116,6 +116,15 @@ const nextConfig: NextConfig = {
   // route qui les importe (« non-ecmascript placeable asset »).
   serverExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
 
+  // Les photos du site public partent en AVIF quand le navigateur le lit,
+  // sinon en WebP : a qualite egale, un tiers de poids en moins que le WebP
+  // seul. Une image transformee est gardee un mois : les fichiers de
+  // `public/accueil/` changent de nom quand ils changent de contenu.
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
+
   // Le processus documentaire charge ses modules sur disque, hors du bundle.
   // Les traces doivent transporter ses sources, polices et binaires natifs.
   // Inclure toutes les routes couvre aussi les actions serveur du garant.
@@ -134,6 +143,13 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
+    // La page 404 globale (`app/global-not-found.tsx`). Le site a un layout
+    // racine par groupe de routes, pour que `<html lang>` dise la langue de
+    // chaque page : il n'y a donc plus de layout unique ou poser une 404
+    // commune. C'est la convention que Next prevoit pour ce cas ; elle est
+    // encore experimentale, et la recette navigateur visite cette page a
+    // chaque execution.
+    globalNotFound: true,
     serverActions: {
       // Le depot d'une piece passe par une action serveur, parce que le
       // chiffrement impose de passer par nous. Next borne le corps a 1 Mo par

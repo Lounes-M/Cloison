@@ -651,6 +651,10 @@ export default async function PageDossier({
                   className="btn btn-secondaire"
                 >
                   {texte.ouvrir}
+                  <span className="sr-only">
+                    {' '}
+                    {natures[String(p.type)] ?? String(p.type)}, {texte.nouvelOnglet}
+                  </span>
                 </a>
                 {/* La piece d'identite n'est jamais lue par une machine (0087). */}
                 {configurationOcr() && p.type !== 'piece_identite' ? (

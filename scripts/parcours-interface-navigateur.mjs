@@ -8,6 +8,10 @@ import { SignJWT } from 'jose'
 import { createHmac } from 'node:crypto'
 import { parcourirSupport } from './parcours-support-navigateur.mjs'
 import { auditerAccessibilite, verifierDetectionAccessibilite } from './audit-accessibilite.mjs'
+import {
+  parcourirPauseMouvement,
+  verifierDetectionComplements,
+} from './parcours-accessibilite-navigateur.mjs'
 
 async function verifierCommandes(page, nom) {
   const commandes = await page
@@ -247,6 +251,10 @@ export async function parcourirInterface(
   await page.getByText('Taux d’acceptation', { exact: true }).waitFor()
   await visiter('/espace/logements', 'logements')
   await page.getByRole('link', { name: 'T2 fictif, 3e étage', exact: true }).waitFor()
+  // Une page refusee dans l'espace garde son cadre et sa langue : c'est le
+  // `not-found.tsx` du groupe, pas la page 404 globale du site.
+  await visiter('/espace/logements/pas-un-identifiant', 'introuvable-espace')
+  await page.getByRole('heading', { name: 'Cette page est introuvable.', exact: true }).waitFor()
   await visiter(`/espace/logements/${id}`, 'logement')
   await page.getByRole('link', { name: 'OCRFICTIF', exact: true }).waitFor()
   await visiter(`/espace/colocations/${id}`, 'colocation')
@@ -452,7 +460,15 @@ export async function parcourirInterface(
       chemin === '/demarrer' || chemin === '/connexion',
     )
   await visiter('/en/candidater/' + 'c'.repeat(32), 'en-candidater')
+  // La page 404 globale annonce la langue de l'adresse demandee.
+  await visiter('/en/page-inexistante', 'en-introuvable', false)
+  assert.equal(await page.locator('html').getAttribute('lang'), 'en', 'Langue de la 404 anglaise')
+  await page.getByRole('heading', { name: 'This page cannot be found.', exact: true }).waitFor()
+  await parcourirPauseMouvement(page, site, moteur, largeur)
+  if (moteur.name() === 'chromium' && largeur === 390)
+    await verifierDetectionComplements(page, site)
   await visiter('/page-inexistante-mobile', 'introuvable', false)
+  assert.equal(await page.locator('html').getAttribute('lang'), 'fr', 'Langue de la 404')
   const reprise = page.getByRole('navigation', { name: 'Reprendre la navigation', exact: true })
   const retourDossier = reprise.getByRole('link', { name: 'Retrouver mon dossier', exact: true })
   await retourDossier.focus()

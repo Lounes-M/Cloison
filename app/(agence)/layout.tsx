@@ -5,12 +5,17 @@ import { securite as securiteFr } from '@/lib/content/securite'
 import { connection } from 'next/server'
 
 import { CadreEspace } from '@/components/layout/CadreEspace'
+import { DocumentRacine } from '@/components/layout/DocumentRacine'
+import { metadonneesRacine, vueRacine } from '@/lib/seo/racine'
 import { support as supportFr } from '@/lib/content/espace'
 import { env } from '@/lib/env'
 import { securite as securiteEn } from '@/lib/content/en/securite'
 import { support as supportEn } from '@/lib/content/en/espace'
 import { choisir } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
+
+export const metadata = metadonneesRacine
+export const viewport = vueRacine
 
 /**
  * L'espace agence.
@@ -40,30 +45,32 @@ export default async function LayoutAgence({ children }: { children: React.React
     .some(({ name, value }) => Boolean(value) && estCookieSessionAgence(name))
 
   return (
-    <CadreEspace
-      agence
-      navigation={afficherSortie}
-      sortie={
-        afficherSortie ? (
-          <form action={seDeconnecter}>
-            <button type="submit" className="lien-espace">
-              {securite.deconnexion}
-            </button>
-          </form>
-        ) : null
-      }
-      footer={
-        adresseDeSupport ? (
-          <footer className="border-ink border-t-2 px-6 py-5 md:px-10">
-            <p className="text-muted mx-auto max-w-[880px] text-[13px] leading-relaxed font-medium">
-              <strong className="text-ink">{support.titre}</strong>{' '}
-              {support.texte(adresseDeSupport)} {support.limite}
-            </p>
-          </footer>
-        ) : null
-      }
-    >
-      {children}
-    </CadreEspace>
+    <DocumentRacine langue={langue}>
+      <CadreEspace
+        agence
+        navigation={afficherSortie}
+        sortie={
+          afficherSortie ? (
+            <form action={seDeconnecter}>
+              <button type="submit" className="lien-espace">
+                {securite.deconnexion}
+              </button>
+            </form>
+          ) : null
+        }
+        footer={
+          adresseDeSupport ? (
+            <footer className="border-ink border-t-2 px-6 py-5 md:px-10">
+              <p className="text-muted mx-auto max-w-[880px] text-[13px] leading-relaxed font-medium">
+                <strong className="text-ink">{support.titre}</strong>{' '}
+                {support.texte(adresseDeSupport)} {support.limite}
+              </p>
+            </footer>
+          ) : null
+        }
+      >
+        {children}
+      </CadreEspace>
+    </DocumentRacine>
   )
 }

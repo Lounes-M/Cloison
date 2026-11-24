@@ -63,6 +63,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Apres le build, sans navigateur : les pages publiques doivent rester
+      # prerendues et sous leur budget de poids (scripts, styles, polices).
+      - name: Prerendu et budget de poids du site public
+        run: npm run check:perf
+
       - name: Session MFA via Next et SDK reels
         run: node scripts/verifier-session-mfa-http.mjs
 

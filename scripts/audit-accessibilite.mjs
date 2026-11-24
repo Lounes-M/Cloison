@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import { appendFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
+
+import { releverComplements } from './audit-accessibilite-complements.mjs'
 
 // axe-core est injecte par le protocole du navigateur, hors CSP de la page :
 // la politique servie reste intacte et aucun script tiers n'entre dans le build.
@@ -30,11 +33,31 @@ export async function auditerAccessibilite(page, nom) {
       cibles: v.nodes.slice(0, 5).map((n) => n.target.join(' ')),
     }))
   }, NORMES)
+  const complements = await releverComplements(page, {
+    clavier: page.context().browser()?.browserType().name() === 'chromium',
+  })
+  // Mode releve : pour un audit, on veut tous les constats de toutes les
+  // pages, pas l'arret au premier. Le fichier recoit une ligne JSON par page.
+  if (process.env.CLOISON_AUDIT_RAPPORT) {
+    if (violations.length || complements.length)
+      await appendFile(
+        process.env.CLOISON_AUDIT_RAPPORT,
+        JSON.stringify({ page: nom, url: page.url(), violations, complements }) + '\n',
+      )
+    return
+  }
   assert.deepEqual(violations, [], `Accessibilite ${nom} : ${JSON.stringify(violations)}`)
+  assert.deepEqual(
+    complements,
+    [],
+    `Accessibilite complementaire ${nom} : ${JSON.stringify(complements)}`,
+  )
 }
 
 /** Contre-preuve : l'audit doit refuser des defauts connus sur une page servie. */
 export async function verifierDetectionAccessibilite(page) {
+  // En mode releve, l'audit note au lieu de refuser : rien a contre-prouver.
+  if (process.env.CLOISON_AUDIT_RAPPORT) return
   await page.evaluate(() => {
     const essai = document.createElement('div')
     essai.id = 'essai-accessibilite'

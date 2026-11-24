@@ -1,4 +1,9 @@
 import { ChromePublic } from '@/components/layout/ChromePublic'
+import { DocumentRacine } from '@/components/layout/DocumentRacine'
+import { metadonneesRacine, vueRacine } from '@/lib/seo/racine'
+
+export const metadata = metadonneesRacine
+export const viewport = vueRacine
 
 /**
  * Le site public : accueil et page agences.
@@ -18,5 +23,9 @@ import { ChromePublic } from '@/components/layout/ChromePublic'
  * connait pas.
  */
 export default function LayoutMarketing({ children }: { children: React.ReactNode }) {
-  return <ChromePublic langue="fr">{children}</ChromePublic>
+  return (
+    <DocumentRacine langue="fr">
+      <ChromePublic langue="fr">{children}</ChromePublic>
+    </DocumentRacine>
+  )
 }

@@ -36,6 +36,8 @@ function Texte({
         type={type}
         required={requis}
         defaultValue={defaut}
+        // Des donnees de tiers (bailleur, logement) : rien a preremplir.
+        autoComplete="off"
         {...autres}
       />
     </label>
@@ -213,6 +215,8 @@ export function ModeleActe({
               className={champ}
               name="telephone"
               type="tel"
+              // Le numero d'un tiers, saisi par l'agence : pas celui du poste.
+              autoComplete="off"
               placeholder="+33600000000"
               required
               pattern="\+[1-9][0-9]{7,14}"

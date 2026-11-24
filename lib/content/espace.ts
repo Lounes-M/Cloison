@@ -159,6 +159,7 @@ export const dossier = {
   piecesEnAttente:
     'Le garant dépose ses pièces de son côté. Elles vous parviennent quand le dossier est complet.',
   ouvrir: 'Ouvrir',
+  nouvelOnglet: 'nouvel onglet',
   ouvrirAide:
     'Chaque ouverture est inscrite au journal, et la pièce vous parvient filigranée à votre nom. Le garant peut voir que vous l’avez consultée.',
   journalTitre: 'Journal des accès',

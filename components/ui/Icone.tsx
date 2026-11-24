@@ -20,6 +20,12 @@ const traces = {
   /** Passage vers une autre perspective. */
   direction: <path d="M5 19 19 5M5 5h14v14" />,
 
+  /** Figer ce qui bouge tout seul. */
+  pause: <path d="M8 5v14M16 5v14" />,
+
+  /** Relancer ce qui a ete fige. */
+  lecture: <path d="M8 5l11 7-11 7z" />,
+
   /** Validation, etat verifie. */
   coche: <path d="M4 12.5 10 19 20 5" />,
 

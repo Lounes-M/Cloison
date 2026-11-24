@@ -130,7 +130,7 @@ export default async function PageColocation({ params }: { params: Promise<{ id:
           <td className="py-2 pr-4">
             <Link
               href={`/espace/dossiers/${d.id}`}
-              className="text-cobalt underline underline-offset-2"
+              className="text-cobalt inline-flex min-h-[44px] items-center underline underline-offset-2"
             >
               {d.reference}
             </Link>
