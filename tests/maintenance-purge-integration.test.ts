@@ -24,6 +24,9 @@ vi.mock('@/lib/courriels/delais-agence', () => ({
 vi.mock('@/lib/courriels/file', () => ({
   distribuerCourriels: async () => ({ traites: 0, echecs: 0 }),
 }))
+vi.mock('@/lib/exploitation/veille-planificateurs', () => ({
+  veillerPlanificateurs: async () => ({ echecs: 0 }),
+}))
 
 beforeEach(() => {
   vi.clearAllMocks()

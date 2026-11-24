@@ -3,6 +3,11 @@ import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { env } from '@/lib/env'
+import {
+  echeanceOuvree,
+  joursFeriesDecomptes,
+  type JourFerie,
+} from '@/lib/exploitation/jours-feries.mjs'
 import { envoyer } from './envoi'
 
 /**
@@ -17,6 +22,17 @@ import { envoyer } from './envoi'
  * La clé de mise en file est stable par demande et par palier, donc un passage
  * interrompu se rejoue sans doublon ; l'alerte n'est acquittée qu'une fois le
  * courriel en file.
+ *
+ * Les jours fériés ne comptent pas. La base ne les connaît pas : sa fonction
+ * `echeance_ouvree` saute seulement le week-end, donc elle rend une demande
+ * au plus tôt, jamais trop tard. Chaque ligne est recomptée ici avec le
+ * calendrier de `lib/exploitation/jours-feries.mjs` :
+ *   - pas encore due une fois les jours fériés retirés : la ligne est
+ *     laissée, sans courriel ni acquittement, et revient au passage suivant ;
+ *   - due à un palier moins avancé que celui de la base : c'est ce palier qui
+ *     part. La base la représente tant que « dépassé » n'est pas acquitté ;
+ *     la clé stable rend ces rejeux sans effet.
+ * Le siège est à Paris : le calendrier est celui de la métropole.
  */
 const alerte = z.object({
   nature: z.enum(['demande', 'activation']),
@@ -27,15 +43,43 @@ const alerte = z.object({
   contact: z.string().min(1).max(180),
   echeance: z.iso.datetime({ offset: true }),
 })
-type Alerte = z.infer<typeof alerte>
+type Alerte = z.infer<typeof alerte> & { feries: JourFerie[] }
 
-export async function alerterDelaisAgence(db: SupabaseClient, signal?: AbortSignal) {
+/** La ligne recomptée sans les jours fériés, ou `null` si rien n'est encore dû. */
+function selonCalendrier(ligne: z.infer<typeof alerte>, maintenant: Date): Alerte | null {
+  const echeance = echeanceOuvree(ligne.depuis, 2)
+  const palier =
+    echeance <= maintenant
+      ? ('depasse' as const)
+      : echeanceOuvree(ligne.depuis, 1) <= maintenant
+        ? ('proche' as const)
+        : null
+  if (!palier) return null
+  return {
+    ...ligne,
+    palier,
+    echeance: echeance.toISOString(),
+    feries: joursFeriesDecomptes(ligne.depuis, echeance),
+  }
+}
+
+export async function alerterDelaisAgence(
+  db: SupabaseClient,
+  signal?: AbortSignal,
+  maintenant: Date = new Date(),
+) {
   const { data, error } = await db.rpc('delais_agence_a_alerter')
   const resultat = z.array(alerte).max(20).safeParse(data)
   if (error || !resultat.success) throw new Error('Alertes de délai indisponibles')
   let echecs = 0
-  for (const a of resultat.data) {
+  let reportees = 0
+  for (const ligne of resultat.data) {
     signal?.throwIfAborted()
+    const a = selonCalendrier(ligne, maintenant)
+    if (!a) {
+      reportees++
+      continue
+    }
     const hex = createHash('sha256')
       .update(`delai:${a.nature}:${a.objet}:${a.depuis}:${a.palier}`)
       .digest('hex')
@@ -59,7 +103,7 @@ export async function alerterDelaisAgence(db: SupabaseClient, signal?: AbortSign
     // `false` : la demande a reçu sa réponse entre-temps, ou l'activation a été redemandée.
     if (refus || typeof acquitte !== 'boolean') echecs++
   }
-  return { echecs }
+  return { echecs, reportees }
 }
 
 function sujet(a: Alerte) {
@@ -75,6 +119,13 @@ function corps(a: Alerte) {
       timeZone: 'Europe/Paris',
       dateStyle: 'full',
       timeStyle: 'short',
+    })
+  const jour = (j: string) =>
+    new Date(`${j}T12:00:00Z`).toLocaleDateString('fr-FR', {
+      timeZone: 'UTC',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
     })
   const marquer =
     a.nature === 'demande'
@@ -104,6 +155,7 @@ function corps(a: Alerte) {
     `${a.nature === 'demande' ? 'E-mail   ' : 'Domaine  '}: ${a.contact}`,
     `Reçue    : ${date(a.depuis)}`,
     `Échéance : ${date(a.echeance)}`,
+    ...a.feries.map((f) => `Férié    : ${jour(f.jour)} (${f.nom}), non compté`),
     '',
     ...marquer,
     '',
