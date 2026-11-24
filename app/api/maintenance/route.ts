@@ -8,16 +8,16 @@ import { alerterDelaisAgence } from '@/lib/courriels/delais-agence'
 import { livrerLiens } from '@/lib/courriels/livraison-liens'
 import { distribuerCourriels } from '@/lib/courriels/file'
 import { purgerCoffres } from '@/lib/exploitation/purge'
+import { veillerPlanificateurs } from '@/lib/exploitation/veille-planificateurs'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 const headers = { 'Cache-Control': 'no-store' }
 export async function GET(request: Request) {
   const recu = request.headers.get('authorization')
-  if (
-    !secretCorrect(recu, process.env.CRON_SECRET) &&
-    !secretCorrect(recu, process.env.CRON_SUPABASE_SECRET)
-  ) {
+  // Le jeton dit qui lance : pg_cron a le sien, GitHub et Vercel partagent l'autre.
+  const parSupabase = secretCorrect(recu, process.env.CRON_SUPABASE_SECRET)
+  if (!parSupabase && !secretCorrect(recu, process.env.CRON_SECRET)) {
     return new NextResponse(null, { status: 401, headers })
   }
   let db: Awaited<ReturnType<typeof clientServeur>>
@@ -36,6 +36,15 @@ export async function GET(request: Request) {
     )
   }
 
+  // La veille des planificateurs lit la reussite precedente avant que ce passage
+  // la remplace. Elle court pendant la purge, sur son propre budget de quatre
+  // secondes, et n'ajoute donc rien a la duree maximale de la route.
+  const veille = veillerPlanificateurs(parSupabase ? 'supabase' : 'github-ou-vercel')
+    .then((bilan) => compteur(bilan.echecs))
+    .catch(() => {
+      console.error('[maintenance] veille des planificateurs indisponible')
+      return 1
+    })
   // La retention passe avant les envois. Chaque phase rend son propre bilan :
   // une panne de courriel ne doit jamais empecher la destruction des donnees.
   const purge = await executerLot('purge', () => purgerCoffres(db, budgetPurge))
@@ -88,6 +97,8 @@ export async function GET(request: Request) {
     console.error('[maintenance] alertes de delai indisponibles')
     notifications.echecs++
   }
+  // Ses alertes sont en file : elles partent avec les courriels de ce passage.
+  notifications.echecs += await veille
   const courriels = await executerLot('courriels', async () => {
     const budget = AbortSignal.timeout(18_000)
     return distribuerCourriels(await clientServeur(budget), undefined, budget)

@@ -4,6 +4,7 @@ import { envoyer } from './envoi'
 
 import { type ControleSiren, lignesControleSiren } from '@/lib/agences/controle-siren'
 import { env } from '@/lib/env'
+import { surUneLigne } from '@/lib/validation/ligne'
 
 /**
  * Le courriel qui t'annonce une demande d'activation.
@@ -34,14 +35,16 @@ export type DemandeActivation = {
 }
 
 export async function notifierDemandeActivation(demande: DemandeActivation): Promise<boolean> {
-  const sujet = `Activation demandee : ${demande.nom} (${demande.domaine})`
+  // Saisis par l'agence, au-dessus d'une ligne SQL a coller : une ligne chacun.
+  const nom = surUneLigne(demande.nom)
+  const sujet = `Activation demandee : ${nom} (${surUneLigne(demande.domaine)})`
 
   const corps = [
-    `Agence     : ${demande.nom}`,
-    `Domaine    : ${demande.domaine}`,
-    `SIREN      : ${demande.siren}`,
-    `Carte pro  : ${demande.cartePro}`,
-    `Demandeur  : ${demande.demandeePar}`,
+    `Agence     : ${nom}`,
+    `Domaine    : ${surUneLigne(demande.domaine)}`,
+    `SIREN      : ${surUneLigne(demande.siren)}`,
+    `Carte pro  : ${surUneLigne(demande.cartePro)}`,
+    `Demandeur  : ${surUneLigne(demande.demandeePar)}`,
     '',
     'Sur sa demonstration :',
     `  ${demande.essais.consultations} consultation(s) de dossier`,
@@ -49,7 +52,8 @@ export async function notifierDemandeActivation(demande: DemandeActivation): Pro
     `  ${demande.essais.dossiersPris} dossier(s) pris`,
     '',
     ...(demande.controleSiren ? [...lignesControleSiren(demande.controleSiren), ''] : []),
-    'Verifier le SIREN : https://annuaire-entreprises.data.gouv.fr/entreprise/' + demande.siren,
+    'Verifier le SIREN : https://annuaire-entreprises.data.gouv.fr/entreprise/' +
+      encodeURIComponent(surUneLigne(demande.siren)),
     '',
     'Pour activer, dans l’editeur SQL Supabase :',
     '',
