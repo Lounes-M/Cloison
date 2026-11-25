@@ -1,6 +1,6 @@
 /**
- * Le texte anglais de la page d'accueil. La forme suit `lib/content/home.ts` :
- * une cle ajoutee la-bas doit l'etre ici.
+ * Le texte anglais de la page d’accueil. La forme suit `lib/content/home.ts` :
+ * une cle ajoutee la-bas doit l’etre ici.
  */
 
 import { commentCaMarche } from './agences'

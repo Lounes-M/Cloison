@@ -1,4 +1,4 @@
-/** Textes de la page d'activite de l'agence (migration 0068). Vouvoiement. */
+/** Textes de la page d’activite de l’agence (migration 0068). Vouvoiement. */
 export const activite = {
   titre: 'Activité de l’agence',
   etiquette: 'Douze derniers mois',

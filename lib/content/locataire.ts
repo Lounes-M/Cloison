@@ -3,8 +3,8 @@
  *
  * La regle qui gouverne chaque phrase ici : il apprend ou en est son dossier,
  * jamais pourquoi. « Ce garant ne convient pas » ne dit ni le montant ni le
- * ratio, et c'est voulu depuis la migration 0003 : le detail vit dans une table
- * qu'il ne lit pas, et le texte ne doit pas le trahir par la bande.
+ * ratio, et c’est voulu depuis la migration 0003 : le detail vit dans une table
+ * qu’il ne lit pas, et le texte ne doit pas le trahir par la bande.
  */
 
 export const porte = {
@@ -57,7 +57,10 @@ export const statutsSansAgence: Record<string, string> = {
 }
 
 export const espace = {
-  loyerFigePhrase: 'Ce montant est figé.',
+  loyerParMois: 'par mois, charges comprises.',
+  loyerFigeEngagement:
+    'Ce montant est figé parce que ton garant a déclaré son engagement : le loyer ne peut plus changer.',
+  loyerFigeClos: 'Ce montant est figé parce que le dossier n’est plus en cours.',
   rattachementPlusTard: 'Rattacher ce dossier à une agence',
   garantAssocie:
     'Ton garant a commencé son dossier : il y reste associé. Pour désigner une autre personne, ouvre un nouveau dossier.',
@@ -109,9 +112,13 @@ export const resteAFaire = {
     loyer: 'Indique le loyer mensuel, charges comprises.',
     paiement: 'Règle le dossier pour que ton garant reçoive son lien.',
     garant: 'Désigne ton garant : il reçoit un lien pour déposer ses pièces.',
+    rattachement: 'Rattache ton dossier à ton agence pour qu’elle puisse décider.',
   },
   attente:
     'Rien à faire de ton côté pour l’instant. Ton garant dépose ses pièces ; tu verras le dossier avancer ici.',
+  attenteDecision: 'Rien à faire de ton côté. Toutes les pièces sont là : l’agence peut décider.',
+  attenteInsuffisant:
+    'Rien à faire de ton côté sur ce dossier. La suite se décide avec l’agence, ou en ouvrant un nouveau dossier.',
 } as const
 
 /**

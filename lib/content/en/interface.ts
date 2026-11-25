@@ -1,7 +1,7 @@
 import type { Textes } from '@/lib/i18n'
 import type { interfaceEspace as Fr } from '../interface'
 
-/** Les libelles communs des espaces et des pages d'entree, en anglais. */
+/** Les libelles communs des espaces et des pages d’entree, en anglais. */
 export const interfaceEspace: Textes<typeof Fr> = {
   menu: 'Menu',
   navPilotage: 'Overview',

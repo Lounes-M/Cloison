@@ -2,17 +2,17 @@
  * Ce que le garant lit.
  *
  * Deux promesses gouvernent chaque phrase. La premiere, a lui : le locataire ne
- * verra jamais ce qu'il depose, seulement que le dossier avance. La seconde,
- * a lui aussi : il sait exactement ce qu'on attend, piece par piece, pour ne
+ * verra jamais ce qu’il depose, seulement que le dossier avance. La seconde,
+ * a lui aussi : il sait exactement ce qu’on attend, piece par piece, pour ne
  * pas avoir a deviner ni a redeposer.
  */
 
 /**
- * Les natures de pieces, dans l'ordre ou on les demande.
+ * Les natures de pieces, dans l’ordre ou on les demande.
  *
  * Miroir de la contrainte `type` de la table `pieces`, etendue en migration 0043.
  * Un test le verifie : une nature ajoutee ici et absente la-bas ne se verrait
- * qu'a l'execution, sous la forme d'un depot refuse sans explication.
+ * qu’a l’execution, sous la forme d’un depot refuse sans explication.
  */
 export const natures = [
   {
@@ -182,8 +182,8 @@ export const engagement = {
   bouton: 'Enregistrer',
   envoi: 'Enregistrement…',
   succes: 'Votre engagement est enregistré.',
-  avertissementLoyer:
-    'Ce montant est inférieur au loyer mensuel du dossier. Vous pouvez l’enregistrer quand même.',
+  avertissementLoyer: (loyer: string) =>
+    `Ce montant est inférieur au loyer mensuel du dossier (${loyer} par mois, charges comprises). Vous pouvez l’enregistrer quand même.`,
   erreurs: {
     couvre: 'Indiquez ce que vous couvrez.',
     montant: 'Le montant ne se lit pas. Exemple : 1 200 ou 1200,50.',
@@ -196,10 +196,10 @@ export const engagement = {
  * La mention : guidee, jamais fournie.
  *
  * Aucune phrase modele ici, ni dans le formulaire, ni dans une aide, ni dans
- * un `placeholder`. La loi exige que la caution l'appose elle-meme, et
- * l'ADR 0005 tient qu'un texte pre-suggere d'un peu trop pres suffirait a
- * faire tomber l'engagement. On decrit ce qu'elle doit contenir ; on ne
- * l'ecrit pas.
+ * un `placeholder`. La loi exige que la caution l’appose elle-meme, et
+ * l’ADR 0005 tient qu’un texte pre-suggere d’un peu trop pres suffirait a
+ * faire tomber l’engagement. On decrit ce qu’elle doit contenir ; on ne
+ * l’ecrit pas.
  */
 export const mention = {
   titre: 'Votre mention',
@@ -236,7 +236,7 @@ export const mention = {
   },
 } as const
 
-/** L'encart du haut : ce qu'il reste, sans verdict et sans chiffre de solvabilite. */
+/** L’encart du haut : ce qu’il reste, sans verdict et sans chiffre de solvabilite. */
 export const resteAFaire = {
   titre: 'Ce qu’il vous reste à faire',
   aide: 'Chaque ligne mène à l’endroit de la page où la compléter.',

@@ -52,7 +52,7 @@ export const questions = {
         {
           question: 'Who sees my documents?',
           reponse:
-            'Only the agency, on watermarked copies, and every viewing is recorded under its name. The tenant sees neither your documents nor your amounts.',
+            'The agency attached to your file sees watermarked copies, and every viewing is recorded under its name. The tenant sees neither your documents nor your amounts.',
           complements: {
             lectureGarant:
               'If you ask for it yourself, an AI reads your payslips or pension statement to suggest an income, without keeping them.',

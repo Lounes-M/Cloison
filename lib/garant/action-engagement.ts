@@ -9,11 +9,13 @@ import { revalidatePath } from 'next/cache'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { prevenirSiLeStatutAChange, statutActuel } from '@/lib/courriels/notifications'
 import { engagement as texteEngagementFr } from '@/lib/content/garant'
+import { euros as eurosFr } from '@/lib/content/tarifs'
 import { analyserEngagement, plafondSousLeLoyer } from '@/lib/garant/validation'
 import { versionConditions } from '@/lib/garant/version-conditions'
 import { conditionsEngagement as conditionsEngagementFr } from '@/lib/content/conditions-engagement'
 import { sessionPorteur as sessionPorteurEn } from '@/lib/content/en/session-porteur'
 import { engagement as texteEngagementEn } from '@/lib/content/en/garant'
+import { euros as eurosEn } from '@/lib/content/en/tarifs'
 import { conditionsEngagement as conditionsEngagementEn } from '@/lib/content/en/conditions-engagement'
 import { choisir } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
@@ -103,9 +105,15 @@ export async function declarerMonEngagement(
       .eq('id', dossierId)
       .maybeSingle()
     const loyerCents = ligneLoyer?.loyer_cents == null ? null : Number(ligneLoyer.loyer_cents)
-    avertissement = plafondSousLeLoyer(analyse.engagement.montantMaxCents, loyerCents)
-      ? choisir(langue, texteEngagementFr, texteEngagementEn).avertissementLoyer
-      : undefined
+    const texteEngagement = choisir(langue, texteEngagementFr, texteEngagementEn)
+    // Le garant lit deja ce loyer : la politique « Un porteur de lien voit le
+    // sien » lui ouvre la ligne, sans retrait de colonne.
+    avertissement =
+      plafondSousLeLoyer(analyse.engagement.montantMaxCents, loyerCents) &&
+      loyerCents != null &&
+      Number.isSafeInteger(loyerCents)
+        ? texteEngagement.avertissementLoyer(choisir(langue, eurosFr, eurosEn)(loyerCents))
+        : undefined
 
     const avant = await statutActuel(supabase, dossierId)
 

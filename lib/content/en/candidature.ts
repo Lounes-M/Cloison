@@ -1,7 +1,7 @@
 import type { Textes } from '@/lib/i18n'
 import type { candidature as Fr } from '../candidature'
 
-/** Le lien de candidature d'un logement, en anglais. */
+/** Le lien de candidature d’un logement, en anglais. */
 export const candidature: Textes<typeof Fr> = {
   agence: {
     titre: 'Application link',

@@ -29,7 +29,7 @@ export const footerLinks = [
   { label: 'Terms', href: '/conditions' },
 ] as const
 
-/** Les libelles d'interface qui ne vivent dans aucun fichier de contenu. */
+/** Les libelles d’interface qui ne vivent dans aucun fichier de contenu. */
 export const chrome = {
   navigationPrincipale: 'Main navigation',
   navigationPied: 'Footer navigation',

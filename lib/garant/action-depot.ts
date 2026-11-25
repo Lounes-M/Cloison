@@ -9,6 +9,7 @@ import { verifierDocument } from '@/lib/coffre/validation-document'
 import { verifierContenu } from '@/lib/coffre/type-reel'
 import { clientStockage } from '@/lib/acces/stockage'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
 import { deposer, retirerPiece, type NatureDePiece } from '@/lib/coffre/depot'
@@ -134,7 +135,9 @@ export async function deposerUnePiece(
   }
 
   revalidatePath('/garant')
-  return { statut: 'depose', nature }
+  // Le message « Pièce déposée. » vit dans l'URL : un rafraichissement du
+  // serveur, apres revalidatePath, efface l'etat du formulaire.
+  redirect(`/garant?deposee=${encodeURIComponent(nature)}#piece-${encodeURIComponent(nature)}`)
 }
 
 export type EtatRetrait = { statut: 'inactif' } | { statut: 'erreur'; message: string }

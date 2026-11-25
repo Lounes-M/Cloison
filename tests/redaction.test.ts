@@ -175,6 +175,35 @@ test('les messages de l agence et du garant vouvoient', () => {
   expect(lus.filter((m) => tutoie(m.slice(m.indexOf(': '))))).toEqual([])
 })
 
+const APOSTROPHE = /(?<=\p{L})'(?=\p{L})/u
+const contenus = import.meta.glob('../lib/content/**/*.ts')
+
+function textesAffiches(valeur: unknown, sortie: string[]) {
+  if (typeof valeur === 'string') {
+    if (valeur.includes(' ')) sortie.push(valeur)
+  } else if (typeof valeur === 'function') {
+    try {
+      textesAffiches((valeur as (...a: unknown[]) => unknown)('X', 2, 'Y', 3), sortie)
+    } catch {
+      return
+    }
+  } else if (Array.isArray(valeur)) {
+    valeur.forEach((v) => textesAffiches(v, sortie))
+  } else if (valeur && typeof valeur === 'object') {
+    for (const v of Object.values(valeur)) textesAffiches(v, sortie)
+  }
+}
+
+test('les textes affiches utilisent l apostrophe typographique', async () => {
+  const fautes: string[] = []
+  for (const [chemin, charger] of Object.entries(contenus)) {
+    const sortie: string[] = []
+    textesAffiches(await charger(), sortie)
+    for (const phrase of sortie) if (APOSTROPHE.test(phrase)) fautes.push(`${chemin}: ${phrase}`)
+  }
+  expect(fautes).toEqual([])
+})
+
 test('les deux gardes reconnaissent les fautes qu elles visent', () => {
   expect('Dépose un fichier de la meme catégorie.').toMatch(SANS_ACCENT)
   expect('Ton depot reste prive.').toMatch(SANS_ACCENT)

@@ -1,9 +1,9 @@
 /**
  * La synthese du dossier remise au bailleur.
  *
- * Une page que l'agence telecharge pour le proprietaire. Elle dit ce qui a
- * ete verifie et ou en est l'acte ; elle ne contient ni justificatif ni
- * montant de revenu. Le bailleur est vouvoye, comme l'agence.
+ * Une page que l’agence telecharge pour le proprietaire. Elle dit ce qui a
+ * ete verifie et ou en est l’acte ; elle ne contient ni justificatif ni
+ * montant de revenu. Le bailleur est vouvoye, comme l’agence.
  */
 export const synthese = {
   ecran: {

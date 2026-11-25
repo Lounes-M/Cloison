@@ -1,4 +1,4 @@
-/** Les titres d'onglet des pages d'espace qui n'ont pas de module de textes a elles. */
+/** Les titres d’onglet des pages d’espace qui n’ont pas de module de textes a elles. */
 export const titres = {
   espace: 'Espace agence',
   dossier: 'Dossier',

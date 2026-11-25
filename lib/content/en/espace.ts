@@ -1,7 +1,7 @@
 import type { Textes } from '@/lib/i18n'
 import type * as Fr from '../espace'
 
-/** Ce que l'agence lit, en anglais. Les chiffres n'apparaissent qu'ici. */
+/** Ce que l’agence lit, en anglais. Les chiffres n’apparaissent qu’ici. */
 export const tableau: Textes<typeof Fr.tableau> = {
   connecte: 'Signed in as',
   administrateur: ', administrator',

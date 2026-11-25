@@ -1,5 +1,5 @@
 /**
- * Ce que tous les courriels de Cloison ont en commun : l'habillage, le pied,
+ * Ce que tous les courriels de Cloison ont en commun : l’habillage, le pied,
  * les libelles des boutons. Le propos de chaque courriel vit dans
  * `courriels.ts`, `liens.ts` et `rappels.ts`.
  */

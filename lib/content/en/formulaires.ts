@@ -1,5 +1,5 @@
 /**
- * Les textes anglais des formulaires du site public : ouverture d'un dossier,
+ * Les textes anglais des formulaires du site public : ouverture d’un dossier,
  * dossier a retrouver, connexion agence, demande de demonstration.
  */
 export const porte = {
@@ -58,7 +58,7 @@ export const demande = {
   envoi: 'Sending…',
   bouton: 'Request a demo →',
   collecte:
-    'These details are only used to get back to you about Cloison. They are neither sold nor used for third-party marketing, and they are kept for as long as it takes to handle your request. To access, correct or delete them, simply reply to the email you will receive.',
+    'These details are only used to get back to you about Cloison. They are neither sold nor used for third-party marketing, and they are kept for twelve months at most after they are sent. To access, correct or delete them, simply reply to the email you will receive.',
   merci: 'Noted.',
   suite:
     'We will get back to you within 48 business hours, with a demo on a complete file: not a brochure.',

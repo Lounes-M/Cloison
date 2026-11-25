@@ -1,4 +1,4 @@
-/** Notes internes d'un dossier (migration 0081). Vouvoiement. */
+/** Notes internes d’un dossier (migration 0081). Vouvoiement. */
 export const notesDossier = {
   titre: 'Notes internes',
   aide: 'Visibles par les collaborateurs de l’agence seulement, jamais par le locataire ni le garant. Elles disparaissent avec le dossier.',

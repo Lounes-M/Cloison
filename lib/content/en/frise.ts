@@ -15,6 +15,7 @@ export const frise: Textes<typeof Fr> = {
       garant: 'Guarantor named',
       garantADesigner: 'Guarantor to name',
       depot: 'Your guarantor’s upload',
+      rattachement: 'Link to your agency',
       decision: 'Agency’s decision',
       signature: 'Deed signed',
     },

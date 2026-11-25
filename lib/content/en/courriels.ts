@@ -1,7 +1,7 @@
 import type * as Fr from '../courriels'
 
 /**
- * Les courriels de statut, en anglais. Memes regles qu'en francais : aucun
+ * Les courriels de statut, en anglais. Memes regles qu’en francais : aucun
  * lien pour le locataire ou le garant, aucun chiffre pour le locataire.
  */
 

@@ -593,9 +593,20 @@
     gap: 0.6rem;
     border-color: transparent;
     background: transparent;
+    cursor: pointer;
+    text-decoration-line: underline;
+    text-underline-offset: 0.18em;
   }
   .sommaire-dossier a:hover {
     background: var(--color-paper);
+  }
+  .sommaire-dossier a:focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 3px;
+  }
+  .espace-shell :is(section, details, li)[id]:focus {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 4px;
   }
   .carte-priorite {
     display: flex;

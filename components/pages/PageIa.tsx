@@ -31,19 +31,32 @@ const ICONES_GARANTIES: Record<string, NomIcone> = {
 /**
  * « Notre usage de l'IA » : ce qu'elle fait, ce qu'elle ne fait jamais, et ce
  * qui le garantit. La page lit la configuration reelle : un usage desactive
- * est annonce comme tel, et la lecture en Europe n'est affirmee que si
- * l'endpoint impose est europeen.
+ * est annonce comme tel. La carte OpenRouter dit le sous-traitant reel :
+ * societe americaine, et serveur europeen seulement si l'endpoint l'impose.
  */
 export function PageIa({ langue = 'fr' }: { langue?: Langue }) {
-  const { deroule, garanties, heroIa, jamais, suiteIa, usages } = choisir(langue, fr, en)
+  const { deroule, garanties, heroIa, jamais, lectureOpenRouter, suiteIa, usages } = choisir(
+    langue,
+    fr,
+    en,
+  )
   const facultatifs = traitementsFacultatifs()
   const actif: Record<string, boolean> = {
     garant: facultatifs.lectureGarant,
     agence: facultatifs.ocr,
     comparaison: facultatifs.comparaisonAgence,
   }
-  const garantiesAffichees = garanties.items.filter(
-    (item) => item.cle !== 'europe' || facultatifs.lectureEnEurope,
+  const lectureDemandee =
+    facultatifs.lectureGarant || facultatifs.ocr || facultatifs.comparaisonAgence
+  const libelleLecture = !lectureDemandee
+    ? lectureOpenRouter.inactive
+    : facultatifs.lectureEnEurope
+      ? lectureOpenRouter.europe
+      : lectureOpenRouter.horsEurope
+  const garantiesAffichees = garanties.items.map((item) =>
+    item.cle === 'europe'
+      ? { ...item, titre: lectureOpenRouter.titre, libelle: libelleLecture }
+      : item,
   )
   return (
     <main>

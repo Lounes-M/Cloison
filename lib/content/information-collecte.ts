@@ -1,5 +1,5 @@
 /**
- * L'information due au moment de la collecte (article 13 du RGPD), affichee
+ * L’information due au moment de la collecte (article 13 du RGPD), affichee
  * avant chaque saisie. A part des pages juridiques pour ne pas les embarquer
  * dans les formulaires clients. Le detail vit sur `/confidentialite`.
  */

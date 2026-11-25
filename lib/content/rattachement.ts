@@ -1,8 +1,8 @@
 /**
- * Les ecrans de la premiere connexion d'agence, avant tout dossier.
+ * Les ecrans de la premiere connexion d’agence, avant tout dossier.
  *
  * La base refuse avec des messages courts et sans accents, ecrits dans des
- * migrations qu'on ne modifie plus. Ils ne sont jamais affiches tels quels :
+ * migrations qu’on ne modifie plus. Ils ne sont jamais affiches tels quels :
  * `refus.messages` les traduit, et tout message inconnu tombe sur le texte
  * par defaut plutot que de montrer un libelle technique.
  */

@@ -8,6 +8,7 @@ import { FormulaireDepot } from '@/components/forms/FormulaireDepot'
 import { ResteAFaireGarant } from '@/components/dossiers/ResteAFaireGarant'
 import { FormulaireRelanceGarant } from '@/components/forms/FormulaireRelanceGarant'
 import { PastillesSuivi } from '@/components/dossiers/PastillesSuivi'
+import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
 import PageLocataire from '@/app/(porteur)/locataire/page'
 import PageGarant from '@/app/(porteur)/garant/page'
@@ -670,6 +671,17 @@ test.each(['garant', 'agence'])(
   },
 )
 
+test('le message de depot reste apres la redirection', async () => {
+  const avec = texteVisible(
+    await PageGarant({ searchParams: Promise.resolve({ deposee: 'piece_identite' }) }),
+  )
+  expect(avec).toContain('Pièce déposée.')
+  const sans = texteVisible(
+    await PageGarant({ searchParams: Promise.resolve({ deposee: 'inconnue' }) }),
+  )
+  expect(sans).not.toContain('Pièce déposée.')
+})
+
 test('le garant voit ce qu il lui reste a faire tant que le depot est ouvert', async () => {
   function textes(noeud: ReactNode, sortie: string[] = []): string[] {
     if (typeof noeud === 'string') sortie.push(noeud)
@@ -898,6 +910,53 @@ test('un dossier regle en depot replie le rattachement et fige le loyer', async 
   expect(dansDetails(enDepot, FormulaireContinuite)).toBe(true)
   expect(texteVisible(enDepot)).toContain('Rattacher ce dossier à une agence')
   expect(texteVisible(enDepot)).toMatch(/850\s+€/)
-  expect(texteVisible(enDepot)).toContain('Ce montant est figé.')
+  expect(texteVisible(enDepot)).toContain(
+    'Ce montant est figé parce que ton garant a déclaré son engagement : le loyer ne peut plus changer.',
+  )
+  expect(texteVisible(enDepot)).toContain('par mois, charges comprises.')
   expect(texteVisible(enDepot)).not.toContain('Charges comprises, par mois.')
+
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'complet',
+      paye_le: '2026-11-24T10:00:00Z',
+      loyer_cents: 125000,
+      loyer_verrouille: true,
+      email_garant: 'garant@example.test',
+      agence_id: null,
+    },
+    error: null,
+  }
+  const completLibre = await locataire()
+  expect(dansDetails(completLibre, FormulaireCandidature)).toBe(true)
+  const texteLibre = texteVisible(completLibre)
+  expect(texteLibre.indexOf('Dossier réglé le')).toBeLessThan(
+    texteLibre.indexOf('Rattacher ce dossier à une agence'),
+  )
+
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'complet',
+      paye_le: '2026-11-24T10:00:00Z',
+      loyer_cents: 125000,
+      loyer_verrouille: true,
+      email_garant: 'garant@example.test',
+      agence_id: ID,
+    },
+    error: null,
+  }
+  const complet = await deplier(await locataire(), [FriseAvancement, ResteAFaireLocataire])
+  const texte = texteVisible(complet)
+  expect(texte).toMatch(/Décision de l’agence\s+\(\s*en cours\s*\)/)
+  expect(texte).toContain(
+    'Toutes les pièces sont là. Ton garant est éligible : l’agence peut décider.',
+  )
+  expect(texte).toContain(
+    'Rien à faire de ton côté. Toutes les pièces sont là : l’agence peut décider.',
+  )
+  expect(texte).not.toContain('Rattache ton dossier à ton agence')
+  expect(texte).not.toContain('Ton garant dépose ses pièces')
+  expect(dansDetails(complet, FormulaireCandidature)).toBe(null)
 })

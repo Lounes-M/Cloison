@@ -32,7 +32,7 @@ export async function SuiviSignature({
     .max(10)
     .safeParse(r.data)
   return (
-    <section id="signature" className="panneau-espace mt-8">
+    <section id="signature" tabIndex={-1} className="panneau-espace mt-8">
       <h2 className="text-xl font-bold">{t.titre}</h2>
       {r.error || !liste.success ? (
         <p>{t.erreur}</p>

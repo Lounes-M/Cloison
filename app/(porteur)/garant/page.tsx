@@ -27,6 +27,7 @@ import {
 import { Icone } from '@/components/ui/Icone'
 import { informationCollecte as informationCollecteFr } from '@/lib/content/information-collecte'
 import { capaciteDepuisCookies, clientPorteurDeLien } from '@/lib/acces/session'
+import { natureDepuis } from '@/lib/garant/validation'
 import { FormulaireMention } from '@/components/forms/FormulaireMention'
 import {
   depot as depotFr,
@@ -132,7 +133,9 @@ export default async function PageGarant({
 
   const supabase = clientPorteurDeLien(porteur.jeton)
   const { dossierId } = porteur.capacite
-  const curseur = lireCurseurJournal((await searchParams)?.avant, dossierId)
+  const parametres = await searchParams
+  const deposee = natureDepuis(typeof parametres?.deposee === 'string' ? parametres.deposee : '')
+  const curseur = lireCurseurJournal(parametres?.avant, dossierId)
 
   const [
     { data: dossier, error: erreurDossier },
@@ -260,7 +263,7 @@ export default async function PageGarant({
         </p>
       ) : null}
 
-      <div className="bg-sun/25 border-sun mt-5 flex items-start gap-3 rounded-[18px] border p-5">
+      <div className="message-info mt-5 flex items-start gap-3">
         <Icone nom="cadenas" className="mt-0.5 size-5 shrink-0" />
         <p className="text-[14px] leading-relaxed font-medium">{depot.discretion}</p>
       </div>
@@ -289,7 +292,7 @@ export default async function PageGarant({
           { id: 'journal', titre: interfaceEspace.historique },
         ]}
       />
-      <section id="engagement" className="panneau-espace mt-8">
+      <section id="engagement" tabIndex={-1} className="panneau-espace mt-8">
         <h2 className="text-xl font-bold">{texteEngagement.titre}</h2>
         <p className="text-muted mt-2 mb-8 text-[14px] leading-relaxed font-medium">
           {texteEngagement.aide}
@@ -320,7 +323,7 @@ export default async function PageGarant({
         agence={false}
         modifiable={ouvert}
       />
-      <section id="pieces" className="panneau-espace mt-6">
+      <section id="pieces" tabIndex={-1} className="panneau-espace mt-6">
         <h2 className="text-xl font-bold">{depot.piecesTitre}</h2>
         <p className="mt-2 text-[15px] font-semibold">
           {documentsDeclares.profil(profilsRessources.find((p) => p.valeur === profil)!.libelle)}
@@ -352,8 +355,14 @@ export default async function PageGarant({
               <li
                 key={nature.valeur}
                 id={`piece-${nature.valeur}`}
+                tabIndex={-1}
                 className="border-ink scroll-mt-6 border-t-2 pt-6"
               >
+                {deposee === nature.valeur ? (
+                  <p role="status" className="message-succes mb-4">
+                    {depot.depose}
+                  </p>
+                ) : null}
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="flex items-center gap-2 text-[16px] font-bold">
@@ -423,7 +432,7 @@ export default async function PageGarant({
       </section>
 
       {mentionAttendue ? (
-        <section id="mention" className="panneau-espace mt-8">
+        <section id="mention" tabIndex={-1} className="panneau-espace mt-8">
           <h2 className="text-xl font-bold">{texteMention.titre}</h2>
           <p className="mt-2 mb-8 text-[15px] leading-relaxed font-medium">{texteMention.intro}</p>
           <FormulaireMention
@@ -449,7 +458,7 @@ export default async function PageGarant({
       ) : null}
 
       {!mentionAttendue && engagement?.mention ? (
-        <section id="mention" className="panneau-espace mt-8">
+        <section id="mention" tabIndex={-1} className="panneau-espace mt-8">
           <h2 className="text-xl font-bold">{texteMention.titre}</h2>
           <p className="text-muted mt-2 text-[14px] leading-relaxed font-medium">
             {texteMention.figee}
@@ -461,7 +470,7 @@ export default async function PageGarant({
       ) : null}
 
       <SuiviSignature db={supabase} dossier={dossierId} partie="garant" />
-      <section id="journal" className="panneau-espace mt-8">
+      <section id="journal" tabIndex={-1} className="panneau-espace mt-8">
         <h2 className="text-xl font-bold">{texteJournal.titre}</h2>
         <p className="text-muted mt-2 text-sm">{texteJournal.aide}</p>
         {erreurJournal ? (

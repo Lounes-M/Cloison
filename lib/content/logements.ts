@@ -1,4 +1,4 @@
-/** Textes des logements de l'agence (migration 0069). Vouvoiement. */
+/** Textes des logements de l’agence (migration 0069). Vouvoiement. */
 export const logements = {
   titre: 'Logements',
   etiquette: 'Comparer les candidats',

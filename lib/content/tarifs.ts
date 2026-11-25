@@ -1,8 +1,8 @@
 /**
  * Les montants, ecrits une seule fois.
  *
- * Decides le 4 septembre 2026, a l'ouverture de la phase 6. En centimes,
- * comme tout ce qui compte de l'argent dans ce depot : un montant ne se stocke
+ * Decides le 4 septembre 2026, a l’ouverture de la phase 6. En centimes,
+ * comme tout ce qui compte de l’argent dans ce depot : un montant ne se stocke
  * pas en flottant.
  */
 
@@ -11,10 +11,10 @@ export const tarifs = {
   locataireCents: 900,
   versionLocataire: 'locataire-2026-09-04',
 
-  /** L'agence, par acte signe et archive. Consulter reste gratuit. */
+  /** L’agence, par acte signe et archive. Consulter reste gratuit. */
   acteCents: 2900,
 
-  /** Le garant. Il n'y a pas de montant parce qu'il n'y en aura jamais. */
+  /** Le garant. Il n’y a pas de montant parce qu’il n’y en aura jamais. */
 } as const
 
 export const euros = (centimes: number) =>

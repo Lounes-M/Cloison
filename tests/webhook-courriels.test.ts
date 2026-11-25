@@ -96,4 +96,7 @@ test('sans configuration de signature aucun message n est accepte', async () => 
   vi.stubEnv('RESEND_WEBHOOK_SECRET', '')
   expect((await POST(requete())).status).toBe(503)
   expect(h.client).not.toHaveBeenCalled()
+  expect(console.error).toHaveBeenCalledWith(
+    '[courriel] webhook refuse : secret de signature absent',
+  )
 })

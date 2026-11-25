@@ -4,7 +4,9 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { PageQuestions } from '@/components/pages/PageQuestions'
 import { DonneesStructurees } from '@/components/seo/DonneesStructurees'
 import { questions as questionsEn } from '@/lib/content/en/questions'
+import { prixActe as prixActeEn, prixLocataire as prixLocataireEn } from '@/lib/content/en/tarifs'
 import { groupesAffiches, questions } from '@/lib/content/questions'
+import { prixActe, prixLocataire } from '@/lib/content/tarifs'
 import { faqStructuree, jsonPourScript } from '@/lib/seo/faq'
 
 afterEach(() => {
@@ -44,6 +46,23 @@ test('la page des questions pose le bloc de donnees', () => {
   expect(trouver(PageQuestions({ langue: 'en' }))).toEqual(faqStructuree(questionsEn.groupes))
 })
 
+test('les trois prix sont ceux du code, dans les deux langues', () => {
+  for (const [source, locataire, acte, rien, acteLibelle] of [
+    [questions.groupes, prixLocataire, prixActe, /garant ne paie rien/, /par acte/],
+    [questionsEn.groupes, prixLocataireEn, prixActeEn, /guarantor pays nothing/, /per signed/],
+  ] as const) {
+    const reponses = source.flatMap((g) => g.questions.map((q) => q.reponse)).join('\n')
+    expect(reponses).toContain(locataire)
+    expect(reponses).toContain(acte)
+    expect(reponses).toMatch(rien)
+    expect(reponses).toMatch(acteLibelle)
+  }
+  const tout = [...questions.groupes, ...questionsEn.groupes]
+    .flatMap((g) => g.questions.map((q) => `${q.question} ${q.reponse}`))
+    .join('\n')
+  expect(tout).not.toMatch(/L’agence seulement|Only the agency/)
+})
+
 test('la reponse sur les pieces du garant dit les lectures automatiques activees', () => {
   const reponse = (
     actifs: { lectureGarant: boolean; ocr: boolean },
@@ -54,7 +73,9 @@ test('la reponse sur les pieces du garant dit les lectures automatiques activees
       .questions.find((q) => /pièces|documents/.test(q.question))!.reponse
 
   const seule = reponse({ lectureGarant: false, ocr: false })
-  expect(seule).toMatch(/^L’agence seulement/)
+  expect(seule).toMatch(/^L’agence rattachée à votre dossier/)
+  expect(seule).not.toMatch(/L’agence seulement/)
+  expect(seule).not.toMatch(/Only the agency/)
   expect(seule).not.toContain('IA')
   expect(seule).not.toContain('reconnaissance de texte')
 
