@@ -3,10 +3,10 @@ import { colocation as texteColocationFr } from '@/lib/content/colocation'
 import { colocation as texteColocationEn } from '@/lib/content/en/colocation'
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { ResteAFaireLocataire } from '@/components/dossiers/ResteAFaireLocataire'
-import { detailDossierOuvert, resteAFaireLocataire } from '@/lib/locataire/reste-a-faire'
+import { suiviLocataire, type CleExplication } from '@/lib/locataire/reste-a-faire'
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { frise as friseFr } from '@/lib/content/frise'
-import { etapesLocataire } from '@/lib/dossiers/frise'
+import { friseDepuisEtape } from '@/lib/dossiers/frise'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { FormulaireCandidature } from '@/components/forms/FormulaireCandidature'
 import { FormulaireContinuite } from '@/components/forms/FormulaireContinuite'
@@ -54,6 +54,46 @@ import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
 
 export const generateMetadata = () => titreEspace(titresFr.locataire, titresEn.locataire)
+
+function phraseEtape(
+  cle: CleExplication,
+  textes: {
+    bandeau: { loyer: string; paiement: string; garant: string; attente: string }
+    sansAgence: Record<string, string>
+    statuts: Record<string, { explication: string }>
+  },
+): string {
+  switch (cle) {
+    case 'loyer':
+      return textes.bandeau.loyer
+    case 'paiement':
+      return textes.bandeau.paiement
+    case 'garant':
+      return textes.bandeau.garant
+    case 'attente':
+      return textes.bandeau.attente
+    case 'depot':
+      return textes.statuts.depot_en_cours!.explication
+    case 'rattachement':
+      return textes.sansAgence.complet!
+    case 'decision':
+      return textes.statuts.complet!.explication
+    case 'insuffisant':
+      return textes.statuts.garant_insuffisant!.explication
+    case 'insuffisantSansAgence':
+      return textes.sansAgence.garant_insuffisant!
+    case 'signature':
+      return textes.statuts.transmis!.explication
+    case 'signe':
+      return textes.statuts.signe!.explication
+    case 'refuse':
+      return textes.statuts.refuse!.explication
+    case 'expire':
+      return textes.statuts.expire!.explication
+    default:
+      return textes.statuts.ouvert!.explication
+  }
+}
 
 const tons = {
   sky: 'bg-sky',
@@ -111,18 +151,19 @@ export default async function PageLocataire({
 
   const statut = statuts[String(dossier.statut)] ?? statuts.ouvert!
   const faits = {
+    statut: String(dossier.statut),
     loyerDeclare: dossier.loyer_cents != null,
     aRegler: resteARegler(dossier),
     garantDesigne: Boolean(dossier.email_garant),
+    agence: Boolean(dossier.agence_id),
+    demonstration: Boolean(dossier.demonstration),
   }
-  const explication =
-    (String(dossier.statut) === 'ouvert'
-      ? choisir(langue, bandeauOuvertFr, bandeauOuvertEn)[detailDossierOuvert(faits)]
-      : undefined) ??
-    (!dossier.agence_id && !dossier.demonstration
-      ? choisir(langue, statutsSansAgenceFr, statutsSansAgenceEn)[String(dossier.statut)]
-      : undefined) ??
-    statut.explication
+  const lecture = suiviLocataire(faits)
+  const explication = phraseEtape(lecture.cle, {
+    bandeau: choisir(langue, bandeauOuvertFr, bandeauOuvertEn),
+    sansAgence: choisir(langue, statutsSansAgenceFr, statutsSansAgenceEn),
+    statuts,
+  })
   const ouvert = ['ouvert', 'depot_en_cours', 'complet', 'garant_insuffisant'].includes(
     String(dossier.statut),
   )
@@ -177,20 +218,15 @@ export default async function PageLocataire({
     timeZone: 'Europe/Paris',
   })
 
-  const restant = ouvert
-    ? resteAFaireLocataire({
-        loyerDeclare: dossier.loyer_cents != null,
-        aRegler,
-        garantDesigne: garant !== null,
-      })
-    : null
+  const restant = ouvert ? lecture.gestes : null
   const saisieLoyer = ouvert && !dossier.loyer_verrouille && !coloc
-  // Une fois paye et en depot, candidater ou transmettre n'est plus le geste
-  // du moment. Les blocs restent, plus bas et replies.
-  const rattachementSecondaire =
-    Boolean(dossier.paye_le) && String(dossier.statut) === 'depot_en_cours'
   const proposerCandidature = ouvert && !dossier.agence_id && !dossier.demonstration
   const proposerContinuite = ouvert && !dossier.agence_id
+  // Une fois le dossier regle, candidater ou transmettre n'est plus le geste
+  // du moment, y compris pendant la decision : le repli ne depend plus du
+  // seul statut `depot_en_cours`.
+  const rattachementSecondaire =
+    Boolean(dossier.paye_le) && (proposerCandidature || proposerContinuite)
   const rattachement = (
     <>
       {proposerCandidature ? (
@@ -205,6 +241,92 @@ export default async function PageLocataire({
       ) : null}
     </>
   )
+
+  function blocPaiement() {
+    if (!dossier || !porteur) return null
+    if (!aRegler && !dossier.paye_le) return null
+    return (
+      <section id="paiement" tabIndex={-1} className="panneau-espace mt-6">
+        <h2 className="text-xl font-bold">{paiementLocataire.titre}</h2>
+        {paiement === 'ok' && !dossier.paye_le ? (
+          <p className="bg-sun outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
+            {paiementLocataire.enAttente}
+          </p>
+        ) : null}
+        {paiement === 'ok' && dossier.paye_le ? (
+          <p className="message-succes mt-4">{paiementLocataire.confirme}</p>
+        ) : null}
+        {paiement === 'annule' ? (
+          <p className="bg-paper outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
+            {paiementLocataire.annule}
+          </p>
+        ) : null}
+        {paiement === 'accords' ? (
+          <p role="alert" className="message-erreur mt-4">
+            {paiementLocataire.accordsManquants}
+          </p>
+        ) : null}
+        {paiement === 'indisponible' ? (
+          <p className="message-erreur mt-4">{paiementLocataire.indisponible}</p>
+        ) : null}
+
+        {dossier.paye_le ? (
+          <p className="text-muted mt-3 text-[14px] font-medium">
+            {paiementLocataire.regle_le(
+              new Date(String(dossier.paye_le)).toLocaleDateString(locale(langue), {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                timeZone: 'Europe/Paris',
+              }),
+            )}
+          </p>
+        ) : (
+          <div className="bg-sky outlined shadow-brut mt-4 rounded-[18px] p-6">
+            <p className="font-display text-3xl">{euros(prixDossier)}</p>
+            <p className="mt-1 text-[13px] font-semibold">
+              {editeur().tva ? mentionTva.ttc : mentionTva.franchise}
+            </p>
+            <p className="mt-2 text-[15px] leading-relaxed font-medium">
+              {paiementLocataire.texte}
+            </p>
+            {/* La retractation au prorata s'affiche AVANT de payer, avec la
+                demande d'execution immediate qu'elle suppose (L221-25). */}
+            <p className="text-muted mt-3 text-[13px] leading-relaxed font-medium">
+              {paiementLocataire.regle}
+            </p>
+            <form action={payerMonDossier} className="mt-5">
+              <input type="hidden" name="tarif_version" value={versionTarif} />
+              <input type="hidden" name="montant_cents" value={prixDossier} />
+              <input type="hidden" name="dossier" value={porteur.capacite.dossierId} />
+              <input type="hidden" name="conditions_version" value={versionConditions} />
+              <label className="mb-3 flex items-start gap-3 text-[14px] leading-relaxed font-medium">
+                <input type="checkbox" name="accord_conditions" required className="mt-1 size-4" />
+                <span>
+                  {paiementLocataire.accordConditions}{' '}
+                  <a href={lien(langue, '/conditions')} className="underline underline-offset-4">
+                    {paiementLocataire.lienConditions}
+                  </a>
+                </span>
+              </label>
+              <label className="mb-5 flex items-start gap-3 text-[14px] leading-relaxed font-medium">
+                <input
+                  type="checkbox"
+                  name="execution_immediate"
+                  required
+                  className="mt-1 size-4"
+                />
+                <span>{paiementLocataire.executionImmediate}</span>
+              </label>
+              <button type="submit" className="btn btn-principal btn-grand">
+                {paiementLocataire.boutonPour(prixDossier)}
+              </button>
+            </form>
+          </div>
+        )}
+      </section>
+    )
+  }
 
   return (
     <div className="page-espace w-full max-w-[640px]">
@@ -223,12 +345,14 @@ export default async function PageLocataire({
         </p>
       ) : null}
 
+      {dossier.paye_le ? blocPaiement() : null}
+
       <FriseAvancement
         titre={frise.locataire.titre}
-        etapes={etapesLocataire(String(dossier.statut), garant !== null, langue)}
+        etapes={friseDepuisEtape(lecture.etape, langue, faits.garantDesigne)}
       />
 
-      {restant ? <ResteAFaireLocataire etapes={restant} /> : null}
+      {restant ? <ResteAFaireLocataire etapes={restant} attente={lecture.attente} /> : null}
 
       <SommaireDossier
         liens={[
@@ -242,7 +366,7 @@ export default async function PageLocataire({
             : []),
         ]}
       />
-      <section id="logement" className="panneau-espace mt-6">
+      <section id="logement" tabIndex={-1} className="panneau-espace mt-6">
         <h2 className="text-xl font-bold">{espace.loyerTitre}</h2>
         {saisieLoyer ? (
           <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
@@ -272,102 +396,25 @@ export default async function PageLocataire({
         ) : (
           <div className="mt-4">
             {dossier.loyer_cents != null ? (
-              <p className="text-sm font-semibold">{euros(Number(dossier.loyer_cents))}</p>
+              <p className="text-sm font-semibold">
+                {euros(Number(dossier.loyer_cents))} {espace.loyerParMois}
+              </p>
             ) : null}
-            <p className="text-muted mt-2 text-sm font-medium">{espace.loyerFigePhrase}</p>
+            <p className="text-muted mt-2 text-sm font-medium">
+              {dossier.loyer_verrouille ? espace.loyerFigeEngagement : espace.loyerFigeClos}
+            </p>
           </div>
         )}
       </section>
-      {rattachementSecondaire ? null : rattachement}
-
-      {aRegler || dossier.paye_le ? (
-        <section id="paiement" className="panneau-espace mt-6">
-          <h2 className="text-xl font-bold">{paiementLocataire.titre}</h2>
-          {paiement === 'ok' && !dossier.paye_le ? (
-            <p className="bg-sun outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
-              {paiementLocataire.enAttente}
-            </p>
-          ) : null}
-          {paiement === 'ok' && dossier.paye_le ? (
-            <p className="message-succes mt-4">{paiementLocataire.confirme}</p>
-          ) : null}
-          {paiement === 'annule' ? (
-            <p className="bg-paper outlined mt-4 rounded-xl px-4 py-3 text-[14px] font-semibold">
-              {paiementLocataire.annule}
-            </p>
-          ) : null}
-          {paiement === 'accords' ? (
-            <p role="alert" className="message-erreur mt-4">
-              {paiementLocataire.accordsManquants}
-            </p>
-          ) : null}
-          {paiement === 'indisponible' ? (
-            <p className="message-erreur mt-4">{paiementLocataire.indisponible}</p>
-          ) : null}
-
-          {dossier.paye_le ? (
-            <p className="text-muted mt-3 text-[14px] font-medium">
-              {paiementLocataire.regle_le(
-                new Date(String(dossier.paye_le)).toLocaleDateString(locale(langue), {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  timeZone: 'Europe/Paris',
-                }),
-              )}
-            </p>
-          ) : (
-            <div className="bg-sky outlined shadow-brut mt-4 rounded-[18px] p-6">
-              <p className="font-display text-3xl">{euros(prixDossier)}</p>
-              <p className="mt-1 text-[13px] font-semibold">
-                {editeur().tva ? mentionTva.ttc : mentionTva.franchise}
-              </p>
-              <p className="mt-2 text-[15px] leading-relaxed font-medium">
-                {paiementLocataire.texte}
-              </p>
-              {/* La retractation au prorata s'affiche AVANT de payer, avec la
-                  demande d'execution immediate qu'elle suppose (L221-25). */}
-              <p className="text-muted mt-3 text-[13px] leading-relaxed font-medium">
-                {paiementLocataire.regle}
-              </p>
-              <form action={payerMonDossier} className="mt-5">
-                <input type="hidden" name="tarif_version" value={versionTarif} />
-                <input type="hidden" name="montant_cents" value={prixDossier} />
-                <input type="hidden" name="dossier" value={porteur.capacite.dossierId} />
-                <input type="hidden" name="conditions_version" value={versionConditions} />
-                <label className="mb-3 flex items-start gap-3 text-[14px] leading-relaxed font-medium">
-                  <input
-                    type="checkbox"
-                    name="accord_conditions"
-                    required
-                    className="mt-1 size-4"
-                  />
-                  <span>
-                    {paiementLocataire.accordConditions}{' '}
-                    <a href={lien(langue, '/conditions')} className="underline underline-offset-4">
-                      {paiementLocataire.lienConditions}
-                    </a>
-                  </span>
-                </label>
-                <label className="mb-5 flex items-start gap-3 text-[14px] leading-relaxed font-medium">
-                  <input
-                    type="checkbox"
-                    name="execution_immediate"
-                    required
-                    className="mt-1 size-4"
-                  />
-                  <span>{paiementLocataire.executionImmediate}</span>
-                </label>
-                <button type="submit" className="btn btn-principal btn-grand">
-                  {paiementLocataire.boutonPour(prixDossier)}
-                </button>
-              </form>
-            </div>
-          )}
-        </section>
+      {!rattachementSecondaire && (proposerCandidature || proposerContinuite) ? (
+        <div id="rattachement" tabIndex={-1}>
+          {rattachement}
+        </div>
       ) : null}
 
-      <section id="garant" className="panneau-espace mt-6">
+      {dossier.paye_le ? null : blocPaiement()}
+
+      <section id="garant" tabIndex={-1} className="panneau-espace mt-6">
         <h2 className="text-xl font-bold">{espace.garantTitre}</h2>
         <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
           {garant ? espace.garantDesigne(garant) : espace.garantAucun}
@@ -397,7 +444,7 @@ export default async function PageLocataire({
       </section>
 
       {secondPossible && (ouvert || second) ? (
-        <section id="second-garant" className="panneau-espace mt-6">
+        <section id="second-garant" tabIndex={-1} className="panneau-espace mt-6">
           <h2 className="text-xl font-bold">{texteSecond.titre}</h2>
           <p className="text-muted mt-2 mb-6 text-[14px] leading-relaxed font-medium">
             {second ? texteSecond.designe(second) : texteSecond.aide}
@@ -413,7 +460,7 @@ export default async function PageLocataire({
       ) : null}
 
       {rattachementSecondaire && (proposerCandidature || proposerContinuite) ? (
-        <details className="aide-espace mt-10">
+        <details id="rattachement" tabIndex={-1} className="aide-espace mt-10">
           <summary>{espace.rattachementPlusTard}</summary>
           {rattachement}
         </details>

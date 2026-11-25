@@ -1,6 +1,7 @@
 import { frise as friseFr } from '@/lib/content/frise'
 import { frise as friseEn } from '@/lib/content/en/frise'
 import { choisir, type Langue } from '@/lib/i18n'
+import { suiviLocataire, type EtapeDossier } from '@/lib/locataire/reste-a-faire'
 
 export type EtatEtape = keyof typeof friseFr.etats
 export type Etape = { titre: string; etat: EtatEtape }
@@ -17,38 +18,70 @@ function suite(titres: string[], courante: number, arret = false): Etape[] {
   }))
 }
 
-/** Le locataire voit les statuts tels quels : la frise n'en apprend pas davantage. */
-export function etapesLocataire(
-  statut: string,
+/**
+ * La frise du locataire, a partir de l'etape en cours.
+ *
+ * `rattachement` remplace le titre de la decision : tant qu'aucune agence ne
+ * suit le dossier, la decision n'a pas commence.
+ */
+export function friseDepuisEtape(
+  etape: EtapeDossier,
+  langue: Langue,
   garantDesigne: boolean,
-  langue: Langue = 'fr',
 ): Etape[] {
   const e = choisir(langue, friseFr, friseEn).locataire.etapes
   const titres = [
     e.ouverture,
     garantDesigne ? e.garant : e.garantADesigner,
     e.depot,
-    e.decision,
+    etape === 'rattachement' ? e.rattachement : e.decision,
     e.signature,
   ]
-  switch (statut) {
-    case 'ouvert':
-      return suite(titres, garantDesigne ? 2 : 1)
-    case 'depot_en_cours':
+  switch (etape) {
+    case 'loyer':
+    case 'paiement':
+    case 'garant':
+      return suite(titres, 1)
+    case 'attente':
+    case 'depot':
       return suite(titres, 2)
-    case 'garant_insuffisant':
+    case 'insuffisant':
       return suite(titres, 2, true)
-    case 'complet':
+    case 'rattachement':
+    case 'decision':
       return suite(titres, 3)
     case 'refuse':
       return suite(titres, 3, true)
-    case 'transmis':
+    case 'signature':
       return suite(titres, 4)
     case 'signe':
       return suite(titres, titres.length)
     default:
       return suite(titres, 0)
   }
+}
+
+/**
+ * Le locataire voit les statuts tels quels : la frise n'en apprend pas davantage.
+ *
+ * Sans precision, un dossier `complet` est traite comme suivi par une agence :
+ * les appelants qui connaissent le rattachement passent par `friseDepuisEtape`.
+ */
+export function etapesLocataire(
+  statut: string,
+  garantDesigne: boolean,
+  langue: Langue = 'fr',
+  options: { agence?: boolean; demonstration?: boolean } = {},
+): Etape[] {
+  const suivi = suiviLocataire({
+    statut,
+    loyerDeclare: true,
+    aRegler: false,
+    garantDesigne,
+    agence: options.agence ?? true,
+    demonstration: options.demonstration ?? false,
+  })
+  return friseDepuisEtape(suivi.etape, langue, garantDesigne)
 }
 
 /**

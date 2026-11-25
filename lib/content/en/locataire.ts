@@ -52,7 +52,10 @@ export const statutsSansAgence: Record<string, string> = {
 }
 
 export const espace: Textes<typeof Fr.espace> = {
-  loyerFigePhrase: 'This amount is locked.',
+  loyerParMois: 'per month, charges included.',
+  loyerFigeEngagement:
+    'This amount is locked because your guarantor has made their declaration: the rent can no longer change.',
+  loyerFigeClos: 'This amount is locked because the file is no longer in progress.',
   rattachementPlusTard: 'Link this file to an agency later',
   garantAssocie:
     'Your guarantor has started their file and stays attached to it. To name someone else, open a new file.',
@@ -98,9 +101,14 @@ export const resteAFaire: Textes<typeof Fr.resteAFaire> = {
     loyer: 'Enter the monthly rent, charges included.',
     paiement: 'Pay for the file so your guarantor receives their link.',
     garant: 'Name your guarantor: they receive a link to upload their documents.',
+    rattachement: 'Attach your file to your agency so that it can decide.',
   },
   attente:
     'Nothing to do on your side for now. Your guarantor is uploading their documents; you will see the file move forward here.',
+  attenteDecision:
+    'Nothing to do on your side. All the documents are there: the agency can decide.',
+  attenteInsuffisant:
+    'Nothing to do on your side on this file. What comes next is settled with the agency, or by opening a new file.',
 }
 
 export const statuts: Textes<typeof Fr.statuts> = {

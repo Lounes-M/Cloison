@@ -158,7 +158,8 @@ export const engagement: Textes<typeof Fr.engagement> = {
   bouton: 'Save',
   envoi: 'Saving…',
   succes: 'Your commitment has been saved.',
-  avertissementLoyer: 'This amount is below the monthly rent for the file. You can still save it.',
+  avertissementLoyer: (loyer: string) =>
+    `This amount is below the monthly rent for the file (${loyer} per month, charges included). You can still save it.`,
   erreurs: {
     couvre: 'Enter what you cover.',
     montant: 'The amount cannot be read. Example: 1 200 or 1200.50.',
@@ -169,7 +170,7 @@ export const engagement: Textes<typeof Fr.engagement> = {
 
 /**
  * La mention : guidee, jamais fournie. Aucune phrase modele ici non plus. Elle
- * s'ecrit en francais : c'est la langue de l'acte et du controle automatique.
+ * s’ecrit en francais : c’est la langue de l’acte et du controle automatique.
  */
 export const mention: Textes<typeof Fr.mention> = {
   titre: 'Your handwritten statement',

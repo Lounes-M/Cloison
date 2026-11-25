@@ -1,7 +1,7 @@
 /**
  * Les etapes du dossier, vues par le locataire (tutoye) et par le garant
  * (vouvoye). Aucune etape ne dit pourquoi : le statut suffit, et le garant
- * n'apprend jamais si son ratio passe le seuil de l'agence.
+ * n’apprend jamais si son ratio passe le seuil de l’agence.
  */
 export const frise = {
   etats: {
@@ -17,6 +17,7 @@ export const frise = {
       garant: 'Garant désigné',
       garantADesigner: 'Garant à désigner',
       depot: 'Dépôt de ton garant',
+      rattachement: 'Rattachement à ton agence',
       decision: 'Décision de l’agence',
       signature: 'Acte signé',
     },

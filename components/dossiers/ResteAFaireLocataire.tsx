@@ -1,6 +1,6 @@
 import { Icone } from '@/components/ui/Icone'
 import { resteAFaire as tFr } from '@/lib/content/locataire'
-import type { EtapeLocataire } from '@/lib/locataire/reste-a-faire'
+import type { AttenteLocataire, EtapeLocataire } from '@/lib/locataire/reste-a-faire'
 import { resteAFaire as tEn } from '@/lib/content/en/locataire'
 import { choisir } from '@/lib/i18n'
 import { langueEspace } from '@/lib/langue-espace'
@@ -9,12 +9,25 @@ const ancres: Record<EtapeLocataire, string> = {
   loyer: 'logement',
   paiement: 'paiement',
   garant: 'garant',
+  rattachement: 'rattachement',
 }
 
 /** Le haut de l'espace du locataire : ses gestes, et ou les faire. */
-export async function ResteAFaireLocataire({ etapes }: { etapes: EtapeLocataire[] }) {
+export async function ResteAFaireLocataire({
+  etapes,
+  attente = null,
+}: {
+  etapes: EtapeLocataire[]
+  attente?: AttenteLocataire | null
+}) {
   const langue = await langueEspace()
   const t = choisir(langue, tFr, tEn)
+  const message =
+    attente === 'decision'
+      ? t.attenteDecision
+      : attente === 'insuffisant'
+        ? t.attenteInsuffisant
+        : t.attente
 
   return (
     <section aria-labelledby="reste-a-faire" className="panneau-espace mt-8">
@@ -41,7 +54,7 @@ export async function ResteAFaireLocataire({ etapes }: { etapes: EtapeLocataire[
       ) : (
         <p className="mt-3 flex items-start gap-2 text-[15px] leading-relaxed font-medium">
           <Icone nom="coche" className="text-cobalt mt-0.5 size-5 shrink-0" />
-          {t.attente}
+          {message}
         </p>
       )}
     </section>
