@@ -17,7 +17,7 @@ test('security.txt suit la RFC 9116 et pointe vers le contact deja publie', () =
   )
   expect(champs.Contact).toBe(`mailto:${identiteEditeur.courriel}`)
   expect(champs['Preferred-Languages']).toBe('fr, en')
-  expect(champs.Canonical).toBe('https://cloison.immo/.well-known/security.txt')
+  expect(champs.Canonical).toBe('https://www.cloison.immo/.well-known/security.txt')
   const expire = new Date(champs.Expires ?? '')
   expect(expire.getTime()).toBeGreaterThan(Date.parse('2027-11-23T00:00:00Z'))
   expect(expire.getTime()).toBeLessThanOrEqual(Date.parse('2027-11-24T23:59:59.000Z'))

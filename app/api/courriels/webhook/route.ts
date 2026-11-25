@@ -7,7 +7,10 @@ export const runtime = 'nodejs'
 export const maxDuration = 20
 export async function POST(requete: Request) {
   const secret = process.env.RESEND_WEBHOOK_SECRET?.trim()
-  if (!secret) return NextResponse.json({ recu: false }, { status: 503 })
+  if (!secret) {
+    console.error('[courriel] webhook refuse : secret de signature absent')
+    return NextResponse.json({ recu: false }, { status: 503 })
+  }
   try {
     const resend = new Resend(env.resendApiKey)
     const corps = await lireCorpsCourriel(requete)
