@@ -2,8 +2,8 @@ import type { Textes } from '@/lib/i18n'
 import type { acte as Fr } from '../acte'
 
 /**
- * L'ecran de redaction de l'acte, en anglais. L'acte lui-meme reste redige en
- * francais : c'est un contrat de droit francais, sur le modele officiel.
+ * L’ecran de redaction de l’acte, en anglais. L’acte lui-meme reste redige en
+ * francais : c’est un contrat de droit francais, sur le modele officiel.
  */
 export const acte: Textes<typeof Fr> = {
   retourDossier: 'Back to the file',

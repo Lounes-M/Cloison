@@ -1,7 +1,7 @@
 /**
- * Le lien de candidature d'un logement (migration 0070).
+ * Le lien de candidature d’un logement (migration 0070).
  *
- * `agence` vouvoie l'agence ; `page` et `espace` tutoient le locataire.
+ * `agence` vouvoie l’agence ; `page` et `espace` tutoient le locataire.
  */
 export const candidature = {
   agence: {

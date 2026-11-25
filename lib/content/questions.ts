@@ -3,7 +3,7 @@
  *
  * Chaque reponse redit ce que les pages juridiques et le code fixent deja :
  * durees, prix, destinataires. Une regle changee ailleurs doit changer ici
- * dans la meme PR. Le locataire est tutoye ; le garant et l'agence vouvoyes.
+ * dans la meme PR. Le locataire est tutoye ; le garant et l’agence vouvoyes.
  */
 
 import { prixActe, prixLocataire } from './tarifs'
@@ -58,7 +58,7 @@ export const questions = {
         {
           question: 'Qui voit mes pièces ?',
           reponse:
-            'L’agence seulement, sur des copies filigranées, et chaque consultation est enregistrée à son nom. Le locataire ne voit ni vos pièces ni vos montants.',
+            'L’agence rattachée à votre dossier voit des copies filigranées, et chaque consultation est enregistrée à son nom. Le locataire ne voit ni vos pièces ni vos montants.',
           // Ajoutes a la reponse seulement quand la lecture correspondante est activee.
           complements: {
             lectureGarant:
@@ -120,9 +120,9 @@ type Question = {
 /**
  * Les questions telles que la page les affiche, selon ce qui tourne vraiment.
  *
- * « L'agence seulement » ne suffit plus des qu'une lecture automatique est
+ * « L’agence seulement » ne suffit plus des qu’une lecture automatique est
  * activee : la reponse le dit alors, comme la politique de confidentialite.
- * Une lecture coupee n'ajoute rien.
+ * Une lecture coupee n’ajoute rien.
  */
 export function groupesAffiches(
   groupes: readonly { id: string; titre: string; questions: readonly Question[] }[],

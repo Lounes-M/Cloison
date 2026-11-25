@@ -1,4 +1,4 @@
-/** Textes du tableau de bord de pilotage de l'agence (migration 0099). Vouvoiement. */
+/** Textes du tableau de bord de pilotage de l’agence (migration 0099). Vouvoiement. */
 export const tableauDeBord = {
   titre: 'Pilotage',
   etiquette: 'Tableau de bord',

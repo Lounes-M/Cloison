@@ -1,6 +1,6 @@
 export const navigationMobile = { menu: 'Menu' } as const
 
-/** La barre fine au-dessus de l'en-tete : les publics du site. */
+/** La barre fine au-dessus de l’en-tete : les publics du site. */
 export const barrePublics = {
   libelle: 'Cloison pour :',
   aria: 'Publics',

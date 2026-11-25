@@ -1,7 +1,7 @@
 /**
- * Tout le texte de la page d'accueil.
+ * Tout le texte de la page d’accueil.
  * Le contenu vit ici, la mise en forme vit dans `components/sections/`.
- * Pour changer une accroche, on n'ouvre pas un composant.
+ * Pour changer une accroche, on n’ouvre pas un composant.
  */
 
 import { commentCaMarche } from './agences'
@@ -39,7 +39,7 @@ export const hero = {
     delay: 1.2,
   },
   subtitle:
-    "Tu crées ton dossier, ton garant dépose ses pièces de son côté, l'agence reçoit un dossier complet. Personne ne voit ce qu'il ne doit pas voir.",
+    'Tu crées ton dossier, ton garant dépose ses pièces de son côté, l’agence reçoit un dossier complet. Personne ne voit ce qu’il ne doit pas voir.',
   primaryCta: 'Créer mon dossier',
   secondaryCta: 'Je suis une agence',
 } as const
@@ -58,7 +58,7 @@ export const marqueeItems = [
 export const problem = {
   titre: 'Un proche se porte caution.',
   sousTitre: 'Ses papiers font le tour.',
-  body: "Ses bulletins de paie sur ton WhatsApp. Son avis d'imposition dans ton Drive. Un acte imprimé, mal rempli, rescanné. Aider un proche à louer ne devrait pas ressembler à ça.",
+  body: 'Ses bulletins de paie sur ton WhatsApp. Son avis d’imposition dans ton Drive. Un acte imprimé, mal rempli, rescanné. Aider un proche à louer ne devrait pas ressembler à ça.',
   suite: {
     titre: 'Trois personnes gênées.',
     texte:
@@ -69,8 +69,8 @@ export const problem = {
 /**
  * Les trois espaces cloisonnés : le cœur du produit.
  *
- * L'ordre suit le parcours réel : le locataire ouvre le dossier, le garant
- * dépose, l'agence décide. Changer cet ordre, c'est changer le produit.
+ * L’ordre suit le parcours réel : le locataire ouvre le dossier, le garant
+ * dépose, l’agence décide. Changer cet ordre, c’est changer le produit.
  */
 export const spaces = [
   {
@@ -79,7 +79,7 @@ export const spaces = [
     title: 'Le locataire',
     tone: 'mint',
     icone: 'acte',
-    body: "Il crée le dossier et invite son garant. Il suit l'avancement du dossier, sans voir les pièces ni les montants.",
+    body: 'Il crée le dossier et invite son garant. Il suit l’avancement du dossier, sans voir les pièces ni les montants.',
     footnote: { left: 'Avancement du dossier', live: true },
   },
   {
@@ -94,7 +94,7 @@ export const spaces = [
   {
     id: 'agence',
     step: 3,
-    title: "L'agence",
+    title: 'L’agence',
     tone: 'sky',
     icone: 'fichier',
     body: 'Elle se connecte à son espace : pièces filigranées et ratio calculé à partir du revenu déclaré. Elle examine le dossier avant de décider.',
@@ -103,21 +103,21 @@ export const spaces = [
 ] as const
 
 /**
- * Les deux portes d'entrée du produit.
+ * Les deux portes d’entrée du produit.
  *
- * Le locataire d'abord, et l'ordre n'est pas cosmétique : c'est lui qui a le
- * problème, c'est lui qui relancera son garant, et c'est le seul dont la
+ * Le locataire d’abord, et l’ordre n’est pas cosmétique : c’est lui qui a le
+ * problème, c’est lui qui relancera son garant, et c’est le seul dont la
  * motivation ne retombe pas. La porte agence existe en parallèle : elle sert
- * l'agence qui préfère lancer le dossier elle-même.
+ * l’agence qui préfère lancer le dossier elle-même.
  *
  * Les étapes agence sont reprises de `agences.ts` plutôt que recopiées : deux
- * descriptions du même parcours finiraient par diverger, et c'est la page
+ * descriptions du même parcours finiraient par diverger, et c’est la page
  * agences qui fait foi.
  */
 export const parcours = {
   eyebrow: 'Comment ça marche',
   headline: ['Trois étapes,', 'chacun son espace.'],
-  /** Lu par les lecteurs d'écran à la place du groupe d'onglets. */
+  /** Lu par les lecteurs d’écran à la place du groupe d’onglets. */
   legende: 'Par où commences-tu\u00a0?',
   pistes: [
     {
@@ -136,14 +136,14 @@ export const parcours = {
           puce: 'dépôt privé',
           titre: 'Ton garant reçoit un lien',
           texte:
-            "Il dépose ses pièces de son côté, chez lui. Tu vois où il en est, jamais ce qu'il envoie.",
+            'Il dépose ses pièces de son côté, chez lui. Tu vois où il en est, jamais ce qu’il envoie.',
         },
         {
           numero: 3,
           puce: 'à examiner',
-          titre: "Tu transmets à l'agence",
+          titre: 'Tu transmets à l’agence',
           texte:
-            "L'agence consulte les pièces filigranées et le ratio déclaré. Elle reste responsable de l'examen du dossier.",
+            'L’agence consulte les pièces filigranées et le ratio déclaré. Elle reste responsable de l’examen du dossier.',
         },
       ],
       cta: { label: 'Créer mon dossier', href: '/demarrer' },
@@ -158,7 +158,7 @@ export const parcours = {
 } as const
 
 export const product = {
-  headline: ['Chacun sa vue.', "Rien d'autre."],
+  headline: ['Chacun sa vue.', 'Rien d’autre.'],
   intro:
     'Trois espaces séparés pour préparer le dossier de caution, transmettre les pièces et examiner la demande.',
   outro: 'Un même dossier, trois accès. Chaque consultation de pièce laisse une trace.',
@@ -173,13 +173,13 @@ export const pricing = {
       detail: 'une fois, pour un dossier valable trois mois. Gratuit quand ton agence t’invite.',
     },
     {
-      audience: "L'agence",
+      audience: 'L’agence',
       price: prixActe,
       detail: 'par acte signé et archivé. Consulter les dossiers reste gratuit.',
     },
   ],
   goldenRule: {
-    tag: "Règle d'or",
+    tag: 'Règle d’or',
     audience: 'Le garant',
     price: 'Rien.',
     detail: 'Le garant ne paie jamais, à aucune étape.',
@@ -207,7 +207,7 @@ export const vision = {
     'Le produit, c\u2019est',
     'le coffre à trois clés.',
   ],
-  body: "Quelqu'un s'engage pour toi sans te montrer ses papiers. Même gêne, même besoin, même coffre.",
+  body: 'Quelqu’un s’engage pour toi sans te montrer ses papiers. Même gêne, même besoin, même coffre.',
   useCases: [
     {
       label: 'Caution bancaire',

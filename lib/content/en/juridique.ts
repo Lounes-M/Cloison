@@ -3,7 +3,7 @@
  *
  * Une traduction de courtoisie : la version francaise fait foi, et la page le
  * dit. La forme suit `lib/content/juridique.ts` ; une regle changee la-bas
- * doit l'etre ici dans la meme PR.
+ * doit l’etre ici dans la meme PR.
  */
 
 import { prixActe, prixLocataire } from './tarifs'
@@ -22,7 +22,7 @@ export const juridique = {
     'This page is a translation provided for convenience. The French version is the one that applies.',
 } as const
 
-/** L'identite de l'editeur, telle que la page anglaise la presente. */
+/** L’identite de l’editeur, telle que la page anglaise la presente. */
 export const identiteEditeur = {
   denomination: 'LM Services',
   forme: 'SASU (société par actions simplifiée unipersonnelle, French single-shareholder company)',

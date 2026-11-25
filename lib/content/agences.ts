@@ -1,8 +1,8 @@
 /**
  * Le texte de la page /agences.
  *
- * L'angle diffère volontairement de la page d'accueil : celle-ci parle de la
- * gêne du locataire et de son garant, celle-là parle du temps que l'agence
+ * L’angle diffère volontairement de la page d’accueil : celle-ci parle de la
+ * gêne du locataire et de son garant, celle-là parle du temps que l’agence
  * perd. Même produit, acheteur différent.
  */
 
@@ -22,7 +22,7 @@ export const douleurs = {
     {
       titre: 'Des pièces qui arrivent de partout',
       texte:
-        "Par mail, par WhatsApp, en photo de travers, parfois par le locataire qui transfère celles de son oncle. Quelqu'un chez vous les rassemble à la main.",
+        'Par mail, par WhatsApp, en photo de travers, parfois par le locataire qui transfère celles de son oncle. Quelqu’un chez vous les rassemble à la main.',
       tampon: '5 canaux',
     },
     {
@@ -34,7 +34,7 @@ export const douleurs = {
     {
       titre: 'Un doute que personne ne lève',
       texte:
-        "Le garant est-il réellement solvable ? Le calcul se fait de tête, dans l'urgence, sur des documents qu'on n'a pas le temps de vérifier.",
+        'Le garant est-il réellement solvable ? Le calcul se fait de tête, dans l’urgence, sur des documents qu’on n’a pas le temps de vérifier.',
       tampon: 'Solvable ?',
     },
   ],
@@ -47,7 +47,7 @@ export const cequonapporte = {
       ton: 'sun',
       titre: 'Des pièces réunies',
       texte:
-        "Le garant dépose lui-même, chez lui, sur son espace. Vous ne recevez rien tant que le dossier n'est pas complet.",
+        'Le garant dépose lui-même, chez lui, sur son espace. Vous ne recevez rien tant que le dossier n’est pas complet.',
     },
     {
       ton: 'mint',
@@ -65,7 +65,7 @@ export const cequonapporte = {
   garantie: {
     titre: 'Et les pièces restent filigranées',
     texte:
-      "Vous voyez ce qu'il faut pour décider, dans un format qui vous engage à ne pas le diffuser. Chaque consultation laisse une trace.",
+      'Vous voyez ce qu’il faut pour décider, dans un format qui vous engage à ne pas le diffuser. Chaque consultation laisse une trace.',
   },
 } as const
 
@@ -74,8 +74,8 @@ export const cequonapporte = {
  *
  * `etapes` est aussi lu par `home.ts` pour la piste agence de la section
  * « Comment ça marche » : deux descriptions du même parcours finiraient par
- * diverger, et c'est cette page qui fait foi. Sa forme (numéro, puce, titre,
- * texte) ne change donc pas sans regarder l'autre usage.
+ * diverger, et c’est cette page qui fait foi. Sa forme (numéro, puce, titre,
+ * texte) ne change donc pas sans regarder l’autre usage.
  */
 export const commentCaMarche = {
   titre: ['Trois étapes,', 'chacun son espace'],
@@ -92,7 +92,7 @@ export const commentCaMarche = {
       puce: 'cloisonné',
       titre: 'Le garant dépose ses pièces',
       texte:
-        "Seul, chez lui. Le locataire suit l'avancement sans jamais voir les documents ni les montants.",
+        'Seul, chez lui. Le locataire suit l’avancement sans jamais voir les documents ni les montants.',
     },
     {
       numero: 3,
@@ -107,13 +107,13 @@ export const commentCaMarche = {
 /**
  * Le tarif, présenté en ticket de caisse.
  *
- * La forme dit ce que le tableau ne disait pas : il n'y a pas de ligne cachée,
+ * La forme dit ce que le tableau ne disait pas : il n’y a pas de ligne cachée,
  * et la dernière ligne est un zéro.
  */
 export const tarifAgence = {
   titre: ['Ce que Cloison', 'vous', 'facture'],
   regleOr:
-    "Le garant ne paie jamais rien, dans aucun cas. C'est la règle qui fait que le dossier avance jusqu'au bout.",
+    'Le garant ne paie jamais rien, dans aucun cas. C’est la règle qui fait que le dossier avance jusqu’au bout.',
   tampon: 'Sans surprise',
   entete: 'tarif agences',
   lignes: [
@@ -161,7 +161,7 @@ export const demande = {
   envoi: 'Envoi…',
   bouton: 'Demander une démonstration →',
   collecte:
-    'Ces informations servent uniquement à vous recontacter au sujet de Cloison. Elles ne sont ni revendues, ni utilisées pour de la prospection tierce, et sont conservées le temps de traiter votre demande. Pour y accéder, les corriger ou les faire supprimer, il suffit de répondre à l’e-mail que vous recevrez.',
+    'Ces informations servent uniquement à vous recontacter au sujet de Cloison. Elles ne sont ni revendues, ni utilisées pour de la prospection tierce, et sont conservées douze mois au plus après leur envoi. Pour y accéder, les corriger ou les faire supprimer, il suffit de répondre à l’e-mail que vous recevrez.',
   merci: formulaire.merci,
   suite: formulaire.suite,
 } as const

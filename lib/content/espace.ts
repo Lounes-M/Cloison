@@ -1,9 +1,9 @@
 /**
- * Ce que l'agence lit.
+ * Ce que l’agence lit.
  *
  * Ici, et ici seulement, les chiffres apparaissent : le ratio, le seuil, le
- * montant. L'agence est celle qui decide, et elle decide sur des nombres. Le
- * vocabulaire vouvoie : c'est un espace de travail, pas un parcours.
+ * montant. L’agence est celle qui decide, et elle decide sur des nombres. Le
+ * vocabulaire vouvoie : c’est un espace de travail, pas un parcours.
  */
 
 export const tableau = {
@@ -96,7 +96,7 @@ export const tableau = {
 /**
  * Le canal de support, tel que docs/exploitation/embarquement-agence.md le
  * promet : une adresse, un delai tenu, une personne. Affiche seulement quand
- * l'adresse est posee.
+ * l’adresse est posee.
  */
 export const support = {
   titre: 'Un dossier bloqué ?',
@@ -187,7 +187,7 @@ export const dossier = {
 } as const
 
 /** Clore un dossier avant son echeance : le geste est definitif. */
-/** Le loyer saisi par l'agence sur un dossier. */
+/** Le loyer saisi par l’agence sur un dossier. */
 /** Relancer le garant a la main une fois les relances automatiques epuisees (0079). */
 export const relanceGarant = {
   aide: 'Le garant n’a pas réagi à ses trois relances automatiques. Après un échange avec lui, vous pouvez relancer un nouveau cycle de trois relances : la première part dans les prochaines heures.',
@@ -239,7 +239,7 @@ export const cloture = {
     `Dossier ${reference} clos. Ses accès sont fermés et ses pièces seront purgées.`,
 } as const
 
-/** Les statuts vus par l'agence : ici, dire pourquoi est permis. */
+/** Les statuts vus par l’agence : ici, dire pourquoi est permis. */
 export const statuts: Record<
   string,
   { libelle: string; ton: 'sky' | 'sun' | 'mint' | 'flame' | 'paper' }

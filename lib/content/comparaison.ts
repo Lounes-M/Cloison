@@ -1,7 +1,7 @@
 /**
  * Comparaison du revenu declare aux justificatifs, cote agence.
  *
- * Aucune phrase ne conclut a la place de l'agence : un ecart se verifie sur
+ * Aucune phrase ne conclut a la place de l’agence : un ecart se verifie sur
  * les pieces, et une lecture IA peut se tromper.
  */
 export const comparaison = {

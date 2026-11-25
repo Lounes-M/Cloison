@@ -2,10 +2,10 @@
  * Ce que les courriels disent, statut par statut.
  *
  * Deux regles. Aucun courriel au locataire ou au garant ne contient de lien :
- * en emettre un nouveau revoquerait celui qu'ils tiennent, et une session en
- * cours tomberait. Ils reviennent par le lien qu'ils ont recu. Et aucun
+ * en emettre un nouveau revoquerait celui qu’ils tiennent, et une session en
+ * cours tomberait. Ils reviennent par le lien qu’ils ont recu. Et aucun
  * libelle adresse au locataire ne contient de chiffre : le statut est tout ce
- * qu'il apprend, comme a l'ecran.
+ * qu’il apprend, comme a l’ecran.
  */
 
 export const locataire: Record<string, { sujet: string; texte: string }> = {

@@ -10,6 +10,18 @@ test('la page existe dans les deux langues', () => {
   expect(lien('en', '/intelligence-artificielle')).toBe('/en/intelligence-artificielle')
 })
 
+test('la lecture nomme OpenRouter, societe americaine, dans les deux langues', () => {
+  for (const textes of [fr.lectureOpenRouter, en.lectureOpenRouter]) {
+    expect(textes.titre).not.toMatch(/Europe|europe/)
+    expect([textes.europe, textes.horsEurope, textes.inactive].join(' ')).toContain(
+      'OpenRouter, Inc.',
+    )
+  }
+  expect(fr.lectureOpenRouter.europe).toContain('société américaine')
+  expect(en.lectureOpenRouter.europe).toContain('US company')
+  expect(fr.garanties.items.find((i) => i.cle === 'europe')?.titre).toBe(fr.lectureOpenRouter.titre)
+})
+
 test('les deux langues decrivent les memes usages, interdits et garanties', () => {
   expect(en.usages.items.map((i) => i.cle)).toEqual(fr.usages.items.map((i) => i.cle))
   expect(en.jamais.cartes).toHaveLength(fr.jamais.cartes.length)

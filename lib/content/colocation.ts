@@ -1,6 +1,6 @@
 import { euros } from './tarifs'
 
-/** La colocation, vue par l'agence, le colocataire et son garant. */
+/** La colocation, vue par l’agence, le colocataire et son garant. */
 export const colocation = {
   titre: 'Colocation',
   retour: 'Tous les dossiers',

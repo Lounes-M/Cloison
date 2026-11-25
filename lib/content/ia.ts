@@ -1,5 +1,5 @@
 /**
- * Tout le texte de la page « Notre usage de l'IA ».
+ * Tout le texte de la page « Notre usage de l’IA ».
  *
  * Chaque phrase decrit un comportement que le code ou la base imposent. Une
  * promesse ajoutee ici sans son garde-fou technique est une promesse fausse :
@@ -121,6 +121,16 @@ export const jamais = {
     'Le ratio est une division entre un loyer et un revenu déclaré. Les pièces en sont la preuve, et c’est une personne, à l’agence, qui les regarde.',
 } as const
 
+export const lectureOpenRouter = {
+  titre: 'Lecture par OpenRouter',
+  europe:
+    'OpenRouter, Inc., société américaine, n’est pas un hébergement européen. Lorsqu’une lecture est demandée, le serveur est imposé en Europe, sans repli.',
+  horsEurope:
+    'OpenRouter, Inc., société américaine, n’est pas un hébergement européen. Le serveur de lecture n’est pas limité à l’Union européenne.',
+  inactive:
+    'OpenRouter, Inc., société américaine, n’est pas un hébergement européen. Aucune pièce ne lui est envoyée tant que la lecture automatique est désactivée.',
+} as const
+
 export const garanties = {
   titre: ['Ce qui le garantit,', 'concrètement.'],
   sousTitre:
@@ -134,9 +144,8 @@ export const garanties = {
     },
     {
       cle: 'europe',
-      titre: 'Lecture en Europe',
-      libelle:
-        'La lecture des revenus est confiée à un serveur situé en Europe, imposé à chaque demande, sans repli vers un autre.',
+      titre: lectureOpenRouter.titre,
+      libelle: lectureOpenRouter.europe,
     },
     {
       cle: 'journal',

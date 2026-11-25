@@ -1,4 +1,4 @@
-/** Le texte anglais de la page « Notre usage de l'IA ». La forme suit `lib/content/ia.ts`. */
+/** Le texte anglais de la page « Notre usage de l’IA ». La forme suit `lib/content/ia.ts`. */
 
 import type { Textes } from '@/lib/i18n'
 import type * as Fr from '../ia'
@@ -116,6 +116,16 @@ export const jamais: Textes<typeof Fr.jamais> = {
     'The ratio is a division between a rent and a declared income. The documents are the evidence, and it is a person, at the agency, who looks at them.',
 }
 
+export const lectureOpenRouter: Textes<typeof Fr.lectureOpenRouter> = {
+  titre: 'Reading via OpenRouter',
+  europe:
+    'OpenRouter, Inc., a US company, is not European hosting. When a reading is requested, the server is required to be in Europe, with no fallback.',
+  horsEurope:
+    'OpenRouter, Inc., a US company, is not European hosting. The reading server is not limited to the European Union.',
+  inactive:
+    'OpenRouter, Inc., a US company, is not European hosting. No document is sent to it while automatic reading is switched off.',
+}
+
 export const garanties: Textes<typeof Fr.garanties> = {
   titre: ['What guarantees it,', 'in practice.'],
   sousTitre:
@@ -129,9 +139,8 @@ export const garanties: Textes<typeof Fr.garanties> = {
     },
     {
       cle: 'europe',
-      titre: 'Read in Europe',
-      libelle:
-        'Income reading is entrusted to a server located in Europe, required on every request, with no fallback to another.',
+      titre: lectureOpenRouter.titre,
+      libelle: lectureOpenRouter.europe,
     },
     {
       cle: 'journal',

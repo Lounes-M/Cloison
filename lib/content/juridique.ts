@@ -4,11 +4,11 @@
  * Ils decrivent ce que le produit fait reellement, tel que les migrations le
  * fixent : durees, destinataires, chiffrement. Une regle changee dans le code
  * doit changer ici dans la meme PR. Ils doivent etre relus par un conseil
- * avant le premier dossier reel ; ce qui depend de l'identite de l'editeur
- * vient de `lib/juridique/editeur.ts`, jamais d'une valeur ecrite ici.
+ * avant le premier dossier reel ; ce qui depend de l’identite de l’editeur
+ * vient de `lib/juridique/editeur.ts`, jamais d’une valeur ecrite ici.
  *
- * Les pages juridiques vouvoient tout le monde : elles s'adressent a la fois
- * au locataire, au garant et a l'agence.
+ * Les pages juridiques vouvoient tout le monde : elles s’adressent a la fois
+ * au locataire, au garant et a l’agence.
  */
 
 import { prixActe, prixLocataire } from './tarifs'
@@ -28,13 +28,13 @@ export const juridique = {
 } as const
 
 /**
- * L'identite de l'editeur, telle que le registre du commerce l'enregistre.
+ * L’identite de l’editeur, telle que le registre du commerce l’enregistre.
  *
- * Cloison est une marque exploitee par LM Services : c'est cette societe qui
- * edite le site et encaisse, et c'est elle que les pages juridiques nomment.
+ * Cloison est une marque exploitee par LM Services : c’est cette societe qui
+ * edite le site et encaisse, et c’est elle que les pages juridiques nomment.
  * Ces valeurs sont ecrites ici, et traduites dans `en/juridique.ts`, plutot
  * que lues dans des variables : elles suivent ainsi la langue de la page. La
- * TVA n'y figure pas : elle depend du regime reel de la societe, et se declare
+ * TVA n’y figure pas : elle depend du regime reel de la societe, et se declare
  * par `EDITEUR_TVA`.
  */
 export const identiteEditeur = {
@@ -48,7 +48,7 @@ export const identiteEditeur = {
   directeurPublication: 'Le président de LM Services',
 } as const
 
-/** La mention fiscale du prix, selon que l'editeur facture la TVA ou non. */
+/** La mention fiscale du prix, selon que l’editeur facture la TVA ou non. */
 export const mentionTva = {
   ttc: 'Prix toutes taxes comprises.',
   franchise: 'TVA non applicable, article 293 B du CGI.',
@@ -167,7 +167,7 @@ export const confidentialite = {
         'La signature électronique de l’acte de cautionnement est confiée à Youtrust, prestataire de signature électronique hébergé en France, qui reçoit aussi le numéro de téléphone du garant, nécessaire à la signature. L’acte signé est conservé selon la durée indiquée au moment de la signature, distincte de celle des justificatifs.',
     },
     ocr: 'À la demande explicite d’une agence, une pièce autre que la pièce d’identité peut être lue par un service de reconnaissance de texte (OpenRouter) pour faciliter sa relecture. Cette lecture ne prend aucune décision et n’est jamais déclenchée automatiquement.',
-    // Le moteur documentaire distant : nomme si l'hebergeur est declare.
+    // Le moteur documentaire distant : nomme si l’hebergeur est declare.
     moteurDocumentaire: (hebergeur: string | null) =>
       `À leur dépôt, puis à chaque consultation, les pièces sont vérifiées et converties en images sur un serveur dédié à ce seul traitement, ${hebergeur ? `hébergé par ${hebergeur}` : 'chez un hébergeur distinct de ceux cités plus haut'}. Elles y passent en clair le temps du traitement et n’y sont pas conservées.`,
     lectureGarant:
