@@ -27,6 +27,7 @@ export const frise = {
     etapes: {
       invitation: 'Invitation reçue',
       depot: 'Vos pièces et votre déclaration',
+      attenteAgence: 'En attente d’une agence',
       decision: 'Décision de l’agence',
       signature: 'Acte signé',
     },

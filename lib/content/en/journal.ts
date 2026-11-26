@@ -12,6 +12,12 @@ export const journal: Textes<typeof Fr> = {
   acces: 'Access',
   inconnu: 'User',
   par: ' by ',
+  vous: 'you',
+  fuseau: 'Paris time',
+  agence: (nom: string | null, identite: string | null) => {
+    const base = nom ? `the agency ${nom}` : 'the agency'
+    return identite ? `${base} (${identite})` : base
+  },
   actions: {
     dossier_consulte: 'File viewed',
     piece_deposee: 'Document uploaded',

@@ -27,8 +27,19 @@ function cible(etape: EtapeRestante, langue: Langue) {
   }
 }
 
-/** Le haut de l'espace du garant : ce qui manque, et ou le faire. */
-export async function ResteAFaireGarant({ etapes }: { etapes: EtapeRestante[] }) {
+/**
+ * Le haut de l'espace du garant : ce qui manque, et ou le faire.
+ *
+ * `attendAgence` ne dit pas si le depot suffit a l'agence : complet et
+ * garant insuffisant donnent la meme attente tant qu'aucune agence ne suit.
+ */
+export async function ResteAFaireGarant({
+  etapes,
+  attendAgence = false,
+}: {
+  etapes: EtapeRestante[]
+  attendAgence?: boolean
+}) {
   const langue = await langueEspace()
   const t = choisir(langue, tFr, tEn)
 
@@ -60,7 +71,7 @@ export async function ResteAFaireGarant({ etapes }: { etapes: EtapeRestante[] })
       ) : (
         <p className="mt-3 flex items-start gap-2 text-[15px] leading-relaxed font-medium">
           <Icone nom="coche" className="text-cobalt mt-0.5 size-5 shrink-0" />
-          {t.termine}
+          {attendAgence ? t.attenteAgence : t.termine}
         </p>
       )}
     </section>

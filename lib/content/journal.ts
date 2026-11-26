@@ -9,6 +9,17 @@ export const journal = {
   acces: 'Accès',
   inconnu: 'Utilisateur',
   par: ' par ',
+  /** Le lecteur du journal, quand la ligne est la sienne. */
+  vous: 'vous',
+  fuseau: 'heure de Paris',
+  /**
+   * L'agence, avec son nom quand le dossier le donne deja au garant, et le
+   * courriel professionnel quand le journal a le droit de le rendre.
+   */
+  agence: (nom: string | null, identite: string | null) => {
+    const base = nom ? `l’agence ${nom}` : 'l’agence'
+    return identite ? `${base} (${identite})` : base
+  },
   actions: {
     dossier_consulte: 'Dossier consulté',
     piece_deposee: 'Pièce déposée',

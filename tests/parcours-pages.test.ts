@@ -671,6 +671,66 @@ test.each(['garant', 'agence'])(
   },
 )
 
+test('un dossier complet sans agence attend une agence, avec elle il attend la decision', async () => {
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'complet',
+      agence_id: null,
+      demonstration: false,
+    },
+    error: null,
+  }
+  const sans = texteVisible(await deplier(await PageGarant(), [FriseAvancement, ResteAFaireGarant]))
+  expect(sans).toMatch(/En attente d’une agence\s+\(\s*en cours\s*\)/)
+  expect(sans).not.toMatch(/Décision de l’agence\s+\(\s*en cours\s*\)/)
+
+  reponses.dossiers = {
+    data: {
+      ...(reponses.dossiers!.data as object),
+      statut: 'complet',
+      agence_id: ID,
+      demonstration: false,
+    },
+    error: null,
+  }
+  const avec = texteVisible(await deplier(await PageGarant(), [FriseAvancement]))
+  expect(avec).toMatch(/Décision de l’agence\s+\(\s*en cours\s*\)/)
+  expect(avec).not.toContain('En attente d’une agence')
+})
+
+test('l historique du garant dit l heure de Paris et qui a agi', async () => {
+  reponses.journal_acces = {
+    data: [
+      {
+        id: '00000000-0000-4000-8000-0000000000aa',
+        quand: '2026-11-25T07:55:00.000Z',
+        acteur: 'garant',
+        action: 'piece_ouverte',
+        identite: 'cache@example.invalid',
+      },
+      {
+        id: '00000000-0000-4000-8000-0000000000ab',
+        quand: '2026-11-25T08:10:00.000Z',
+        acteur: 'agence',
+        action: 'dossier_consulte',
+        identite: 'cabinet@logis-lyon.fr',
+      },
+    ],
+    error: null,
+  }
+  reponses.agence = {
+    data: [{ agence: 'Logis Lyon', logement: null, ville: null }],
+    error: null,
+  }
+  const texte = texteVisible(await PageGarant())
+  expect(texte).toContain('25/11/2026 08:55 (heure de Paris) : Pièce ouverte par vous.')
+  expect(texte).toContain(
+    '25/11/2026 09:10 (heure de Paris) : Dossier consulté par l’agence Logis Lyon (cabinet@logis-lyon.fr).',
+  )
+  expect(texte).not.toContain('cache@example.invalid')
+})
+
 test('le message de depot reste apres la redirection', async () => {
   const avec = texteVisible(
     await PageGarant({ searchParams: Promise.resolve({ deposee: 'piece_identite' }) }),

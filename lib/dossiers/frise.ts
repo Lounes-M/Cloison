@@ -84,18 +84,69 @@ export function etapesLocataire(
   return friseDepuisEtape(suivi.etape, langue, garantDesigne)
 }
 
+export type OptionsFriseGarant = { agence?: boolean; demonstration?: boolean }
+
+/**
+ * Les faits que `suiviLocataire` lit deja, vus de l'autre cote.
+ *
+ * Sans precision, un dossier `complet` est traite comme suivi par une agence,
+ * comme `etapesLocataire`. La page du garant passe l'etat reel.
+ */
+function faitsGarant(statut: string, options: OptionsFriseGarant) {
+  const agence = options.agence ?? true
+  const demonstration = options.demonstration ?? false
+  return {
+    agence,
+    demonstration,
+    suivi: suiviLocataire({
+      statut,
+      loyerDeclare: true,
+      aRegler: false,
+      garantDesigne: true,
+      agence,
+      demonstration,
+    }),
+  }
+}
+
+/**
+ * Le libelle de l'etape qui suit le depot, tant que la decision n'a pas
+ * commence et qu'aucune agence ne suit le dossier.
+ *
+ * `complet` et `garant_insuffisant` restent indistinguables : le garant
+ * n'apprend pas si son ratio passe le seuil. Une demonstration compte comme
+ * un dossier suivi, le meme choix que cote locataire.
+ */
+export function garantAttendAgence(statut: string, options: OptionsFriseGarant = {}): boolean {
+  const { agence, demonstration, suivi } = faitsGarant(statut, options)
+  if (agence || demonstration) return false
+  return !['signature', 'signe', 'refuse', 'expire'].includes(suivi.etape)
+}
+
 /**
  * Le garant ne lit pas de verdict : complet et garant insuffisant donnent la
- * meme frise.
+ * meme frise, avec ou sans agence.
  *
  * L'etape des pieces n'est terminee que lorsque le serveur a juge le depot
  * suffisant (`pieces_suffisantes`) : le statut est alors `complet` ou
  * `garant_insuffisant`. `ouvert` et `depot_en_cours` laissent l'etape en
  * cours, meme si une piece est deja la. Une piece deposee ne suffit pas.
+ *
+ * Sans agence rattachee, et tant que la decision n'a pas commence, cette
+ * etape dit l'attente : personne n'examine encore le dossier.
  */
-export function etapesGarant(statut: string, langue: Langue = 'fr'): Etape[] {
+export function etapesGarant(
+  statut: string,
+  langue: Langue = 'fr',
+  options: OptionsFriseGarant = {},
+): Etape[] {
   const e = choisir(langue, friseFr, friseEn).garant.etapes
-  const titres = [e.invitation, e.depot, e.decision, e.signature]
+  const titres = [
+    e.invitation,
+    e.depot,
+    garantAttendAgence(statut, options) ? e.attenteAgence : e.decision,
+    e.signature,
+  ]
   switch (statut) {
     case 'ouvert':
     case 'depot_en_cours':

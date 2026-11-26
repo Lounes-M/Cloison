@@ -5,7 +5,7 @@ import { euros as eurosFr } from '@/lib/content/tarifs'
 import { euros as eurosEn } from '@/lib/content/en/tarifs'
 import { FriseAvancement } from '@/components/dossiers/FriseAvancement'
 import { frise as friseFr } from '@/lib/content/frise'
-import { etapesGarant } from '@/lib/dossiers/frise'
+import { etapesGarant, garantAttendAgence } from '@/lib/dossiers/frise'
 import { SommaireDossier } from '@/components/layout/SommaireDossier'
 import { interfaceEspace as interfaceEspaceFr } from '@/lib/content/interface'
 import { SuiviSignature } from '@/components/dossiers/SuiviSignature'
@@ -40,6 +40,7 @@ import {
   type ProfilRessources,
 } from '@/lib/content/garant'
 import { tailleLisible } from '@/lib/garant/validation'
+import { ligneAccesGarant } from '@/lib/journal/ligne-garant'
 import { lireCurseurJournal, pageJournal } from '@/lib/journal/pagination'
 import { NavigationJournal } from '@/components/ui/NavigationJournal'
 import { journal as texteJournalFr } from '@/lib/content/journal'
@@ -62,7 +63,7 @@ import { journal as texteJournalEn } from '@/lib/content/en/journal'
 import { agenceDuDossier as texteAgenceEn } from '@/lib/content/en/agence-du-dossier'
 import { signature as texteSignatureEn } from '@/lib/content/en/signature'
 import { signature as texteSignatureFr } from '@/lib/content/signature'
-import { choisir, lien, locale, deuxPoints, type Langue } from '@/lib/i18n'
+import { choisir, lien, locale, type Langue } from '@/lib/i18n'
 import { langueEspace, titreEspace } from '@/lib/langue-espace'
 import { titres as titresEn } from '@/lib/content/en/titres'
 import { titres as titresFr } from '@/lib/content/titres'
@@ -146,7 +147,7 @@ export default async function PageGarant({
   ] = await Promise.all([
     supabase
       .from('dossiers')
-      .select('reference, email_locataire, statut, expire_le')
+      .select('reference, email_locataire, statut, expire_le, agence_id, demonstration')
       .eq('id', dossierId)
       .maybeSingle(),
     supabase
@@ -180,6 +181,11 @@ export default async function PageGarant({
   const historique = pageJournal(erreurJournal ? null : journal, dossierId)
 
   const ouvert = STATUTS_OUVERTS.has(String(dossier.statut))
+  const faitsAgence = {
+    agence: Boolean(dossier.agence_id),
+    demonstration: Boolean(dossier.demonstration),
+  }
+  const attendAgence = garantAttendAgence(String(dossier.statut), faitsAgence)
   const suivi = await agenceDuDossier(supabase)
   const coloc = suivi ? await maColocation(supabase) : null
 
@@ -277,10 +283,10 @@ export default async function PageGarant({
 
       <FriseAvancement
         titre={frise.garant.titre}
-        etapes={etapesGarant(String(dossier.statut), langue)}
+        etapes={etapesGarant(String(dossier.statut), langue, faitsAgence)}
       />
 
-      {restant ? <ResteAFaireGarant etapes={restant} /> : null}
+      {restant ? <ResteAFaireGarant etapes={restant} attendAgence={attendAgence} /> : null}
 
       <SommaireDossier
         liens={[
@@ -484,19 +490,14 @@ export default async function PageGarant({
                 acteur: string
                 identite: string | null
                 quand: string
-              }) => (
-                <li key={entree.id} className="border-ink border-t pt-3 text-sm break-words">
-                  <time dateTime={entree.quand}>
-                    {new Date(entree.quand).toLocaleString(locale(langue), {
-                      timeZone: 'Europe/Paris',
-                    })}
-                  </time>
-                  {deuxPoints(langue)}
-                  {texteJournal.actions[entree.action] ?? texteJournal.acces}
-                  {texteJournal.par}
-                  {entree.identite ?? texteJournal.acteurs[entree.acteur] ?? texteJournal.inconnu}.
-                </li>
-              ),
+              }) => {
+                const ligne = ligneAccesGarant(entree, langue, suivi?.agence ?? null)
+                return (
+                  <li key={entree.id} className="border-ink border-t pt-3 text-sm break-words">
+                    <time dateTime={entree.quand}>{ligne.texte}</time>
+                  </li>
+                )
+              },
             )}
             {!historique.lignes.length ? <li>{texteJournal.aucun}</li> : null}
           </ol>

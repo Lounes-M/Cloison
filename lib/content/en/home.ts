@@ -105,7 +105,7 @@ export const parcours = {
       id: 'agence',
       onglet: 'I am an agency',
       etapes: commentCaMarche.etapes,
-      cta: { label: 'What it changes for you', href: '/agences' },
+      cta: { label: 'What it changes for an agency', href: '/agences' },
     },
   ],
 } as const
