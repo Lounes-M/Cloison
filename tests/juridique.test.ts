@@ -66,8 +66,9 @@ test('les mentions affichent l editeur et l hebergeur de l application', () => {
     'Covina',
   ])
     expect(html).toContain(attendu)
-  // La base reste un prestataire distinct : son nom n'est pas dans les mentions.
-  expect(html).not.toContain('Supabase')
+  // Le meme hebergeur que la page Confidentialite, sans coordonnees inventees.
+  expect(html).toContain('hébergées par Supabase, dans l’Union européenne')
+  expect(html).not.toContain('communiquées sur demande')
   expect(html).toContain('href="mailto:contact@cloison.immo"')
 })
 

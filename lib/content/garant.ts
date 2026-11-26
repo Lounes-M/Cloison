@@ -242,6 +242,8 @@ export const resteAFaire = {
   aide: 'Chaque ligne mène à l’endroit de la page où la compléter.',
   termine:
     'Tout ce qu’on attend de vous est là. L’agence examinera vos pièces ; vous pouvez encore les corriger tant que le dossier n’est pas parti.',
+  attenteAgence:
+    'Tout ce qu’on attend de vous est là. Le locataire doit encore rattacher ce dossier à une agence pour qu’elle puisse l’examiner. Vous pouvez encore corriger vos pièces tant que le dossier n’est pas parti.',
   engagement: 'Indiquez ce que vous couvrez, votre revenu net mensuel et un montant maximum.',
   complement: (nombre: number) =>
     nombre > 1

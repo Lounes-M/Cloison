@@ -211,6 +211,8 @@ export const resteAFaire: Textes<typeof Fr.resteAFaire> = {
   aide: 'Each line takes you to the place on the page where you can complete it.',
   termine:
     'Everything we expect from you is there. The agency will review your documents; you can still correct them as long as the file has not been handed over.',
+  attenteAgence:
+    'Everything we expect from you is there. The tenant still has to link this file to an agency before it can be reviewed. You can still correct your documents until the file is handed over.',
   engagement: 'Enter what you cover, your net monthly income and a maximum amount.',
   complement: (nombre) =>
     nombre > 1

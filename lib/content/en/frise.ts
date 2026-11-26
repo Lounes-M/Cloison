@@ -25,6 +25,7 @@ export const frise: Textes<typeof Fr> = {
     etapes: {
       invitation: 'Invitation received',
       depot: 'Your documents and your declaration',
+      attenteAgence: 'Waiting for an agency',
       decision: 'Agency’s decision',
       signature: 'Deed signed',
     },

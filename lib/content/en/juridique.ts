@@ -11,7 +11,7 @@ import { prixActe, prixLocataire } from './tarifs'
 export const juridique = {
   aCompleter: 'To be completed',
   immatriculation: 'Registration in progress',
-  miseAJour: 'Last updated: 24 November 2026.',
+  miseAJour: 'Last updated: 26 November 2026.',
   navigation: 'Legal information',
   liens: {
     mentions: { label: 'Legal notice', href: '/mentions-legales' },
@@ -58,7 +58,7 @@ export const mentionsLegales = {
   hebergement: 'Hosting',
   hebergementTexte: [
     'The site and its server functions are hosted by Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, United States. The application runs in the Frankfurt region (European Union).',
-    'The database, authentication and the encrypted documents are hosted by a separate provider, in the European Union. Its contact details are available on request at the contact address above.',
+    'The database, authentication and the encrypted documents are hosted by Supabase, in the European Union.',
   ],
   donnees: 'Personal data and cookies',
   donneesTexte:

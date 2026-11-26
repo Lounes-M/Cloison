@@ -18,7 +18,7 @@ export const versionConditions = 'conditions-2026-11-23'
 export const juridique = {
   aCompleter: 'À compléter',
   immatriculation: 'En cours d’immatriculation',
-  miseAJour: 'Dernière mise à jour : 24 novembre 2026.',
+  miseAJour: 'Dernière mise à jour : 26 novembre 2026.',
   navigation: 'Informations légales',
   liens: {
     mentions: { label: 'Mentions légales', href: '/mentions-legales' },
@@ -73,7 +73,7 @@ export const mentionsLegales = {
   hebergement: 'Hébergement',
   hebergementTexte: [
     'Le site et ses fonctions serveur sont hébergés par Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis. L’application s’exécute dans la région de Francfort (Union européenne).',
-    'La base de données, l’authentification et les pièces chiffrées sont hébergées par un prestataire distinct, dans l’Union européenne. Ses coordonnées sont communiquées sur demande à l’adresse de contact ci-dessus.',
+    'La base de données, l’authentification et les pièces chiffrées sont hébergées par Supabase, dans l’Union européenne.',
   ],
   donnees: 'Données personnelles et cookies',
   donneesTexte:
